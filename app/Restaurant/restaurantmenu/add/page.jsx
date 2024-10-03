@@ -49,7 +49,7 @@ export default function AddRestaurant() {
     e.preventDefault();
   
     try {
-      const response = await fetch("http://localhost:3000/api/menuItem", {
+      const response = await fetch("https://booking-master-psi.vercel.app/api/menuItem", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
