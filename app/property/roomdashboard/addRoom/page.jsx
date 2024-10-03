@@ -15,7 +15,7 @@ export default function NewRoomForm() {
   useEffect(() => {
     // Fetch room categories from the backend
     async function fetchCategories() {
-      const res = await fetch("/api/roomCategories");
+      const res = await fetch("https://booking-master-psi.vercel.app/api/roomCategories");
       const data = await res.json();
       setCategories(data.data);
     }
@@ -37,7 +37,7 @@ export default function NewRoomForm() {
   
     try {
       // Submit new room to backend
-      const res = await fetch("http://localhost:3000/api/rooms", {
+      const res = await fetch("https://booking-master-psi.vercel.app/api/rooms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
