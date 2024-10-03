@@ -42,7 +42,7 @@ const EditRoomCategory = () => {
 
   const fetchRoomCategory = async () => {
     try {
-      const res = await fetch(`/api/roomCategories`);
+      const res = await fetch(`https://booking-master-psi.vercel.app/api/roomCategories`);
       if (!res.ok) {
         throw new Error("Failed to fetch room categories");
       }
@@ -130,7 +130,7 @@ const EditRoomCategory = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch(`/api/roomCategories/${id}`, {
+      const response = await fetch(`https://booking-master-psi.vercel.app/api/roomCategories/${id}`, {
         method: "PUT", // Use PUT method for updates
         headers: {
           "Content-Type": "application/json",
