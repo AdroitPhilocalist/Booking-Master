@@ -1,25 +1,32 @@
 "use client"
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Footer } from '@/app/_components/Footer'
 import Navbar from '@/app/_components/Navbar'
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('All Tables')
+  const [tables, setTables] = useState([]) // Initialize tables as an empty array
 
   const tabs = ['All Tables', 'In Room Dining', 'Foods of Heaven', 'POOLSIDE CAFE', 'Restaurant', 'House keeping', 'pvt']
 
-  const tables = [
-    { id: 2, due: null },
-    { id: 3, due: null },
-    { id: 4, due: null },
-    { id: 5, due: 803.00 },
-    { id: 8, due: 32.00 },
-    { id: 6, due: 97.00 },
-    { id: 7, due: null },
-  ]
+  // Fetch table data from the backend
+  useEffect(() => {
+    async function fetchTables() {
+      try {
+        const response = await fetch('https://booking-master-psi.vercel.app/api/tables'); // Update the endpoint as needed
+        const data = await response.json();
+        setTables(data.data); // Set the fetched table data
+      } catch (error) {
+        console.error('Error fetching tables:', error);
+      }
+    }
+
+    fetchTables();
+  }, []);
 
   return (
     <div className="min-h-screen bg-amber-50">
-        <Navbar />
+      <Navbar />
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Restaurant Dashboard</h1>
@@ -77,40 +84,44 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {tables.map((table) => (
-            <div
-              key={table.id}
-              className={`p-4 rounded-lg ${
-                table.due ? 'bg-red-100' : 'bg-white'
-              } shadow`}
-            >
-              <h3 className="text-lg font-semibold mb-2">Table-{table.id}</h3>
-              {table.due && (
-                <p className="mb-2">Due - ₹{table.due.toFixed(2)}</p>
-              )}
-              <div className="flex flex-wrap gap-2">
-                <button className="px-2 py-1 bg-teal-500 text-white rounded text-sm">
-                  + Token
-                </button>
-                <button className="px-2 py-1 bg-purple-500 text-white rounded text-sm">
-                  + NC Token
-                </button>
+          {tables.length > 0 ? (
+            tables.map((table) => (
+              <div
+                key={table.id}
+                className={`p-4 rounded-lg ${
+                  table.due ? 'bg-red-100' : 'bg-white'
+                } shadow`}
+              >
+                <h3 className="text-lg font-semibold mb-2">Table-{table.tableNo}</h3>
                 {table.due && (
-                  <>
-                    <button className="px-2 py-1 bg-yellow-500 text-white rounded text-sm">
-                      Print
-                    </button>
-                    <button className="px-2 py-1 bg-blue-500 text-white rounded text-sm">
-                      $ Payment
-                    </button>
-                    <button className="px-2 py-1 bg-green-500 text-white rounded text-sm">
-                      Transfer to Room
-                    </button>
-                  </>
+                  <p className="mb-2">Due - ₹{table.due.toFixed(2)}</p>
                 )}
+                <div className="flex flex-wrap gap-2">
+                  <button className="px-2 py-1 bg-teal-500 text-white rounded text-sm">
+                    + Token
+                  </button>
+                  <button className="px-2 py-1 bg-purple-500 text-white rounded text-sm">
+                    + NC Token
+                  </button>
+                  {table.due && (
+                    <>
+                      <button className="px-2 py-1 bg-yellow-500 text-white rounded text-sm">
+                        Print
+                      </button>
+                      <button className="px-2 py-1 bg-blue-500 text-white rounded text-sm">
+                        $ Payment
+                      </button>
+                      <button className="px-2 py-1 bg-green-500 text-white rounded text-sm">
+                        Transfer to Room
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No tables available.</p>
+          )}
         </div>
       </main>
       <Footer />
