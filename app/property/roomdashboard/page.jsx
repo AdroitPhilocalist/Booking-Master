@@ -137,7 +137,7 @@ export default function RoomDashboard() {
 
   const handleDelete = async (roomId) => {
     try {
-      const res = await fetch(`/api/rooms/${roomId}`, {
+      const res = await fetch(`https://booking-master-psi.vercel.app/api/rooms/${roomId}`, {
         method: 'DELETE',
       });
 
@@ -154,7 +154,7 @@ export default function RoomDashboard() {
 
   const handleEdit = async (updatedRoom) => {
     try {
-      const res = await fetch(`/api/rooms/${updatedRoom._id}`, {
+      const res = await fetch(`https://booking-master-psi.vercel.app/api/rooms/${updatedRoom._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedRoom),
@@ -174,7 +174,7 @@ export default function RoomDashboard() {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await fetch('/api/rooms');
+        const response = await fetch('https://booking-master-psi.vercel.app/api/rooms');
         const data = await response.json();
         if (data.success && Array.isArray(data.data)) {
           setRooms(data.data);
