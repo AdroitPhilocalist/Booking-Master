@@ -1,6 +1,7 @@
 "use client"
 import { useState } from 'react'
-
+import { Footer } from '@/app/_components/Footer'
+import Navbar from '@/app/_components/Navbar'
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('All Tables')
 
