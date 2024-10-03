@@ -16,7 +16,7 @@ export default function RoomCategories() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/roomCategories");
+      const res = await fetch("https://booking-master-psi.vercel.app/api/roomCategories");
       if (!res.ok) {
         throw new Error("Failed to fetch categories");
       }
