@@ -327,7 +327,7 @@ export default function Navbar() {
             {openDropdown === 7 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="restaurantdashboard">Dashboard</Link>
+                  <Link href="/Restaurant/dashboard">Dashboard</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Restaurant/Tables">Tables</Link>
