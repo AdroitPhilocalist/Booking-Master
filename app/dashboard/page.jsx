@@ -63,6 +63,7 @@ export default function Dashboard() {
           </div>
         </div>
         <h1>etobar bhalo lagena</h1>
+        <h1>Hello my friend</h1>
       </div>
 
       {/* Footer */}
