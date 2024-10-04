@@ -11,11 +11,9 @@ export default function AddTable() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-    const response = await fetch('/api/tables', {
-=======
+
     const response = await fetch('https://booking-master-psi.vercel.app/api/tables', {
->>>>>>> 75434b0ec8b150497c0dc4afa858245028b10fa8
+
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
