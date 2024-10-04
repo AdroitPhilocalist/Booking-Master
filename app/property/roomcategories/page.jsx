@@ -16,7 +16,7 @@ export default function RoomCategories() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("https://booking-master-psi.vercel.app/api/roomCategories");
+      const res = await fetch("/api/roomCategories");
       if (!res.ok) {
         throw new Error("Failed to fetch categories");
       }
@@ -31,6 +31,31 @@ export default function RoomCategories() {
       setCategories([]);
     }
   };
+
+  const deleteCategory = async (id) => {
+    if (!confirm("Are you sure you want to delete this category?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/roomCategories/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Category deleted successfully");
+        fetchCategories(); // Refresh categories after deletion
+      } else {
+        alert("Failed to delete category");
+      }
+    } catch (error) {
+      console.error("Error deleting room category:", error);
+      alert("An error occurred while trying to delete the category");
+    }
+  };
+
 
   const filteredCategories = categories.filter((category) =>
     category.category.toLowerCase().includes(searchTerm.toLowerCase())

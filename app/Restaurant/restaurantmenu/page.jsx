@@ -16,7 +16,7 @@ export default function RestaurantList() {
     useEffect(() => {
         const fetchMenuItems = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/menuItem"); // Adjust the endpoint if necessary
+                const response = await fetch("/api/menuItem"); // Adjust the endpoint if necessary
                 const result = await response.json();
 
                 if (result.success) {

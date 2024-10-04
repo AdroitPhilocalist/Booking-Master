@@ -81,7 +81,7 @@ export default function Navbar() {
                   <Link href="/property/checkoutstatement">Checkout Statement</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="#">Guests</Link>
+                  <Link href="/property/guests">Guests</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/reservations">Reservations</Link>

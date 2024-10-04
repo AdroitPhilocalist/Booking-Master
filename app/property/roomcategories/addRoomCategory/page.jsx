@@ -131,7 +131,7 @@ const RoomCategoryForm = () => {
     };
 
     try {
-      let response = await fetch("https://booking-master-psi.vercel.app/api/roomCategories", {
+      let response = await fetch("/api/roomCategories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -515,12 +515,10 @@ const RoomCategoryForm = () => {
               <button
                 type="submit"
                 className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                onClick={()=>router.push('/property/roomcategories')}
               >
                 Submit
               </button>
-              <button onClick={() => router.back()} className="bg-gray-500 text-white px-4 py-2 mx-4 rounded mb-4">
-        Back
-      </button>
               
             </div>
           </form>

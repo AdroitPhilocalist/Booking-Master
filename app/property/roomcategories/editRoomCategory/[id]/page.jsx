@@ -33,40 +33,31 @@ const EditRoomCategory = () => {
     active: "Yes",
   });
 
+  const fetchRoomCategory = async () => {
+    try {
+      const res = await fetch(`/api/roomCategories/${id}`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch room category");
+      }
+  
+      const result = await res.json();
+      console.log("Response Data:", result);
+  
+      if (result.success && result.data) {
+        setFormData(result.data);
+      } else {
+        console.error("Unexpected response format or no data found.");
+      }
+    } catch (error) {
+      console.error("Error fetching room category:", error);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       fetchRoomCategory();
     }
-  }, [id, fetchRoomCategory]);  // Include fetchRoomCategory in the dependency array
-  
-
-  const fetchRoomCategory = async () => {
-    try {
-      const res = await fetch(`https://booking-master-psi.vercel.app/api/roomCategories`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch room categories");
-      }
-  
-      const result = await res.json();
-      console.log("Response Data:", result); // Log to check the response structure again
-  
-      // Check if the response format is correct and contains an array of room categories
-      if (result.success && Array.isArray(result.data)) {
-        // Use the `_id` field to find the room category by its id
-        const roomCategory = result.data.find(category => category._id === id);
-        
-        if (roomCategory) {
-          setFormData(roomCategory);  // Set the specific room category data into the form
-        } else {
-          console.error("No room category found with the given ID.");
-        }
-      } else {
-        console.error("Unexpected response format. Expected an array inside `data`.");
-      }
-    } catch (error) {
-      console.error("Error fetching room categories:", error);
-    }
-  };
+  }, [id]);
   
   
   
@@ -130,7 +121,7 @@ const EditRoomCategory = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch(`https://booking-master-psi.vercel.app/api/roomCategories/${id}`, {
+      const response = await fetch(`/api/roomCategories/${id}`, {
         method: "PUT", // Use PUT method for updates
         headers: {
           "Content-Type": "application/json",
