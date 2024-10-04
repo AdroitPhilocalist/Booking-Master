@@ -62,6 +62,7 @@ export default function Dashboard() {
             {/* Add sales graph here */}
           </div>
         </div>
+        <h1>Updated for check</h1>
       </div>
 
       {/* Footer */}
