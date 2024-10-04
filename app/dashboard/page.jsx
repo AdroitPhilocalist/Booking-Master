@@ -62,8 +62,7 @@ export default function Dashboard() {
             {/* Add sales graph here */}
           </div>
         </div>
-        <h1>Soumyadipta</h1>
-        <h1>Piyush</h1>
+
       </div>
 
       {/* Footer */}
