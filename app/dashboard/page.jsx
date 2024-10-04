@@ -62,8 +62,7 @@ export default function Dashboard() {
             {/* Add sales graph here */}
           </div>
         </div>
-        <h1>Updated for check</h1>
-        <h2>Hello My friend</h2>
+        <h1>etobar bhalo lagena</h1>
       </div>
 
       {/* Footer */}
