@@ -63,6 +63,7 @@ export default function Dashboard() {
           </div>
         </div>
         <h1>Updated for check</h1>
+        <h2>Hello My friend</h2>
       </div>
 
       {/* Footer */}
