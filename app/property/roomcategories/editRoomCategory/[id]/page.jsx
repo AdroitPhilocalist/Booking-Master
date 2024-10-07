@@ -35,7 +35,7 @@ const EditRoomCategory = () => {
 
   const fetchRoomCategory = async () => {
     try {
-      const res = await fetch(`/api/roomCategories/${id}`);
+      const res = await fetch(`https://booking-master-psi.vercel.app/api/roomCategories/${id}`);
       if (!res.ok) {
         throw new Error("Failed to fetch room category");
       }

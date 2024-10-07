@@ -56,7 +56,7 @@ export default function RestaurantList() {
                 <div style={{ marginBottom: '20px' }}>
                     <button
                         style={{ backgroundColor: '#48bb78', color: 'white', border: 'none', padding: '10px', marginRight: '10px', cursor: 'pointer' }}
-                        onClick={() => router.push("/profile/restaurantmenu/add")}
+                        onClick={() => router.push("/Restaurant/restaurantmenu/add")}
                     >
                         Add New +
                     </button>

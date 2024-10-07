@@ -37,7 +37,7 @@ export default function NewRoomForm() {
   
     try {
       // Submit new room to backend
-      const res = await fetch("/api/rooms", {
+      const res = await fetch("https://booking-master-psi.vercel.app/api/rooms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

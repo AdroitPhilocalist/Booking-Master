@@ -17,7 +17,7 @@ export default function GuestList() {
     useEffect(() => {
         const fetchGuests = async () => {
             try {
-                const response = await fetch('/api/NewBooking');
+                const response = await fetch('https://booking-master-psi.vercel.app/api/NewBooking');
                 const data = await response.json();
 
                 if (data.success) {

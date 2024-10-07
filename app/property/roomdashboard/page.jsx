@@ -168,7 +168,7 @@ export default function RoomDashboard() {
 
   const handleDelete = async (roomId) => {
     try {
-      const res = await fetch(`/api/rooms/${roomId}`, {
+      const res = await fetch(`https://booking-master-psi.vercel.app/api/rooms/${roomId}`, {
         method: 'DELETE',
       });
 
