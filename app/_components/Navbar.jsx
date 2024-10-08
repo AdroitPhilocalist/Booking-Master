@@ -53,7 +53,7 @@ export default function Navbar() {
             <button className="px-1 py-1 focus:outline-none hover:bg-amber-700 rounded hover:text-yellow-200">Property</button>
             {openDropdown === 2 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
-                <li className="px-4 py-2 hover:bg-gray-100">
+                {/* <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/settings">Settings</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -64,7 +64,7 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/scheduledmessages">Scheduled Message</Link>
-                </li>
+                </li> */}
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/roomdashboard">Room Dashboard</Link>
                 </li>
@@ -74,16 +74,16 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/roomlist">Room List</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
+                {/* <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/dailyreport">Daily Report</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/checkoutstatement">Checkout Statement</Link>
-                </li>
+                </li> */}
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/guests">Guests</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
+                {/* <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/reservations">Reservations</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -109,13 +109,13 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="#">Sent SMS Log</Link>
-                </li>
+                </li> */}
               </ul>
             )}
           </li>
 
           {/* Profile Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(3)}
             onMouseLeave={handleMouseLeave}
@@ -153,10 +153,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Business Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(4)}
             onMouseLeave={handleMouseLeave}
@@ -184,10 +184,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Booking Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(5)}
             onMouseLeave={handleMouseLeave}
@@ -239,10 +239,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Accounts Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(6)}
             onMouseLeave={handleMouseLeave}
@@ -315,7 +315,7 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Restaurant Dropdown */}
           <li
@@ -335,7 +335,7 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Restaurant/restaurantmenu">Restaurant Menu</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
+                {/* <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="#">Tokens</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -361,13 +361,13 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="#">Dailywise Food Report</Link>
-                </li>
+                </li> */}
               </ul>
             )}
           </li>
 
           {/* Services Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(8)}
             onMouseLeave={handleMouseLeave}
@@ -404,10 +404,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Inventory Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(9)}
             onMouseLeave={handleMouseLeave}
@@ -474,10 +474,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Housekeeping Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(10)}
             onMouseLeave={handleMouseLeave}
@@ -505,10 +505,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Staff Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(11)}
             onMouseLeave={handleMouseLeave}
@@ -533,10 +533,10 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
 
           {/* Banquet Dropdown */}
-          <li
+          {/* <li
             className="relative"
             onMouseEnter={() => handleMouseEnter(12)}
             onMouseLeave={handleMouseLeave}
@@ -558,7 +558,7 @@ export default function Navbar() {
                 </li>
               </ul>
             )}
-          </li>
+          </li> */}
         </ul>
       </div>
     </nav>
