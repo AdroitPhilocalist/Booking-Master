@@ -6,6 +6,7 @@ import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 
 export default function BookingForm() {
+    const [focusedInput, setFocusedInput] = useState(null);
     const [formData, setFormData] = useState({
         bookingType: 'FIT',
         bookingId: '',
@@ -35,20 +36,45 @@ export default function BookingForm() {
         internalNotes: '',
     });
 
+    const placeholders = {
+        bookingPoint: 'Enter Booking Point',
+        pinCode: 'Enter Pin Code',
+        mobileNo: 'Enter Mobile Number',
+        guestName: 'Enter Guest Name',
+        companyName: 'Enter Company Name',
+        gstin: 'Enter GSTIN',
+        guestEmail: 'Enter Guest Email',
+        address: 'Enter Guest Address',
+        state: 'Enter Guest State',
+        bookingReference: 'Enter Booking Reference',
+        guestNotes: 'Enter Guest Notes',
+        internalNotes: 'Enter Internal Notes',
+        remarks: 'Enter Remarks'
+    };
+
     const router = useRouter();
 
     useEffect(() => {
-        // Generate unique booking ID
         const generateBookingId = () => {
-            return Math.random().toString(36).substring(2, 12).toUpperCase(); // Generates 10 character alphanumeric code
+            return Math.random().toString(36).substring(2, 12).toUpperCase();
         };
 
         setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    const getLabel = (fieldName, defaultLabel) => {
+        if (focusedInput === fieldName && placeholders[fieldName]) {
+            return placeholders[fieldName];
+        }
+        return defaultLabel;
     };
 
     const handleSubmit = async (e) => {
@@ -61,7 +87,7 @@ export default function BookingForm() {
 
         if (response.ok) {
             alert('Booking created successfully!');
-            router.push('/property/roomdashboard'); // Redirect to Room Dashboard after successful booking
+            router.push('/property/roomdashboard');
         } else {
             alert('Failed to create booking');
         }
@@ -108,10 +134,20 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-point">
-                                        Booking Point*
+                                <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-point">
+                                        {getLabel('bookingPoint', 'Booking Point*')}
                                     </label>
-                                    <input type="text" name="bookingPoint" value={formData.bookingPoint} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Booking Point" />
+                                    <input
+                                        type="text"
+                                        name="bookingPoint"
+                                        value={formData.bookingPoint}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('bookingPoint')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        required
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'bookingPoint' ? '' : placeholders.bookingPoint}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
@@ -131,44 +167,102 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                    
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        Mobile No.
+                                        {getLabel('mobileNo', 'Mobile No.')}
                                     </label>
-                                    <input type="text" name="mobileNo" value={formData.mobileNo} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"  placeholder="Enter mobile number" />
+                                    <input
+                                        type="text"
+                                        name="mobileNo"
+                                        value={formData.mobileNo}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('mobileNo')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'mobileNo' ? '' : placeholders.mobileNo}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
-                                        Pin Code
+                                <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="pin-code">
+                                        {getLabel('pinCode', 'Pin Code')}
                                     </label>
-                                    <input type="text" name="pinCode" value={formData.pinCode} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Pin Code" />
+                                    <input
+                                        type="text"
+                                        name="pinCode"
+                                        value={formData.pinCode}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('pinCode')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'pinCode' ? '' : placeholders.pinCode}
+                                    />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
-                                        Guest Name
+                                <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
+                                        {getLabel('guestName', 'Guest Name')}
                                     </label>
-                                    <input type="text" name="guestName" value={formData.guestName} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Guest Name" />
+                                    <input
+                                        type="text"
+                                        name="guestName"
+                                        value={formData.guestName}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('guestName')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'guestName' ? '' : placeholders.guestName}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        Company Name
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="company-name">
+                                        {getLabel('companyName', 'Company Name')}
                                     </label>
-                                    <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Company Name" />
+                                    <input
+                                        type="text"
+                                        name="companyName"
+                                        value={formData.companyName}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('companyName')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'companyName' ? '' : placeholders.companyName}
+                                    />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
-                                        GSTIN
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="gstin">
+                                        {getLabel('gstin', 'GSTIN')}
                                     </label>
-                                    <input type="text" name="gstin" value={formData.gstin} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter GSTIN" />
+                                    <input
+                                        type="text"
+                                        name="gstin"
+                                        value={formData.gstin}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('gstin')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'gstin' ? '' : placeholders.gstin}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        Guest Email
+                                    
+
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-email">
+                                        {getLabel('guestEmail', 'Guest Email')}
                                     </label>
-                                    <input type="email" name="guestEmail" value={formData.guestEmail} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Guest Email" />
+                                    <input
+                                        type="email"
+                                        name="guestEmail"
+                                        value={formData.guestEmail}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('guestEmail')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        required
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'guestEmail' ? '' : placeholders.guestEmail}
+                                    />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -231,10 +325,22 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-point">
-                                        Address*
+                                    
+
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="address">
+                                        {getLabel('address', 'Address*')}
                                     </label>
-                                    <input type="text" name="address" value={formData.address} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Guest Address" />
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('address')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        required
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'address' ? '' : placeholders.address}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
@@ -254,10 +360,22 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-point">
-                                        State
+                                    
+
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="state">
+                                        {getLabel('state', 'State')}
                                     </label>
-                                    <input type="text" name="state" value={formData.state} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Guest Address" />
+                                    <input
+                                        type="text"
+                                        name="state"
+                                        value={formData.state}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('state')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'state' ? '' : placeholders.state}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
@@ -277,10 +395,22 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
-                                        Booking Reference
+                                    
+
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="bookingReference">
+                                        {getLabel('bookingReference', 'Booking Reference')}
                                     </label>
-                                    <input type="text" name="bookingReference" value={formData.bookingReference} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Booking Reference" />
+                                    <input
+                                        type="text"
+                                        name="bookingReference"
+                                        value={formData.bookingReference}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('bookingReference')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'bookingReference' ? '' : placeholders.bookingReference}
+                                    />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
@@ -306,22 +436,61 @@ export default function BookingForm() {
                                     </div>
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-point">
-                                        Guest Notes
+                                    
+
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guestNotes">
+                                        {getLabel('guestNotes', 'Guest Notes')}
                                     </label>
-                                    <input type="text" name="guestNotes" value={formData.guestNotes} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Guest Notes" />
+                                    <input
+                                        type="text"
+                                        name="guestNotes"
+                                        value={formData.guestNotes}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('guestNotes')}
+                                        onBlur={() => setFocusedInput(null)}
+                                        
+                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        placeholder={focusedInput === 'guestNotes' ? '' : placeholders.guestNotes}
+                                    />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="remarks">
-                                        Internal Notes
+                                    
+
+                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="internalNotes">
+                                        {getLabel('internalNotes', 'Internal Notes')}
                                     </label>
-                                    <textarea name="internalNotes" value={formData.internalNotes} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"  placeholder="Enter Internal notes"></textarea>
+                                    <textarea
+                                    
+                                    name="internalNotes"
+                                    value={formData.internalNotes}
+                                    onChange={handleChange}
+                                    onFocus={() => setFocusedInput('internalNotes')}
+                                    onBlur={() => setFocusedInput(null)}
+                                    
+                                    className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" 
+                                    placeholder={focusedInput === 'internalNotes' ? '' : placeholders.internalNotes}>
+                                        
+                                        </textarea>
+
+                                    
+
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="remarks">
-                                        Remarks
+                                        {getLabel('remarks', 'Remarks')}
                                     </label>
-                                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" placeholder="Enter Remarks"></textarea>
+                                    <textarea
+                                    
+                                    name="remarks"
+                                    value={formData.remarks}
+                                    onChange={handleChange}
+                                    onFocus={() => setFocusedInput('remarks')}
+                                    onBlur={() => setFocusedInput(null)}
+                                    
+                                    className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" 
+                                    placeholder={focusedInput === 'remarks' ? '' : placeholders.remarks}>
+                                        
+                                        </textarea>
                                 </div>
                             </div>
                             <div className="flex items-center justify-end">
