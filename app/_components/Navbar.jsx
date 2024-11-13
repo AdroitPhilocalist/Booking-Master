@@ -83,6 +83,9 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/guests">Guests</Link>
                 </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/property/billing">Billing</Link>
+                </li>
                 {/* <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/reservations">Reservations</Link>
                 </li>

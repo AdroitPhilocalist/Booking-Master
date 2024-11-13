@@ -9,7 +9,7 @@ export default function NewRoomForm() {
   const [categories, setCategories] = useState([]);
   const [floorNumber, setFloorNumber] = useState("");
   const [clean, setClean] = useState("Yes");
-  const [occupied, setOccupied] = useState("Vacant"); // Added occupied state
+  //const [occupied, setOccupied] = useState("Vacant"); // Added occupied state
   const router = useRouter();
 
   useEffect(() => {
@@ -32,12 +32,12 @@ export default function NewRoomForm() {
       category,                     // Assuming category is the selected category ID
       floor: floorNumber,           // Assuming floorNumber is the state for floor number
       clean: clean === "Yes",       // Convert clean to a boolean, assuming clean is "Yes" or "No"
-      occupied: occupied === "Confirmed" ? "Confirmed" : "Vacant", // Enum values as "Confirmed" or "Vacant"
+      //occupied: occupied === "Confirmed" ? "Confirmed" : "Vacant", // Enum values as "Confirmed" or "Vacant"
     };
   
     try {
       // Submit new room to backend
-      const res = await fetch("https://booking-master-psi.vercel.app/api/rooms", {
+      const res = await fetch("/api/rooms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,18 +110,7 @@ export default function NewRoomForm() {
             <option value="No">No</option>
           </select>
         </div>
-        <div className="mb-4">
-        <label className="block text-gray-700">Occupied</label>
-        <select
-          className="border rounded w-full p-2"
-          value={occupied}
-          onChange={(e) => setOccupied(e.target.value)}
-          required
-        >
-          <option value="Vacant">Vacant</option>
-          <option value="Confirmed">Confirmed</option>
-        </select>
-      </div>
+
 
         <button
           type="submit"

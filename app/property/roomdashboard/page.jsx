@@ -36,6 +36,9 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
     setIsEditing(false);
   };
 
+  // Find category name based on room's category ID
+  const categoryName = categories.find(cat => cat._id === room.category)?.category || "No Category";
+
   return (
     <div className="bg-white rounded shadow p-4 relative">
       {/* Edit and Delete Buttons */}
@@ -52,17 +55,16 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
       <div className="flex justify-between items-start">
         <div>
           <div className="text-2xl font-bold">Room {room.number}</div>
-          <div className="text-xs text-gray-500">
-            {room.category ? room.category.category : "No Category"}
-          </div>
+          <div className="text-xs text-gray-500">Floor {room.floor}</div> {/* Display floor info */}
+          <div className="text-xs text-gray-500">{categoryName}</div>
         </div>
       </div>
 
       {/* Vacant/Occupied Status */}
       <div
         className={`mt-2 px-2 py-1 rounded text-xs font-bold ${room.occupied === "Vacant"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
+          ? "bg-green-100 text-green-800"
+          : "bg-red-100 text-red-800"
           }`}
       >
         {room.occupied === "Vacant" ? "Vacant" : "Occupied"}
@@ -93,6 +95,16 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                   type="text"
                   name="number"
                   value={updatedRoom.number}
+                  onChange={handleEditChange}
+                  className="border rounded w-full p-1"
+                />
+              </label>
+              <label className="block mt-2">
+                Floor:
+                <input
+                  type="text"
+                  name="floor"
+                  value={updatedRoom.floor}
                   onChange={handleEditChange}
                   className="border rounded w-full p-1"
                 />
@@ -160,15 +172,19 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
 
 
 
+
+
 export default function RoomDashboard() {
   const [rooms, setRooms] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState("all"); // New state for filter
+
 
   const handleDelete = async (roomId) => {
     try {
-      const res = await fetch(`https://booking-master-psi.vercel.app/api/rooms/${roomId}`, {
+      const res = await fetch(`/api/rooms/${roomId}`, {
         method: 'DELETE',
       });
 
@@ -233,10 +249,19 @@ export default function RoomDashboard() {
     fetchData();
   }, []);
 
+  // Filter rooms based on search term and selected filter
   const filteredRooms = rooms.filter((room) => {
-    const category = categories.find(cat => cat._id === room.category);
-    return room.number.toString().includes(searchTerm) ||
-      (category && category.category.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = room.number.toString().includes(searchTerm) ||
+      categories.find(cat => cat._id === room.category)?.category.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "occupied" && room.occupied === "Occupied") ||
+      (filter === "vacant" && room.occupied === "Vacant") ||
+      (filter === "clean" && room.clean) ||
+      (filter === "dirty" && !room.clean);
+
+    return matchesSearch && matchesFilter;
   });
 
   // Summary Data
@@ -256,16 +281,6 @@ export default function RoomDashboard() {
 
       {/* Main Content */}
       <div className="container mx-auto p-4">
-        {/* Search Bar */}
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Search by room number or category"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="border rounded w-full p-2"
-          />
-        </div>
 
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
@@ -276,19 +291,21 @@ export default function RoomDashboard() {
 
         {/* Filters */}
         <div className="flex flex-wrap justify-between items-center mb-6">
-          <div className="flex space-x-2 mb-2 sm:mb-0">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded">All Rooms</button>
-            <button className="bg-red-500 text-white px-4 py-2 rounded">Occupied</button>
-            <button className="bg-green-500 text-white px-4 py-2 rounded">Vacant</button>
-            <button className="bg-yellow-500 text-white px-4 py-2 rounded">Blocked</button>
-            <button className="bg-purple-500 text-white px-4 py-2 rounded">Dirty</button>
+          <div className="flex space-x-2 mb-4">
+            <button onClick={() => setFilter("all")} className="bg-blue-500 text-white px-4 py-2 rounded">All Rooms</button>
+            <button onClick={() => setFilter("occupied")} className="bg-red-500 text-white px-4 py-2 rounded">Occupied</button>
+            <button onClick={() => setFilter("vacant")} className="bg-green-500 text-white px-4 py-2 rounded">Vacant</button>
+            <button onClick={() => setFilter("clean")} className="bg-yellow-500 text-white px-4 py-2 rounded">Clean</button>
+            <button onClick={() => setFilter("dirty")} className="bg-purple-500 text-white px-4 py-2 rounded">Dirty</button>
           </div>
-          <Link href="roomdashboard/addRoom" className="bg-green-600 text-white px-4 py-2 rounded">
-            Add Room
-          </Link>
-          <Link href="roomdashboard/newguest" className="bg-blue-600 text-white px-4 py-2 rounded">
-            New Guest +
-          </Link>
+          <div className="flex space-x-2">
+            <Link href="roomdashboard/addRoom" className="bg-green-600 text-white px-4 py-2 rounded">
+              Add Room
+            </Link>
+            <Link href="roomdashboard/newguest" className="bg-blue-600 text-white px-4 py-2 rounded">
+              New Guest +
+            </Link>
+          </div>
         </div>
 
         {/* Rooms List */}
