@@ -26,6 +26,8 @@ const SummaryItem = ({ icon: Icon, title, count }) => (
 const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [updatedRoom, setUpdatedRoom] = useState(room);
+  const [guestList, setGuestList] = useState([]);
+  const [selectedGuest, setSelectedGuest] = useState(null);
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
