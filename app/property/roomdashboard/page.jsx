@@ -28,10 +28,43 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   const [updatedRoom, setUpdatedRoom] = useState(room);
 
   const handleEditChange = (e) => {
-    setUpdatedRoom({ ...updatedRoom, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setUpdatedRoom({ ...updatedRoom, [name]: value });
+
+    // Fetch guests when status changes to "Occupied"
+    if (name === "occupied" && value === "Occupied") {
+      fetchGuests();
+    }
+  };
+  const fetchGuests = async () => {
+    try {
+      const response = await fetch("/api/NewBooking"); // Replace with your actual API endpoint
+      const data = await response.json();
+      setGuestList(data);
+    } catch (error) {
+      console.error("Error fetching guests:", error);
+    }
   };
 
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
+    if (updatedRoom.occupied === "Occupied" && selectedGuest) {
+      try {
+        // Update the guest's roomNumbers in the database
+        await fetch(`/api/NewBooking/${selectedGuest._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            roomNumbers: [...selectedGuest.roomNumbers, updatedRoom.number],
+          }),
+        });
+      } catch (error) {
+        console.error("Error updating guest room numbers:", error);
+      }
+    }
+
+    // Save the room changes
     onEdit(updatedRoom);
     setIsEditing(false);
   };
@@ -136,6 +169,23 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                   <option value="Occupied">Occupied</option>
                 </select>
               </label>
+              {/* Guest Selection */}
+              {updatedRoom.occupied === "Occupied" && guestList.length > 0 && (
+                <label className="block mt-2">
+                  Guest:
+                  <select
+                    onChange={(e) => setSelectedGuest(guestList.find((g) => g._id === e.target.value))}
+                    className="border rounded w-full p-1"
+                  >
+                    <option value="">Select Guest</option>
+                    {guestList.map((guest) => (
+                      <option key={guest._id} value={guest._id}>
+                        {guest.guestName} - {guest.mobileNo}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="block mt-2">
                 Clean:
                 <select
