@@ -72,7 +72,9 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   };
 
   // Find category name based on room's category ID
-  const categoryName = categories.find(cat => cat._id === room.category)?.category || "No Category";
+  const categoryName =
+    categories.find((cat) => cat._id === room.category)?.category ||
+    "No Category";
 
   return (
     <div className="bg-white rounded shadow p-4 relative">
@@ -90,17 +92,19 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
       <div className="flex justify-between items-start">
         <div>
           <div className="text-2xl font-bold">Room {room.number}</div>
-          <div className="text-xs text-gray-500">Floor {room.floor}</div> {/* Display floor info */}
+          <div className="text-xs text-gray-500">Floor {room.floor}</div>{" "}
+          {/* Display floor info */}
           <div className="text-xs text-gray-500">{categoryName}</div>
         </div>
       </div>
 
       {/* Vacant/Occupied Status */}
       <div
-        className={`mt-2 px-2 py-1 rounded text-xs font-bold ${room.occupied === "Vacant"
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
-          }`}
+        className={`mt-2 px-2 py-1 rounded text-xs font-bold ${
+          room.occupied === "Vacant"
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+        }`}
       >
         {room.occupied === "Vacant" ? "Vacant" : "Occupied"}
       </div>
@@ -164,19 +168,26 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                 <select
                   name="occupied"
                   value={updatedRoom.occupied}
-                  onChange={handleEditChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setUpdatedRoom({ ...updatedRoom, occupied: value });
+                  }}
                   className="border rounded w-full p-1"
                 >
                   <option value="Vacant">Vacant</option>
                   <option value="Occupied">Occupied</option>
                 </select>
               </label>
-              {/* Guest Selection */}
+              {/* // Guest Selection (conditionally rendered) */}
               {updatedRoom.occupied === "Occupied" && guestList.length > 0 && (
                 <label className="block mt-2">
                   Guest:
                   <select
-                    onChange={(e) => setSelectedGuest(guestList.find((g) => g._id === e.target.value))}
+                    onChange={(e) =>
+                      setSelectedGuest(
+                        guestList.find((g) => g._id === e.target.value)
+                      )
+                    }
                     className="border rounded w-full p-1"
                   >
                     <option value="">Select Guest</option>
@@ -222,10 +233,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   );
 };
 
-
-
-
-
 export default function RoomDashboard() {
   const [rooms, setRooms] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -233,40 +240,42 @@ export default function RoomDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all"); // New state for filter
 
-
   const handleDelete = async (roomId) => {
     try {
       const res = await fetch(`/api/rooms/${roomId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await res.json();
       if (data.success) {
-        setRooms(rooms.filter(room => room._id !== roomId));
+        setRooms(rooms.filter((room) => room._id !== roomId));
       } else {
-        console.error('Failed to delete room');
+        console.error("Failed to delete room");
       }
     } catch (error) {
-      console.error('Error deleting room:', error);
+      console.error("Error deleting room:", error);
     }
   };
-
 
   const handleEdit = async (updatedRoom) => {
     try {
       const res = await fetch(`/api/rooms/${updatedRoom._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedRoom),
       });
       const data = await res.json();
       if (data.success) {
-        setRooms(rooms.map(room => (room._id === updatedRoom._id ? updatedRoom : room)));
+        setRooms(
+          rooms.map((room) =>
+            room._id === updatedRoom._id ? updatedRoom : room
+          )
+        );
       } else {
-        console.error('Failed to update room');
+        console.error("Failed to update room");
       }
     } catch (error) {
-      console.error('Error updating room:', error);
+      console.error("Error updating room:", error);
     }
   };
 
@@ -275,8 +284,8 @@ export default function RoomDashboard() {
     const fetchData = async () => {
       try {
         const [roomsResponse, categoriesResponse] = await Promise.all([
-          fetch('/api/rooms'),
-          fetch('/api/roomCategories')
+          fetch("/api/rooms"),
+          fetch("/api/roomCategories"),
         ]);
         const roomsData = await roomsResponse.json();
         const categoriesData = await categoriesResponse.json();
@@ -284,16 +293,18 @@ export default function RoomDashboard() {
         if (roomsData.success && Array.isArray(roomsData.data)) {
           setRooms(roomsData.data);
         } else {
-          console.error('Failed to fetch rooms or rooms is not an array');
+          console.error("Failed to fetch rooms or rooms is not an array");
         }
 
         if (categoriesData.success && Array.isArray(categoriesData.data)) {
           setCategories(categoriesData.data);
         } else {
-          console.error('Failed to fetch categories or categories is not an array');
+          console.error(
+            "Failed to fetch categories or categories is not an array"
+          );
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
@@ -303,8 +314,12 @@ export default function RoomDashboard() {
 
   // Filter rooms based on search term and selected filter
   const filteredRooms = rooms.filter((room) => {
-    const matchesSearch = room.number.toString().includes(searchTerm) ||
-      categories.find(cat => cat._id === room.category)?.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      room.number.toString().includes(searchTerm) ||
+      categories
+        .find((cat) => cat._id === room.category)
+        ?.category.toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
     const matchesFilter =
       filter === "all" ||
@@ -318,12 +333,24 @@ export default function RoomDashboard() {
 
   // Summary Data
   const summaryItems = [
-    { icon: Bed, title: 'Occupied Rooms', count: rooms.filter(room => room.occupied === 'Occupied').length },
-    { icon: Home, title: 'Vacant Rooms', count: rooms.filter(room => room.occupied === 'Vacant').length },
-    { icon: PlaneTakeoff, title: 'Expected Arrivals', count: rooms.filter(room => room.occupied === 'Occupied').length },
-    { icon: PlaneLanding, title: 'Expected Departures', count: '0' },
-    { icon: UserCheck, title: "Today's Check In", count: '0' },
-    { icon: UserPlus, title: "Today's Check Out", count: '0' },
+    {
+      icon: Bed,
+      title: "Occupied Rooms",
+      count: rooms.filter((room) => room.occupied === "Occupied").length,
+    },
+    {
+      icon: Home,
+      title: "Vacant Rooms",
+      count: rooms.filter((room) => room.occupied === "Vacant").length,
+    },
+    {
+      icon: PlaneTakeoff,
+      title: "Expected Arrivals",
+      count: rooms.filter((room) => room.occupied === "Occupied").length,
+    },
+    { icon: PlaneLanding, title: "Expected Departures", count: "0" },
+    { icon: UserCheck, title: "Today's Check In", count: "0" },
+    { icon: UserPlus, title: "Today's Check Out", count: "0" },
   ];
 
   return (
@@ -333,7 +360,6 @@ export default function RoomDashboard() {
 
       {/* Main Content */}
       <div className="container mx-auto p-4">
-
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           {summaryItems.map((item, index) => (
@@ -344,17 +370,48 @@ export default function RoomDashboard() {
         {/* Filters */}
         <div className="flex flex-wrap justify-between items-center mb-6">
           <div className="flex space-x-2 mb-4">
-            <button onClick={() => setFilter("all")} className="bg-blue-500 text-white px-4 py-2 rounded">All Rooms</button>
-            <button onClick={() => setFilter("occupied")} className="bg-red-500 text-white px-4 py-2 rounded">Occupied</button>
-            <button onClick={() => setFilter("vacant")} className="bg-green-500 text-white px-4 py-2 rounded">Vacant</button>
-            <button onClick={() => setFilter("clean")} className="bg-yellow-500 text-white px-4 py-2 rounded">Clean</button>
-            <button onClick={() => setFilter("dirty")} className="bg-purple-500 text-white px-4 py-2 rounded">Dirty</button>
+            <button
+              onClick={() => setFilter("all")}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              All Rooms
+            </button>
+            <button
+              onClick={() => setFilter("occupied")}
+              className="bg-red-500 text-white px-4 py-2 rounded"
+            >
+              Occupied
+            </button>
+            <button
+              onClick={() => setFilter("vacant")}
+              className="bg-green-500 text-white px-4 py-2 rounded"
+            >
+              Vacant
+            </button>
+            <button
+              onClick={() => setFilter("clean")}
+              className="bg-yellow-500 text-white px-4 py-2 rounded"
+            >
+              Clean
+            </button>
+            <button
+              onClick={() => setFilter("dirty")}
+              className="bg-purple-500 text-white px-4 py-2 rounded"
+            >
+              Dirty
+            </button>
           </div>
           <div className="flex space-x-2">
-            <Link href="roomdashboard/addRoom" className="bg-green-600 text-white px-4 py-2 rounded">
+            <Link
+              href="roomdashboard/addRoom"
+              className="bg-green-600 text-white px-4 py-2 rounded"
+            >
               Add Room
             </Link>
-            <Link href="roomdashboard/newguest" className="bg-blue-600 text-white px-4 py-2 rounded">
+            <Link
+              href="roomdashboard/newguest"
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
               New Guest +
             </Link>
           </div>
@@ -374,7 +431,9 @@ export default function RoomDashboard() {
                 categories={categories}
               />
             ))}
-            {filteredRooms.length === 0 && <div className="text-center">No rooms found.</div>}
+            {filteredRooms.length === 0 && (
+              <div className="text-center">No rooms found.</div>
+            )}
           </div>
         )}
       </div>
