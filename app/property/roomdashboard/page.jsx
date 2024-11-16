@@ -382,5 +382,3 @@ export default function RoomDashboard() {
     </div>
   );
 }
-
-
