@@ -28,13 +28,14 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   const [updatedRoom, setUpdatedRoom] = useState(room);
   const [guestList, setGuestList] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
-
+  
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setUpdatedRoom({ ...updatedRoom, [name]: value });
 
     // Fetch guests when status changes to "Occupied"
-    if (name === "occupied" && value === "Occupied") {
+    if (e.target.name === "occupied" && e.target.value === "Occupied") {
+      console.log("occupied")
       fetchGuests();
     }
   };
@@ -42,7 +43,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
     try {
       const response = await fetch("/api/NewBooking"); // Replace with your actual API endpoint
       const data = await response.json();
-      setGuestList(data);
+      console.log(data.data);
+      setGuestList(data.data);
     } catch (error) {
       console.error("Error fetching guests:", error);
     }
@@ -168,10 +170,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                 <select
                   name="occupied"
                   value={updatedRoom.occupied}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setUpdatedRoom({ ...updatedRoom, occupied: value });
-                  }}
+                  onChange={handleEditChange}
                   className="border rounded w-full p-1"
                 >
                   <option value="Vacant">Vacant</option>
@@ -179,7 +178,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                 </select>
               </label>
               {/* // Guest Selection (conditionally rendered) */}
-              {updatedRoom.occupied === "Occupied" && guestList.length > 0 && (
+              {updatedRoom.occupied === "Occupied" && (
                 <label className="block mt-2">
                   Guest:
                   <select
