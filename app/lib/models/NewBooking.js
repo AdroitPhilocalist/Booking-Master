@@ -104,6 +104,10 @@ const newBookingSchema = new mongoose.Schema({
   },
   internalNotes: {
     type: String
+  },
+  roomNumbers: {
+    type: [Number], // Array of room numbers
+    required: true // You can set this to false if it's optional
   }
 }, {
   timestamps: true
