@@ -1,5 +1,5 @@
-import Inventory from "@/app/lib/models/Inventorycategory";
-import connectSTR from "@/app/lib/dbConnect";
+import Inventory from "../../lib/models/Inventorycategory";
+import connectSTR from "../../lib/dbConnect";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 

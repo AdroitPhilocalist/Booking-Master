@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 const InventoryList = new mongoose.Schema({
 
@@ -37,6 +36,5 @@ export default Inventorylist;
 
 
 
-}
 
-)
+
