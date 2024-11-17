@@ -6,113 +6,102 @@ import { Footer } from "../../_components/Footer";
 export default function InventoryCategory() {
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState(null); // For editing
+  const [currentProduct, setCurrentProduct] = useState(null);
 
+  // Fetch products from the API
   useEffect(() => {
     const fetchProducts = async () => {
-      // Set loading to true before fetch
       try {
         const response = await fetch("/api/InventoryCategory");
         const data = await response.json();
-        if (data.products) {
-          setProducts(data.products);
-        }
+        setProducts(data.products || []);
       } catch (error) {
         console.error("Failed to fetch products", error);
       }
-      // Set loading to false after data is fetched
     };
     fetchProducts();
-  }, [products]);
+  }, []);
 
-  // Handle Add/Edit Product
+  // Add or edit a product
   const handleAddProduct = async (productName) => {
-    if (currentProduct) {
-      // Edit mode
-      const updatedProduct = { ...currentProduct, itemName: productName };
-      const response = await fetch(`/api/InventoryCategory/${currentProduct.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedProduct),
-      });
-      const data = await response.json();
+    try {
+      const method = currentProduct ? "PUT" : "POST";
+      const url = currentProduct
+        ? `/api/InventoryCategory/${currentProduct._id}`
+        : "/api/InventoryCategory";
 
-      if (data.product) {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          itemName: productName,
+          isActive: currentProduct ? currentProduct.isActive : true,
+        }),
+      });
+
+      const data = await response.json();
+      if (method === "POST") setProducts((prev) => [...prev, data.product]);
+      else
         setProducts((prev) =>
           prev.map((product) =>
-            product.id === currentProduct.id ? data.product : product
+            product._id === data.product._id ? data.product : product
           )
         );
-      }
+
+      setShowModal(false);
       setCurrentProduct(null);
-    } else {
-      // Add new product
-      const response = await fetch("/api/InventoryCategory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: productName }),
-      });
-      const data = await response.json();
-
-      if (data.product) {
-        setProducts((prev) => [...prev, data.product]);
-      }
+    } catch (error) {
+      console.error("Error saving product:", error);
     }
-    setShowModal(false);
   };
 
-  // Toggle Active/Inactive Status
+  // Toggle product status
   const toggleActiveStatus = async (id) => {
-    const product = products.find((product) => product.id === id);
-    if (!product) return;
-
-    const updatedProduct = { ...product, isActive: !product.isActive };
-
-    const response = await fetch(`/api/InventoryCategory/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedProduct),
-    });
-    const data = await response.json();
-
-    if (data.product) {
+    try {
+      const product = products.find((p) => p._id === id);
+      if (!product) return;
+  
+      const response = await fetch(`/api/InventoryCategory/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !product.isActive }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to update status: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+  
+      if (!data.product || !data.product.itemName) {
+        throw new Error("Invalid product data returned from the API");
+      }
+  
       setProducts((prev) =>
-        prev.map((product) =>
-          product.id === id ? data.product : product
-        )
+        prev.map((p) => (p._id === id ? data.product : p))
       );
+    } catch (error) {
+      console.error("Error toggling status:", error);
     }
   };
-
-  // Handle Edit Product
-  const handleEdit = (product) => {
-    setCurrentProduct(product);
-    setShowModal(true);
-  };
+  
+  
 
   return (
     <div>
-      {/* Navbar */}
       <Navbar />
-
       <div className="container mx-auto p-4">
-        <h1 className="text-xl font-bold mb-4">Segments List</h1>
+        <h1 className="text-xl font-bold mb-4">Inventory List</h1>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setShowModal(true);
+            setCurrentProduct(null); // Add new product
+          }}
           className="bg-green-500 text-white px-4 py-2 rounded mb-4"
         >
           Add New +
         </button>
 
-        
-
-        {/* Table */}
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr>
@@ -121,61 +110,48 @@ export default function InventoryCategory() {
             </tr>
           </thead>
           <tbody>
-            {products && products.length > 0 ? (
-              products.map((product) => (
-                <tr key={product._id}>
-                  <td className="border border-gray-300 px-4 py-2">{product.itemName}</td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    <button
-                      onClick={() => toggleActiveStatus(product._id)}
-                      className={`px-4 py-2 rounded ${product.isActive ? "bg-green-500" : "bg-red-500"} text-white`}
-                    >
-                      {product.isActive ? "Active" : "Inactive"}
-                    </button>
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="2" className="border border-gray-300 px-4 py-2 text-center">
-                  No products available
+            {products.map((product) => (
+              <tr key={product._id}>
+                <td className="border border-gray-300 px-4 py-2">{product.itemName}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  <button
+                    onClick={() => toggleActiveStatus(product._id)}
+                    className={`px-4 py-2 rounded ${
+                      product.isActive ? "bg-green-500" : "bg-red-500"
+                    } text-white`}
+                  >
+                    {product.isActive ? "Active" : "Inactive"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowModal(true);
+                      setCurrentProduct(product); // Edit existing product
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded ml-2"
+                  >
+                    Edit
+                  </button>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
-
-        {showModal && (
-          <AddProductModal
-            onClose={() => {
-              setShowModal(false);
-              setCurrentProduct(null);
-            }}
-            onSubmit={handleAddProduct}
-            initialValue={currentProduct ? currentProduct.itemName : ""}
-          />
-        )}
       </div>
-
+      {showModal && (
+        <AddProductModal
+          onClose={() => setShowModal(false)}
+          onSubmit={handleAddProduct}
+          initialValue={currentProduct?.itemName || ""}
+        />
+      )}
       <Footer />
     </div>
   );
 }
 
-// Modal component for adding/editing a product
+// Modal Component
 const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
   const [productName, setProductName] = useState(initialValue);
-
-  const handleSubmit = () => {
-    onSubmit(productName);
-    setProductName(""); // Reset field
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -186,12 +162,16 @@ const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
           className="border p-2 mb-4 w-full"
+          placeholder="Enter product name"
         />
         <div className="flex justify-between">
           <button onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">
             Cancel
           </button>
-          <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2 rounded">
+          <button
+            onClick={() => onSubmit(productName)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
             Submit
           </button>
         </div>

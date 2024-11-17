@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const inventorySchema = new mongoose.Schema(
   {
@@ -8,14 +8,14 @@ const inventorySchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true,  // New field to track active/inactive status
+      default: true, // Active by default
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, // Adds createdAt and updatedAt timestamps
   }
 );
 
-const Inventory = mongoose.models.Inventory || mongoose.model('Inventory', inventorySchema);
+const Inventory = mongoose.models.Inventory || mongoose.model("Inventory", inventorySchema);
 
 export default Inventory;
