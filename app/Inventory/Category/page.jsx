@@ -91,7 +91,7 @@ export default function InventoryCategory() {
     <div>
       <Navbar />
       <div className="container mx-auto p-4">
-        <h1 className="text-xl font-bold mb-4">Inventory List</h1>
+        <h1 className="text-xl font-bold mb-4">Inventory Category</h1>
         <button
           onClick={() => {
             setShowModal(true);
