@@ -382,17 +382,13 @@ export default function Navbar() {
                   <Link href="/Inventory/Category">Category</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/Inventory/Items">Items</Link>
+                  <Link href="/Inventory/InventoryList">Inventory List</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/Inventory/Purchase">Purchase</Link>
-                </li>
+              
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Inventory/Report">Report</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/Inventory/Sales">Sales</Link>
-                </li>
+                
               </ul>
             )}
           </li>
