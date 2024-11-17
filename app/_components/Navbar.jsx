@@ -368,6 +368,35 @@ export default function Navbar() {
               </ul>
             )}
           </li>
+          <ul className="flex space-x-6 text-white">
+          {/* Master Dropdown */}
+          <li
+            className="relative"
+            onMouseEnter={() => handleMouseEnter(8)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <button className="px-1 py-1 focus:outline-none hover:bg-amber-700 rounded hover:text-yellow-200">Inventory</button>
+            {openDropdown === 8 && (
+              <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Inventory/Category">Category</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Inventory/Items">Items</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Inventory/Purchase">Purchase</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Inventory/Report">Report</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Inventory/Sales">Sales</Link>
+                </li>
+              </ul>
+            )}
+          </li>
+          </ul>
 
           {/* Services Dropdown */}
           {/* <li
