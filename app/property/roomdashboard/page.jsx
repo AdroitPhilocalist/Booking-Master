@@ -51,10 +51,15 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   };
 
   const handleEditSubmit = async () => {
+    // Validation: Ensure a guest is selected when the room is set to "Occupied"
+    if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
+      alert("Please select a guest before saving an occupied room.");
+      return; // Prevent submission if validation fails
+    }
     if (updatedRoom.occupied === "Occupied" && selectedGuest) {
       try {
         // Update the guest's roomNumbers in the database
-        await fetch(`/api/NewBooking / ${ selectedGuest._id }`, {
+        await fetch(`/api/NewBooking / ${selectedGuest._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -157,8 +162,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
       {/* Vacant/Occupied Status */}
       <div
         className={`mt-2 px-2 py-1 rounded text-xs font-bold ${room.occupied === "Vacant"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
+          ? "bg-green-100 text-green-800"
+          : "bg-red-100 text-red-800"
           }`}
       >
         {room.occupied === "Vacant" ? "Vacant" : "Occupied"}
