@@ -98,7 +98,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
 
           // Get the generated billing record's ID
           const billingId = billingData.data._id;
-
+          console.log('Billing ID:', billingId);
           // Update the updatedRoom object with the new billing details
           const updatedRoomWithBilling = {
             ...updatedRoom, // Copy existing properties
