@@ -51,8 +51,14 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   };
 
   const handleEditSubmit = async () => {
-    if (updatedRoom.occupied === "Occupied" && selectedGuest) {
-      try {
+    // Validation: Ensure a guest is selected when the room is set to "Occupied"
+    if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
+      alert("Please select a guest before saving an occupied room.");
+      return; // Prevent submission if validation fails
+    }
+  
+    try {
+      if (updatedRoom.occupied === "Occupied" && selectedGuest) {
         // Update the guest's roomNumbers in the database
         await fetch(`/api/NewBooking/${selectedGuest._id}`, {
           method: "PUT",
@@ -63,16 +69,18 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
             roomNumbers: [...selectedGuest.roomNumbers, updatedRoom.number],
           }),
         });
-      } catch (error) {
-        console.error("Error updating guest room numbers:", error);
       }
+  
+      // Save the room changes (call the parent onEdit function)
+      onEdit(updatedRoom);
+    } catch (error) {
+      console.error("Error updating guest room numbers:", error);
+    } finally {
+      // Close the modal
+      setIsEditing(false);
     }
-
-    // Save the room changes
-    onEdit(updatedRoom);
-    setIsEditing(false);
   };
-
+  
   // Find category name based on room's category ID
   const categoryName =
     categories.find((cat) => cat._id === room.category)?.category ||
@@ -166,7 +174,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                 </select>
               </label>
               <label className="block mt-2">
-                Occupied:
+                Occupancy:
                 <select
                   name="occupied"
                   value={updatedRoom.occupied}
