@@ -23,7 +23,7 @@ const SummaryItem = ({ icon: Icon, title, count }) => (
   </div>
 );
 
-const RoomCard = ({ room, onDelete, onEdit, categories }) => {
+const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [updatedRoom, setUpdatedRoom] = useState(room);
   const [guestList, setGuestList] = useState([]);
@@ -53,84 +53,116 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   const handleEditSubmit = async () => {
     // Validation: Ensure a guest is selected when the room is set to "Occupied"
     if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
-      alert("Please select a guest before saving an occupied room.");
-      return; // Prevent submission if validation fails
+        alert("Please select a guest before saving an occupied room.");
+        return; // Prevent submission if validation fails
     }
+
     if (updatedRoom.occupied === "Occupied" && selectedGuest) {
-      try {
-        // Update the guest's roomNumbers in the database
-        await fetch(`/api/NewBooking / ${selectedGuest._id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            roomNumbers: [...selectedGuest.roomNumbers, updatedRoom.number],
-          }),
-        });
+        try {
+            // Update the guest's roomNumbers in the database
+            await fetch(`/api/NewBooking/${selectedGuest._id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    roomNumbers: [...selectedGuest.roomNumbers, updatedRoom.number],
+                }),
+            });
 
-        // Create billing entry when room status changes to "Occupied"
-        const newBilling = {
-          roomNo: updatedRoom.number,
-          itemList: ["Room Charge"], // You can add more items here
-          priceList: [updatedRoom.category.tarrif], // Assuming the room has a price field
-          billStartDate: new Date().toISOString(), // Ensure proper date format
-          billEndDate: new Date().toISOString(), // Ensure proper date format
-          totalAmount: 0, // Set total amount based on room price
-          amountAdvanced: 0, // Assuming no amount advanced initially
-          dueAmount: 0, // Assuming no advance payment
-        };
+            // Create billing entry when room status changes to "Occupied"
+            const newBilling = {
+                roomNo: updatedRoom.number,
+                itemList: ["Room Charge"], // Add more items as necessary
+                priceList: [updatedRoom.category.tarrif], // Assuming the room has a price field
+                billStartDate: new Date().toISOString(),
+                billEndDate: new Date().toISOString(),
+                totalAmount: 0,
+                amountAdvanced: 0,
+                dueAmount: 0,
+            };
 
-        console.log("Submitting billing data:", newBilling);
+            console.log("Submitting billing data:", newBilling);
 
-        // Create Billing Record in the database
-        const billingResponse = await fetch("/api/Billing", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newBilling),
-        });
+            // Create Billing Record in the database
+            const billingResponse = await fetch("/api/Billing", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newBilling),
+            });
 
-        const billingData = await billingResponse.json();
-        if (billingData.success) {
-          console.log('Billing created successfully:', billingData.data);
+            const billingData = await billingResponse.json();
+            if (billingData.success) {
+                console.log('Billing created successfully:', billingData.data);
 
-          // Get the generated billing record's ID
-          const billingId = billingData.data._id;
-          console.log('Billing ID:', billingId);
-          // Update the updatedRoom object with the new billing details
-          const updatedRoomWithBilling = {
-            ...updatedRoom, // Copy existing properties
-            billingStarted: "Yes",  // Ensure that this is a string 'Yes'
-            currentBillingId: billingId // Set to the newly created billing ID
-          };
+                // Get the generated billing record's ID
+                const billingId = billingData.data._id;
+                console.log('Billing ID:', billingId);
 
-          // Update the room in the state
-          setRooms((prevRooms) =>
-            prevRooms.map((room) =>
-              room._id === updatedRoom._id ? updatedRoomWithBilling : room
-            )
-          );
+                // Update the updatedRoom object with the new billing details
+                const updatedRoomWithBilling = {
+                    ...updatedRoom,
+                    billingStarted: "Yes",
+                    currentBillingId: billingId,
+                };
 
-          // Call the handleEdit function to update the room in the database
-          handleEdit(updatedRoomWithBilling);
-        } else {
-          console.error("Error creating billing:", billingData.error);
+                console.log('Updated Room with Billing:', updatedRoomWithBilling);
+
+                // Update the room in the database directly
+                const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoomWithBilling._id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedRoomWithBilling),
+                });
+
+                const roomUpdateData = await roomUpdateResponse.json();
+                if (roomUpdateData.success) {
+                    setRooms((prevRooms) =>
+                        prevRooms.map((room) =>
+                            room._id === updatedRoomWithBilling._id ? updatedRoomWithBilling : room
+                        )
+                    );
+                } else {
+                    console.error("Failed to update room in database:", roomUpdateData.error);
+                }
+            } else {
+                console.error("Error creating billing:", billingData.error);
+            }
+        } catch (error) {
+            console.error(
+                "Error updating guest room numbers or creating billing:",
+                error
+            );
         }
+    } else {
+        // Update the room in the database directly if no billing creation is needed
+        try {
+            const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoom._id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedRoom),
+            });
 
-      } catch (error) {
-        console.error(
-          "Error updating guest room numbers or creating billing:",
-          error
-        );
-      }
+            const roomUpdateData = await roomUpdateResponse.json();
+            if (roomUpdateData.success) {
+                setRooms((prevRooms) =>
+                    prevRooms.map((room) =>
+                        room._id === updatedRoom._id ? updatedRoom : room
+                    )
+                );
+            } else {
+                console.error("Failed to update room in database:", roomUpdateData.error);
+            }
+        } catch (error) {
+            console.error("Error updating room:", error);
+        }
     }
 
-    // Save the room changes
-    onEdit(updatedRoom);
+    // Finalize editing
     setIsEditing(false);
-  };
+};
 
   // Find category name based on room's category ID
   const categoryName =
@@ -485,7 +517,9 @@ export default function RoomDashboard() {
                 room={room}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
+                handleEdit={handleEdit}
                 categories={categories}
+                setRooms={setRooms}
               />
             ))}
             {filteredRooms.length === 0 && (
