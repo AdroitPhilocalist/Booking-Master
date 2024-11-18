@@ -179,3 +179,5 @@ const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
     </div>
   );
 };
+
+
