@@ -10,7 +10,7 @@ export async function POST(req) {
     const data = await req.json();
 
     // Validate required fields
-    if (!data.roomNo || !data.billStartDate || !data.billEndDate || !data.totalAmount) {
+    if (!data.roomNo || !data.billStartDate || !data.billEndDate ) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }

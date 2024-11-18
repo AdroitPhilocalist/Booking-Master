@@ -28,14 +28,14 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   const [updatedRoom, setUpdatedRoom] = useState(room);
   const [guestList, setGuestList] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
-  
+
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setUpdatedRoom({ ...updatedRoom, [name]: value });
 
     // Fetch guests when status changes to "Occupied"
     if (e.target.name === "occupied" && e.target.value === "Occupied") {
-      console.log("occupied")
+      console.log("occupied");
       fetchGuests();
     }
   };
@@ -51,10 +51,15 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
   };
 
   const handleEditSubmit = async () => {
+    // Validation: Ensure a guest is selected when the room is set to "Occupied"
+    if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
+      alert("Please select a guest before saving an occupied room.");
+      return; // Prevent submission if validation fails
+    }
     if (updatedRoom.occupied === "Occupied" && selectedGuest) {
       try {
         // Update the guest's roomNumbers in the database
-        await fetch(`/api/NewBooking/${selectedGuest._id}`, {
+        await fetch(`/api/NewBooking / ${selectedGuest._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -63,8 +68,62 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
             roomNumbers: [...selectedGuest.roomNumbers, updatedRoom.number],
           }),
         });
+
+        // Create billing entry when room status changes to "Occupied"
+        const newBilling = {
+          roomNo: updatedRoom.number,
+          itemList: ["Room Charge"], // You can add more items here
+          priceList: [updatedRoom.category.tarrif], // Assuming the room has a price field
+          billStartDate: new Date().toISOString(), // Ensure proper date format
+          billEndDate: new Date().toISOString(), // Ensure proper date format
+          totalAmount: 0, // Set total amount based on room price
+          amountAdvanced: 0, // Assuming no amount advanced initially
+          dueAmount: 0, // Assuming no advance payment
+        };
+
+        console.log("Submitting billing data:", newBilling);
+
+        // Create Billing Record in the database
+        const billingResponse = await fetch("/api/Billing", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newBilling),
+        });
+
+        const billingData = await billingResponse.json();
+        if (billingData.success) {
+          console.log('Billing created successfully:', billingData.data);
+
+          // Get the generated billing record's ID
+          const billingId = billingData.data._id;
+
+          // Update the updatedRoom object with the new billing details
+          const updatedRoomWithBilling = {
+            ...updatedRoom, // Copy existing properties
+            billingStarted: "Yes",  // Ensure that this is a string 'Yes'
+            currentBillingId: billingId // Set to the newly created billing ID
+          };
+
+          // Update the room in the state
+          setRooms((prevRooms) =>
+            prevRooms.map((room) =>
+              room._id === updatedRoom._id ? updatedRoomWithBilling : room
+            )
+          );
+
+          // Call the handleEdit function to update the room in the database
+          handleEdit(updatedRoomWithBilling);
+        } else {
+          console.error("Error creating billing:", billingData.error);
+        }
+
       } catch (error) {
-        console.error("Error updating guest room numbers:", error);
+        console.error(
+          "Error updating guest room numbers or creating billing:",
+          error
+        );
       }
     }
 
@@ -102,11 +161,10 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
 
       {/* Vacant/Occupied Status */}
       <div
-        className={`mt-2 px-2 py-1 rounded text-xs font-bold ${
-          room.occupied === "Vacant"
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
-        }`}
+        className={`mt-2 px-2 py-1 rounded text-xs font-bold ${room.occupied === "Vacant"
+          ? "bg-green-100 text-green-800"
+          : "bg-red-100 text-red-800"
+          }`}
       >
         {room.occupied === "Vacant" ? "Vacant" : "Occupied"}
       </div>
@@ -166,7 +224,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
                 </select>
               </label>
               <label className="block mt-2">
-                Occupied:
+                Occupancy:
                 <select
                   name="occupied"
                   value={updatedRoom.occupied}

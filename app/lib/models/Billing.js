@@ -28,6 +28,7 @@ const BillingSchema = new mongoose.Schema(
     totalAmount: {
       type: Number, // Total amount for the bill
       required: true,
+      default: 0,
     },
     amountAdvanced: {
       type: Number, // Amount advanced by the guest
