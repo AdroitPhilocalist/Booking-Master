@@ -177,7 +177,7 @@ export default function Billing() {
       {/* Modal for Viewing Bill Details */}
       {selectedBill && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white w-11/12 max-w-lg rounded-lg shadow-lg p-6 relative">
+          <div className="bg-white w-11/12 max-w-lg rounded-lg Fadow-lg p-6 relative">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">
               Bill Details
             </h2>
