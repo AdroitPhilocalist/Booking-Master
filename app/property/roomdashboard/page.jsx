@@ -59,6 +59,9 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
 
     if (updatedRoom.occupied === "Occupied" && selectedGuest) {
         try {
+            // Retrieve checkIn and checkOut from selected guest
+            const { checkIn, checkOut } = selectedGuest;
+
             // Update the guest's roomNumbers in the database
             await fetch(`/api/NewBooking/${selectedGuest._id}`, {
                 method: "PUT",
@@ -75,8 +78,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                 roomNo: updatedRoom.number,
                 itemList: ["Room Charge"], // Add more items as necessary
                 priceList: [updatedRoom.category.tarrif], // Assuming the room has a price field
-                billStartDate: new Date().toISOString(),
-                billEndDate: new Date().toISOString(),
+                billStartDate: checkIn, // Use the checkIn value from the selected guest
+                billEndDate: checkOut, // Use the checkOut value from the selected guest
                 totalAmount: 0,
                 amountAdvanced: 0,
                 dueAmount: 0,
@@ -163,6 +166,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
     // Finalize editing
     setIsEditing(false);
 };
+
 
   // Find category name based on room's category ID
   const categoryName =
