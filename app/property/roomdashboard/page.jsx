@@ -59,7 +59,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories }) => {
     if (updatedRoom.occupied === "Occupied" && selectedGuest) {
       try {
         // Update the guest's roomNumbers in the database
-        await fetch(`/api/NewBooking / ${selectedGuest._id}`, {
+        await fetch(`/api/NewBooking/${selectedGuest._id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
