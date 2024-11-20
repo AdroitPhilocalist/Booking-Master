@@ -34,6 +34,11 @@ const RoomSchema = new mongoose.Schema({
       ref: 'Invoice',
       default: null, // Default to null
     },
+    currentGuestId: {
+      type: mongoose.Schema.Types.ObjectId, // Reference to the NewBooking table
+      ref: 'NewBooking',
+      default: null, // Default to null
+    },
   });
 
 export default mongoose.models.Room || mongoose.model('Room', RoomSchema);
