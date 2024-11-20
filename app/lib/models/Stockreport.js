@@ -46,7 +46,13 @@ const Stockreport = new mongoose.Schema(
         {
             type:Number,
             required:true,
-        }
+        },
+        purorsell:
+        {
+            type:String,
+            enum: ['purchase', 'sell'],
+            required:true,
+        },
     },
     {
         timestamps: true,

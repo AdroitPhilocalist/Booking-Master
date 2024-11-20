@@ -81,7 +81,7 @@ export default function StockReportPage() {
 
   return (
     <div>
-        <Navbar />
+      <Navbar />
       <h1>Stock Report</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
@@ -152,21 +152,35 @@ export default function StockReportPage() {
       </form>
 
       <h2>Existing Stock Reports</h2>
-      <ul>
-        {stockReports.map((report) => (
-          <li key={report._id}>
-            <p>Purchase Order No: {report.purchaseorderno}</p>
-            <p>Purchase Date: {new Date(report.purchasedate).toLocaleDateString()}</p>
-            <p>Invoice No: {report.Invoiceno}</p>
-            <p>Quantity: {report.quantity?.stock}</p>
-            <p>Unit: {report.unit?.quantityUnit}</p>
-            <p>Rate: {report.rate}</p>
-            <p>Tax: {report.taxpercent?.tax}</p>
-            <p>Total: {report.total}</p>
-          </li>
-        ))}
-      </ul>
-        <Footer />
+      <table border="1" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th>Purchase Order No</th>
+            <th>Purchase Date</th>
+            <th>Invoice No</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Rate</th>
+            <th>Tax</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stockReports.map((report) => (
+            <tr key={report._id}>
+              <td>{report.purchaseorderno}</td>
+              <td>{new Date(report.purchasedate).toLocaleDateString()}</td>
+              <td>{report.Invoiceno}</td>
+              <td>{report.quantity?.stock}</td>
+              <td>{report.unit?.quantityUnit}</td>
+              <td>{report.rate}</td>
+              <td>{report.taxpercent?.tax}</td>
+              <td>{report.total}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Footer />
     </div>
   );
 }

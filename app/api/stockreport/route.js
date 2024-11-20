@@ -44,6 +44,7 @@ export async function POST(request) {
       "rate",
       "taxpercent",
       "total",
+      "purorsell"
     ];
 
     for (const field of requiredFields) {
