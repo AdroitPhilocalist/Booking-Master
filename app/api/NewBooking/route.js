@@ -35,7 +35,8 @@ export async function POST(req) {
             stopPosting: data.stopPosting,
             guestType: data.guestType,
             guestNotes: data.guestNotes,
-            internalNotes: data.internalNotes
+            internalNotes: data.internalNotes,
+            roomNumbers: data.roomNumbers
         });
 
         await newBooking.save(); // Save new booking to the database

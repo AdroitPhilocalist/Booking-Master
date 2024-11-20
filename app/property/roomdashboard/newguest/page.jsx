@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, Calendar, Clock } from 'lucide-react'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardContent, Checkbox, Typography, Box } from '@mui/material';
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 
@@ -51,6 +52,9 @@ export default function BookingForm() {
         internalNotes: 'Enter Internal Notes',
         remarks: 'Enter Remarks'
     };
+    const [rooms, setRooms] = useState([]); // Store available rooms
+    const [selectedRooms, setSelectedRooms] = useState([]); // Store selected rooms
+    const [modalOpen, setModalOpen] = useState(false); // Modal state
 
     const router = useRouter();
 
@@ -76,22 +80,87 @@ export default function BookingForm() {
         }
         return defaultLabel;
     };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleCheckAvailability = async () => {
+        try {
+            // Fetch available rooms and populate the category field from the API
+            const response = await fetch('/api/rooms');
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch rooms');
+            }
+    
+            const availableRooms = await response.json();
+            
+            // Ensure rooms have the populated category data
+            if (availableRooms.success && availableRooms.data) {
+                setRooms(availableRooms.data);
+            } else {
+                console.error('No room data available');
+            }
+    
+            setModalOpen(true); // Open the modal with room data
+        } catch (error) {
+            console.error('Error fetching room data:', error.message);
+            alert('Error fetching room data');
+        }
+    };
+    
+    const handleRoomSelection = (roomId) => {
+        setSelectedRooms((prevSelectedRooms) => {
+            const newSelectedRooms = prevSelectedRooms.includes(roomId)
+                ? prevSelectedRooms.filter((room) => room !== roomId)
+                : [...prevSelectedRooms, roomId];
+    
+            console.log('Updated selectedRooms:', newSelectedRooms); // Debugging selection
+    
+            return newSelectedRooms;
+        });
+    };
+    
+    const handleSubmit = async () => {
+        console.log('Selected rooms:', selectedRooms);
+    
+        // Typecast selectedRooms (array of strings) to an array of numbers
+        const roomNumbers = selectedRooms.map((room) => Number(room)); // Ensure all values are numbers
+    
+        // Check if typecasting is successful
+        console.log('Room numbers:', roomNumbers);
+    
+        const bookingData = { ...formData, roomNumbers: roomNumbers };
+    
+        console.log('Booking data to be sent:', bookingData);
+    
         const response = await fetch('/api/NewBooking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(bookingData),
         });
-
+    
         if (response.ok) {
             alert('Booking created successfully!');
+            setModalOpen(false);
             router.push('/property/roomdashboard');
         } else {
             alert('Failed to create booking');
         }
     };
+    
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     const response = await fetch('/api/NewBooking', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify(formData),
+    //     });
+
+    //     if (response.ok) {
+    //         alert('Booking created successfully!');
+    //         router.push('/property/roomdashboard');
+    //     } else {
+    //         alert('Failed to create booking');
+    //     }
+    // };
 
     return (
         <div className="min-h-screen bg-amber-200">
@@ -494,10 +563,18 @@ export default function BookingForm() {
                                 </div>
                             </div>
                             <div className="flex items-center justify-end">
-                                <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                                    Submit
+                                <button
+                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="button"
+                                    onClick={handleCheckAvailability}
+                                >
+                                    Check Room Availability
                                 </button>
-                                <button onClick={()=>router.push('/property/roomdashboard')} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4" type="button">
+                                <button
+                                    onClick={() => router.push('/property/roomdashboard')}
+                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
+                                    type="button"
+                                >
                                     Back
                                 </button>
                             </div>
@@ -506,6 +583,81 @@ export default function BookingForm() {
                 </div>
             </main>
             <Footer />
+             {/* Modal for Room Selection */}
+             <Dialog
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                maxWidth="lg"
+                fullWidth
+                PaperProps={{
+                    style: { minWidth: '50vw', padding: '1rem' }, // Modal size
+                }}
+            >
+                <DialogTitle style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>
+                    Select Rooms
+                </DialogTitle>
+                <DialogContent>
+                    <Box
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                            gap: 2,
+                        }}
+                    >
+                        {rooms.map((room) => (
+                            <Card
+                                key={room.number}
+                                variant="outlined"
+                                sx={{
+                                    border: selectedRooms.includes(room.number)
+                                        ? '2px solid #1976d2'
+                                        : '1px solid #ccc',
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.2s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.05)',
+                                    },
+                                }}
+                                onClick={() => handleRoomSelection(room.number)}
+                            >
+                                <CardContent>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        Room {room.number}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Category: {room.category.name}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Floor: {room.floor}
+                                    </Typography>
+                                    <Checkbox
+                                        checked={selectedRooms.includes(room.number)}
+                                        onChange={() => handleRoomSelection(room.number)}
+                                        color="primary"
+                                    />
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </Box>
+                </DialogContent>
+                <DialogActions style={{ justifyContent: 'space-between', padding: '1rem' }}>
+                    <Button
+                        onClick={() => setModalOpen(false)}
+                        color="secondary"
+                        variant="outlined"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        color="primary"
+                        variant="contained"
+                        disabled={selectedRooms.length === 0}
+                    >
+                        Submit
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }
