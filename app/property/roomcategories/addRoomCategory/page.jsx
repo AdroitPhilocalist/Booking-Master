@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import TextField from '@mui/material/TextField';
+
 
 const RoomCategoryForm = () => {
   const [formData, setFormData] = useState({
@@ -179,51 +181,33 @@ const RoomCategoryForm = () => {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="category"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Category
-                </label>
-                <input
+                <TextField id="Category" label="Category" variant="outlined"
                   type="text"
                   name="category"
-                  id="category"
+                  
                   value={formData.category}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="border rounded w-full "
                 />
               </div>
               <div className="sm:col-span-2">
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Description
-                </label>
-                <textarea
+                
+                <TextField id="Description" label="Description" variant="outlined"
                   name="description"
-                  id="description"
                   rows="3"
                   value={formData.description}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                ></textarea>
+                  className="border rounded w-full "
+                />
               </div>
               <div>
-                <label
-                  htmlFor="bedType"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Bed Type
-                </label>
-                <input
+                <TextField id="Bed type" label="Bed type" variant="outlined"
                   type="text"
                   name="bedType"
-                  id="bedType"
+           
                   value={formData.bedType}
                   onChange={handleChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="border rounded w-full "
                 />
               </div>
               <div>
@@ -515,14 +499,14 @@ const RoomCategoryForm = () => {
               <button
                 type="submit"
                 className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                onClick={()=>router.push('/property/roomcategories')}
+                onClick={() => router.push('/property/roomcategories')}
               >
                 Submit
               </button>
-              
+
             </div>
           </form>
-          
+
         </div>
       </div>
     </div>

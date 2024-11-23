@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { BoltIcon } from 'lucide-react'
 import { useRouter } from "next/navigation";
+import TextField from '@mui/material/TextField';
 
 
 export default function AddTable() {
@@ -12,7 +13,7 @@ export default function AddTable() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('https://booking-master-psi.vercel.app/api/tables', {
+    const response = await fetch('/api/tables', {
 
       method: 'POST',
       headers: {

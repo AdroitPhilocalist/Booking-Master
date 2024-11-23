@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import TextField from '@mui/material/TextField';
 
 export default function NewRoomForm() {
   const [roomNumber, setRoomNumber] = useState("");
@@ -25,7 +26,7 @@ export default function NewRoomForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Create new room object with the correct enum values
     const newRoom = {
       number: roomNumber,           // Assuming roomNumber is the state for room number
@@ -34,7 +35,7 @@ export default function NewRoomForm() {
       clean: clean === "Yes",       // Convert clean to a boolean, assuming clean is "Yes" or "No"
       //occupied: occupied === "Confirmed" ? "Confirmed" : "Vacant", // Enum values as "Confirmed" or "Vacant"
     };
-  
+
     try {
       // Submit new room to backend
       const res = await fetch("/api/rooms", {
@@ -44,7 +45,7 @@ export default function NewRoomForm() {
         },
         body: JSON.stringify(newRoom),
       });
-  
+
       // Handle response
       if (res.ok) {
         // Redirect to the room dashboard if the room creation is successful
@@ -57,23 +58,21 @@ export default function NewRoomForm() {
       console.error("An error occurred while creating the room:", error);
     }
   };
-  
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl mb-4">Add New Room</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700">Room Number</label>
-          <input
-            type="text"
-            className="border rounded w-full p-2"
+          <TextField id="Room Number" label="Room Number" variant="outlined" type="text"
+            className="border rounded w-full "
             value={roomNumber}
             onChange={(e) => setRoomNumber(e.target.value)}
-            required
-          />
+            required />
+
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700">Room Category</label>
+          
           <select
             className="border rounded w-full p-2"
             value={category}
@@ -89,10 +88,10 @@ export default function NewRoomForm() {
           </select>
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700">Floor Number</label>
-          <input
+          <TextField id="Floor Number" label="Floor Number" variant="outlined"
+          
             type="text"
-            className="border rounded w-full p-2"
+            className="border rounded w-full"
             value={floorNumber}
             onChange={(e) => setFloorNumber(e.target.value)}
             required

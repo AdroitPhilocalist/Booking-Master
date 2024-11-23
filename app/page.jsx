@@ -1,10 +1,17 @@
-"use client"
-import Image from 'next/image'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation';
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import TextField from "@mui/material/TextField";
 
 export default function Home() {
   const router = useRouter();
+  
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+    router.push("/hotelpage"); // Navigate to /hotelpage
+  };
+
   return (
     <main>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-700 to-orange-600">
@@ -19,37 +26,23 @@ export default function Home() {
         </div>
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-3xl font-semibold text-center mb-6 text-amber-800">Login</h2>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-amber-700">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="mt-1 block w-full px-3 py-2 bg-amber-50 border border-amber-300 rounded-md text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                placeholder="Enter your username"
-              />
+              <TextField id="username" label="Username" variant="outlined" fullWidth />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-amber-700">
-                Password
-              </label>
-              <input
+              <TextField
                 id="password"
-                name="password"
+                label="Password"
                 type="password"
-                required
-                className="mt-1 block w-full px-3 py-2 bg-amber-50 border border-amber-300 rounded-md text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-amber-500 focus:border-amber-500"
-                placeholder="Enter your password"
+                autoComplete="current-password"
+                fullWidth
               />
             </div>
             <div>
               <button
+                type="submit" // Change button type to "submit" for form submission
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-950 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
-                onClick={()=> router.push("/hotelpage")}
               >
                 SUBMIT
               </button>

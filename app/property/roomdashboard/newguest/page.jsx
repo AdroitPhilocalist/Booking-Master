@@ -5,6 +5,7 @@ import { ChevronDown, Calendar, Clock } from 'lucide-react'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardContent, Checkbox, Typography, Box } from '@mui/material';
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
+import TextField from '@mui/material/TextField';
 
 export default function BookingForm() {
     const [focusedInput, setFocusedInput] = useState(null);
@@ -84,58 +85,58 @@ export default function BookingForm() {
         try {
             // Fetch available rooms and populate the category field from the API
             const response = await fetch('/api/rooms');
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch rooms');
             }
-    
+
             const availableRooms = await response.json();
-            
+
             // Ensure rooms have the populated category data
             if (availableRooms.success && availableRooms.data) {
                 setRooms(availableRooms.data);
             } else {
                 console.error('No room data available');
             }
-    
+
             setModalOpen(true); // Open the modal with room data
         } catch (error) {
             console.error('Error fetching room data:', error.message);
             alert('Error fetching room data');
         }
     };
-    
+
     const handleRoomSelection = (roomId) => {
         setSelectedRooms((prevSelectedRooms) => {
             const newSelectedRooms = prevSelectedRooms.includes(roomId)
                 ? prevSelectedRooms.filter((room) => room !== roomId)
                 : [...prevSelectedRooms, roomId];
-    
+
             console.log('Updated selectedRooms:', newSelectedRooms); // Debugging selection
-    
+
             return newSelectedRooms;
         });
     };
-    
+
     const handleSubmit = async () => {
         console.log('Selected rooms:', selectedRooms);
-    
+
         // Typecast selectedRooms (array of strings) to an array of numbers
         const roomNumbers = selectedRooms.map((room) => Number(room)); // Ensure all values are numbers
-    
+
         // Check if typecasting is successful
         console.log('Room numbers:', roomNumbers);
-    
+
         const bookingData = { ...formData, roomNumbers: roomNumbers };
-    
+
         console.log('Booking data to be sent:', bookingData);
-    
+
         const response = await fetch('/api/NewBooking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bookingData),
         });
-    
+
         if (response.ok) {
             alert('Booking created successfully!');
             setModalOpen(false);
@@ -144,7 +145,7 @@ export default function BookingForm() {
             alert('Failed to create booking');
         }
     };
-    
+
 
     // const handleSubmit = async (e) => {
     //     e.preventDefault();
@@ -203,10 +204,8 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-point">
-                                        {getLabel('bookingPoint', 'Booking Point*')}
-                                    </label>
-                                    <input
+
+                                    <TextField id="Booking Point" label="Booking Point" variant="outlined"
                                         type="text"
                                         name="bookingPoint"
                                         value={formData.bookingPoint}
@@ -214,9 +213,10 @@ export default function BookingForm() {
                                         onFocus={() => setFocusedInput('bookingPoint')}
                                         onBlur={() => setFocusedInput(null)}
                                         required
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'bookingPoint' ? '' : placeholders.bookingPoint}
                                     />
+
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
                                     <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
@@ -236,92 +236,75 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        {getLabel('mobileNo', 'Mobile No.')}
-                                    </label>
-                                    <input
+
+
+                                    <TextField id="Mobile Number" label="Mobile Number" variant="outlined"
                                         type="text"
                                         name="mobileNo"
                                         value={formData.mobileNo}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('mobileNo')}
                                         onBlur={() => setFocusedInput(null)}
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'mobileNo' ? '' : placeholders.mobileNo}
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="pin-code">
-                                        {getLabel('pinCode', 'Pin Code')}
-                                    </label>
-                                    <input
+                                    <TextField id="Pincode" label="Pincode" variant="outlined"
                                         type="text"
                                         name="pinCode"
                                         value={formData.pinCode}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('pinCode')}
                                         onBlur={() => setFocusedInput(null)}
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'pinCode' ? '' : placeholders.pinCode}
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
-                                        {getLabel('guestName', 'Guest Name')}
-                                    </label>
-                                    <input
+                                    <TextField id="Guest Name" label="Guest Name" variant="outlined"
                                         type="text"
                                         name="guestName"
                                         value={formData.guestName}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('guestName')}
                                         onBlur={() => setFocusedInput(null)}
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'guestName' ? '' : placeholders.guestName}
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="company-name">
-                                        {getLabel('companyName', 'Company Name')}
-                                    </label>
-                                    <input
+                                    <TextField id="Company Name" label="Company Name" variant="outlined"
                                         type="text"
                                         name="companyName"
                                         value={formData.companyName}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('companyName')}
                                         onBlur={() => setFocusedInput(null)}
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full"
                                         placeholder={focusedInput === 'companyName' ? '' : placeholders.companyName}
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="gstin">
-                                        {getLabel('gstin', 'GSTIN')}
-                                    </label>
-                                    <input
+                                    <TextField id="GSTIN" label="GSTIN" variant="outlined"
                                         type="text"
                                         name="gstin"
                                         value={formData.gstin}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('gstin')}
                                         onBlur={() => setFocusedInput(null)}
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'gstin' ? '' : placeholders.gstin}
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-email">
-                                        {getLabel('guestEmail', 'Guest Email')}
-                                    </label>
-                                    <input
+
+                                    <TextField id="Guest Email" label="Guest Email" variant="outlined"
                                         type="email"
                                         name="guestEmail"
                                         value={formData.guestEmail}
@@ -329,7 +312,7 @@ export default function BookingForm() {
                                         onFocus={() => setFocusedInput('guestEmail')}
                                         onBlur={() => setFocusedInput(null)}
                                         required
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'guestEmail' ? '' : placeholders.guestEmail}
                                     />
                                 </div>
@@ -394,12 +377,9 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="address">
-                                        {getLabel('address', 'Address*')}
-                                    </label>
-                                    <input
+
+                                    <TextField id="Address" label="Address" variant="outlined"
                                         type="text"
                                         name="address"
                                         value={formData.address}
@@ -407,7 +387,7 @@ export default function BookingForm() {
                                         onFocus={() => setFocusedInput('address')}
                                         onBlur={() => setFocusedInput(null)}
                                         required
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'address' ? '' : placeholders.address}
                                     />
                                 </div>
@@ -429,20 +409,17 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="state">
-                                        {getLabel('state', 'State')}
-                                    </label>
-                                    <input
+
+                                    <TextField id="State" label="State" variant="outlined"
                                         type="text"
                                         name="state"
                                         value={formData.state}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('state')}
                                         onBlur={() => setFocusedInput(null)}
-                                        
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'state' ? '' : placeholders.state}
                                     />
                                 </div>
@@ -464,20 +441,17 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="bookingReference">
-                                        {getLabel('bookingReference', 'Booking Reference')}
-                                    </label>
-                                    <input
+
+                                    <TextField id="Booking Reference" label="Booking Reference" variant="outlined"
                                         type="text"
                                         name="bookingReference"
                                         value={formData.bookingReference}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('bookingReference')}
                                         onBlur={() => setFocusedInput(null)}
-                                        
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'bookingReference' ? '' : placeholders.bookingReference}
                                     />
                                 </div>
@@ -505,61 +479,50 @@ export default function BookingForm() {
                                     </div>
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guestNotes">
-                                        {getLabel('guestNotes', 'Guest Notes')}
-                                    </label>
-                                    <input
+
+                                    <TextField id="Guest Notes" label="Guest Notes" variant="outlined"
                                         type="text"
                                         name="guestNotes"
                                         value={formData.guestNotes}
                                         onChange={handleChange}
                                         onFocus={() => setFocusedInput('guestNotes')}
                                         onBlur={() => setFocusedInput(null)}
-                                        
-                                        className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500"
+
+                                        className="border rounded w-full "
                                         placeholder={focusedInput === 'guestNotes' ? '' : placeholders.guestNotes}
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full px-3">
-                                    
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="internalNotes">
-                                        {getLabel('internalNotes', 'Internal Notes')}
-                                    </label>
-                                    <textarea
-                                    
-                                    name="internalNotes"
-                                    value={formData.internalNotes}
-                                    onChange={handleChange}
-                                    onFocus={() => setFocusedInput('internalNotes')}
-                                    onBlur={() => setFocusedInput(null)}
-                                    
-                                    className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" 
-                                    placeholder={focusedInput === 'internalNotes' ? '' : placeholders.internalNotes}>
-                                        
-                                        </textarea>
 
-                                    
+                                    <TextField id="Internal Notes" label="Internal notes" variant="outlined"
 
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="remarks">
-                                        {getLabel('remarks', 'Remarks')}
-                                    </label>
-                                    <textarea
+                                        name="internalNotes"
+                                        value={formData.internalNotes}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('internalNotes')}
+                                        onBlur={() => setFocusedInput(null)}
+
+                                        className="border rounded w-full p-2"
+                                        placeholder={focusedInput === 'internalNotes' ? '' : placeholders.internalNotes}>
+                                    </TextField>
                                     
-                                    name="remarks"
-                                    value={formData.remarks}
-                                    onChange={handleChange}
-                                    onFocus={() => setFocusedInput('remarks')}
-                                    onBlur={() => setFocusedInput(null)}
+                                    <TextField id="Remarks" label="Remarks" variant="outlined"
+
+                                        name="remarks"
+                                        value={formData.remarks}
+                                        onChange={handleChange}
+                                        onFocus={() => setFocusedInput('remarks')}
+                                        onBlur={() => setFocusedInput(null)}
+
+                                        className="border rounded w-full p-2"
+                                        placeholder={focusedInput === 'remarks' ? '' : placeholders.remarks}>
+
+                                    </TextField>
                                     
-                                    className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" 
-                                    placeholder={focusedInput === 'remarks' ? '' : placeholders.remarks}>
-                                        
-                                        </textarea>
                                 </div>
                             </div>
                             <div className="flex items-center justify-end">
@@ -583,8 +546,8 @@ export default function BookingForm() {
                 </div>
             </main>
             <Footer />
-             {/* Modal for Room Selection */}
-             <Dialog
+            {/* Modal for Room Selection */}
+            <Dialog
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 maxWidth="lg"
