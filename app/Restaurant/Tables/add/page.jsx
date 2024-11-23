@@ -63,15 +63,12 @@ export default function AddTable() {
                   <h3 className="text-lg font-medium text-gray-900">Table Details</h3>
                   <div className="mt-4 space-y-4">
                     <div>
-                      <label htmlFor="tableNo" className="block text-sm font-medium text-gray-700">
-                        Table No. <span className="text-red-500">*</span>
-                      </label>
-                      <input
+                      <TextField id="Table Number" label="Table Number" variant="outlined"
                         type="text"
-                        id="tableNo"
+                        
                         value={tableNo}
                         onChange={(e) => setTableNo(e.target.value)}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
+                        className="border rounded w-full"
                         required
                       />
                     </div>

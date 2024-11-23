@@ -17,7 +17,7 @@ export default function RestaurantList() {
         const fetchMenuItems = async () => {
             try {
 
-                const response = await fetch("https://booking-master-psi.vercel.app/api/menuItem"); // Adjust the endpoint if necessary
+                const response = await fetch("/api/menuItem"); // Adjust the endpoint if necessary
 
                 const result = await response.json();
 

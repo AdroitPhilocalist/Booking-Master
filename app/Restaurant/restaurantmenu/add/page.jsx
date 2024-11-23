@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { useRouter } from "next/navigation";
+import TextField from '@mui/material/TextField';
 export default function AddRestaurant() {
     const router = useRouter();
   const [formData, setFormData] = useState({
@@ -50,7 +51,7 @@ export default function AddRestaurant() {
   
     try {
 
-      const response = await fetch("https://booking-master-psi.vercel.app/api/menuItem", {
+      const response = await fetch("/api/menuItem", {
 
         method: 'POST',
         headers: {
@@ -141,26 +142,24 @@ export default function AddRestaurant() {
             <option value="Others">Others</option>
           </select>
 
-          <label htmlFor="itemCode">Item Code*</label>
-          <input
+          <TextField id="Item Code" label="Item Code" variant="outlined"
             type="text"
-            id="itemCode"
+          
             name="itemCode"
             value={formData.itemCode}
             onChange={handleInputChange}
             required
-            style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
+            className="border rounded w-full "
           />
 
-          <label htmlFor="itemName">Item Name*</label>
-          <input
+          <TextField id="Item Name" label="Item Name" variant="outlined"
             type="text"
-            id="itemName"
+            
             name="itemName"
             value={formData.itemName}
             onChange={handleInputChange}
             required
-            style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
+            className="border rounded w-full "
           />
 
           <label htmlFor="price">Price (INR)*</label>
@@ -230,24 +229,22 @@ export default function AddRestaurant() {
             <option value="No (Not Allowed)">No (Not Allowed)</option>
           </select>
 
-          <label htmlFor="storeItemCode">Store Item Code (Inventory Code)</label>
-          <input
+          <TextField id="Store Item Code" label="Store Item Code" variant="outlined"
             type="text"
-            id="storeItemCode"
+          
             name="storeItemCode"
             value={formData.storeItemCode}
             onChange={handleInputChange}
-            style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
+            className="border rounded w-full "
           />
 
-          <label htmlFor="ingredientCode">Ingredient Code</label>
-          <input
+          <TextField id="Ingredient Code" label="Ingredient Code" variant="outlined"
             type="text"
-            id="ingredientCode"
+            
             name="ingredientCode"
             value={formData.ingredientCode}
             onChange={handleInputChange}
-            style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
+            className="border rounded w-full "
           />
         </div>
         <div style={{ marginTop: '20px', textAlign: 'right' }}>

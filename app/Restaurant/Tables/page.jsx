@@ -19,7 +19,7 @@ export default function BookingMasterControlPanel() {
     const fetchTableData = async () => {
       try {
 
-        const response = await fetch('https://booking-master-psi.vercel.app/api/tables');  // Fetch data from the API route
+        const response = await fetch('/api/tables');  // Fetch data from the API route
 
         const data = await response.json();
         if (data.success) {
