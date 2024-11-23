@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import TextField from '@mui/material/TextField';
 
 export default function InventoryList() {
   const [items, setItems] = useState([]);
@@ -198,38 +199,35 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
         <h2 className="text-xl font-bold mb-4">{initialData ? 'Edit' : 'Add'} Item</h2>
         
         <div className="space-y-4">
-          <label className="mb-2">Item Code</label>
-          <input
+          <TextField id="Item Code" label="Item Code" variant="outlined"
             type="text"
-            placeholder="Item Code"
+          
             value={formData.itemCode}
             onChange={(e) => setFormData({...formData, itemCode: e.target.value})}
-            className="w-full border p-2 rounded mt-2"
+            className="w-full border p-2 rounded"
           />
           
-          <label className="mb-2">Name</label>
-          <input
+          <TextField id="Name" label="Name" variant="outlined"
             type="text"
-            placeholder="Name"
+          
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
             className="w-full border p-2 rounded mt-2"
           />
           
-          <label className="mb-2">Group</label>
-          <input
+          <TextField id="Group" label="Group" variant="outlined"
             type="text"
-            placeholder="Group"
+          
             value={formData.group}
             onChange={(e) => setFormData({...formData, group: e.target.value})}
             className="w-full border p-2 rounded mt-2"
           />
           
-          <label className="mb-2">Segment</label>
+          
           <select
             value={formData.segment}
             onChange={(e) => setFormData({...formData, segment: e.target.value})}
-            className="w-full border p-2 rounded mt-2"
+            className="w-full border p-3 rounded mt-2"
           >
             <option value="">Select Segment</option>
             {categories.map((category) => (
@@ -239,7 +237,7 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
             ))}
           </select>
           
-          <label className="mb-2">Auditable</label>
+          <label className="p-2 mt-3">Auditable</label>
           <select
             value={formData.auditable}
             onChange={(e) => setFormData({...formData, auditable: e.target.value})}

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import TextField from '@mui/material/TextField';
 
 export default function InventoryCategory() {
   const [products, setProducts] = useState([]);
@@ -157,14 +158,13 @@ const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded shadow">
         <h2 className="text-xl font-bold mb-4">Add/Edit Product</h2>
-        <input
+        <TextField id="Product name" label="Product Name" variant="outlined"
           type="text"
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
-          className="border p-2 mb-4 w-full"
-          placeholder="Enter product name"
+          className="border rounded w-full p-2 "
         />
-        <div className="flex justify-between">
+        <div className="flex justify-between m-3">
           <button onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">
             Cancel
           </button>
