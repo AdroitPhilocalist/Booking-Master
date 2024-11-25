@@ -229,6 +229,123 @@ export default function InventoryList() {
   );
 }
 
+const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
+  const [formData, setFormData] = useState(initialData || {
+    itemCode: '',
+    name: '',
+    group: '',
+    segment: '',
+    auditable: 'no',
+    tax: '',
+    stock: 0,
+    quantityUnit: 'pieces'
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+      <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">{initialData ? 'Edit' : 'Add'} Item</h2>
+        
+        <div className="space-y-4">
+          <TextField id="Item Code" label="Item Code" variant="outlined"
+            type="text"
+          
+            value={formData.itemCode}
+            onChange={(e) => setFormData({...formData, itemCode: e.target.value})}
+            className="w-full border p-2 rounded"
+          />
+          
+          <TextField id="Name" label="Name" variant="outlined"
+            type="text"
+          
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="w-full border p-2 rounded mt-2"
+          />
+          
+          <TextField id="Group" label="Group" variant="outlined"
+            type="text"
+          
+            value={formData.group}
+            onChange={(e) => setFormData({...formData, group: e.target.value})}
+            className="w-full border p-2 rounded mt-2"
+          />
+          
+          
+          <select
+            value={formData.segment}
+            onChange={(e) => setFormData({...formData, segment: e.target.value})}
+            className="w-full border p-3 rounded mt-2"
+          >
+            <option value="">Select Segment</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category._id}>
+                {category.itemName}
+              </option>
+            ))}
+          </select>
+          
+          <label className="p-2 mt-3">Auditable</label>
+          <select
+            value={formData.auditable}
+            onChange={(e) => setFormData({...formData, auditable: e.target.value})}
+            className="w-full border p-2 rounded mt-2"
+          >
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+          
+          <label className="mb-2">Tax (%)</label>
+          <input
+            type="number"
+            placeholder="Tax (%)"
+            value={formData.tax}
+            onChange={(e) => setFormData({...formData, tax: e.target.value})}
+            className="w-full border p-2 rounded mt-2"
+          />
+          
+          <label className="mb-2">Initial Stock</label>
+          <input
+            type="number"
+            placeholder="Initial Stock"
+            value={formData.stock}
+            onChange={(e) => setFormData({...formData, stock: e.target.value})}
+            className="w-full border p-2 rounded mt-2"
+          />
+          
+          <label className="mb-2">Quantity Unit</label>
+          <select
+            value={formData.quantityUnit}
+            onChange={(e) => setFormData({...formData, quantityUnit: e.target.value})}
+            className="w-full border p-2 rounded mt-2"
+          >
+            <option value="pieces">Pieces</option>
+            <option value="kgs">Kgs</option>
+            <option value="grams">Grams</option>
+            <option value="litres">Litres</option>
+          </select>
+
+          <div className="flex justify-end space-x-2 mt-4">
+            <button
+              onClick={onClose}
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onSubmit(formData)}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              {initialData ? 'Update' : 'Add'} Item
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   const [purchaseorderno, setPurchaseorderno] = useState('');
   const [purchasedate, setPurchasedate] = useState('');
