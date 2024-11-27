@@ -22,6 +22,8 @@ const AddNewBookingForm = ({ onSubmit }) => {
   };
 
   return (
+    <div>
+    <Navbar/>
     <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <TextField
         label="Table No."
@@ -59,6 +61,8 @@ const AddNewBookingForm = ({ onSubmit }) => {
         Submit
       </Button>
     </Box>
+    <Footer/>
+    </div>
   );
 };
 
