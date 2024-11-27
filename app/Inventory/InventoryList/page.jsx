@@ -389,7 +389,7 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   }
 
   if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
-    alert("Not enough stock available");
+    alert("Not enough stocks available");
     return;
   }
 
