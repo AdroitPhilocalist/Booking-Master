@@ -1,8 +1,7 @@
 "use client";
 import Navbar from "../../_components/Navbar";
-import { Footer } from "../../_components/Footer"
-
-import React, { useState } from "react";
+import { Footer } from "../../_components/Footer";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -27,12 +26,48 @@ const RestaurantBooking = () => {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
+  // Fetch bookings from the API
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const response = await fetch("/api/RestaurantBooking");
+        const data = await response.json();
+        if (data.success) {
+          setBookings(data.data);
+        } else {
+          console.error("Failed to fetch bookings:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
+    };
+
+    fetchBookings();
+  }, []);
+
+  // Open/Close Modal
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const addBooking = (newBooking) => {
-    setBookings([...bookings, newBooking]);
-    handleClose();
+  // Add a new booking
+  const addBooking = async (newBooking) => {
+    try {
+      const response = await fetch("/api/RestaurantBooking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBooking),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setBookings((prevBookings) => [...prevBookings, data.data]);
+        handleClose();
+      } else {
+        console.error("Failed to add booking:", data.error);
+      }
+    } catch (error) {
+      console.error("Error adding booking:", error);
+    }
   };
 
   // Handle Edit Booking (Dummy Function)
@@ -41,8 +76,23 @@ const RestaurantBooking = () => {
   };
 
   // Handle Delete Booking
-  const handleDelete = (id) => {
-    setBookings(bookings.filter((booking) => booking.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`/api/restaurantBookings/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setBookings((prevBookings) =>
+          prevBookings.filter((booking) => booking._id !== id)
+        );
+      } else {
+        console.error("Failed to delete booking:", data.error);
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+    }
   };
 
   return (
@@ -53,93 +103,95 @@ const RestaurantBooking = () => {
         Booking
       </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3, gap: 2 }}>
-        <TextField
-          placeholder="Search By Guest Name"
-          variant="outlined"
-          size="small"
-          sx={{ minWidth: 300 }}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          onClick={handleOpen}
-          sx={{
-            bgcolor: "#2196f3",
-            "&:hover": { bgcolor: "#1976d2" },
-          }}
-        >
-          Add New Booking
-        </Button>
-      </Box>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3, gap: 2 }}>
+          <TextField
+            placeholder="Search By Guest Name"
+            variant="outlined"
+            size="small"
+            sx={{ minWidth: 300 }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            onClick={handleOpen}
+            sx={{
+              bgcolor: "#2196f3",
+              "&:hover": { bgcolor: "#1976d2" },
+            }}
+          >
+            Add New Booking
+          </Button>
+        </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-              <TableCell sx={{ color: "#2196f3" }}>Table No.</TableCell>
-              <TableCell sx={{ color: "#2196f3" }}>Date</TableCell>
-              <TableCell sx={{ color: "#2196f3" }}>Time</TableCell>
-              <TableCell sx={{ color: "#2196f3" }}>Guest Name</TableCell>
-              <TableCell sx={{ color: "#2196f3" }}>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {bookings
-              .filter((booking) =>
-                booking.guestName.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((booking) => (
-                <TableRow key={booking.id}>
-                  <TableCell>{booking.tableNo}</TableCell>
-                  <TableCell>{booking.date}</TableCell>
-                  <TableCell>{booking.time}</TableCell>
-                  <TableCell>{booking.guestName}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleEdit(booking.id)} sx={{ color: "#4caf50" }}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(booking.id)} sx={{ color: "#f44336" }}>
-                      <DeleteIcon />
-                    </IconButton>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                <TableCell sx={{ color: "#2196f3" }}>Table No.</TableCell>
+                <TableCell sx={{ color: "#2196f3" }}>Date</TableCell>
+                <TableCell sx={{ color: "#2196f3" }}>Time</TableCell>
+                <TableCell sx={{ color: "#2196f3" }}>Guest Name</TableCell>
+                <TableCell sx={{ color: "#2196f3" }}>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {bookings
+                .filter((booking) =>
+                  booking.guestName.toLowerCase().includes(search.toLowerCase())
+                )
+                .map((booking) => (
+                  <TableRow key={booking._id}>
+                    <TableCell>{booking.tableNo}</TableCell>
+                    <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{booking.time}</TableCell>
+                    <TableCell>{booking.guestName}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => handleEdit(booking._id)} sx={{ color: "#4caf50" }}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDelete(booking._id)}
+                        sx={{ color: "#f44336" }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {bookings.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    No bookings available.
                   </TableCell>
                 </TableRow>
-              ))}
-            {bookings.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No bookings available.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      {/* Modal for Adding New Booking */}
-      <Modal open={open} onClose={handleClose}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "white",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-            minWidth: 400,
-          }}
-        >
-          <AddNewBookingForm onSubmit={addBooking} />
-        </Box>
-      </Modal>
-    </Box>
-    <Footer/>
+        {/* Modal for Adding New Booking */}
+        <Modal open={open} onClose={handleClose}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "white",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              minWidth: 400,
+            }}
+          >
+            <AddNewBookingForm onSubmit={addBooking} />
+          </Box>
+        </Modal>
+      </Box>
+      <Footer />
     </div>
   );
 };
 
 export default RestaurantBooking;
-
