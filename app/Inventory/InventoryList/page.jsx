@@ -383,28 +383,28 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   }, [rate, selectedQuantity, selectedItem]);
 
   const handleSubmit = () => {
-    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
-      alert("Please fill all required fields");
-      return;
-    }
-  
-    if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
-      alert("Not enough stock available");
-      return;
-    }
-  
-    const formData = {
-      purchaseorderno,
-      purchasedate,
-      Invoiceno,
-      quantityAmount: parseFloat(selectedQuantity),
-      rate: parseFloat(rate),
-      total: parseFloat(total),
-      purorsell: action.type === 'buy' ? 'purchase' : 'sell'
-    };
-  
-    onSubmit(formData);
+  if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
+    alert("Not enough stock available");
+    return;
+  }
+
+  const formData = {
+    purchaseorderno,
+    purchasedate,
+    Invoiceno,
+    quantityAmount: parseFloat(selectedQuantity),
+    rate: parseFloat(rate),
+    total: parseFloat(total),
+    purorsell: action.type === 'buy' ? 'purchase' : 'sell'
   };
+
+  onSubmit(formData);
+};
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[90vh] overflow-auto">

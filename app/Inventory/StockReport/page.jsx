@@ -39,16 +39,13 @@ const StockReportPage = () => {
         <table className="table-auto w-full border-collapse border border-gray-200">
           <thead>
             <tr className="bg-yellow-950 text-white">
-              <th className="border border-gray-300 px-4 py-2">Purchase No</th>
               <th className="border border-gray-300 px-4 py-2">Item Name</th>
               <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
-              <th className="border border-gray-300 px-4 py-2">Invoice No</th>
               <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
               <th className="border border-gray-300 px-4 py-2">Unit</th>
               <th className="border border-gray-300 px-4 py-2">Rate</th>
               <th className="border border-gray-300 px-4 py-2">Tax Percent</th>
               <th className="border border-gray-300 px-4 py-2">Total</th>
-              <th className="border border-gray-300 px-4 py-2">Purchase/Sell</th>
             </tr>
           </thead>
           <tbody>
@@ -56,18 +53,15 @@ const StockReportPage = () => {
               stockReports.map((report) => (
                 <tr
                   key={report._id}
-                  className={report.purorsell === 'purchase' ? 'bg-green-100' : 'bg-red-100'}
+                  className="bg-white"
                 >
-                  <td className="border border-gray-300 px-10 py-2">{report.purchaseorderno}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.name?.name}</td>
                   <td className="border border-gray-300 px-8 py-2">{new Date(report.purchasedate).toLocaleDateString()}</td>
-                  <td className="border border-gray-300 px-8 py-2">{report.Invoiceno}</td>
                   <td className="border border-gray-300 px-20 py-2">{report.quantity?.stock}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.unit?.quantityUnit}</td>
                   <td className="border border-gray-300 px-6 py-2">{report.rate}</td>
                   <td className="border border-gray-300 px-16 py-2">{report.taxpercent?.tax}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.total}</td>
-                  <td className="border border-gray-300 px-4 py-2">{report.purorsell}</td>
                 </tr>
               ))
             ) : (
