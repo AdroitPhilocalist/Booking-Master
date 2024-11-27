@@ -63,14 +63,34 @@ export default function InventoryList() {
   // In your main page component, update the handleStock function:
   const handleStock = async (itemId, stockDetails) => {
     try {
+      // Find the current item
+      const currentItem = items.find(item => item._id === itemId);
+      if (!currentItem) {
+        throw new Error("Item not found");
+      }
+  
+      // Prepare complete stock details
+      const completeStockDetails = {
+        purchaseorderno: stockDetails.purchaseorderno,
+        name: currentItem._id, // Use item _id as reference
+        purchasedate: new Date(stockDetails.purchasedate),
+        Invoiceno: stockDetails.Invoiceno,
+        quantity: currentItem._id, // Use item _id as reference
+        quantityAmount: stockDetails.quantityAmount,
+        unit: currentItem._id, // Use item _id as reference
+        rate: stockDetails.rate,
+        taxpercent: currentItem._id, // Use item _id as reference
+        total: stockDetails.total,
+        purorsell: stockDetails.purorsell
+      };
+  
       // Create stock report
       const stockReportResponse = await fetch("/api/stockreport", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          // Add any authentication headers if needed
         },
-        body: JSON.stringify(stockDetails),
+        body: JSON.stringify(completeStockDetails),
       });
   
       // Check if response is ok and parse JSON
@@ -84,22 +104,15 @@ export default function InventoryList() {
       const stockReportData = await stockReportResponse.json();
   
       // Calculate new stock value
-      const quantityChange = stockDetails.purorsell === 'purchase' 
-        ? stockDetails.quantityAmount 
-        : -stockDetails.quantityAmount;
-  
-      // Get current item
-      const currentItem = items.find(item => item._id === itemId);
-      if (!currentItem) {
-        throw new Error("Item not found");
-      }
+      const quantityChange = completeStockDetails.purorsell === 'purchase' 
+        ? completeStockDetails.quantityAmount 
+        : -completeStockDetails.quantityAmount;
   
       // Update inventory
       const inventoryResponse = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
-          // Add any authentication headers if needed
         },
         body: JSON.stringify({
           ...currentItem,
@@ -121,7 +134,7 @@ export default function InventoryList() {
       setShowStockModal(false);
       setStockAction({ type: '', itemId: '' });
       
-      alert(stockDetails.purorsell === 'purchase' ? 'Purchase completed successfully' : 'Sale completed successfully');
+      alert(completeStockDetails.purorsell === 'purchase' ? 'Purchase completed successfully' : 'Sale completed successfully');
       
     } catch (error) {
       console.error("Error managing stock:", error);
@@ -348,6 +361,7 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
 
 const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   const [purchaseorderno, setPurchaseorderno] = useState('');
+
   const [purchasedate, setPurchasedate] = useState('');
   const [Invoiceno, setInvoiceno] = useState('');
   const [selectedQuantity, setSelectedQuantity] = useState('');
@@ -373,25 +387,22 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
       alert("Please fill all required fields");
       return;
     }
-
+  
     if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
       alert("Not enough stock available");
       return;
     }
-
+  
     const formData = {
       purchaseorderno,
       purchasedate,
       Invoiceno,
-      quantity: selectedItem._id,
-      quantityAmount: parseFloat(selectedQuantity), // Add this field for stock updates
-      unit: selectedItem._id,
+      quantityAmount: parseFloat(selectedQuantity),
       rate: parseFloat(rate),
-      taxpercent: selectedItem._id,
       total: parseFloat(total),
       purorsell: action.type === 'buy' ? 'purchase' : 'sell'
     };
-
+  
     onSubmit(formData);
   };
   return (
