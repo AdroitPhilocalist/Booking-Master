@@ -103,24 +103,24 @@ export default function Billing() {
         </h1>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-            <thead className="bg-amber-100">
+            <thead className="bg-cyan-800">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b">
+                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
                   Room Number
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b">
+                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
                   Guest
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b">
+                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
                   Total Amount
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b">
+                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
                   Amount Paid in Advance
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b">
+                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
                   Due Amount
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider border-b">
+                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
                   Actions
                 </th>
               </tr>
@@ -152,7 +152,7 @@ export default function Billing() {
                     <td className="px-6 py-4 text-sm text-center border-b">
                       <button
                         onClick={() => handleViewBill(bill)}
-                        className="px-4 py-2 bg-amber-600 text-white font-semibold rounded-md hover:bg-amber-700 transition"
+                        className="px-4 py-2 bg-cyan-600 text-white font-semibold rounded-md hover:bg-cyan-700 transition"
                       >
                         View Bill
                       </button>

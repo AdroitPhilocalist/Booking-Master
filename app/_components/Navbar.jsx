@@ -15,7 +15,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-[#1976d2] p-4">
+    <nav className="bg-cyan-600 p-4">
       <div className="max-w-7xl flex justify-between items-center">
         {/* Logo */}
         <Image
@@ -34,7 +34,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(1)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-[#1565c0] rounded hover:text-yellow-200">Master</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Master</button>
             {openDropdown === 1 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -50,7 +50,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(2)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-[#1565c0] rounded hover:text-yellow-200">Property</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Property</button>
             {openDropdown === 2 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -78,7 +78,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(7)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-[#1565c0] rounded hover:text-yellow-200">Restaurant</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Restaurant</button>
             {openDropdown === 7 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -103,7 +103,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(8)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-[#1565c0] rounded hover:text-yellow-200">Inventory</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Inventory</button>
             {openDropdown === 8 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">

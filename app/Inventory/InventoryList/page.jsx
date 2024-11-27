@@ -144,7 +144,7 @@ export default function InventoryList() {
 
 
   return (
-    <div>
+    <div className="bg-amber-50 min-h-screen">
       <Navbar />
       <div className="container mx-auto p-4">
         <h1 className="text-xl font-bold mb-4">Inventory List</h1>
@@ -153,14 +153,14 @@ export default function InventoryList() {
             setShowModal(true);
             setCurrentItem(null);
           }}
-          className="bg-green-500 text-white px-4 py-2 rounded mb-4"
-        >
+          className="bg-green-500 text-white px-4 py-2 rounded mb-4">
+        
           Add Items +
         </button>
 
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full border-collapse borderborder border-gray-200">
           <thead>
-            <tr>
+            <tr className="bg-cyan-900 text-white">
               <th className="border border-gray-300 px-4 py-2">Item Code</th>
               <th className="border border-gray-300 px-4 py-2">Name</th>
               <th className="border border-gray-300 px-4 py-2">Group</th>
@@ -174,7 +174,7 @@ export default function InventoryList() {
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item._id}>
+              <tr key={item._id} className="bg-gray-50">
                 <td className="border border-gray-300 px-4 py-2">{item.itemCode}</td>
                 <td className="border border-gray-300 px-4 py-2">{item.name}</td>
                 <td className="border border-gray-300 px-4 py-2">{item.group}</td>

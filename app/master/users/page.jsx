@@ -26,7 +26,7 @@ export default function Page() {
             <main className="flex-grow p-8">
                 <h1 className="text-2xl font-semibold mb-4">Booking Master Control Panel</h1>
                 <div className="bg-white shadow rounded-lg">
-                    <div className="bg-amber-950 p-4 rounded-t-lg">
+                    <div className="bg-cyan-900 p-4 rounded-t-lg">
                         <h2 className="text-lg font-semibold text-white">Users</h2>
                     </div>
                     <div className="p-4">

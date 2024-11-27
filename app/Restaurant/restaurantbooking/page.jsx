@@ -46,7 +46,7 @@ const RestaurantBooking = () => {
   };
 
   return (
-    <div>
+    <div className="bg-amber-50 min-h-screen">
     <Navbar/>
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, color: "#1976d2" }}>
