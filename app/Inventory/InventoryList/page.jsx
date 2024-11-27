@@ -60,29 +60,88 @@ export default function InventoryList() {
     }
   };
 
-  const handleStock = async (itemId, quantity) => {
+  // In your main page component, update the handleStock function:
+  const handleStock = async (itemId, stockDetails) => {
     try {
-      const response = await fetch(`/api/InventoryList/${itemId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+      // Find the current item
+      const currentItem = items.find(item => item._id === itemId);
+      if (!currentItem) {
+        throw new Error("Item not found");
+      }
+  
+      // Prepare complete stock details
+      const completeStockDetails = {
+        purchaseorderno: stockDetails.purchaseorderno,
+        name: currentItem._id, // Use item _id as reference
+        purchasedate: new Date(stockDetails.purchasedate),
+        Invoiceno: stockDetails.Invoiceno,
+        quantity: currentItem._id, // Use item _id as reference
+        quantityAmount: stockDetails.quantityAmount,
+        unit: currentItem._id, // Use item _id as reference
+        rate: stockDetails.rate,
+        taxpercent: currentItem._id, // Use item _id as reference
+        total: stockDetails.total,
+        purorsell: stockDetails.purorsell
+      };
+  
+      // Create stock report
+      const stockReportResponse = await fetch("/api/stockreport", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(completeStockDetails),
+      });
+  
+      // Check if response is ok and parse JSON
+      if (!stockReportResponse.ok) {
+        const errorData = await stockReportResponse.json().catch(() => ({
+          error: `Server returned ${stockReportResponse.status}`
+        }));
+        throw new Error(errorData.error || 'Failed to create stock report');
+      }
+  
+      const stockReportData = await stockReportResponse.json();
+  
+      // Calculate new stock value
+      const quantityChange = completeStockDetails.purorsell === 'purchase' 
+        ? completeStockDetails.quantityAmount 
+        : -completeStockDetails.quantityAmount;
+  
+      // Update inventory
+      const inventoryResponse = await fetch(`/api/InventoryList/${itemId}`, {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          action: stockAction.type,
-          quantity: Number(quantity)
+          ...currentItem,
+          stock: currentItem.stock + quantityChange
         }),
       });
-
-      const data = await response.json();
-      if (response.ok) {
-        setItems(prev => prev.map(item => 
-          item._id === itemId ? data.item : item
-        ));
+  
+      if (!inventoryResponse.ok) {
+        throw new Error("Failed to update inventory");
       }
+  
+      const inventoryData = await inventoryResponse.json();
+      
+      // Update local state
+      setItems(prev =>
+        prev.map(item => (item._id === itemId ? inventoryData.item : item))
+      );
+      
       setShowStockModal(false);
       setStockAction({ type: '', itemId: '' });
+      
+      alert(completeStockDetails.purorsell === 'purchase' ? 'Purchase completed successfully' : 'Sale completed successfully');
+      
     } catch (error) {
       console.error("Error managing stock:", error);
+      alert(error.message || "Error managing stock. Please try again.");
     }
   };
+
 
   return (
     <div>
@@ -171,11 +230,13 @@ export default function InventoryList() {
       {showStockModal && (
         <StockModal
           onClose={() => setShowStockModal(false)}
-          onSubmit={handleStock}
+          onSubmit={(formData) => handleStock(stockAction.itemId, formData)}
           action={stockAction}
+          inventoryList={items} // Pass the items state as inventoryList prop
         />
       )}
-      
+
+
       <Footer />
     </div>
   );
@@ -297,24 +358,147 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
   );
 };
 
-const StockModal = ({ onClose, onSubmit, action }) => {
-  const [quantity, setQuantity] = useState('');
 
+const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
+  const [purchaseorderno, setPurchaseorderno] = useState('');
+
+  const [purchasedate, setPurchasedate] = useState('');
+  const [Invoiceno, setInvoiceno] = useState('');
+  const [selectedQuantity, setSelectedQuantity] = useState('');
+  const [rate, setRate] = useState('');
+  const [total, setTotal] = useState('');
+  
+  const selectedItem = inventoryList.find(item => item._id === action.itemId);
+
+  const calculateTotal = () => {
+    if (rate && selectedQuantity && selectedItem) {
+      const baseTotal = parseFloat(rate) * parseFloat(selectedQuantity);
+      const taxAmount = baseTotal * (parseFloat(selectedItem.tax || 0) / 100);
+      setTotal((baseTotal + taxAmount).toFixed(2));
+    }
+  };
+
+  useEffect(() => {
+    calculateTotal();
+  }, [rate, selectedQuantity, selectedItem]);
+
+  const handleSubmit = () => {
+  if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
+    alert("Please fill all required fields");
+    return;
+  }
+
+  if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
+    alert("Not enough stocks available");
+    return;
+  }
+
+  const formData = {
+    purchaseorderno,
+    purchasedate,
+    Invoiceno,
+    quantityAmount: parseFloat(selectedQuantity),
+    rate: parseFloat(rate),
+    total: parseFloat(total),
+    purorsell: action.type === 'buy' ? 'purchase' : 'sell'
+  };
+
+  onSubmit(formData);
+};
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded shadow-lg w-80 max-h-[60vh] overflow-y-auto">
+      <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[90vh] overflow-auto">
         <h2 className="text-xl font-bold mb-4">
-          {action.type === 'buy' ? 'Buy' : 'Sell'} Stock
+          {action.type === "buy" ? "Purchase Stock" : "Sell Stock"}
         </h2>
-        
-        <div className="space-y-4">
-          <input
+
+        <div className="space-y-4 overflow-y-auto max-h-[70vh]">
+          <TextField
+            required
+            id="purchaseorderno"
+            label="Purchase Order No"
+            variant="outlined"
+            value={purchaseorderno}
+            onChange={(e) => setPurchaseorderno(e.target.value)}
+            className="w-full"
+          />
+
+          <TextField
+            required
+            id="purchasedate"
+            label="Purchase Date"
+            type="date"
+            variant="outlined"
+            value={purchasedate}
+            onChange={(e) => setPurchasedate(e.target.value)}
+            className="w-full"
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <TextField
+            required
+            id="Invoiceno"
+            label="Invoice No"
+            variant="outlined"
+            value={Invoiceno}
+            onChange={(e) => setInvoiceno(e.target.value)}
+            className="w-full"
+          />
+
+          <div className="space-y-2">
+            <label className="block">Selected Item</label>
+            <div className="p-2 border rounded">
+              {selectedItem.name} (Tax: {selectedItem.tax}%)
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block">Unit</label>
+            <div className="p-2 border rounded">
+              {selectedItem.quantityUnit}
+            </div>
+          </div>
+
+          <TextField
+            required
+            id="quantity"
+            label="Quantity"
             type="number"
-            placeholder="Enter quantity"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            className="w-full border p-2 rounded mt-2"
-            min="1"
+            variant="outlined"
+            value={selectedQuantity}
+            onChange={(e) => setSelectedQuantity(e.target.value)}
+            className="w-full"
+            error={action.type === 'sell' && selectedQuantity > selectedItem.stock}
+            helperText={action.type === 'sell' && selectedQuantity > selectedItem.stock 
+              ? `Available stock: ${selectedItem.stock}` 
+              : ''}
+          />
+
+          <TextField
+            required
+            id="rate"
+            label="Rate per Unit"
+            type="number"
+            variant="outlined"
+            value={rate}
+            onChange={(e) => setRate(e.target.value)}
+            className="w-full"
+          />
+
+          <div className="space-y-2">
+            <label className="block">Tax Percentage</label>
+            <div className="p-2 border rounded">
+              {selectedItem.tax}%
+            </div>
+          </div>
+
+          <TextField
+            id="total"
+            label="Total Amount"
+            variant="outlined"
+            value={total}
+            className="w-full"
+            InputProps={{ readOnly: true }}
           />
 
           <div className="flex justify-end space-x-2 mt-4">
@@ -325,10 +509,10 @@ const StockModal = ({ onClose, onSubmit, action }) => {
               Cancel
             </button>
             <button
-              onClick={() => onSubmit(action.itemId, quantity)}
+              onClick={handleSubmit}
               className="bg-blue-500 text-white px-4 py-2 rounded"
             >
-              Confirm
+              Confirm {action.type === 'buy' ? 'Purchase' : 'Sale'}
             </button>
           </div>
         </div>
@@ -336,6 +520,4 @@ const StockModal = ({ onClose, onSubmit, action }) => {
     </div>
   );
 };
-
-
 

@@ -1,30 +1,31 @@
-// pages/stockreport.jsx
-'use client'
+'use client';
 import { useEffect, useState } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 
-const StockReportPage = () => {
-  const [stockReports, setStockReports] = useState([]);
+const PurchaseReportPage = () => {
+  const [purchaseReports, setPurchaseReports] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fetch stock reports from the API when the component mounts
+  // Fetch stock reports from the API and filter purchases
   useEffect(() => {
-    const fetchStockReports = async () => {
+    const fetchPurchaseReports = async () => {
       try {
         const res = await fetch("/api/stockreport");
         const data = await res.json();
         if (res.ok) {
-          setStockReports(data.stockReports); // Set the fetched stock reports to state
+          // Filter only the purchases
+          const purchases = data.stockReports.filter((report) => report.purorsell === 'purchase');
+          setPurchaseReports(purchases);
         } else {
-          setError(data.error); // Set any error that occurred
+          setError(data.error);
         }
       } catch (err) {
-        setError("Failed to fetch stock reports"); // Handle any errors from fetch
+        setError("Failed to fetch purchase reports");
       }
     };
 
-    fetchStockReports();
+    fetchPurchaseReports();
   }, []);
 
   if (error) {
@@ -35,12 +36,14 @@ const StockReportPage = () => {
     <div>
       <Navbar />
       <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-4">Stock Report</h1>
+        <h1 className="text-2xl font-bold mb-4">Purchase Report</h1>
         <table className="table-auto w-full border-collapse border border-gray-200">
           <thead>
             <tr className="bg-yellow-950 text-white">
+              <th className="border border-gray-300 px-4 py-2">Purchase No</th>
               <th className="border border-gray-300 px-4 py-2">Item Name</th>
               <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
+              <th className="border border-gray-300 px-4 py-2">Invoice No</th>
               <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
               <th className="border border-gray-300 px-4 py-2">Unit</th>
               <th className="border border-gray-300 px-4 py-2">Rate</th>
@@ -49,14 +52,13 @@ const StockReportPage = () => {
             </tr>
           </thead>
           <tbody>
-            {stockReports.length > 0 ? (
-              stockReports.map((report) => (
-                <tr
-                  key={report._id}
-                  className="bg-white"
-                >
+            {purchaseReports.length > 0 ? (
+              purchaseReports.map((report) => (
+                <tr key={report._id} className="bg-green-100">
+                  <td className="border border-gray-300 px-10 py-2">{report.purchaseorderno}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.name?.name}</td>
                   <td className="border border-gray-300 px-8 py-2">{new Date(report.purchasedate).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-8 py-2">{report.Invoiceno}</td>
                   <td className="border border-gray-300 px-20 py-2">{report.quantity?.stock}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.unit?.quantityUnit}</td>
                   <td className="border border-gray-300 px-6 py-2">{report.rate}</td>
@@ -67,12 +69,11 @@ const StockReportPage = () => {
             ) : (
               <tr>
                 <td colSpan="9" className="border border-gray-300 px-4 py-2 text-center">
-                  No stock reports available.
+                  No purchase reports available.
                 </td>
               </tr>
             )}
           </tbody>
-
         </table>
       </div>
       <Footer />
@@ -80,4 +81,4 @@ const StockReportPage = () => {
   );
 };
 
-export default StockReportPage;
+export default PurchaseReportPage;
