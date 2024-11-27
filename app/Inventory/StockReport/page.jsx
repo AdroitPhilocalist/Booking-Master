@@ -39,7 +39,8 @@ const StockReportPage = () => {
         <table className="table-auto w-full border-collapse border border-gray-200">
           <thead>
             <tr className="bg-yellow-950 text-white">
-              <th className="border border-gray-300 px-4 py-2">Purchase Order No</th>
+              <th className="border border-gray-300 px-4 py-2">Purchase No</th>
+              <th className="border border-gray-300 px-4 py-2">Item Name</th>
               <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
               <th className="border border-gray-300 px-4 py-2">Invoice No</th>
               <th className="border border-gray-300 px-4 py-2">Quantity</th>
@@ -58,6 +59,7 @@ const StockReportPage = () => {
                   className={report.purorsell === 'purchase' ? 'bg-green-100' : 'bg-red-100'}
                 >
                   <td className="border border-gray-300 px-4 py-2">{report.purchaseorderno}</td>
+                  <td className="border border-gray-300 px-4 py-2">{report.name?.name}</td>
                   <td className="border border-gray-300 px-4 py-2">{new Date(report.purchasedate).toLocaleDateString()}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.Invoiceno}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.quantity?.stock}</td>
@@ -76,6 +78,7 @@ const StockReportPage = () => {
               </tr>
             )}
           </tbody>
+
         </table>
       </div>
       <Footer />

@@ -17,6 +17,7 @@ export async function GET() {
   try {
     await connectToDatabase();
     const stockReports = await StockReport.find()
+      .populate("name", "name") // Populates name field from InventoryList
       .populate("quantity", "stock") // Populates stock field from InventoryList
       .populate("unit", "quantityUnit") // Populates quantityUnit field from InventoryList
       .populate("taxpercent", "tax"); // Populates tax field from InventoryList
@@ -37,6 +38,7 @@ export async function POST(request) {
     const data = await request.json();
     const requiredFields = [
       "purchaseorderno",
+      "name",
       "purchasedate",
       "Invoiceno",
       "quantity",
