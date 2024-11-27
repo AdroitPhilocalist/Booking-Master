@@ -338,10 +338,10 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Restaurant/restaurantmenu">Restaurant Menu</Link>
                 </li>
-                {/* <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="#">Tokens</Link>
+                { <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Restaurant/restaurantbooking">Booking</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
+                /*<li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="#">Deleted Token Items</Link>
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
