@@ -31,28 +31,33 @@ export default function InventoryList() {
     fetchData();
   }, []);
 
-  const handleSubmit = () => {
-    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
-      alert("Please fill all required fields");
-      return;
+  const handleSubmit = async (formData) => {
+    try {
+      const method = currentItem ? "PUT" : "POST";
+      const url = currentItem
+        ? `/api/InventoryList/${currentItem._id}`
+        : "/api/InventoryList";
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (method === "POST") setItems((prev) => [...prev, data.item]);
+      else
+        setItems((prev) =>
+          prev.map((item) =>
+            item._id === data.item._id ? data.item : item
+          )
+        );
+
+      setShowModal(false);
+      setCurrentItem(null);
+    } catch (error) {
+      console.error("Error saving item:", error);
     }
-  
-    if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
-      alert("Not enough stock available");
-      return;
-    }
-  
-    const formData = {
-      purchaseorderno,
-      purchasedate,
-      Invoiceno,
-      quantityAmount: parseFloat(selectedQuantity),
-      rate: parseFloat(rate),
-      total: parseFloat(total),
-      purorsell: action.type === 'buy' ? 'purchase' : 'sell'
-    };
-  
-    onSubmit(formData);
   };
 
   // In your main page component, update the handleStock function:
@@ -378,35 +383,28 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   }, [rate, selectedQuantity, selectedItem]);
 
   const handleSubmit = () => {
-  if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
-    alert("Please fill all required fields");
-    return;
-  }
-
-  if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
-    alert("Not enough stock available");
-    return;
-  }
-
-  const formData = {
-    purchaseorderno,
-    purchasedate,
-    Invoiceno,
-    name: selectedItem.name, // Add name
-    itemCode: selectedItem.itemCode, // Add item code
-    group: selectedItem.group, // Add group
-    segment: selectedItem.segment, // Add segment
-    quantity: selectedItem._id,
-    quantityAmount: parseFloat(selectedQuantity),
-    unit: selectedItem.quantityUnit,
-    rate: parseFloat(rate),
-    taxpercent: selectedItem.tax,
-    total: parseFloat(total),
-    purorsell: action.type === 'buy' ? 'purchase' : 'sell'
+    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
+      alert("Please fill all required fields");
+      return;
+    }
+  
+    if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
+      alert("Not enough stock available");
+      return;
+    }
+  
+    const formData = {
+      purchaseorderno,
+      purchasedate,
+      Invoiceno,
+      quantityAmount: parseFloat(selectedQuantity),
+      rate: parseFloat(rate),
+      total: parseFloat(total),
+      purorsell: action.type === 'buy' ? 'purchase' : 'sell'
+    };
+  
+    onSubmit(formData);
   };
-
-  onSubmit(formData);
-};
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[90vh] overflow-auto">
