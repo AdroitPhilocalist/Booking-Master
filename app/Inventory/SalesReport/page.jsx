@@ -57,7 +57,7 @@ const SalesReportPage = () => {
                 <tr key={report._id} className="bg-red-200">
                   <td className="border border-gray-300 px-10 py-2">{report.purchaseorderno}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.name?.name}</td>
-                  <td className="border border-gray-300 px-8 py-2">{new Date(report.salesdate).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-8 py-2">{new Date(report.purchasedate).toLocaleDateString()}</td>
                   <td className="border border-gray-300 px-8 py-2">{report.Invoiceno}</td>
                   <td className="border border-gray-300 px-20 py-2">{report.quantity?.stock}</td>
                   <td className="border border-gray-300 px-4 py-2">{report.unit?.quantityUnit}</td>
