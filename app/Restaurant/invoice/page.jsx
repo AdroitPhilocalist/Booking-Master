@@ -38,8 +38,6 @@ const InvoicePage = () => {
 
   return (
     <div>
-      <Navbar/>
-      <CreateInvoicePage></CreateInvoicePage>
       <h1>Restaurant Invoices</h1>
       <table>
         <thead>
@@ -70,6 +68,9 @@ const InvoicePage = () => {
           ))}
         </tbody>
       </table>
+      <button onClick={() => router.push('/Restaurant/invoice/createinvoice')}>
+        Create Invoice
+      </button>
     </div>
   );
 };
