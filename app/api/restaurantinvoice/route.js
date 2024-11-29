@@ -1,36 +1,28 @@
-import connectDB from '../../../models/dbConnect';
-import restaurantinvoice from '../../../models/restaurantinvoice';
+// api/restaurantinvoice/route.js
+import connectSTR from '../../lib/dbConnect';
+import restaurantinvoice from '../../lib/models/restaurantinvoice';
+import mongoose from 'mongoose';
+import { NextResponse } from 'next/server';
 
-export default async function handler(req, res) {
-  await connectDB();
+export async function GET(req) {
+    try {
+        await mongoose.connect(connectSTR);
+        const invoices = await restaurantinvoice.find({});
+        return NextResponse.json({ success: true, data: invoices }, { status: 200 });
+    } catch (error) {
+        console.error('Error fetching invoices:', error);
+        return NextResponse.json({ success: false, error: 'Failed to fetch invoices' }, { status: 400 });
+    }
+}
 
-  switch (req.method) {
-    case 'GET':
-      try {
-        const invoices = await RestaurantInvoice.find();
-        res.json(invoices);
-      } catch (err) {
-        res.status(500).json({ message: err.message });
-      }
-      break;
-    case 'POST':
-      try {
-        const invoice = new RestaurantInvoice({
-          invoiceno: req.body.invoiceno,
-          date: req.body.date,
-          time: req.body.time,
-          custname: req.body.custname,
-          totalamt: req.body.totalamt,
-          gst: req.body.gst,
-          payableamt: req.body.payableamt
-        });
-        const newInvoice = await invoice.save();
-        res.status(201).json(newInvoice);
-      } catch (err) {
-        res.status(400).json({ message: err.message });
-      }
-      break;
-    default:
-      res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+export async function POST(req) {
+    try {
+        await mongoose.connect(connectSTR);
+        const data = await req.json();
+        const newInvoice = await restaurantinvoice.create(data);
+        return NextResponse.json({ success: true, data: newInvoice }, { status: 201 });
+    } catch (error) {
+        console.error('Error creating invoice:', error);
+        return NextResponse.json({ success: false, error: 'Failed to create invoice' }, { status: 400 });
+    }
 }

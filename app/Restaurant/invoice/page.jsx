@@ -1,72 +1,75 @@
 "use client";
+import CreateInvoicePage from './createinvoice/page';
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 
 
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@mui/styles';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper
-} from '@mui/material';
-import axios from 'axios';
-
-const useStyles = makeStyles((theme) => ({
-  table: {
-    minWidth: 650
-  }
-}));
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const InvoicePage = () => {
-  const classes = useStyles();
   const [invoices, setInvoices] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await axios.get('/api/restaurantinvoice');
-        setInvoices(response.data);
-      } catch (err) {
-        console.error(err);
+        const response = await fetch('/api/restaurantinvoice');
+        const data = await response.json();
+        setInvoices(data.data);
+      } catch (error) {
+        console.error(error);
       }
     };
     fetchInvoices();
   }, []);
 
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`/api/restaurantinvoice/${id}`, {
+        method: 'DELETE',
+      });
+      setInvoices(invoices.filter((invoice) => invoice._id !== id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
+      <Navbar/>
+      <CreateInvoicePage></CreateInvoicePage>
       <h1>Restaurant Invoices</h1>
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Invoice No.</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Customer Name</TableCell>
-              <TableCell>Total Amount</TableCell>
-              <TableCell>GST</TableCell>
-              <TableCell>Payable Amount</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {invoices.map((invoice) => (
-              <TableRow key={invoice._id}>
-                <TableCell>{invoice.invoiceno}</TableCell>
-                <TableCell>{invoice.date.toLocaleDateString()}</TableCell>
-                <TableCell>{invoice.custname}</TableCell>
-                <TableCell>{invoice.totalamt}</TableCell>
-                <TableCell>{invoice.gst}</TableCell>
-                <TableCell>{invoice.payableamt}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice No.</th>
+            <th>Date</th>
+            <th>Customer Name</th>
+            <th>Total Amount</th>
+            <th>GST</th>
+            <th>Payable Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {invoices.map((invoice) => (
+            <tr key={invoice._id}>
+              <td>{invoice.invoiceno}</td>
+              <td>{new Date(invoice.date).toLocaleDateString()}</td>
+              <td>{invoice.custname}</td>
+              <td>{invoice.totalamt}</td>
+              <td>{invoice.gst}</td>
+              <td>{invoice.payableamt}</td>
+              <td>
+                <Link href={`/restaurant/invoice/edit/${invoice._id}`}>Edit</Link>
+                <button onClick={() => handleDelete(invoice._id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
