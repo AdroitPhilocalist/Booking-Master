@@ -37,4 +37,4 @@ const restaurantInvoiceSchema = new mongoose.Schema({
     }
 );
 
-export default mongoose.models.roominvoice||mongoose.modelName('restaurantinvoice',restaurantInvoiceSchema);
+export default mongoose.models.restaurantinvoice||mongoose.modelName('restaurantinvoice',restaurantInvoiceSchema);
