@@ -7,6 +7,11 @@ import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 import TextField from '@mui/material/TextField';
 
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
 export default function BookingForm() {
     const [focusedInput, setFocusedInput] = useState(null);
     const [formData, setFormData] = useState({
@@ -120,29 +125,29 @@ export default function BookingForm() {
 
     const handleSubmit = async () => {
         console.log('Selected rooms:', selectedRooms);
-    
+
         const roomNumbers = selectedRooms.map((room) => Number(room)); // Ensure roomNumbers is numeric
         const bookingData = { ...formData, roomNumbers: roomNumbers };
         console.log('Booking data to be sent:', bookingData);
-    
+
         // Submit the booking data
         const bookingResponse = await fetch('/api/NewBooking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(bookingData),
         });
-    
+
         if (!bookingResponse.ok) {
             alert('Failed to create booking');
             return;
         }
-    
+
         // Get the newly created guest's ID
         const bookingResult = await bookingResponse.json();
         const guestId = bookingResult.data._id; // Adjust based on your API response structure
-    
+
         console.log('New Guest ID:', guestId);
-    
+
         // Loop through the selected rooms and handle billing and room updates
         for (const room of selectedRooms) {
             console.log(room)
@@ -158,25 +163,25 @@ export default function BookingForm() {
                     amountAdvanced: 0,
                     dueAmount: 0,
                 };
-    
+
                 console.log('Submitting billing data:', newBilling);
-    
+
                 const billingResponse = await fetch('/api/Billing', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newBilling),
                 });
-    
+
                 if (!billingResponse.ok) {
                     console.error(`Failed to create billing record for room ${room.number}`);
                     continue;
                 }
-    
+
                 const billingResult = await billingResponse.json();
                 const billId = billingResult.data._id; // Adjust based on your API response structure
-    
+
                 console.log(`Bill ID for room ${room}:`, billId);
-    
+
                 // Step 2: Update room attributes
                 const roomUpdate = {
                     currentBillingId: billId,
@@ -188,47 +193,47 @@ export default function BookingForm() {
                     method: 'GET', // Assuming this endpoint returns all room data
                     headers: { 'Content-Type': 'application/json' },
                 });
-            
+
                 if (!allRoomsResponse.ok) {
                     console.error('Failed to fetch all rooms');
                     return; // Handle the error or exit the function
                 }
-            
+
                 const allRoomsData = await allRoomsResponse.json();
-            
+
                 // Filter the room with number = 49
                 const targetRoom = allRoomsData.data.find((rooms) => rooms.number === room);
-            
+
                 if (!targetRoom) {
                     console.error(`Room with number ${room} not found`);
                     return; // Handle the case where the room doesn't exist
                 }
-            
+
                 const roomId = targetRoom._id; // Extract the room ID
                 console.log(`Room ID for room number 49: ${roomId}`);
-    
+
                 const roomUpdateResponse = await fetch(`/api/rooms/${roomId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(roomUpdate),
                 });
-    
+
                 if (!roomUpdateResponse.ok) {
                     console.error(`Failed to update room ${room}`);
                     continue;
                 }
-    
+
                 console.log(`Room ${room} updated successfully.`);
             } catch (error) {
                 console.error(`Error processing room ${room.number}:`, error);
             }
         }
-    
+
         alert('Booking created successfully!');
         setModalOpen(false);
         router.push('/property/roomdashboard');
     };
-    
+
 
 
     // const handleSubmit = async (e) => {
@@ -248,42 +253,47 @@ export default function BookingForm() {
     // };
 
     return (
-        <div className="min-h-screen bg-amber-200">
+        <div className="min-h-screen bg-amber-50">
             <Navbar />
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="px-4 py-6 sm:px-0">
                     <div className="bg-white shadow rounded-lg p-6">
-                        <h1 className="text-2xl font-semibold text-amber-800 mb-4">Booking Master Control Panel</h1>
-                        <div className="mb-4 flex items-center text-sm text-amber-600">
+                        <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Booking Master Control Panel</h1>
+                        <div className="mb-4 flex items-center text-sm text-cyan-900">
                             <a href="#" className="hover:underline">Home</a>
                             <span className="mx-2">&gt;</span>
                             <span>Reservations</span>
                         </div>
-                        <div className="bg-amber-800 text-white p-4 rounded-lg mb-6">
+                        <div className="bg-cyan-800 text-white p-4 rounded-lg mb-6">
                             <h2 className="text-lg font-semibold">Add Booking</h2>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-type">
-                                        Booking Type*
-                                    </label>
-                                    <div className="relative">
-                                        <select name="bookingType" value={formData.bookingType} onChange={handleChange} className="block appearance-none w-full bg-amber-50 border border-amber-200 text-amber-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
-                                            {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
-                                                <option key={type} value={type}>{type}</option>
-                                            ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
-                                            <ChevronDown className="fill-current h-4 w-4" />
-                                        </div>
-                                    </div>
+                                    
+                                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
+                                    <InputLabel id="demo-simple-select-standard-label">Booking</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-standard-label"
+                                        id="demo-simple-select-standard"
+                                        value={formData.bookingType}
+                                        onChange={handleChange}
+                                        label="Booking"
+                                    >
+                                        {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
+                                            <MenuItem key={type} value={type}>
+                                                {type}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                                 </div>
+
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="mobile-no">
                                         Booking ID*
                                     </label>
-                                    <input type="text" name="bookingId" value={formData.bookingId} readOnly className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
+                                    <input type="text" name="bookingId" value={formData.bookingId} readOnly className="appearance-none block w-full bg-amber-50 text-cyan-900 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -303,7 +313,7 @@ export default function BookingForm() {
 
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="booking-source">
                                         Booking Source*
                                     </label>
                                     <div className="relative">
@@ -312,7 +322,7 @@ export default function BookingForm() {
                                                 <option key={source} value={source}>{source}</option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
                                             <ChevronDown className="fill-current h-4 w-4" />
                                         </div>
                                     </div>
@@ -409,7 +419,7 @@ export default function BookingForm() {
                                     <input type="number" name="adults" value={formData.adults} onChange={handleChange} min="1" className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="mobile-no">
                                         Children
                                     </label>
                                     <input type="number" name="children" value={formData.children} onChange={handleChange} min="0" className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
@@ -417,7 +427,7 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="check-in">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="check-in">
                                         Check-In*
                                     </label>
                                     <div className="relative">
@@ -427,34 +437,34 @@ export default function BookingForm() {
                                     </div>
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="check-out">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="check-out">
                                         Check-Out*
                                     </label>
                                     <div className="relative">
                                         <input type="date" name="checkOut" value={formData.checkOut} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="expected-arrival">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="expected-arrival">
                                         Expected Arrival*
                                     </label>
                                     <div className="relative">
                                         <input type="time" name="expectedArrival" value={formData.expectedArrival} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
                                         </div>
                                     </div>
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="expected-departure">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="expected-departure">
                                         Expected Departure*
                                     </label>
                                     <div className="relative">
                                         <input type="time" name="expectedDeparture" value={formData.expectedDeparture} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" id="expected-departure" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
                                         </div>
                                     </div>
                                 </div>
@@ -476,7 +486,7 @@ export default function BookingForm() {
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
+                                    <label className="block uppercase tracking-wide text-cyan-700 text-xs font-bold mb-2" htmlFor="booking-source">
                                         Booking Status*
                                     </label>
                                     <div className="relative">
@@ -485,7 +495,7 @@ export default function BookingForm() {
                                                 <option key={status} value={status}>{status}</option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-700">
                                             <ChevronDown className="fill-current h-4 w-4" />
                                         </div>
                                     </div>
@@ -508,7 +518,7 @@ export default function BookingForm() {
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="booking-source">
                                         Meal Plan
                                     </label>
                                     <div className="relative">
@@ -517,7 +527,7 @@ export default function BookingForm() {
                                                 <option key={meal} value={meal}>{meal}</option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
                                             <ChevronDown className="fill-current h-4 w-4" />
                                         </div>
                                     </div>
@@ -540,7 +550,7 @@ export default function BookingForm() {
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="mobile-no">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="mobile-no">
                                         Stop Posting
                                     </label>
                                     <input type="checkbox" name="stopPosting" checked={formData.stopPosting} onChange={(e) => setFormData((prev) => ({ ...prev, stopPosting: e.target.checked }))} />
@@ -548,16 +558,16 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="booking-source">
+                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="booking-source">
                                         Guest Type
                                     </label>
                                     <div className="relative">
-                                        <select name="guestType" value={formData.guestType} onChange={handleChange} className="block appearance-none w-full bg-amber-50 border border-amber-200 text-amber-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
+                                        <select name="guestType" value={formData.guestType} onChange={handleChange} className="block appearance-none w-full bg-amber-50 border border-amber-200 text-cyan-900 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
                                             {['General', 'VIP Guest', 'VVIP Guest', 'Scanty baggage'].map((type) => (
                                                 <option key={type} value={type}>{type}</option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
                                             <ChevronDown className="fill-current h-4 w-4" />
                                         </div>
                                     </div>
@@ -593,7 +603,7 @@ export default function BookingForm() {
                                         className="border rounded w-full p-2"
                                         placeholder={focusedInput === 'internalNotes' ? '' : placeholders.internalNotes}>
                                     </TextField>
-                                    
+
                                     <TextField id="Remarks" label="Remarks" variant="outlined"
 
                                         name="remarks"
@@ -606,7 +616,7 @@ export default function BookingForm() {
                                         placeholder={focusedInput === 'remarks' ? '' : placeholders.remarks}>
 
                                     </TextField>
-                                    
+
                                 </div>
                             </div>
                             <div className="flex items-center justify-end">

@@ -17,7 +17,7 @@ export default function Home() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-700 to-cyan-600">
         <div className="mb-8">
           <Image
-            src="/Booking Master logo.png"
+            src="/Hotel-Logo.png"
             alt="BookingMaster.in"
             width={300}
             height={60}
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
         </div>
         <div className="mt-8 text-center text-white text-sm">
-          © {new Date().getFullYear()}, Booking Master. All Rights Reserved.
+          © {new Date().getFullYear()}, Hotel Booking. All Rights Reserved.
         </div>
       </div>
     </main>

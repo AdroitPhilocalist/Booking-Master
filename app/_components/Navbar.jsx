@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-7xl flex justify-between items-center">
         {/* Logo */}
         <Image
-          src="/Booking Master logo.png"
+          src="/Hotel-Logo.png"
           alt="BookingMaster.in"
           width={190}
           height={60}
