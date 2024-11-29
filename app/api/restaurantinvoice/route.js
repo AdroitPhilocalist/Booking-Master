@@ -16,6 +16,7 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+    
     try {
         await mongoose.connect(connectSTR);
         const data = await req.json();

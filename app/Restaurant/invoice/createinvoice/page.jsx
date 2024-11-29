@@ -1,18 +1,16 @@
 "use client";
 import React, { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
-const CreateInvoicePage = () => {
+const CreateInvoicePage = ({ onInvoiceCreate }) => {
   const [formData, setFormData] = useState({
     invoiceno: '',
     date: '',
+    time:'',
     custname: '',
     totalamt: '',
     gst: '',
     payableamt: '',
   });
-  const router = useRouter();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,19 +24,27 @@ const CreateInvoicePage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // Ensure formData contains all required fields
       });
+  
       const data = await response.json();
+  
       if (response.ok) {
+        // Notify the parent component (InvoicePage) about the new invoice
+        if (onInvoiceCreate) {
+          onInvoiceCreate(data.data); // Pass the newly created invoice back
+        }
+  
+        // Reset the form
         setFormData({
           invoiceno: '',
           date: '',
+          time:'',
           custname: '',
           totalamt: '',
           gst: '',
           payableamt: '',
         });
-        router.push('/restaurant/invoice');
       } else {
         console.error(data.error);
       }
@@ -46,7 +52,7 @@ const CreateInvoicePage = () => {
       console.error(error);
     }
   };
-
+  
   return (
     <div>
       <h1>Create Invoice</h1>
@@ -66,6 +72,15 @@ const CreateInvoicePage = () => {
             type="date"
             name="date"
             value={formData.date}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Time:
+          <input
+            type="time"
+            name="time"
+            value={formData.time}
             onChange={handleChange}
           />
         </label>

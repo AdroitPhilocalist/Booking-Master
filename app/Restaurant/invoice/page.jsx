@@ -1,15 +1,12 @@
 "use client";
-import CreateInvoicePage from './createinvoice/page';
-import Navbar from "../../_components/Navbar";
-import { Footer } from "../../_components/Footer";
-
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import CreateInvoicePage from './createinvoice/page'; // Correct Import
 
 const InvoicePage = () => {
   const [invoices, setInvoices] = useState([]);
+  const [showModal, setShowModal] = useState(false); // To toggle the modal
   const router = useRouter();
 
   useEffect(() => {
@@ -34,6 +31,11 @@ const InvoicePage = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const addNewInvoice = (newInvoice) => {
+    setInvoices((prev) => [...prev, newInvoice]); // Add the new invoice to the table
+    setShowModal(false); // Close the modal after submission
   };
 
   return (
@@ -68,9 +70,17 @@ const InvoicePage = () => {
           ))}
         </tbody>
       </table>
-      <button onClick={() => router.push('/Restaurant/invoice/createinvoice')}>
-        Create Invoice
-      </button>
+      <button onClick={() => setShowModal(true)}>Create Invoice</button>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <button onClick={() => setShowModal(false)}>Close</button>
+            <CreateInvoicePage onInvoiceCreate={addNewInvoice} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
