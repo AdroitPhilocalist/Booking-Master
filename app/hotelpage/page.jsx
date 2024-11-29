@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 export default function HotelPage() {
     const router = useRouter();
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-700 to-orange-600">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-700 to-cyan-600">
             {/* Logo */}
             <div className="mb-8">
                 <Image src="/Booking Master logo.png" alt="BookingMaster Logo" width={300} height={60} />
@@ -48,7 +48,7 @@ export default function HotelPage() {
                             <li>Driver&apos;s Room</li>
 
                         </ul>
-                        <button  onClick={() => router.push("/dashboard")} className="bg-amber-950 text-white p-2 border border-transparent shadow-sm text-sm font-medium rounded-full hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">Go to Dashboard</button>
+                        <button  onClick={() => router.push("/dashboard")} className="bg-cyan-900 text-white p-2 border border-transparent shadow-sm text-sm font-medium rounded-full hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">Go to Dashboard</button>
 
                         {/* Small Images */}
                         <div className="grid grid-cols-2 gap-2">

@@ -32,13 +32,13 @@ const StockReportPage = () => {
   }
 
   return (
-    <div>
+    <div className="bg-amber-50 min-h-screen">
       <Navbar />
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-bold mb-4">Stock Report</h1>
         <table className="table-auto w-full border-collapse border border-gray-200">
           <thead>
-            <tr className="bg-yellow-950 text-white">
+            <tr className="bg-cyan-900 text-white">
               <th className="border border-gray-300 px-4 py-2">Item Name</th>
               <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
               <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
@@ -53,7 +53,7 @@ const StockReportPage = () => {
               stockReports.map((report) => (
                 <tr
                   key={report._id}
-                  className="bg-white"
+                  className="bg-gray-50"
                 >
                   <td className="border border-gray-300 px-4 py-2">{report.name?.name}</td>
                   <td className="border border-gray-300 px-8 py-2">{new Date(report.purchasedate).toLocaleDateString()}</td>

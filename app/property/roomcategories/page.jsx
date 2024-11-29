@@ -66,7 +66,7 @@ export default function RoomCategories() {
       <div className="min-h-screen bg-amber-50">
         <Navbar />
         <div className="p-4">
-          <div className="bg-amber-950 p-4 mb-5">
+          <div className="bg-cyan-900 p-4 mb-5">
             <h2 className="text-xl text-white">Category List</h2>
           </div>
           <div className="flex justify-between items-center mb-4">
@@ -96,7 +96,7 @@ export default function RoomCategories() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-100">
+                <tr className="bg-cyan-800 text-white">
                   <th className="border p-2">Image</th>
                   <th className="border p-2">Category</th>
                   <th className="border p-2 w-48">Description</th>
@@ -110,7 +110,7 @@ export default function RoomCategories() {
               </thead>
               <tbody>
                 {filteredCategories.map((room) => (
-                  <tr key={room.id} className="border-b">
+                  <tr key={room.id} className="border-b bg-gray-50">
                     <td className="border p-2">
                       <Image
                         src={room.image}

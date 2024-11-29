@@ -14,7 +14,7 @@ export default function Home() {
 
   return (
     <main>
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-amber-700 to-orange-600">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-700 to-cyan-600">
         <div className="mb-8">
           <Image
             src="/Booking Master logo.png"
@@ -25,7 +25,7 @@ export default function Home() {
           />
         </div>
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-3xl font-semibold text-center mb-6 text-amber-800">Login</h2>
+          <h2 className="text-3xl font-semibold text-center mb-6 text-cyan-900">Login</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <TextField id="username" label="Username" variant="outlined" fullWidth />
@@ -42,14 +42,14 @@ export default function Home() {
             <div>
               <button
                 type="submit" // Change button type to "submit" for form submission
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-950 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cyan-700 hover:bg-cyan-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
               >
                 SUBMIT
               </button>
             </div>
           </form>
           <div className="mt-4 text-center">
-            <Link href="/forgot-password" className="text-sm text-amber-600 hover:text-amber-500">
+            <Link href="/forgot-password" className="text-sm text-cyan-600 hover:text-cyan-500">
               Forgot Password?
             </Link>
           </div>

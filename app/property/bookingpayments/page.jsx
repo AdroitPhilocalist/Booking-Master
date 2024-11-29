@@ -65,10 +65,10 @@ export default function BookingPayments() {
         <div className="flex justify-between items-center mt-4">
           <div>Showing 0 to 0 of 0 entries</div>
           <div className="flex space-x-2">
-            <button className="border rounded px-3 py-1 bg-amber-200 text-amber-800">
+            <button className="border rounded px-3 py-1 bg-amber-200 text-cyan-800">
               <ChevronLeft size={18} />
             </button>
-            <button className="border rounded px-3 py-1 bg-amber-200 text-amber-800">
+            <button className="border rounded px-3 py-1 bg-amber-200 text-cyan-800">
               <ChevronRight size={18} />
             </button>
           </div>
