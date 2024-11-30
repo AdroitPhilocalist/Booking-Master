@@ -34,7 +34,7 @@ const PurchaseReportPage = () => {
         const purchaseData = await purchaseResponse.json();
         
         setItems(itemsData.items || []);
-        
+        console.log(itemsData.items);
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "purchase"

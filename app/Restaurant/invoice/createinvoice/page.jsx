@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
  const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice }) => {
-  const [menu,setmenu] = useState();
+  const [menu,setmenu] = useState([]);
   const [formData, setFormData] = useState({
     invoiceno: "",
     date: "",
@@ -23,7 +23,6 @@ import React, { useState, useEffect } from "react";
         const menudata=await menuresponse.json();
         console.log(menudata.data);
         setmenu(menudata.data);
-        console.log(menu);
       }
       catch(error){
         console.error("failed to fetch data",error);
@@ -95,7 +94,7 @@ import React, { useState, useEffect } from "react";
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-center">Create Invoice</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 overflow-auto">
         {[
           { label: "Invoice No.", name: "invoiceno", type: "text" },
           { label: "Date", name: "date", type: "date" },
@@ -123,10 +122,11 @@ import React, { useState, useEffect } from "react";
         label="select menu item"
         name="menuitem"
         type="text"
+        className="text-black w-full px-3 py-2 border rounded-md"
         > <option value="">select item</option>
         {menu.map((item)=>(
-          <option key={item._id} value={item._id}>
-           {menu.itemName}
+          <option key={item._id} value={item.itemName}>
+           {item.itemName}
 
 
           </option>

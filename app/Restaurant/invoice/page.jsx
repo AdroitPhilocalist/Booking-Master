@@ -20,8 +20,7 @@ const InvoicePage = () => {
         const menuresponse=await fetch("/api/menuItem");
         const menudata=await menuresponse.json();
         console.log(menudata.data);
-        setmenu(menudata.data);
-        console.log(menu);
+        setmenu(menudata.data || []);
       }
       catch(error){
         console.error("failed to fetch data",error);
@@ -39,7 +38,7 @@ const InvoicePage = () => {
       try {
         const response = await fetch("/api/restaurantinvoice");
         const data = await response.json();
-        setInvoices(data.data);
+        setInvoices(data.invoices);
       } catch (error) {
         console.error(error);
       }
