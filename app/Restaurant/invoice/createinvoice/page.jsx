@@ -1,11 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-
-
-
-
-
-
  const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice }) => {
   const [menu,setmenu] = useState();
   const [formData, setFormData] = useState({

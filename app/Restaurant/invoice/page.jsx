@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CreateInvoicePage from "./createinvoice/page";
-import Navbar from "../../_components/Navbar"; // Import Navbar
+import Navbar from '@/app/_components/Navbar'
+import { Footer } from '@/app/_components/Footer'
 
 const InvoicePage = () => {
   const [menu,setmenu] = useState();
@@ -100,9 +101,9 @@ const InvoicePage = () => {
   };
 
   return (
-    <div className="p-4">
-      <Navbar /> {/* Render Navbar */}
-
+    <div>
+      <Navbar /> {/* Add Navbar component */}
+      <div className="p-4">
       <h1 className="text-3xl font-bold mb-4">Restaurant Invoices</h1>
 
       <button
@@ -177,6 +178,8 @@ const InvoicePage = () => {
           </div>
         </div>
       )}
+    </div>
+    <Footer /> {/* Add Navbar component */}
     </div>
   );
 };
