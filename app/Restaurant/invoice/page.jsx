@@ -5,33 +5,30 @@ import Link from "next/link";
 import CreateInvoicePage from "./createinvoice/page";
 import Navbar from '@/app/_components/Navbar'
 import { Footer } from '@/app/_components/Footer'
+import PrintableInvoice from './PrintableInvoice'; // Import the PrintableInvoice component
 
 const InvoicePage = () => {
-  const [menu,setmenu] = useState();
+  const [menu, setMenu] = useState();
   const [invoices, setInvoices] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState(null); // For editing
+  const [printableInvoice, setPrintableInvoice] = useState(null); // For printing
   const router = useRouter();
 
-
-  useEffect( ()=>{
-    const fetchmenu=async()=>{
-      try{
-        const menuresponse=await fetch("/api/menuItem");
-        const menudata=await menuresponse.json();
-        console.log(menudata.data);
-        setmenu(menudata.data || []);
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const menuResponse = await fetch("/api/menuItem");
+        const menuData = await menuResponse.json();
+        console.log(menuData.data);
+        setMenu(menuData.data || []);
       }
-      catch(error){
-        console.error("failed to fetch data",error);
+      catch (error) {
+        console.error("failed to fetch data", error);
       }
     };
-    fetchmenu();
-  },
-  
-  []
-  );
-
+    fetchMenu();
+  }, []);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -65,6 +62,25 @@ const InvoicePage = () => {
   const handleEdit = (invoice) => {
     setCurrentInvoice(invoice); // Set the invoice to be edited
     setShowModal(true); // Open the modal
+  };
+
+  const handlePrint = (invoice) => {
+    // Prepare the invoice for printing
+    const printInvoice = {
+      id: invoice.invoiceno,
+      customerName: invoice.custname,
+      customerAddress: invoice.custaddress || 'N/A',
+      date: new Date(invoice.date).toLocaleDateString(),
+      dueDate: new Date(invoice.duedate).toLocaleDateString(),
+      items: invoice.items || [],
+      totalAmount: invoice.totalamt,
+      gst: invoice.gst,
+      gstRate: invoice.gstrate || 0,
+      payableAmount: invoice.payableamt,
+      paymentTerms: invoice.paymentterms || 30
+    };
+    
+    setPrintableInvoice(printInvoice);
   };
 
   const handleInvoiceSave = async (updatedInvoice) => {
@@ -107,80 +123,107 @@ const InvoicePage = () => {
 
   return (
     <div className="bg-amber-50 min-h-screen">
-      <Navbar /> {/* Add Navbar component */}
+      <Navbar />
       <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Restaurant Invoices</h1>
+        <h1 className="text-3xl font-bold mb-4">Restaurant Invoices</h1>
 
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
-        onClick={() => {
-          setCurrentInvoice(null); // Reset form for new invoice
-          setShowModal(true);
-        }}
-      >
-        Create Invoice
-      </button>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
+          onClick={() => {
+            setCurrentInvoice(null); // Reset form for new invoice
+            setShowModal(true);
+          }}
+        >
+          Create Invoice
+        </button>
 
-      <table className="w-full border border-gray-300 rounded-md">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border border-gray-300 px-4 py-2">Invoice No.</th>
-            <th className="border border-gray-300 px-4 py-2">Date</th>
-            <th className="border border-gray-300 px-4 py-2">Customer Name</th>
-            <th className="border border-gray-300 px-4 py-2">Total Amount</th>
-            <th className="border border-gray-300 px-4 py-2">GST</th>
-            <th className="border border-gray-300 px-4 py-2">Payable Amount</th>
-            <th className="border border-gray-300 px-4 py-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {invoices.map((invoice) => (
-            <tr key={invoice._id} className="text-center">
-              <td className="border border-gray-300 px-4 py-2">{invoice.invoiceno}</td>
-              <td className="border border-gray-300 px-4 py-2">
-                {new Date(invoice.date).toLocaleDateString()}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">{invoice.custname}</td>
-              <td className="border border-gray-300 px-4 py-2">{invoice.totalamt}</td>
-              <td className="border border-gray-300 px-4 py-2">{invoice.gst}</td>
-              <td className="border border-gray-300 px-4 py-2">{invoice.payableamt}</td>
-              <td className="border border-gray-300 px-4 py-2 flex items-center justify-center gap-2">
-                <button
-                  className="bg-green-600 text-white px-2 py-1 rounded"
-                  onClick={() => handleEdit(invoice)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="bg-red-600 text-white px-2 py-1 rounded"
-                  onClick={() => handleDelete(invoice._id)}
-                >
-                  Delete
-                </button>
-                <button className="bg-gray-600 text-white px-2 py-1 rounded">
-                  Print
-                </button>
-              </td>
+        <table className="w-full border border-gray-300 rounded-md">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2">Invoice No.</th>
+              <th className="border border-gray-300 px-4 py-2">Date</th>
+              <th className="border border-gray-300 px-4 py-2">Customer Name</th>
+              <th className="border border-gray-300 px-4 py-2">Total Amount</th>
+              <th className="border border-gray-300 px-4 py-2">GST</th>
+              <th className="border border-gray-300 px-4 py-2">Payable Amount</th>
+              <th className="border border-gray-300 px-4 py-2">Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {invoices.map((invoice) => (
+              <tr key={invoice._id} className="text-center">
+                <td className="border border-gray-300 px-4 py-2">{invoice.invoiceno}</td>
+                <td className="border border-gray-300 px-4 py-2">
+                  {new Date(invoice.date).toLocaleDateString()}
+                </td>
+                <td className="border border-gray-300 px-4 py-2">{invoice.custname}</td>
+                <td className="border border-gray-300 px-4 py-2">{invoice.totalamt}</td>
+                <td className="border border-gray-300 px-4 py-2">{invoice.gst}</td>
+                <td className="border border-gray-300 px-4 py-2">{invoice.payableamt}</td>
+                <td className="border border-gray-300 px-4 py-2 flex items-center justify-center gap-2">
+                  <button
+                    className="bg-green-600 text-white px-2 py-1 rounded"
+                    onClick={() => handleEdit(invoice)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-600 text-white px-2 py-1 rounded"
+                    onClick={() => handleDelete(invoice._id)}
+                  >
+                    Delete
+                  </button>
+                  <button 
+                    className="bg-gray-600 text-white px-2 py-1 rounded"
+                    onClick={() => handlePrint(invoice)}
+                  >
+                    Print
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {/* Modal for Create/Edit Invoice */}
-      {showModal && (
-        <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-           
-            <CreateInvoicePage
-              onInvoiceCreate={handleInvoiceSave}
-              existingInvoice={currentInvoice}
-              onCancel={handleCancelModal} // Pass the cancel handler
-            />
+        {/* Modal for Create/Edit Invoice */}
+        {showModal && (
+          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg">
+              <CreateInvoicePage
+                onInvoiceCreate={handleInvoiceSave}
+                existingInvoice={currentInvoice}
+                onCancel={handleCancelModal}
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-    <Footer /> {/* Add Navbar component */}
+        )}
+
+        {/* Print Modal */}
+        {printableInvoice && (
+          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg">
+              <PrintableInvoice invoice={printableInvoice} />
+              <div className="flex justify-center mt-4">
+                <button 
+                  className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
+                  onClick={() => {
+                    window.print();
+                  }}
+                >
+                  Confirm Print
+                </button>
+                <button 
+                  className="bg-gray-600 text-white px-4 py-2 rounded"
+                  onClick={() => setPrintableInvoice(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <Footer />
     </div>
   );
 };
