@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Loader from "../../_components/Loader";
 import {
   Bed,
   Home,
@@ -22,6 +23,7 @@ const SummaryItem = ({ icon: Icon, title, count }) => (
     </div>
   </div>
 );
+
 
 const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -332,6 +334,13 @@ export default function RoomDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all"); // New state for filter
+  useEffect(() => {
+    // Simulate a loading period (e.g., fetching data)
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000); // Adjust time as needed (2 seconds here)
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleDelete = async (roomId) => {
     try {
@@ -512,7 +521,7 @@ export default function RoomDashboard() {
 
         {/* Rooms List */}
         {loading ? (
-          <div className="text-center">Loading...</div>
+          <Loader />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredRooms.map((room) => (

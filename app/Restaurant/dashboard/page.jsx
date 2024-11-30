@@ -3,15 +3,23 @@ import { useEffect, useState } from "react";
 import { Footer } from "@/app/_components/Footer";
 import Navbar from "@/app/_components/Navbar";
 import { Modal, Box, Button,Card,Typography } from "@mui/material";
-
+import Loader from "../../_components/Loader";
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Today");
   const [tables, setTables] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const tabs = ["Today", "Tomorrow", "Day After Tomorrow"];
+  useEffect(() => {
+    // Simulate a loading period (e.g., fetching data)
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500); // Adjust time as needed (2 seconds here)
+    return () => clearTimeout(timer);
+  }, []);
 
   // Fetch table data from the backend
   useEffect(() => {
@@ -74,6 +82,9 @@ export default function Dashboard() {
     setModalOpen(false);
     setSelectedBooking(null);
   };
+  if (loading) {
+    return <Loader />; // Show loader while loading
+  }
 
   return (
     <div className="min-h-screen bg-amber-50">
