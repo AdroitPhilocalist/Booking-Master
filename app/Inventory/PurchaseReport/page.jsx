@@ -13,14 +13,14 @@ const PurchaseReportPage = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState([]);
+  
+  // State for form fields
   const [purchaseorderno, setPurchaseorderno] = useState("");
   const [purchasedate, setPurchasedate] = useState("");
-  const [invoiceno, setInvoiceno] = useState("");
-  const [itemname, setItemname] = useState("");
-  const [unit, setUnit] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [Invoiceno, setInvoiceno] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
-  const [taxpercent, setTaxpercent] = useState("");
   const [total, setTotal] = useState("");
 
   useEffect(() => {
@@ -32,7 +32,9 @@ const PurchaseReportPage = () => {
         ]);
         const itemsData = await itemsResponse.json();
         const purchaseData = await purchaseResponse.json();
+        
         setItems(itemsData.items || []);
+        
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "purchase"
@@ -41,51 +43,61 @@ const PurchaseReportPage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch data", error);
+        setError("Failed to fetch data");
       }
     };
     fetchData();
   }, []);
 
   useEffect(() => {
-    if (quantity && rate && taxpercent) {
-      const taxMultiplier = 1 + parseFloat(taxpercent) / 100;
-      const calculatedTotal = parseFloat(quantity) * parseFloat(rate) * taxMultiplier;
-      setTotal(calculatedTotal.toFixed(2)); 
+    if (quantityAmount && rate && selectedItem) {
+      const taxMultiplier = 1 + (selectedItem.tax / 100);
+      const calculatedTotal = parseFloat(quantityAmount) * parseFloat(rate) * taxMultiplier;
+      setTotal(calculatedTotal.toFixed(2));
     } else {
-      setTotal(""); 
+      setTotal("");
     }
-  }, [quantity, rate, taxpercent]);
+  }, [quantityAmount, rate, selectedItem]);
 
   const handleOpenModal = () => setIsModalOpen(true);
+  
   const handleCloseModal = () => {
+    // Reset all form fields
     setPurchaseorderno("");
     setPurchasedate("");
     setInvoiceno("");
-    setItemname("");
-    setUnit("");
-    setQuantity("");
+    setSelectedItem(null);
+    setQuantityAmount("");
     setRate("");
-    setTaxpercent("");
     setTotal("");
     setIsModalOpen(false);
   };
 
+  const handleItemChange = (itemId) => {
+    const item = items.find((item) => item._id === itemId);
+    setSelectedItem(item || null);
+  };
+
   const handlePurchase = async () => {
+    if (!selectedItem) {
+      setError("Please select an item");
+      return;
+    }
+  
     const purchaseData = {
-      purchaseorderno,
-      purchasedate,
-      invoiceno,
-      name: itemname,
-      unit,
-      quantityAmount: quantity,  // Quantity taken from the field, as quantityAmount
-      rate,
-      taxpercent,
-      total,
-      purorsell: "purchase",
+      purchaseorderno, // String
+      name: selectedItem._id, // ObjectId reference to InventoryList
+      purchasedate: new Date(purchasedate), // Date object
+      Invoiceno, // String
+      quantity: selectedItem._id, // ObjectId reference to InventoryList
+      quantityAmount: parseFloat(quantityAmount), // Number
+      unit: selectedItem._id, // ObjectId reference to InventoryList
+      rate: parseFloat(rate), // Number
+      taxpercent: selectedItem._id, // ObjectId reference to InventoryList
+      total: parseFloat(total), // Number
+      purorsell: "purchase" // String from enum
     };
-
-    console.log("Sending data to API:", purchaseData); // Log the payload for debugging
-
+  
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -94,14 +106,22 @@ const PurchaseReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
-        console.log("Purchase report saved:", result);
-        // Update stock based on the new quantityAmount
-        await updateStockQuantity(itemname, quantity);
+        // Update stock in inventory
+        await updateStockQuantity(
+          selectedItem._id, 
+          parseFloat(quantityAmount), 
+          selectedItem.stock
+        );
+  
+        // Update purchase reports state
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
+        
+        // Close modal
+        handleCloseModal();
       } else {
         setError(result.error || "Failed to save purchase report");
       }
@@ -109,40 +129,31 @@ const PurchaseReportPage = () => {
       console.error("Error saving purchase report:", error);
       setError("Error saving purchase report");
     }
-
-    handleCloseModal();
   };
 
-  const handleItemChange = (itemId) => {
-    setItemname(itemId);
-    const selectedItem = items.find((item) => item._id === itemId);
-    if (selectedItem) {
-      setTaxpercent(selectedItem.tax || "");
-      setUnit(selectedItem.quantityUnit || "");
-    }
-  };
-
-  const updateStockQuantity = async (itemId, quantityAmount) => {
+  const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
-      // Make an API call to update the stock in InventoryList
+      const newStock = currentStock + quantityAmount;
+      
       const response = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          quantity: quantityAmount,
+          stock: newStock,
         }),
       });
 
       const result = await response.json();
-      if (response.ok) {
-        console.log("Stock updated:", result);
-      } else {
+      
+      if (!response.ok) {
         console.error("Failed to update stock:", result);
+        throw new Error("Failed to update stock");
       }
     } catch (error) {
       console.error("Error updating stock:", error);
+      throw error;
     }
   };
 
@@ -255,10 +266,10 @@ const PurchaseReportPage = () => {
             />
             <TextField
               required
-              id="invoiceno"
+              id="Invoiceno"
               label="Invoice No"
               variant="outlined"
-              value={invoiceno}
+              value={Invoiceno}
               onChange={(e) => setInvoiceno(e.target.value)}
               className="w-full"
             />
@@ -266,9 +277,8 @@ const PurchaseReportPage = () => {
               required
               select
               id="itemname"
-              label="Item Name"
               variant="outlined"
-              value={itemname}
+              value={selectedItem?._id || ''}
               onChange={(e) => handleItemChange(e.target.value)}
               className="w-full"
               SelectProps={{
@@ -287,18 +297,27 @@ const PurchaseReportPage = () => {
               id="unit"
               label="Unit"
               variant="outlined"
-              value={unit}
+              value={selectedItem?.quantityUnit || ''}
               disabled
               className="w-full"
             />
             <TextField
               required
-              id="quantity"
-              label="Quantity"
+              id="stock"
+              label="Current Stock"
+              variant="outlined"
+              value={selectedItem?.stock || ''}
+              disabled
+              className="w-full"
+            />
+            <TextField
+              required
+              id="quantityAmount"
+              label="Purchase Quantity"
               variant="outlined"
               type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              value={quantityAmount}
+              onChange={(e) => setQuantityAmount(e.target.value)}
               className="w-full"
             />
             <TextField
@@ -316,9 +335,8 @@ const PurchaseReportPage = () => {
               id="taxpercent"
               label="Tax Percent"
               variant="outlined"
-              type="number"
-              value={taxpercent}
-              onChange={(e) => setTaxpercent(e.target.value)}
+              value={selectedItem?.tax || ''}
+              disabled
               className="w-full"
             />
             <TextField
@@ -333,14 +351,21 @@ const PurchaseReportPage = () => {
             <div className="flex justify-end">
               <Button
                 variant="contained"
-                color="primary"
+                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
                 onClick={handlePurchase}
               >
                 Save
               </Button>
               <Button
                 variant="outlined"
-                color="secondary"
+                sx={{
+                  color: 'red',
+                  borderColor: 'red',
+                  '&:hover': {
+                    borderColor: 'darkred',
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)', 
+                  },
+                }}
                 onClick={handleCloseModal}
                 className="ml-2"
               >
