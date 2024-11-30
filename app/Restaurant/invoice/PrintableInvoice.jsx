@@ -48,6 +48,14 @@ const PrintableInvoice = ({ invoice }) => {
     window.print();
   };
 
+  // Prepare items with name, quantity, price, and total amount
+  const preparedItems = invoice.items.map((menuItem, index) => ({
+    name: menuItem.name || 'Unknown Item',
+    qty: invoice.quantity[index] || 0,
+    rate: menuItem.price || 0,
+    amount: (menuItem.price || 0) * (invoice.quantity[index] || 0)
+  }));
+
   return (
     <>
       {/* Add print-specific styles to the document */}
@@ -111,12 +119,12 @@ const PrintableInvoice = ({ invoice }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {invoice.items.map((item, index) => (
+                {preparedItems.map((item, index) => (
                   <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell>{item.name}</TableCell>
                     <TableCell align="right">{item.qty}</TableCell>
-                    <TableCell align="right">${item.rate.toFixed(2)}</TableCell>
-                    <TableCell align="right">${item.amount.toFixed(2)}</TableCell>
+                    <TableCell align="right">₹{item.rate.toFixed(2)}</TableCell>
+                    <TableCell align="right">₹{item.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -128,7 +136,7 @@ const PrintableInvoice = ({ invoice }) => {
               <Grid container spacing={1}>
                 <Grid item xs={6}>
                   <Typography variant="body1">Subtotal:</Typography>
-                  <Typography variant="body1">GST:</Typography>
+                  <Typography variant="body1">GST ({invoice.gstRate}%):</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
