@@ -78,7 +78,7 @@ const RestaurantBooking = () => {
   // Handle Delete Booking
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`/api/restaurantBookings/${id}`, {
+      const response = await fetch(`/api/RestaurantBooking/${id}`, {
         method: "DELETE",
       });
 
