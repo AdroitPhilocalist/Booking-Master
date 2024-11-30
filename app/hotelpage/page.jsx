@@ -8,7 +8,7 @@ export default function HotelPage() {
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-700 to-cyan-600">
             {/* Logo */}
             <div className="mb-8">
-                <Image src="/Booking Master logo.png" alt="BookingMaster Logo" width={300} height={60} />
+                <Image src="/Hotel-Logo.png" alt="BookingMaster Logo" width={300} height={60} />
             </div>
 
             {/* Hotel Card */}
@@ -69,7 +69,7 @@ export default function HotelPage() {
 
             {/* Footer */}
             <div className="mt-8 text-white text-sm">
-            © {new Date().getFullYear()}, Booking Master. All Rights Reserved.
+            © {new Date().getFullYear()}, Hotel Booking. All Rights Reserved.
             </div>
         </div>
     )

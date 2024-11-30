@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-7xl flex justify-between items-center">
         {/* Logo */}
         <Image
-          src="/Booking Master logo.png"
+          src="/Hotel-Logo.png"
           alt="BookingMaster.in"
           width={190}
           height={60}
@@ -92,6 +92,9 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Restaurant/restaurantbooking">Booking</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Restaurant/invoice">Invoice</Link>
                 </li>
               </ul>
             )}

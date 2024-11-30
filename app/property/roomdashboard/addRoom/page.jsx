@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 export default function NewRoomForm() {
   const [roomNumber, setRoomNumber] = useState("");
@@ -72,24 +77,34 @@ export default function NewRoomForm() {
 
         </div>
         <div className="mb-4">
-          
-          <select
-            className="border rounded w-full p-2"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-          >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.category}
-              </option>
-            ))}
-          </select>
+
+          <Box sx={{ minWidth: 120 }}>
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth >
+              <InputLabel id="demo-simple-select-label" >Select a category</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>Select a category</em>
+                </MenuItem>
+                {categories.map((cat) => (
+                  <MenuItem key={cat._id} value={cat._id}>
+                    {cat.category}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+
+
         </div>
         <div className="mb-4">
           <TextField id="Floor Number" label="Floor Number" variant="outlined"
-          
+
             type="text"
             className="border rounded w-full"
             value={floorNumber}
@@ -97,23 +112,29 @@ export default function NewRoomForm() {
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Clean</label>
-          <select
-            className="border rounded w-full p-2"
+
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}fullWidth >
+          <InputLabel id="demo-clean-select-label ">Clean</InputLabel>
+          <Select
+            labelId="demo-clean-select-label"
+            id="demo-clean-select"
+            
             value={clean}
             onChange={(e) => setClean(e.target.value)}
-            required
           >
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        </div>
+            <MenuItem value="">
+              <em>Choose an option</em>
+            </MenuItem>
+            <MenuItem value="Yes">Yes</MenuItem>
+            <MenuItem value="No">No</MenuItem>
+          </Select>
+        </FormControl>
+
 
 
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
         >
           Add Room
         </button>
