@@ -1,28 +1,69 @@
-"use client"
-import { useEffect, useState } from 'react'
-import { Footer } from '@/app/_components/Footer'
-import Navbar from '@/app/_components/Navbar'
+"use client";
+import { useEffect, useState } from "react";
+import { Footer } from "@/app/_components/Footer";
+import Navbar from "@/app/_components/Navbar";
+import { Modal, Box, Button } from "@mui/material";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('All Tables')
-  const [tables, setTables] = useState([]) // Initialize tables as an empty array
+  const [activeTab, setActiveTab] = useState("Today");
+  const [tables, setTables] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const tabs = ['All Tables', 'In Room Dining', 'Foods of Heaven', 'POOLSIDE CAFE', 'Restaurant', 'House keeping', 'pvt']
+  const tabs = ["Today", "Tomorrow", "Day After Tomorrow"];
 
   // Fetch table data from the backend
   useEffect(() => {
     async function fetchTables() {
       try {
-        const response = await fetch('https://booking-master-psi.vercel.app/api/tables'); // Update the endpoint as needed
+        const response = await fetch("/api/tables");
         const data = await response.json();
-        setTables(data.data); // Set the fetched table data
+        setTables(data.data);
       } catch (error) {
-        console.error('Error fetching tables:', error);
+        console.error("Error fetching tables:", error);
+      }
+    }
+
+    async function fetchBookings() {
+      try {
+        const response = await fetch("/api/RestaurantBooking");
+        const data = await response.json();
+        setBookings(data.data);
+        // console.log(bookings);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
       }
     }
 
     fetchTables();
+    fetchBookings();
   }, []);
+
+  // Filter bookings for today
+  const getBookingsForToday = () => {
+    const currentDate = new Date();
+const year = currentDate.getFullYear();
+const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+const day = String(currentDate.getDate()).padStart(2, '0');
+
+const today = `${year}-${month}-${day}`;
+console.log(today); // Output: YYYY-MM-DD
+
+    console.log(bookings.filter((booking) => booking.date.split("T")[0] === today));
+    // console.log(bookings[1].date.split("T")[0]);
+    return bookings.filter((booking) => booking.date.split("T")[0] === today);
+  };
+
+  const handleBookingDetails = (booking) => {
+    setSelectedBooking(booking);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedBooking(null);
+  };
 
   return (
     <div className="min-h-screen bg-amber-50">
@@ -43,26 +84,7 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="flex space-x-4 mb-6">
-          <div className="w-1/2 bg-blue-100 p-4 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Table</h2>
-            <div className="space-y-2">
-              <div className="flex justify-between bg-green-100 p-2 rounded">
-                <span>Running Tables</span>
-                <span>3</span>
-              </div>
-              <div className="flex justify-between bg-green-100 p-2 rounded">
-                <span>Blank Tables</span>
-                <span>34</span>
-              </div>
-            </div>
-          </div>
-          <div className="w-1/2 bg-yellow-100 p-4 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Room</h2>
-            <div className="bg-red-100 p-2 rounded flex justify-between">
-              <span>Invoice Pending</span>
-              <span>0</span>
-            </div>
-          </div>
+          {/* Summary Section */}
         </div>
 
         <div className="mb-6">
@@ -72,8 +94,8 @@ export default function Dashboard() {
                 key={tab}
                 className={`px-3 py-2 rounded-md text-sm font-medium ${
                   activeTab === tab
-                    ? 'bg-gray-200 text-gray-800'
-                    : 'text-gray-600 hover:bg-gray-200'
+                    ? "bg-gray-200 text-gray-800"
+                    : "text-gray-600 hover:bg-gray-200"
                 }`}
                 onClick={() => setActiveTab(tab)}
               >
@@ -85,46 +107,81 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {tables.length > 0 ? (
-            tables.map((table) => (
-              <div
-                key={table.id}
-                className={`p-4 rounded-lg ${
-                  table.due ? 'bg-red-100' : 'bg-white'
-                } shadow`}
-              >
-                <h3 className="text-lg font-semibold mb-2">Table-{table.tableNo}</h3>
-                {table.due && (
-                  <p className="mb-2">Due - ₹{table.due.toFixed(2)}</p>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <button className="px-2 py-1 bg-teal-500 text-white rounded text-sm">
-                    + Token
-                  </button>
-                  <button className="px-2 py-1 bg-purple-500 text-white rounded text-sm">
-                    + NC Token
-                  </button>
-                  {table.due && (
-                    <>
-                      <button className="px-2 py-1 bg-yellow-500 text-white rounded text-sm">
-                        Print
-                      </button>
-                      <button className="px-2 py-1 bg-blue-500 text-white rounded text-sm">
-                        $ Payment
-                      </button>
-                      <button className="px-2 py-1 bg-green-500 text-white rounded text-sm">
-                        Transfer to Room
-                      </button>
-                    </>
+            tables.map((table) => {
+              const todayBookings = getBookingsForToday();
+              const booking = todayBookings.find(
+                (b) => b.tableNo === table.tableNo
+              );
+
+              return (
+                <div
+                  key={table._id}
+                  className={`p-4 rounded-lg ${
+                    booking ? "bg-green-100" : "bg-white"
+                  } shadow`}
+                >
+                  <h3 className="text-lg font-semibold mb-2">Table-{table.tableNo}</h3>
+                  {booking && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => handleBookingDetails(booking)}
+                    >
+                      Booking Details
+                    </Button>
                   )}
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p>No tables available.</p>
           )}
         </div>
       </main>
+
       <Footer />
+
+      {/* Booking Details Modal */}
+      {selectedBooking && (
+        <Modal open={modalOpen} onClose={closeModal}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+            }}
+          >
+            <h2 className="text-lg font-bold mb-2">Booking Details</h2>
+            <p>
+              <strong>Table:</strong> {selectedBooking.tableNo}
+            </p>
+            <p>
+              <strong>Date:</strong> {new Date(selectedBooking.date).toDateString()}
+            </p>
+            <p>
+              <strong>Time:</strong> {selectedBooking.time}
+            </p>
+            <p>
+              <strong>Guest Name:</strong> {selectedBooking.guestName}
+            </p>
+            <Button
+              onClick={closeModal}
+              variant="contained"
+              color="secondary"
+              sx={{ mt: 2 }}
+            >
+              Close
+            </Button>
+          </Box>
+        </Modal>
+      )}
     </div>
-  )
+  );
 }
