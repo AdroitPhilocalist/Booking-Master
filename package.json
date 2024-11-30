@@ -17,6 +17,7 @@
     "@mui/styles": "^6.1.9",
     "axios": "^1.7.8",
     "dotenv": "^16.4.5",
+    "file-saver": "^2.0.5",
     "formidable": "^3.5.1",
     "fs-extra": "^11.2.0",
     "jspdf": "^2.5.2",
@@ -24,6 +25,7 @@
     "mongodb": "^6.9.0",
     "mongoose": "^8.6.2",
     "next": "14.1.4",
+    "pdf-lib": "^1.17.1",
     "react": "^18",
     "react-dom": "^18"
   },
