@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Footer } from "@/app/_components/Footer";
 import Navbar from "@/app/_components/Navbar";
-import { Modal, Box, Button } from "@mui/material";
+import { Modal, Box, Button,Card,Typography } from "@mui/material";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Today");
@@ -41,19 +41,29 @@ export default function Dashboard() {
   }, []);
 
   // Filter bookings for today
-  const getBookingsForToday = () => {
+  const getBookingsForSelectedDay = () => {
     const currentDate = new Date();
-const year = currentDate.getFullYear();
-const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-const day = String(currentDate.getDate()).padStart(2, '0');
-
-const today = `${year}-${month}-${day}`;
-console.log(today); // Output: YYYY-MM-DD
-
-    console.log(bookings.filter((booking) => booking.date.split("T")[0] === today));
-    // console.log(bookings[1].date.split("T")[0]);
-    return bookings.filter((booking) => booking.date.split("T")[0] === today);
+  
+    // Adjust the date based on the activeTab
+    if (activeTab === 'Tomorrow') {
+      currentDate.setDate(currentDate.getDate() + 1);
+    } else if (activeTab === 'Day After Tomorrow') {
+      currentDate.setDate(currentDate.getDate() + 2);
+    }
+  
+    // Format the date to YYYY-MM-DD
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const selectedDate = `${year}-${month}-${day}`;
+  
+    console.log(activeTab);
+    console.log(selectedDate); // Output: YYYY-MM-DD
+  
+    // Filter bookings based on the selected date
+    return bookings.filter((booking) => booking.date.split("T")[0] === selectedDate);
   };
+  
 
   const handleBookingDetails = (booking) => {
     setSelectedBooking(booking);
@@ -108,7 +118,7 @@ console.log(today); // Output: YYYY-MM-DD
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {tables.length > 0 ? (
             tables.map((table) => {
-              const todayBookings = getBookingsForToday();
+              const todayBookings = getBookingsForSelectedDay();
               const booking = todayBookings.find(
                 (b) => b.tableNo === table.tableNo
               );
@@ -142,46 +152,89 @@ console.log(today); // Output: YYYY-MM-DD
 
       <Footer />
 
-      {/* Booking Details Modal */}
-      {selectedBooking && (
-        <Modal open={modalOpen} onClose={closeModal}>
-          <Box
+      {/* Stylish Booking Details Modal */}
+{selectedBooking && (
+  <Modal open={modalOpen} onClose={closeModal}>
+     <Box
+  sx={{
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 450,
+    background: "linear-gradient(135deg, #9B6FCE, #4E92D6)", // Lighter gradient colors
+    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)", // Shadow for depth
+    borderRadius: 3,
+    p: 3,
+    overflow: "hidden",
+  }}
+>
+
+
+      <Card
+        sx={{
+          bgcolor: "#f9f9f9",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+          borderRadius: 2,
+          padding: 3,
+        }}
+      >
+        {/* Header */}
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            color: "#007BFF",
+            textAlign: "center",
+            mb: 2,
+          }}
+        >
+          Booking Details
+        </Typography>
+
+        {/* Booking Information */}
+        <Typography variant="body1" sx={{ mb: 1 }}>
+          <strong>Table:</strong> {selectedBooking.tableNo}
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 1 }}>
+          <strong>Date:</strong>{" "}
+          {new Date(selectedBooking.date).toDateString()}
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 1 }}>
+          <strong>Time:</strong> {selectedBooking.time}
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          <strong>Guest Name:</strong> {selectedBooking.guestName}
+        </Typography>
+
+        {/* Footer */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mt: 3,
+          }}
+        >
+          <Button
+            onClick={closeModal}
+            variant="contained"
             sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: 2,
+              bgcolor: "#007BFF",
+              color: "white",
+              ":hover": { bgcolor: "#0056b3" },
+              px: 4,
+              borderRadius: "20px",
+              textTransform: "capitalize",
             }}
           >
-            <h2 className="text-lg font-bold mb-2">Booking Details</h2>
-            <p>
-              <strong>Table:</strong> {selectedBooking.tableNo}
-            </p>
-            <p>
-              <strong>Date:</strong> {new Date(selectedBooking.date).toDateString()}
-            </p>
-            <p>
-              <strong>Time:</strong> {selectedBooking.time}
-            </p>
-            <p>
-              <strong>Guest Name:</strong> {selectedBooking.guestName}
-            </p>
-            <Button
-              onClick={closeModal}
-              variant="contained"
-              color="secondary"
-              sx={{ mt: 2 }}
-            >
-              Close
-            </Button>
-          </Box>
-        </Modal>
-      )}
+            Close
+          </Button>
+        </Box>
+      </Card>
+    </Box>
+  </Modal>
+)}
+
     </div>
   );
 }
