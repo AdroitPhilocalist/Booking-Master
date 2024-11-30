@@ -106,7 +106,7 @@ const InvoicePage = () => {
   };
 
   return (
-    <div>
+    <div className="bg-amber-50 min-h-screen">
       <Navbar /> {/* Add Navbar component */}
       <div className="p-4">
       <h1 className="text-3xl font-bold mb-4">Restaurant Invoices</h1>
