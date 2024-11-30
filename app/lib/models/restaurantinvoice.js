@@ -1,40 +1,54 @@
 import mongoose from "mongoose";
 
-const restaurantInvoiceSchema = new mongoose.Schema({
-
-    invoiceno:{
-        type:Number,
-        required: true
+const restaurantInvoiceSchema = new mongoose.Schema(
+  {
+    invoiceno: {
+      type: Number,
+      required: true,
     },
-    date:{
-        type: Date,
-        required: true
+    date: {
+      type: Date,
+      required: true,
     },
-    time:{
-        type: String,
-        required:true
+    time: {
+      type: String,
+      required: true,
     },
-    custname:{
-        type:String,
-        required:true
+    custname: {
+      type: String,
+      required: true,
     },
-    totalamt:{
-        type:Number,
-        required: true        
+    quantity:{
+        type: [Number],
+        required: true,
     },
-    gst:{
-        type:Number,
-        required: true
-    },
-    payableamt:{
-        type:Number,
-        required: true
+    
+    menuitem: {
+        type: [String],
         
-    }
+        required: true,
     },
-    {
-        timestamps: true
-    }
+    price: {
+      type: [Number],
+      required: true,
+    },
+    totalamt: {
+      type: Number,
+      required: true,
+    },
+    gst: {
+      type: Number,
+      required: true,
+    },
+    payableamt: {
+      type: Number,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.models.restaurantinvoice||mongoose.model('restaurantinvoice',restaurantInvoiceSchema);
+export default mongoose.models.restaurantinvoice ||
+  mongoose.model("restaurantinvoice", restaurantInvoiceSchema);

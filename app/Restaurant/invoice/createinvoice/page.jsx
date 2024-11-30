@@ -1,16 +1,60 @@
-"use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 
-const CreateInvoicePage = ({ onInvoiceCreate }) => {
+
+
+
+
+
+ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice }) => {
+  const [menu,setmenu] = useState();
   const [formData, setFormData] = useState({
-    invoiceno: '',
-    date: '',
-    time:'',
-    custname: '',
-    totalamt: '',
-    gst: '',
-    payableamt: '',
+    invoiceno: "",
+    date: "",
+    time: "",
+    custname: "",
+    itemName:"",
+    quantity:"",
+    price:"",
+
+    totalamt: "",
+    gst: "",
+    payableamt: "",
   });
+
+  useEffect( ()=>{
+    const fetchmenu=async()=>{
+      try{
+        const menuresponse=await fetch("/api/menuItem");
+        const menudata=await menuresponse.json();
+        console.log(menudata.data);
+        setmenu(menudata.data);
+        console.log(menu);
+      }
+      catch(error){
+        console.error("failed to fetch data",error);
+      }
+    };
+    fetchmenu();
+  },
+  
+  []
+  );
+
+  useEffect(() => {
+    if (existingInvoice) {
+      setFormData({
+        invoiceno: existingInvoice.invoiceno || "",
+        date: existingInvoice.date
+          ? new Date(existingInvoice.date).toISOString().split("T")[0]
+          : "", // Format to YYYY-MM-DD
+        time: existingInvoice.time || "",
+        custname: existingInvoice.custname || "",
+        totalamt: existingInvoice.totalamt || "",
+        gst: existingInvoice.gst || "",
+        payableamt: existingInvoice.payableamt || "",
+      });
+    }
+  }, [existingInvoice]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,108 +63,95 @@ const CreateInvoicePage = ({ onInvoiceCreate }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/restaurantinvoice', {
-        method: 'POST',
+      const method = existingInvoice ? "PUT" : "POST";
+      const url = existingInvoice
+        ? `/api/restaurantinvoice/${existingInvoice._id}`
+        : "/api/restaurantinvoice";
+
+      const response = await fetch(url, {
+        method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData), // Ensure formData contains all required fields
+        body: JSON.stringify(formData),
       });
-  
+
       const data = await response.json();
-  
       if (response.ok) {
-        // Notify the parent component (InvoicePage) about the new invoice
-        if (onInvoiceCreate) {
-          onInvoiceCreate(data.data); // Pass the newly created invoice back
-        }
-  
-        // Reset the form
+        console.log("Invoice saved successfully:", data);
+        if (onInvoiceCreate) onInvoiceCreate(data.data);
         setFormData({
-          invoiceno: '',
-          date: '',
-          time:'',
-          custname: '',
-          totalamt: '',
-          gst: '',
-          payableamt: '',
+          invoiceno: "",
+          date: "",
+          time: "",
+          custname: "",
+          totalamt: "",
+          gst: "",
+          payableamt: "",
         });
       } else {
-        console.error(data.error);
+        console.error("Error saving invoice:", data.error);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error during invoice save:", error);
     }
   };
-  
+
   return (
     <div>
-      <h1>Create Invoice</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Invoice No.:
-          <input
-            type="text"
-            name="invoiceno"
-            value={formData.invoiceno}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Date:
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Time:
-          <input
-            type="time"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Customer Name:
-          <input
-            type="text"
-            name="custname"
-            value={formData.custname}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Total Amount:
-          <input
-            type="number"
-            name="totalamt"
-            value={formData.totalamt}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          GST:
-          <input
-            type="number"
-            name="gst"
-            value={formData.gst}
-            onChange={handleChange}
-          />
-        </label>
-        <label>
-          Payable Amount:
-          <input
-            type="number"
-            name="payableamt"
-            value={formData.payableamt}
-            onChange={handleChange}
-          />
-        </label>
-        <button type="submit">Create Invoice</button>
+      <h2 className="text-2xl font-bold mb-4 text-center">Create Invoice</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {[
+          { label: "Invoice No.", name: "invoiceno", type: "text" },
+          { label: "Date", name: "date", type: "date" },
+          { label: "Time", name: "time", type: "time" },
+          { label: "Customer Name", name: "custname", type: "text" },
+          {label:"select menu item", name:"menuitem", type:"text"},
+
+          { label: "Total Amount", name: "totalamt", type: "number" },
+          { label: "GST", name: "gst", type: "number" },
+          { label: "Payable Amount", name: "payableamt", type: "number" },
+        ].map(({ label, name, type }) => (
+          <label key={name} className="block">
+            {label}
+            <input
+              type={type}
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md"
+              required
+            />
+          </label>
+        ))}
+        <select 
+        label="select menu item"
+        name="menuitem"
+        type="text"
+        > <option value="">select item</option>
+        {menu.map((item)=>(
+          <option key={item._id} value={item._id}>
+           {menu.itemName}
+
+
+          </option>
+        ))}
+        </select>
+        <div className="flex justify-center gap-4">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            className="bg-gray-400 text-white px-4 py-2 rounded"
+            onClick={() => setFormData({})}
+          >
+            Reset
+          </button>
+        </div>
       </form>
     </div>
   );
