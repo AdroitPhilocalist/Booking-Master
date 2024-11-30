@@ -8,7 +8,7 @@ export async function GET(req) {
     try {
         await mongoose.connect(connectSTR);
         const invoices = await restaurantinvoice.find({});
-        return NextResponse.json({ success: true, data: invoices }, { status: 200 });
+        return NextResponse.json({ invoices });
     } catch (error) {
         console.error('Error fetching invoices:', error);
         return NextResponse.json({ success: false, error: 'Failed to fetch invoices' }, { status: 400 });

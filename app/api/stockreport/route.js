@@ -6,10 +6,15 @@ import { NextResponse } from "next/server";
 
 const connectToDatabase = async () => {
   if (mongoose.connections[0].readyState) return;
-  await mongoose.connect(connectSTR, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  try {
+    await mongoose.connect(connectSTR, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  } catch (err) {
+    console.error("Database connection error:", err.message);
+    throw new Error("Database connection failed.");
+  }
 };
 
 // GET all stock reports with populated inventory references
@@ -24,7 +29,7 @@ export async function GET() {
 
     return NextResponse.json({ stockReports });
   } catch (error) {
-    console.error("Error fetching stock reports:", error);
+    console.error("Error fetching stock reports:", error.message);
     return NextResponse.json(
       { error: "Error fetching stock reports from the database" },
       { status: 500 }
@@ -73,7 +78,7 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error adding stock report:", error);
+    console.error("Error adding stock report:", error.message);
     return NextResponse.json(
       { error: "Error adding stock report to the database" },
       { status: 500 }
