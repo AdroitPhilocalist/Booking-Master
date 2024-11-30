@@ -7,13 +7,20 @@ import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
-const PurchaseReportPage = () => {
+const SalesReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState([]);
-  
+
   // State for form fields
   const [purchaseorderno, setPurchaseorderno] = useState("");
   const [purchasedate, setPurchasedate] = useState("");
@@ -22,6 +29,8 @@ const PurchaseReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 5;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,9 +41,9 @@ const PurchaseReportPage = () => {
         ]);
         const itemsData = await itemsResponse.json();
         const purchaseData = await purchaseResponse.json();
-        
+
         setItems(itemsData.items || []);
-        
+
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "sell"
@@ -59,8 +68,10 @@ const PurchaseReportPage = () => {
     }
   }, [quantityAmount, rate, selectedItem]);
 
+  const handlePageChange = (event, newPage) => setPage(newPage);
+
   const handleOpenModal = () => setIsModalOpen(true);
-  
+
   const handleCloseModal = () => {
     // Reset all form fields
     setPurchaseorderno("");
@@ -83,7 +94,7 @@ const PurchaseReportPage = () => {
       setError("Please select an item");
       return;
     }
-  
+
     const purchaseData = {
       purchaseorderno, // String
       name: selectedItem._id, // ObjectId reference to InventoryList
@@ -97,7 +108,7 @@ const PurchaseReportPage = () => {
       total: parseFloat(total), // Number
       purorsell: "sell" // String from enum
     };
-  
+
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -106,35 +117,35 @@ const PurchaseReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         // Update stock in inventory
         await updateStockQuantity(
-          selectedItem._id, 
-          parseFloat(quantityAmount), 
+          selectedItem._id,
+          parseFloat(quantityAmount),
           selectedItem.stock
         );
-  
+
         // Update purchase reports state
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
-        
+
         // Close modal
         handleCloseModal();
       } else {
-        setError(result.error || "Failed to save purchase report");
+        setError(result.error || "Failed to save sales report");
       }
     } catch (error) {
-      console.error("Error saving purchase report:", error);
-      setError("Error saving purchase report");
+      console.error("Error saving sales report:", error);
+      setError("Error saving sales report");
     }
   };
 
   const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
       const newStock = currentStock - quantityAmount;
-      
+
       const response = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: {
@@ -146,7 +157,7 @@ const PurchaseReportPage = () => {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         console.error("Failed to update stock:", result);
         throw new Error("Failed to update stock");
@@ -161,80 +172,70 @@ const PurchaseReportPage = () => {
     return <div>Error: {error}</div>;
   }
 
+  const paginatedReports = purchaseReports.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Purchase Report</h1>
+          <h1 className="text-2xl font-bold">Sales Report</h1>
           <Button
             variant="contained"
-            color="success"
+            color="error"
             onClick={handleOpenModal}
           >
             Sell Stock
           </Button>
         </div>
 
-        <table className="table-auto w-full border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-cyan-900 text-white">
-              <th className="border border-gray-300 px-4 py-2">Purchase No</th>
-              <th className="border border-gray-300 px-4 py-2">Item Name</th>
-              <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
-              <th className="border border-gray-300 px-4 py-2">Invoice No</th>
-              <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
-              <th className="border border-gray-300 px-4 py-2">Unit</th>
-              <th className="border border-gray-300 px-4 py-2">Rate</th>
-              <th className="border border-gray-300 px-4 py-2">Tax Percent</th>
-              <th className="border border-gray-300 px-4 py-2">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {purchaseReports.length > 0 ? (
-              purchaseReports.map((report) => (
-                <tr key={report._id} className="bg-red-200">
-                  <td className="border border-gray-300 px-10 py-2">
-                    {report.purchaseorderno}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.name?.name}
-                  </td>
-                  <td className="border border-gray-300 px-8 py-2">
-                    {new Date(report.purchasedate).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 px-8 py-2">
-                    {report.Invoiceno}
-                  </td>
-                  <td className="border border-gray-300 px-20 py-2">
-                    {report.quantity?.stock}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.unit?.quantityUnit}
-                  </td>
-                  <td className="border border-gray-300 px-6 py-2">
-                    {report.rate}
-                  </td>
-                  <td className="border border-gray-300 px-16 py-2">
-                    {report.taxpercent?.tax}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.total}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="9"
-                  className="border border-gray-300 px-4 py-2 text-center"
-                >
-                  No purchase reports available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#164E63" }}>
+                <TableCell sx={{ color: "white" }}>Sales No</TableCell>
+                <TableCell sx={{ color: "white" }}>Item Name</TableCell>
+                <TableCell sx={{ color: "white" }}>Sales Date</TableCell>
+                <TableCell sx={{ color: "white" }}>Invoice No</TableCell>
+                <TableCell sx={{ color: "white" }}>Available Quantity</TableCell>
+                <TableCell sx={{ color: "white" }}>Unit</TableCell>
+                <TableCell sx={{ color: "white" }}>Rate</TableCell>
+                <TableCell sx={{ color: "white" }}>Tax Percent</TableCell>
+                <TableCell sx={{ color: "white" }}>Total</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedReports.length > 0 ? (
+                paginatedReports.map((report) => (
+                  <TableRow key={report._id} sx={{ backgroundColor: "#FECACA" }}>
+                    <TableCell>{report.purchaseorderno}</TableCell>
+                    <TableCell>{report.name?.name}</TableCell>
+                    <TableCell>
+                      {new Date(report.purchasedate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{report.Invoiceno}</TableCell>
+                    <TableCell>{report.quantity?.stock}</TableCell>
+                    <TableCell>{report.unit?.quantityUnit}</TableCell>
+                    <TableCell>{report.rate}</TableCell>
+                    <TableCell>{report.taxpercent?.tax}</TableCell>
+                    <TableCell>{report.total}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    No Sales reports available.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+
+
+          </Table>
+        </TableContainer>
       </div>
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
@@ -242,12 +243,12 @@ const PurchaseReportPage = () => {
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 w-1/2 shadow-md max-h-[90%] overflow-y-auto"
           sx={{ borderRadius: 2 }}
         >
-          <h2 className="text-xl font-bold mb-4">New Purchase</h2>
+          <h2 className="text-xl font-bold mb-4">New Sales</h2>
           <form className="space-y-4">
             <TextField
               required
               id="purchaseorderno"
-              label="Purchase Order No"
+              label="Sales Order No"
               variant="outlined"
               value={purchaseorderno}
               onChange={(e) => setPurchaseorderno(e.target.value)}
@@ -256,7 +257,7 @@ const PurchaseReportPage = () => {
             <TextField
               required
               id="purchasedate"
-              label="Purchase Date"
+              label="Sales Date"
               variant="outlined"
               type="date"
               InputLabelProps={{ shrink: true }}
@@ -313,7 +314,7 @@ const PurchaseReportPage = () => {
             <TextField
               required
               id="quantityAmount"
-              label="Purchase Quantity"
+              label="Sales Quantity"
               variant="outlined"
               type="number"
               value={quantityAmount}
@@ -348,7 +349,7 @@ const PurchaseReportPage = () => {
               disabled
               className="w-full"
             />
-            <div className="flex justify-end">
+            <div className="flex justify-end ml-2">
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
@@ -363,7 +364,7 @@ const PurchaseReportPage = () => {
                   borderColor: 'red',
                   '&:hover': {
                     borderColor: 'darkred',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)', 
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
                 }}
                 onClick={handleCloseModal}
@@ -381,4 +382,4 @@ const PurchaseReportPage = () => {
   );
 };
 
-export default PurchaseReportPage;
+export default SalesReportPage;

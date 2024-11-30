@@ -7,6 +7,13 @@ import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -22,6 +29,8 @@ const PurchaseReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 5;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,6 +67,8 @@ const PurchaseReportPage = () => {
       setTotal("");
     }
   }, [quantityAmount, rate, selectedItem]);
+
+  const handlePageChange = (event, newPage) => setPage(newPage);
 
   const handleOpenModal = () => setIsModalOpen(true);
   
@@ -161,6 +172,11 @@ const PurchaseReportPage = () => {
     return <div>Error: {error}</div>;
   }
 
+  const paginatedReports = purchaseReports.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
@@ -176,65 +192,48 @@ const PurchaseReportPage = () => {
           </Button>
         </div>
 
-        <table className="table-auto w-full border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-cyan-900 text-white">
-              <th className="border border-gray-300 px-4 py-2">Purchase No</th>
-              <th className="border border-gray-300 px-4 py-2">Item Name</th>
-              <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
-              <th className="border border-gray-300 px-4 py-2">Invoice No</th>
-              <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
-              <th className="border border-gray-300 px-4 py-2">Unit</th>
-              <th className="border border-gray-300 px-4 py-2">Rate</th>
-              <th className="border border-gray-300 px-4 py-2">Tax Percent</th>
-              <th className="border border-gray-300 px-4 py-2">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {purchaseReports.length > 0 ? (
-              purchaseReports.map((report) => (
-                <tr key={report._id} className="bg-green-200">
-                  <td className="border border-gray-300 px-10 py-2">
-                    {report.purchaseorderno}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.name?.name}
-                  </td>
-                  <td className="border border-gray-300 px-8 py-2">
-                    {new Date(report.purchasedate).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 px-8 py-2">
-                    {report.Invoiceno}
-                  </td>
-                  <td className="border border-gray-300 px-20 py-2">
-                    {report.quantity?.stock}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.unit?.quantityUnit}
-                  </td>
-                  <td className="border border-gray-300 px-6 py-2">
-                    {report.rate}
-                  </td>
-                  <td className="border border-gray-300 px-16 py-2">
-                    {report.taxpercent?.tax}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.total}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="9"
-                  className="border border-gray-300 px-4 py-2 text-center"
-                >
-                  No purchase reports available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#164E63" }}>
+                <TableCell sx={{ color: "white" }}>Purchase No</TableCell>
+                <TableCell sx={{ color: "white" }}>Item Name</TableCell>
+                <TableCell sx={{ color: "white" }}>Purchase Date</TableCell>
+                <TableCell sx={{ color: "white" }}>Invoice No</TableCell>
+                <TableCell sx={{ color: "white" }}>Available Quantity</TableCell>
+                <TableCell sx={{ color: "white" }}>Unit</TableCell>
+                <TableCell sx={{ color: "white" }}>Rate</TableCell>
+                <TableCell sx={{ color: "white" }}>Tax Percent</TableCell>
+                <TableCell sx={{ color: "white" }}>Total</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedReports.length > 0 ? (
+                paginatedReports.map((report) => (
+                  <TableRow key={report._id} sx={{ backgroundColor: "#BBF7D0" }}>
+                    <TableCell>{report.purchaseorderno}</TableCell>
+                    <TableCell>{report.name?.name}</TableCell>
+                    <TableCell>
+                      {new Date(report.purchasedate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{report.Invoiceno}</TableCell>
+                    <TableCell>{report.quantity?.stock}</TableCell>
+                    <TableCell>{report.unit?.quantityUnit}</TableCell>
+                    <TableCell>{report.rate}</TableCell>
+                    <TableCell>{report.taxpercent?.tax}</TableCell>
+                    <TableCell>{report.total}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    No Purchase reports available.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>    
       </div>
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
