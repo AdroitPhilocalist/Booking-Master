@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
@@ -14,15 +14,14 @@ import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState([]);
-  
+
   const [purchaseorderno, setPurchaseorderno] = useState("");
   const [purchasedate, setPurchasedate] = useState("");
   const [Invoiceno, setInvoiceno] = useState("");
@@ -30,7 +29,10 @@ const PurchaseReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+
+  // Filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,13 +43,14 @@ const PurchaseReportPage = () => {
         ]);
         const itemsData = await itemsResponse.json();
         const purchaseData = await purchaseResponse.json();
-        
+
         setItems(itemsData.items || []);
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "purchase"
           );
           setPurchaseReports(purchases);
+          setFilteredReports(purchases);
         }
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -68,7 +71,7 @@ const PurchaseReportPage = () => {
   }, [quantityAmount, rate, selectedItem]);
 
   const handleOpenModal = () => setIsModalOpen(true);
-  
+
   const handleCloseModal = () => {
     setPurchaseorderno("");
     setPurchasedate("");
@@ -90,11 +93,19 @@ const PurchaseReportPage = () => {
       setError("Please select an item");
       return;
     }
-  
+
+    // Format the purchase date
+    const formatDate = (date) => {
+      const [year, month, day] = date.split("-");
+      return `${day}/${month}/${year}`;
+    };
+
+    const formattedPurchaseDate = formatDate(purchasedate);
+
     const purchaseData = {
       purchaseorderno,
       name: selectedItem._id,
-      purchasedate: new Date(purchasedate),
+      purchasedate: formattedPurchaseDate,
       Invoiceno,
       quantity: selectedItem._id,
       quantityAmount: parseFloat(quantityAmount),
@@ -102,9 +113,9 @@ const PurchaseReportPage = () => {
       rate: parseFloat(rate),
       taxpercent: selectedItem._id,
       total: parseFloat(total),
-      purorsell: "purchase"
+      purorsell: "purchase",
     };
-  
+
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -113,13 +124,13 @@ const PurchaseReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         await updateStockQuantity(
-          selectedItem._id, 
-          parseFloat(quantityAmount), 
+          selectedItem._id,
+          parseFloat(quantityAmount),
           selectedItem.stock
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
@@ -132,6 +143,7 @@ const PurchaseReportPage = () => {
       setError("Error saving purchase report");
     }
   };
+
 
   const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
@@ -154,6 +166,40 @@ const PurchaseReportPage = () => {
     }
   };
 
+  const filterByDate = () => {
+    if (startDate && endDate) {
+      const parseDate = (dateStr) => {
+        // Parse the date from dd/mm/yyyy to yyyy-mm-dd
+        const [day, month, year] = dateStr.split("/");
+        return new Date(`${year}-${month}-${day}`);
+      };
+  
+      const start = parseDate(startDate);
+      const end = parseDate(endDate);
+  
+      // Ensure the dates are set to 00:00:00 for accurate comparison
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+  
+      const filtered = purchaseReports.filter((report) => {
+        const [year, month, day] = report.purchasedate.split("-");
+        const purchaseDate = new Date(`${year}-${month}-${day}`);
+  
+        // Set purchaseDate to 00:00:00 for consistency
+        purchaseDate.setHours(0, 0, 0, 0);
+  
+        return purchaseDate >= start && purchaseDate <= end;
+      });
+  
+      setFilteredReports(filtered);
+    } else {
+      setFilteredReports(purchaseReports);
+    }
+  };
+  
+
+
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -167,9 +213,48 @@ const PurchaseReportPage = () => {
           <Button
             variant="contained"
             color="success"
-            onClick={handleOpenModal}
+            onClick={() => setIsModalOpen(true)}
           >
             Purchase Stock
+          </Button>
+        </div>
+
+        <div className="flex space-x-4 mb-6">
+          <TextField
+            label="Start Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full"
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={filterByDate}
+            className="ml-4"
+          >
+            Filter
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+              setFilteredReports(purchaseReports); // Reset to show all reports
+            }}
+            className="ml-4"
+          >
+            Reset
           </Button>
         </div>
 
@@ -189,14 +274,21 @@ const PurchaseReportPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {purchaseReports.length > 0 ? (
-                purchaseReports.map((report) => (
+              {filteredReports.length > 0 ? (
+                filteredReports.map((report) => (
                   <TableRow key={report._id} sx={{ backgroundColor: "#BBF7D0" }}>
                     <TableCell>{report.purchaseorderno}</TableCell>
                     <TableCell>{report.name?.name}</TableCell>
                     <TableCell>
-                      {new Date(report.purchasedate).toLocaleDateString()}
+                      {(() => {
+                        const date = new Date(report.purchasedate);
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+                        const year = date.getFullYear();
+                        return `${day}/${month}/${year}`;
+                      })()}
                     </TableCell>
+
                     <TableCell>{report.Invoiceno}</TableCell>
                     <TableCell>{report.quantity?.stock}</TableCell>
                     <TableCell>{report.unit?.quantityUnit}</TableCell>
@@ -213,8 +305,9 @@ const PurchaseReportPage = () => {
                 </TableRow>
               )}
             </TableBody>
+
           </Table>
-        </TableContainer>    
+        </TableContainer>
       </div>
 
 
@@ -344,7 +437,7 @@ const PurchaseReportPage = () => {
                   borderColor: 'red',
                   '&:hover': {
                     borderColor: 'darkred',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)', 
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
                 }}
                 onClick={handleCloseModal}
