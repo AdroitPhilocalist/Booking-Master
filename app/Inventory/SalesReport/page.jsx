@@ -208,8 +208,8 @@ const SalesReportPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedReports.length > 0 ? (
-                paginatedReports.map((report) => (
+              {purchaseReports.length > 0 ? (
+                purchaseReports.map((report) => (
                   <TableRow key={report._id} sx={{ backgroundColor: "#FECACA" }}>
                     <TableCell>{report.purchaseorderno}</TableCell>
                     <TableCell>{report.name?.name}</TableCell>

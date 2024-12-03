@@ -13,7 +13,9 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -21,7 +23,6 @@ const PurchaseReportPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState([]);
   
-  // State for form fields
   const [purchaseorderno, setPurchaseorderno] = useState("");
   const [purchasedate, setPurchasedate] = useState("");
   const [Invoiceno, setInvoiceno] = useState("");
@@ -29,8 +30,7 @@ const PurchaseReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 5;
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +43,6 @@ const PurchaseReportPage = () => {
         const purchaseData = await purchaseResponse.json();
         
         setItems(itemsData.items || []);
-        console.log(itemsData.items);
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "purchase"
@@ -68,12 +67,9 @@ const PurchaseReportPage = () => {
     }
   }, [quantityAmount, rate, selectedItem]);
 
-  const handlePageChange = (event, newPage) => setPage(newPage);
-
   const handleOpenModal = () => setIsModalOpen(true);
   
   const handleCloseModal = () => {
-    // Reset all form fields
     setPurchaseorderno("");
     setPurchasedate("");
     setInvoiceno("");
@@ -96,17 +92,17 @@ const PurchaseReportPage = () => {
     }
   
     const purchaseData = {
-      purchaseorderno, // String
-      name: selectedItem._id, // ObjectId reference to InventoryList
-      purchasedate: new Date(purchasedate), // Date object
-      Invoiceno, // String
-      quantity: selectedItem._id, // ObjectId reference to InventoryList
-      quantityAmount: parseFloat(quantityAmount), // Number
-      unit: selectedItem._id, // ObjectId reference to InventoryList
-      rate: parseFloat(rate), // Number
-      taxpercent: selectedItem._id, // ObjectId reference to InventoryList
-      total: parseFloat(total), // Number
-      purorsell: "purchase" // String from enum
+      purchaseorderno,
+      name: selectedItem._id,
+      purchasedate: new Date(purchasedate),
+      Invoiceno,
+      quantity: selectedItem._id,
+      quantityAmount: parseFloat(quantityAmount),
+      unit: selectedItem._id,
+      rate: parseFloat(rate),
+      taxpercent: selectedItem._id,
+      total: parseFloat(total),
+      purorsell: "purchase"
     };
   
     try {
@@ -121,17 +117,12 @@ const PurchaseReportPage = () => {
       const result = await response.json();
   
       if (response.ok) {
-        // Update stock in inventory
         await updateStockQuantity(
           selectedItem._id, 
           parseFloat(quantityAmount), 
           selectedItem.stock
         );
-  
-        // Update purchase reports state
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
-        
-        // Close modal
         handleCloseModal();
       } else {
         setError(result.error || "Failed to save purchase report");
@@ -145,21 +136,16 @@ const PurchaseReportPage = () => {
   const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
       const newStock = currentStock + quantityAmount;
-      
       const response = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          stock: newStock,
-        }),
+        body: JSON.stringify({ stock: newStock }),
       });
 
       const result = await response.json();
-      
       if (!response.ok) {
-        console.error("Failed to update stock:", result);
         throw new Error("Failed to update stock");
       }
     } catch (error) {
@@ -171,11 +157,6 @@ const PurchaseReportPage = () => {
   if (error) {
     return <div>Error: {error}</div>;
   }
-
-  const paginatedReports = purchaseReports.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
 
   return (
     <div className="bg-amber-50 min-h-screen">
@@ -208,8 +189,8 @@ const PurchaseReportPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedReports.length > 0 ? (
-                paginatedReports.map((report) => (
+              {purchaseReports.length > 0 ? (
+                purchaseReports.map((report) => (
                   <TableRow key={report._id} sx={{ backgroundColor: "#BBF7D0" }}>
                     <TableCell>{report.purchaseorderno}</TableCell>
                     <TableCell>{report.name?.name}</TableCell>
@@ -235,6 +216,7 @@ const PurchaseReportPage = () => {
           </Table>
         </TableContainer>    
       </div>
+
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box
