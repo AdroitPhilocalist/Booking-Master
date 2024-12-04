@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
@@ -7,14 +7,21 @@ import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState([]);
-  
-  // State for form fields
+
   const [purchaseorderno, setPurchaseorderno] = useState("");
   const [purchasedate, setPurchasedate] = useState("");
   const [Invoiceno, setInvoiceno] = useState("");
@@ -22,6 +29,10 @@ const PurchaseReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
+
+  // Filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,14 +43,14 @@ const PurchaseReportPage = () => {
         ]);
         const itemsData = await itemsResponse.json();
         const purchaseData = await purchaseResponse.json();
-        
+
         setItems(itemsData.items || []);
-        console.log(itemsData.items);
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "purchase"
           );
           setPurchaseReports(purchases);
+          setFilteredReports(purchases);
         }
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -60,9 +71,8 @@ const PurchaseReportPage = () => {
   }, [quantityAmount, rate, selectedItem]);
 
   const handleOpenModal = () => setIsModalOpen(true);
-  
+
   const handleCloseModal = () => {
-    // Reset all form fields
     setPurchaseorderno("");
     setPurchasedate("");
     setInvoiceno("");
@@ -83,21 +93,29 @@ const PurchaseReportPage = () => {
       setError("Please select an item");
       return;
     }
-  
-    const purchaseData = {
-      purchaseorderno, // String
-      name: selectedItem._id, // ObjectId reference to InventoryList
-      purchasedate: new Date(purchasedate), // Date object
-      Invoiceno, // String
-      quantity: selectedItem._id, // ObjectId reference to InventoryList
-      quantityAmount: parseFloat(quantityAmount), // Number
-      unit: selectedItem._id, // ObjectId reference to InventoryList
-      rate: parseFloat(rate), // Number
-      taxpercent: selectedItem._id, // ObjectId reference to InventoryList
-      total: parseFloat(total), // Number
-      purorsell: "purchase" // String from enum
+
+    // Format the purchase date
+    const formatDate = (date) => {
+      const [year, month, day] = date.split("-");
+      return `${day}/${month}/${year}`;
     };
-  
+
+    const formattedPurchaseDate = formatDate(purchasedate);
+
+    const purchaseData = {
+      purchaseorderno,
+      name: selectedItem._id,
+      purchasedate: formattedPurchaseDate,
+      Invoiceno,
+      quantity: selectedItem._id,
+      quantityAmount: parseFloat(quantityAmount),
+      unit: selectedItem._id,
+      rate: parseFloat(rate),
+      taxpercent: selectedItem._id,
+      total: parseFloat(total),
+      purorsell: "purchase",
+    };
+
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -106,21 +124,16 @@ const PurchaseReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
-        // Update stock in inventory
         await updateStockQuantity(
-          selectedItem._id, 
-          parseFloat(quantityAmount), 
+          selectedItem._id,
+          parseFloat(quantityAmount),
           selectedItem.stock
         );
-  
-        // Update purchase reports state
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
-        
-        // Close modal
         handleCloseModal();
       } else {
         setError(result.error || "Failed to save purchase report");
@@ -131,24 +144,20 @@ const PurchaseReportPage = () => {
     }
   };
 
+
   const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
       const newStock = currentStock + quantityAmount;
-      
       const response = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          stock: newStock,
-        }),
+        body: JSON.stringify({ stock: newStock }),
       });
 
       const result = await response.json();
-      
       if (!response.ok) {
-        console.error("Failed to update stock:", result);
         throw new Error("Failed to update stock");
       }
     } catch (error) {
@@ -156,6 +165,40 @@ const PurchaseReportPage = () => {
       throw error;
     }
   };
+
+  const filterByDate = () => {
+    if (startDate && endDate) {
+      const parseDate = (dateStr) => {
+        // Parse the date from dd/mm/yyyy to yyyy-mm-dd
+        const [day, month, year] = dateStr.split("/");
+        return new Date(`${year}-${month}-${day}`);
+      };
+  
+      const start = parseDate(startDate);
+      const end = parseDate(endDate);
+  
+      // Ensure the dates are set to 00:00:00 for accurate comparison
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+  
+      const filtered = purchaseReports.filter((report) => {
+        const [year, month, day] = report.purchasedate.split("-");
+        const purchaseDate = new Date(`${year}-${month}-${day}`);
+  
+        // Set purchaseDate to 00:00:00 for consistency
+        purchaseDate.setHours(0, 0, 0, 0);
+  
+        return purchaseDate >= start && purchaseDate <= end;
+      });
+  
+      setFilteredReports(filtered);
+    } else {
+      setFilteredReports(purchaseReports);
+    }
+  };
+  
+
+
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -170,72 +213,103 @@ const PurchaseReportPage = () => {
           <Button
             variant="contained"
             color="success"
-            onClick={handleOpenModal}
+            onClick={() => setIsModalOpen(true)}
           >
             Purchase Stock
           </Button>
         </div>
 
-        <table className="table-auto w-full border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-cyan-900 text-white">
-              <th className="border border-gray-300 px-4 py-2">Purchase No</th>
-              <th className="border border-gray-300 px-4 py-2">Item Name</th>
-              <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
-              <th className="border border-gray-300 px-4 py-2">Invoice No</th>
-              <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
-              <th className="border border-gray-300 px-4 py-2">Unit</th>
-              <th className="border border-gray-300 px-4 py-2">Rate</th>
-              <th className="border border-gray-300 px-4 py-2">Tax Percent</th>
-              <th className="border border-gray-300 px-4 py-2">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {purchaseReports.length > 0 ? (
-              purchaseReports.map((report) => (
-                <tr key={report._id} className="bg-green-200">
-                  <td className="border border-gray-300 px-10 py-2">
-                    {report.purchaseorderno}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.name?.name}
-                  </td>
-                  <td className="border border-gray-300 px-8 py-2">
-                    {new Date(report.purchasedate).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-300 px-8 py-2">
-                    {report.Invoiceno}
-                  </td>
-                  <td className="border border-gray-300 px-20 py-2">
-                    {report.quantity?.stock}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.unit?.quantityUnit}
-                  </td>
-                  <td className="border border-gray-300 px-6 py-2">
-                    {report.rate}
-                  </td>
-                  <td className="border border-gray-300 px-16 py-2">
-                    {report.taxpercent?.tax}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {report.total}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="9"
-                  className="border border-gray-300 px-4 py-2 text-center"
-                >
-                  No purchase reports available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="flex space-x-4 mb-6">
+          <TextField
+            label="Start Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full"
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={filterByDate}
+            className="ml-4"
+          >
+            Filter
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+              setFilteredReports(purchaseReports); // Reset to show all reports
+            }}
+            className="ml-4"
+          >
+            Reset
+          </Button>
+        </div>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#164E63" }}>
+                <TableCell sx={{ color: "white" }}>Purchase No</TableCell>
+                <TableCell sx={{ color: "white" }}>Item Name</TableCell>
+                <TableCell sx={{ color: "white" }}>Purchase Date</TableCell>
+                <TableCell sx={{ color: "white" }}>Invoice No</TableCell>
+                <TableCell sx={{ color: "white" }}>Available Quantity</TableCell>
+                <TableCell sx={{ color: "white" }}>Unit</TableCell>
+                <TableCell sx={{ color: "white" }}>Rate</TableCell>
+                <TableCell sx={{ color: "white" }}>Tax Percent</TableCell>
+                <TableCell sx={{ color: "white" }}>Total</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredReports.length > 0 ? (
+                filteredReports.map((report) => (
+                  <TableRow key={report._id} sx={{ backgroundColor: "#BBF7D0" }}>
+                    <TableCell>{report.purchaseorderno}</TableCell>
+                    <TableCell>{report.name?.name}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        const date = new Date(report.purchasedate);
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+                        const year = date.getFullYear();
+                        return `${day}/${month}/${year}`;
+                      })()}
+                    </TableCell>
+
+                    <TableCell>{report.Invoiceno}</TableCell>
+                    <TableCell>{report.quantity?.stock}</TableCell>
+                    <TableCell>{report.unit?.quantityUnit}</TableCell>
+                    <TableCell>{report.rate}</TableCell>
+                    <TableCell>{report.taxpercent?.tax}</TableCell>
+                    <TableCell>{report.total}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    No Purchase reports available.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+
+          </Table>
+        </TableContainer>
       </div>
+
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box
@@ -363,7 +437,7 @@ const PurchaseReportPage = () => {
                   borderColor: 'red',
                   '&:hover': {
                     borderColor: 'darkred',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)', 
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
                 }}
                 onClick={handleCloseModal}
