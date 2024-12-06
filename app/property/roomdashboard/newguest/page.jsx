@@ -162,6 +162,7 @@ export default function BookingForm() {
                     totalAmount: 0,
                     amountAdvanced: 0,
                     dueAmount: 0,
+                    Bill_Paid: 'no',
                 };
 
                 console.log('Submitting billing data:', newBilling);
