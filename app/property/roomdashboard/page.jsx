@@ -504,12 +504,12 @@ export default function RoomDashboard() {
             </button>
           </div>
           <div className="flex space-x-2">
-            <Link
+            {/* <Link
               href="roomdashboard/addRoom"
               className="bg-green-600 text-white px-4 py-2 rounded"
             >
               Add Room
-            </Link>
+            </Link> */}
             <Link
               href="roomdashboard/newguest"
               className="bg-blue-600 text-white px-4 py-2 rounded"
