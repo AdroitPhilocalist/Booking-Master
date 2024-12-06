@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import jsPDF from "jspdf";
-import { FaTrashAlt } from 'react-icons/fa';
+import { FaTrashAlt } from "react-icons/fa";
 export default function Billing() {
   const [billingData, setBillingData] = useState([]);
   const [selectedBill, setSelectedBill] = useState(null);
@@ -18,10 +18,12 @@ export default function Billing() {
         // Step 1: Fetch all unpaid bills directly
         const response = await fetch("/api/Billing"); // Assuming this endpoint filters by Bill_Paid
         const billingData = await response.json();
-  
+
         if (billingData.success) {
           // Step 2: Filter the bills with Bill_Paid === "No"
-          const unpaidBills = billingData.data.filter((bill) => bill.Bill_Paid === "no");
+          const unpaidBills = billingData.data.filter(
+            (bill) => bill.Bill_Paid === "no"
+          );
           setBillingData(unpaidBills);
         } else {
           console.error("Failed to fetch unpaid billing data");
@@ -30,10 +32,9 @@ export default function Billing() {
         console.error("Error fetching unpaid billing data:", error);
       }
     };
-  
+
     fetchUnpaidBillingData();
   }, []);
-  
 
   // Function to handle viewing bill details
   const handleViewBill = (bill) => {
@@ -55,8 +56,16 @@ export default function Billing() {
     doc.setFontSize(12);
     doc.text(`Room Number: ${bill.roomNo || "N/A"}`, 10, 20);
     doc.text(`Guest Name: ${bill.guestName || "N/A"}`, 10, 30);
-    doc.text(`Bill Start Date: ${new Date(bill.billStartDate).toLocaleDateString()}`, 10, 40);
-    doc.text(`Bill End Date: ${new Date(bill.billEndDate).toLocaleDateString()}`, 10, 50);
+    doc.text(
+      `Bill Start Date: ${new Date(bill.billStartDate).toLocaleDateString()}`,
+      10,
+      40
+    );
+    doc.text(
+      `Bill End Date: ${new Date(bill.billEndDate).toLocaleDateString()}`,
+      10,
+      50
+    );
     doc.text(`Total Amount: ₹${bill.totalAmount || 0}`, 10, 60);
     doc.text(`Amount Paid in Advance: ₹${bill.amountAdvanced || 0}`, 10, 70);
     doc.text(`Due Amount: ₹${bill.dueAmount || 0}`, 10, 80);
@@ -95,7 +104,7 @@ export default function Billing() {
           itemList: [newItem],
           priceList: [parseFloat(newPrice)],
         };
-  
+
         // Call the API
         const response = await fetch(`/api/Billing/${selectedBill._id}`, {
           method: "PUT",
@@ -104,9 +113,9 @@ export default function Billing() {
           },
           body: JSON.stringify(payload),
         });
-  
+
         const result = await response.json();
-  
+
         if (result.success) {
           // Update the selectedBill state with the new data
           setSelectedBill(result.data);
@@ -126,15 +135,19 @@ export default function Billing() {
   const handleDeleteItem = async (index) => {
     try {
       // Create updated lists by removing the item at the given index
-      const updatedItemList = selectedBill.itemList.filter((_, idx) => idx !== index);
-      const updatedPriceList = selectedBill.priceList.filter((_, idx) => idx !== index);
-  
+      const updatedItemList = selectedBill.itemList.filter(
+        (_, idx) => idx !== index
+      );
+      const updatedPriceList = selectedBill.priceList.filter(
+        (_, idx) => idx !== index
+      );
+
       // Prepare the payload with the updated item list and price list
       const payload = {
         itemList: updatedItemList,
         priceList: updatedPriceList,
       };
-  
+
       // Call the PATCH API to update the bill with the new lists
       const response = await fetch(`/api/Billing/${selectedBill._id}`, {
         method: "PATCH",
@@ -143,9 +156,9 @@ export default function Billing() {
         },
         body: JSON.stringify(payload),
       });
-  
+
       const result = await response.json();
-  
+
       if (result.success) {
         // Update the selectedBill state with the updated data from the response
         setSelectedBill(result.data); // Replace the entire bill with the updated one
@@ -158,14 +171,12 @@ export default function Billing() {
       alert("An error occurred while deleting the item.");
     }
   };
-  
-  
+
   const calculateTotal = (priceList) => {
     // Recalculate the total price from the updated priceList
     return priceList.reduce((total, price) => total + price, 0);
   };
-  
-  
+
   return (
     <div className="min-h-screen bg-amber-50">
       {/* Navigation */}
@@ -248,94 +259,105 @@ export default function Billing() {
           </table>
         </div>
       </div>
-{/* Modal for Viewing Bill Details */}
-{selectedBill && (
-  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white w-11/12 max-w-5xl rounded-lg shadow-lg p-8 relative">
-      <div className="border border-gray-200 p-6 rounded-lg bg-gray-50">
-        {/* Guest Details Section */}
-        <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-          {selectedBill.guestName || "Guest Name"}
-        </h2>
-        <div className="grid grid-cols-2 gap-6">
-          <p>
-            <strong>Check-In:</strong>{" "}
-            {new Date(selectedBill.billStartDate).toLocaleString()}
-          </p>
-          <p>
-            <strong>Expected Check-Out:</strong>{" "}
-            {new Date(selectedBill.billEndDate).toLocaleString()}
-          </p>
-          <p>
-            <strong>Room Number:</strong> {selectedBill.roomNo || "N/A"}
-          </p>
-          <p>
-            <strong>Meal Plan:</strong> {selectedBill.mealPlan || "N/A"}
-          </p>
-          <p>
-            <strong>Amount Paid:</strong> ₹{selectedBill.amountAdvanced || 0}
-          </p>
-          <p>
-            <strong>Due Amount:</strong> ₹{selectedBill.dueAmount || 0}
-          </p>
-          <p>
-            <strong>Total Amount:</strong> ₹{selectedBill.totalAmount || 0}
-          </p>
-        </div>
+      {/* Modal for Viewing Bill Details */}
+      {selectedBill && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white w-11/12 max-w-5xl rounded-lg shadow-lg p-8 relative">
+            <div className="border border-gray-200 p-6 rounded-lg bg-gray-50">
+              {/* Guest Details Section */}
+              <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+                {selectedBill.guestName || "Guest Name"}
+              </h2>
+              <div className="grid grid-cols-2 gap-6">
+                <p>
+                  <strong>Check-In:</strong>{" "}
+                  {new Date(selectedBill.billStartDate).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Expected Check-Out:</strong>{" "}
+                  {new Date(selectedBill.billEndDate).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Room Number:</strong> {selectedBill.roomNo || "N/A"}
+                </p>
+                <p>
+                  <strong>Meal Plan:</strong> {selectedBill.mealPlan || "N/A"}
+                </p>
+                <p>
+                  <strong>Amount Paid:</strong> ₹
+                  {selectedBill.amountAdvanced || 0}
+                </p>
+                <p>
+                  <strong>Due Amount:</strong> ₹{selectedBill.dueAmount || 0}
+                </p>
+                <p>
+                  <strong>Total Amount:</strong> ₹
+                  {selectedBill.totalAmount || 0}
+                </p>
+              </div>
 
-        {/* Itemized List Section */}
-<div className="mt-8">
-  <h3 className="text-lg font-medium mb-2">Itemized List:</h3>
-  <ul className="list-disc list-inside">
-    {selectedBill.itemList.map((item, index) => (
-      <li key={index} className="flex justify-between items-center">
-        <span>
-          {item} - ₹{selectedBill.priceList[index] || 0}
-        </span>
-        <button
-          className="text-red-500 hover:text-red-700"
-          onClick={() => handleDeleteItem(index)}
-        >
-          <FaTrashAlt /> {/* Delete icon */}
-        </button>
-      </li>
-    ))}
-  </ul>
-</div>
+              {/* Itemized List Section */}
+              <div className="mt-8">
+                <h3 className="text-lg font-medium mb-2">Itemized List:</h3>
+                <ul className="list-disc list-inside">
+                  {selectedBill.itemList.map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
+                      <span>
+                        {item} - ₹{selectedBill.priceList[index] || 0}
+                      </span>
+                      <button
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleDeleteItem(index)}
+                      >
+                        <FaTrashAlt /> {/* Delete icon */}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-        {/* Action Buttons */}
-        <div className="mt-9 flex justify-between gap-1">
-          <button
-            onClick={() => console.log("Food button clicked")}
-            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
-          >
-            Food
-          </button>
-          <button
-            onClick={openEditModal}
-            className="px-6 py-3 bg-yellow-600 text-white font-semibold rounded-md hover:bg-yellow-700 transition"
-          >
-            Add Item
-          </button>
-          <button
-            onClick={() => generatePDF(selectedBill)}
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
-          >
-            Create Invoice
-          </button>
-          <button
-            onClick={closeModal}
-            className="px-6 py-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
-          >
-            Close
-          </button>
+              {/* Action Buttons */}
+              <div className="mt-9 flex justify-between gap-1">
+                <button
+                  onClick={() => console.log("Food button clicked")}
+                  className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
+                >
+                  Food
+                </button>
+                <button
+                  onClick={openEditModal}
+                  className="px-6 py-3 bg-yellow-600 text-white font-semibold rounded-md hover:bg-yellow-700 transition"
+                >
+                  Add Item
+                </button>
+                <button
+                  onClick={() => generatePDF(selectedBill)}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
+                >
+                  Create Invoice
+                </button>
+                <button
+                  onClick={markBillAsPaid}
+                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-red-700 transition"
+                >
+                  Bill Paid
+                </button>
+                <button
+                  onClick={closeModal}
+                  className="px-6 py-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
-{/* Edit Bill Modal */}
-{showEditModal && (
+      )}
+      {/* Edit Bill Modal */}
+      {showEditModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white w-11/12 max-w-md rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-gray-700 mb-4">
