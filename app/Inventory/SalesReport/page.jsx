@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
@@ -13,15 +13,15 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 
 const SalesReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState([]);
 
-  // State for form fields
   const [purchaseorderno, setPurchaseorderno] = useState("");
   const [purchasedate, setPurchasedate] = useState("");
   const [Invoiceno, setInvoiceno] = useState("");
@@ -29,8 +29,10 @@ const SalesReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 5;
+
+  // Filters
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,12 +45,12 @@ const SalesReportPage = () => {
         const purchaseData = await purchaseResponse.json();
 
         setItems(itemsData.items || []);
-
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
             (report) => report.purorsell === "sell"
           );
           setPurchaseReports(purchases);
+          setFilteredReports(purchases);
         }
       } catch (error) {
         console.error("Failed to fetch data", error);
@@ -68,12 +70,9 @@ const SalesReportPage = () => {
     }
   }, [quantityAmount, rate, selectedItem]);
 
-  const handlePageChange = (event, newPage) => setPage(newPage);
-
   const handleOpenModal = () => setIsModalOpen(true);
 
   const handleCloseModal = () => {
-    // Reset all form fields
     setPurchaseorderno("");
     setPurchasedate("");
     setInvoiceno("");
@@ -95,18 +94,19 @@ const SalesReportPage = () => {
       return;
     }
 
+
     const purchaseData = {
-      purchaseorderno, // String
-      name: selectedItem._id, // ObjectId reference to InventoryList
-      purchasedate: new Date(purchasedate), // Date object
-      Invoiceno, // String
-      quantity: selectedItem._id, // ObjectId reference to InventoryList
-      quantityAmount: parseFloat(quantityAmount), // Number
-      unit: selectedItem._id, // ObjectId reference to InventoryList
-      rate: parseFloat(rate), // Number
-      taxpercent: selectedItem._id, // ObjectId reference to InventoryList
-      total: parseFloat(total), // Number
-      purorsell: "sell" // String from enum
+      purchaseorderno,
+      name: selectedItem._id,
+      purchasedate: new Date(purchasedate),
+      Invoiceno,
+      quantity: selectedItem._id,
+      quantityAmount: parseFloat(quantityAmount),
+      unit: selectedItem._id,
+      rate: parseFloat(rate),
+      taxpercent: selectedItem._id,
+      total: parseFloat(total),
+      purorsell: "sell",
     };
 
     try {
@@ -121,17 +121,12 @@ const SalesReportPage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        // Update stock in inventory
         await updateStockQuantity(
           selectedItem._id,
           parseFloat(quantityAmount),
           selectedItem.stock
         );
-
-        // Update purchase reports state
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
-
-        // Close modal
         handleCloseModal();
       } else {
         setError(result.error || "Failed to save sales report");
@@ -142,24 +137,20 @@ const SalesReportPage = () => {
     }
   };
 
+
   const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
       const newStock = currentStock - quantityAmount;
-
       const response = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          stock: newStock,
-        }),
+        body: JSON.stringify({ stock: newStock }),
       });
 
       const result = await response.json();
-
       if (!response.ok) {
-        console.error("Failed to update stock:", result);
         throw new Error("Failed to update stock");
       }
     } catch (error) {
@@ -168,14 +159,28 @@ const SalesReportPage = () => {
     }
   };
 
+  // Filter Function
+  const filterByDate = () => {
+    if (startDate && endDate) {
+      const filtered = purchaseReports.filter((report) => {
+        const purchaseDate = new Date(report.purchasedate);
+        return (
+          purchaseDate >= new Date(startDate) &&
+          purchaseDate <= new Date(endDate)
+        );
+      });
+      setFilteredReports(filtered);
+    } else {
+      setFilteredReports(purchaseReports); // Show all reports if no dates are selected
+    }
+  };
+
+
+
+
   if (error) {
     return <div>Error: {error}</div>;
   }
-
-  const paginatedReports = purchaseReports.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
 
   return (
     <div className="bg-amber-50 min-h-screen">
@@ -186,9 +191,48 @@ const SalesReportPage = () => {
           <Button
             variant="contained"
             color="error"
-            onClick={handleOpenModal}
+            onClick={() => setIsModalOpen(true)}
           >
             Sell Stock
+          </Button>
+        </div>
+
+        <div className="flex space-x-4 mb-6">
+          <TextField
+            label="Start Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full"
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={filterByDate}
+            className="ml-4"
+          >
+            Filter
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+              setFilteredReports(purchaseReports); // Reset to show all reports
+            }}
+            className="ml-4"
+          >
+            Reset
           </Button>
         </div>
 
@@ -196,32 +240,38 @@ const SalesReportPage = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ color: "white" }}>Sales No</TableCell>
-                <TableCell sx={{ color: "white" }}>Item Name</TableCell>
-                <TableCell sx={{ color: "white" }}>Sales Date</TableCell>
-                <TableCell sx={{ color: "white" }}>Invoice No</TableCell>
-                <TableCell sx={{ color: "white" }}>Available Quantity</TableCell>
-                <TableCell sx={{ color: "white" }}>Unit</TableCell>
-                <TableCell sx={{ color: "white" }}>Rate</TableCell>
-                <TableCell sx={{ color: "white" }}>Tax Percent</TableCell>
-                <TableCell sx={{ color: "white" }}>Total</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Sales No</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Name</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Sales Date</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Invoice No</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Available Quantity</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Rate</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Tax Percent</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {purchaseReports.length > 0 ? (
-                purchaseReports.map((report) => (
-                  <TableRow key={report._id} sx={{ backgroundColor: "#FECACA" }}>
-                    <TableCell>{report.purchaseorderno}</TableCell>
-                    <TableCell>{report.name?.name}</TableCell>
-                    <TableCell>
-                      {new Date(report.purchasedate).toLocaleDateString()}
+              {filteredReports.length > 0 ? (
+                filteredReports.map((report) => (
+                  <TableRow key={report._id} sx={{ backgroundColor: "#FACACA" }}>
+                    <TableCell sx={{ textAlign: "center" }}>{report.purchaseorderno}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.name?.name}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {(() => {
+                        const date = new Date(report.purchasedate);
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const year = date.getFullYear();
+                        return `${day}/${month}/${year}`;
+                      })()}
                     </TableCell>
-                    <TableCell>{report.Invoiceno}</TableCell>
-                    <TableCell>{report.quantity?.stock}</TableCell>
-                    <TableCell>{report.unit?.quantityUnit}</TableCell>
-                    <TableCell>{report.rate}</TableCell>
-                    <TableCell>{report.taxpercent?.tax}</TableCell>
-                    <TableCell>{report.total}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.Invoiceno}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.quantity?.stock}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.unit?.quantityUnit}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.rate}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.taxpercent?.tax}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.total}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -232,11 +282,11 @@ const SalesReportPage = () => {
                 </TableRow>
               )}
             </TableBody>
-
-
           </Table>
+
         </TableContainer>
       </div>
+
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box
@@ -314,7 +364,7 @@ const SalesReportPage = () => {
             <TextField
               required
               id="quantityAmount"
-              label="Sales Quantity"
+              label="Purchase Quantity"
               variant="outlined"
               type="number"
               value={quantityAmount}
@@ -349,7 +399,7 @@ const SalesReportPage = () => {
               disabled
               className="w-full"
             />
-            <div className="flex justify-end ml-2">
+            <div className="flex justify-end">
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
