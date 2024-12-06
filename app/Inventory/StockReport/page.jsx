@@ -65,14 +65,14 @@ const StockReportPage = () => {
   };
 
 
-  // Render error state
-  if (error) {
-    return (
-      <div className="bg-amber-50 min-h-screen flex items-center justify-center">
-        <div className="text-red-600 text-xl font-semibold">Error: {error}</div>
-      </div>
-    );
-  }
+  // // Render error state
+  // if (error) {
+  //   return (
+  //     <div className="bg-amber-50 min-h-screen flex items-center justify-center">
+  //       <div className="text-red-600 text-xl font-semibold">Error: {error}</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="bg-amber-50 min-h-screen">
