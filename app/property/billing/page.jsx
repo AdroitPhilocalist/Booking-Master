@@ -98,9 +98,11 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
     setNewPrice("");
   };
 
-  const handlePayment = async () => {
+  const handlePayment = async (e) => {
+
     const newAmountAdvanced =
       selectedBill.amountAdvanced + parseFloat(amountToBePaid);
+    console.log(newAmountAdvanced);
   
     if (newAmountAdvanced > selectedBill.totalAmount) {
       alert("Payment exceeds the total amount due!");
@@ -112,6 +114,8 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
       const payload = {
         amountAdvanced: newAmountAdvanced,
       };
+      console.log(newAmountAdvanced);
+      console.log(payload);
   
       // Update the bill via API
       const response = await fetch(`/api/Billing/${selectedBill._id}`, {
@@ -121,6 +125,7 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
       });
   
       const result = await response.json();
+      console.log(result);
   
       if (result.success) {
         setSelectedBill(result.data);
@@ -457,7 +462,7 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
         <label className="block text-gray-700 font-medium mb-2">Due Amount:</label>
         <input
           type="text"
-          value={selectedBill.totalAmount - selectedBill.amountAdvanced}
+          value={selectedBill.dueAmount - amountToBePaid}
           readOnly
           className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
         />

@@ -105,6 +105,27 @@ export async function PUT(req, { params }) {
       bill.Bill_Paid = data.Bill_Paid;
     }
 
+    // Handle amountAdvanced updates
+    if (typeof data.amountAdvanced !== "undefined") {
+      const newAmountAdvanced = parseFloat(data.amountAdvanced);
+      // console.log("newAmountAdvanced ="+newAmountAdvanced);
+      // console.log("data.amountToBePaid = "+data.amountToBePaid);
+
+      // Prevent overpayment
+      if (newAmountAdvanced > bill.totalAmount) {
+        return NextResponse.json(
+          { success: false, error: "Payment exceeds total amount" },
+          { status: 400 }
+        );
+      }
+
+      bill.amountAdvanced = newAmountAdvanced;
+      bill.dueAmount=bill.totalAmount-bill.amountAdvanced;
+
+      // // Update the Bill_Paid status based on payment completion
+      // bill.Bill_Paid = newAmountAdvanced >= bill.totalAmount ? "Yes" : "No";
+    }
+
     // Save changes
     const updatedBill = await bill.save();
 
