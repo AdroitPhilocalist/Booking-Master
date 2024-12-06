@@ -13,47 +13,29 @@ export default function Billing() {
 
   // Fetch room and billing data
   useEffect(() => {
-    const fetchRoomsAndBillingData = async () => {
+    const fetchUnpaidBillingData = async () => {
       try {
-        // Step 1: Fetch all rooms
-        const roomsResponse = await fetch("/api/rooms"); // Replace with your rooms API endpoint
-        const roomsData = await roomsResponse.json();
-//console.log(roomsData);
-        if (roomsData.success) {
-          // Step 2: Filter rooms where billingStarted is "Yes"
-          const roomsWithBilling = roomsData.data.filter(
-            (room) => room.billingStarted === "Yes"
-          );
-          console.log(roomsWithBilling[0].currentBillingId);
-
-          // Step 3: Fetch billing details for each filtered room
-          const billsPromises = roomsWithBilling.map(async (room) => {
-            if (room.currentBillingId) {
-              const billResponse = await fetch(
-                `/api/Billing/${room.currentBillingId}` // Replace with your billing endpoint
-              );
-              const billData = await billResponse.json();
-              //console.log(billData);
-              return { ...billData.data };
-            }
-            return null;
-          });
-
-          // Step 4: Wait for all promises to resolve
-          const bills = await Promise.all(billsPromises);
-          console.log(bills[0]);
-          // Filter out any null values and update state
-          setBillingData(bills.filter((bill) => bill !== null));
+        // Step 1: Fetch all unpaid bills directly
+        const response = await fetch("/api/Billing"); // Assuming this endpoint filters by Bill_Paid
+        const billingData = await response.json();
+  
+        if (billingData.success) {
+          // Step 2: Filter the bills with Bill_Paid === "No"
+          const unpaidBills = billingData.data.filter((bill) => bill.Bill_Paid === "no");
+  
+          // Step 3: Update the state
+          setBillingData(unpaidBills);
         } else {
-          console.error("Failed to fetch room data");
+          console.error("Failed to fetch unpaid billing data");
         }
       } catch (error) {
-        console.error("Error fetching room and billing data:", error);
+        console.error("Error fetching unpaid billing data:", error);
       }
     };
-
-    fetchRoomsAndBillingData();
+  
+    fetchUnpaidBillingData();
   }, []);
+  
 
   // Function to handle viewing bill details
   const handleViewBill = (bill) => {

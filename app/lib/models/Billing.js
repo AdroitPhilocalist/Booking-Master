@@ -40,6 +40,11 @@ const BillingSchema = new mongoose.Schema(
         return this.totalAmount - this.amountAdvanced; // Auto-calculate based on totalAmount and amountAdvanced
       },
     },
+    Bill_Paid: {
+      type: String,
+      enum: ['yes', 'no'], // Restrict values to 'yes' or 'no'
+      default: 'no', // Default value for every new bill
+    },
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt timestamps
