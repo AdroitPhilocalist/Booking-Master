@@ -10,7 +10,10 @@ export default function Billing() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [newItem, setNewItem] = useState("");
   const [newPrice, setNewPrice] = useState("");
-
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+const [amountToBePaid, setAmountToBePaid] = useState(0);
+const openPaymentModal = () => setIsPaymentModalOpen(true);
+const closePaymentModal = () => setIsPaymentModalOpen(false);
   // Fetch room and billing data
   useEffect(() => {
     const fetchUnpaidBillingData = async () => {
@@ -95,7 +98,42 @@ export default function Billing() {
     setNewPrice("");
   };
 
-
+  const handlePayment = async () => {
+    const newAmountAdvanced =
+      selectedBill.amountAdvanced + parseFloat(amountToBePaid);
+  
+    if (newAmountAdvanced > selectedBill.totalAmount) {
+      alert("Payment exceeds the total amount due!");
+      return;
+    }
+  
+    try {
+      // Prepare the payload for updating the bill
+      const payload = {
+        amountAdvanced: newAmountAdvanced,
+      };
+  
+      // Update the bill via API
+      const response = await fetch(`/api/Billing/${selectedBill._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        setSelectedBill(result.data);
+        alert("Payment updated successfully!");
+        closePaymentModal();
+      } else {
+        alert("Failed to update payment: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      alert("An error occurred while processing the payment.");
+    }
+  };
   const markBillAsPaid = async () => {
     try {
       if (!selectedBill) {
@@ -382,6 +420,12 @@ export default function Billing() {
                   Bill Paid
                 </button>
                 <button
+    onClick={openPaymentModal}
+    className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
+  >
+    Bill Payment
+  </button>
+                <button
                   onClick={closeModal}
                   className="px-6 py-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
                 >
@@ -392,6 +436,62 @@ export default function Billing() {
           </div>
         </div>
       )}
+      {isPaymentModalOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-lg p-6 w-96">
+      <h3 className="text-lg font-medium mb-4">Bill Payment</h3>
+      
+      {/* Total Amount */}
+      <div className="mb-4">
+        <label className="block text-gray-700 font-medium mb-2">Total Amount:</label>
+        <input
+          type="text"
+          value={selectedBill.totalAmount}
+          readOnly
+          className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
+        />
+      </div>
+      
+      {/* Due Amount */}
+      <div className="mb-4">
+        <label className="block text-gray-700 font-medium mb-2">Due Amount:</label>
+        <input
+          type="text"
+          value={selectedBill.totalAmount - selectedBill.amountAdvanced}
+          readOnly
+          className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
+        />
+      </div>
+      
+      {/* Amount to Be Paid */}
+      <div className="mb-4">
+        <label className="block text-gray-700 font-medium mb-2">Amount to Be Paid:</label>
+        <input
+          type="number"
+          value={amountToBePaid}
+          onChange={(e) => setAmountToBePaid(e.target.value)}
+          className="w-full px-4 py-2 border rounded-md"
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-4">
+        <button
+          onClick={closePaymentModal}
+          className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handlePayment}
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+        >
+          Pay
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       {/* Edit Bill Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
