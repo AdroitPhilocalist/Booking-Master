@@ -22,8 +22,6 @@ export default function Billing() {
         if (billingData.success) {
           // Step 2: Filter the bills with Bill_Paid === "No"
           const unpaidBills = billingData.data.filter((bill) => bill.Bill_Paid === "no");
-  
-          // Step 3: Update the state
           setBillingData(unpaidBills);
         } else {
           console.error("Failed to fetch unpaid billing data");
