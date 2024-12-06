@@ -16,9 +16,6 @@ import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Stack from '@mui/material/Stack';
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -105,15 +102,15 @@ const PurchaseReportPage = () => {
           draggable: true,
           progress: undefined,
           theme: "dark",
-          });
-    return;
-  }
+        });
+      return;
+    }
+  
     if (!selectedItem) {
       setError("Please select an item");
       return;
     }
-
-
+  
     const purchaseData = {
       purchaseorderno,
       name: selectedItem._id,
@@ -127,7 +124,7 @@ const PurchaseReportPage = () => {
       total: parseFloat(total),
       purorsell: "purchase",
     };
-
+  
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -136,9 +133,9 @@ const PurchaseReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
         await updateStockQuantity(
           selectedItem._id,
@@ -147,8 +144,22 @@ const PurchaseReportPage = () => {
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
         handleCloseModal();
-        // Success Toast
+  
+        // Show success toast with onClose callback to reload the page
         toast.success('👍 Item Purchased Successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          onClose: () => window.location.reload()
+        });
+      } else {
+        setError(result.error || "Failed to save purchase report");
+        toast.error('👎 Failed to save purchase report', {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -158,10 +169,6 @@ const PurchaseReportPage = () => {
           progress: undefined,
           theme: "dark",
         });
-
-        window.location.reload();
-      } else {
-        setError(result.error || "Failed to save purchase report");
       }
     } catch (error) {
       console.error("Error saving purchase report:", error);
