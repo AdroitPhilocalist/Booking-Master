@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
@@ -14,6 +16,9 @@ import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Stack from '@mui/material/Stack';
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -89,6 +94,20 @@ const PurchaseReportPage = () => {
   };
 
   const handlePurchase = async () => {
+    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem || 
+      !quantityAmount || !rate) {
+        toast.warn('🥲 Please fill in all fields!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          });
+    return;
+  }
     if (!selectedItem) {
       setError("Please select an item");
       return;
@@ -128,6 +147,18 @@ const PurchaseReportPage = () => {
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
         handleCloseModal();
+        // Success Toast
+        toast.success('👍 Item Purchased Successfully!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+
         window.location.reload();
       } else {
         setError(result.error || "Failed to save purchase report");
@@ -176,9 +207,6 @@ const PurchaseReportPage = () => {
     }
   };
 
-
-
-
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -186,6 +214,18 @@ const PurchaseReportPage = () => {
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Purchase Report</h1>

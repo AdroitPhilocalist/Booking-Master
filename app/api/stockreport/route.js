@@ -17,24 +17,32 @@ const connectToDatabase = async () => {
   }
 };
 
-// GET all stock reports with populated inventory references
-export async function GET() {
-  try {
-    await connectToDatabase();
+export async function GET() { 
+  try { 
+    await connectToDatabase(); 
     const stockReports = await StockReport.find()
-      .populate("name", "name") // Populates name field from InventoryList
-      .populate("quantity", "stock") // Populates stock field from InventoryList
-      .populate("unit", "quantityUnit") // Populates quantityUnit field from InventoryList
-      .populate("taxpercent", "tax"); // Populates tax field from InventoryList
-
-    return NextResponse.json({ stockReports });
-  } catch (error) {
-    console.error("Error fetching stock reports:", error.message);
-    return NextResponse.json(
-      { error: "Error fetching stock reports from the database" },
-      { status: 500 }
-    );
-  }
+      .populate({ 
+        path: "name", 
+        model: "InventoryList", 
+        select: "name itemCode segment",
+        populate: {
+          path: "segment",
+          model: "Inventory",
+          select: "itemName" // This will populate the segment with its name
+        }
+      })
+      .populate({ path: "quantity", select: "stock" }) 
+      .populate({ path: "unit", select: "quantityUnit" }) 
+      .populate({ path: "taxpercent", select: "tax" });
+    
+    return NextResponse.json({ stockReports }); 
+  } catch (error) { 
+    console.error("Error fetching stock reports:", error.message); 
+    return NextResponse.json( 
+      { error: "Error fetching stock reports from the database" }, 
+      { status: 500 } 
+    ); 
+  } 
 }
 
 // POST a new stock report
@@ -69,9 +77,23 @@ export async function POST(request) {
     await newStockReport.save();
 
     const populatedStockReport = await StockReport.findById(newStockReport._id)
-      .populate("quantity", "stock")
-      .populate("unit", "quantityUnit")
-      .populate("taxpercent", "tax");
+      .populate({
+        path: "name",
+        model: "InventoryList",
+        select: "name itemCode segment"
+      })
+      .populate({
+        path: "quantity", 
+        select: "stock"
+      })
+      .populate({
+        path: "unit", 
+        select: "quantityUnit"
+      })
+      .populate({
+        path: "taxpercent", 
+        select: "tax"
+      });
 
     return NextResponse.json(
       { message: "Stock report added successfully", stockReport: populatedStockReport },
