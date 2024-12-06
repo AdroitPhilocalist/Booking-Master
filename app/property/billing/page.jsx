@@ -315,7 +315,7 @@ export default function Billing() {
             onClick={openEditModal}
             className="px-6 py-3 bg-yellow-600 text-white font-semibold rounded-md hover:bg-yellow-700 transition"
           >
-            Edit Bill
+            Add Item
           </button>
           <button
             onClick={() => generatePDF(selectedBill)}
