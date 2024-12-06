@@ -85,17 +85,25 @@ export async function PUT(req, { params }) {
       );
     }
 
-    // Append only the new items to the existing lists
-    const newItemList = data.itemList || [];
-    const newPriceList = data.priceList || [];
+    // Conditionally update fields based on the request payload
+    if (data.itemList && data.priceList) {
+      const newItemList = data.itemList || [];
+      const newPriceList = data.priceList || [];
 
-    bill.itemList = [...bill.itemList, ...newItemList];
-    bill.priceList = [...bill.priceList, ...newPriceList];
+      // Append only new items and prices
+      bill.itemList = [...bill.itemList, ...newItemList];
+      bill.priceList = [...bill.priceList, ...newPriceList];
 
-    // Update the total amount
-    const newTotalAmount =
-      bill.totalAmount + newPriceList.reduce((sum, price) => sum + price, 0);
-    bill.totalAmount = newTotalAmount;
+      // Update the total amount
+      const newTotalAmount =
+        bill.totalAmount + newPriceList.reduce((sum, price) => sum + price, 0);
+      bill.totalAmount = newTotalAmount;
+    }
+
+    // Update the Bill_Paid attribute if provided
+    if (typeof data.Bill_Paid !== "undefined") {
+      bill.Bill_Paid = data.Bill_Paid;
+    }
 
     // Save changes
     const updatedBill = await bill.save();

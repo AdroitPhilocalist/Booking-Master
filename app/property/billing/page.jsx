@@ -95,6 +95,42 @@ export default function Billing() {
     setNewPrice("");
   };
 
+
+  const markBillAsPaid = async () => {
+    try {
+      if (!selectedBill) {
+        alert("No bill selected!");
+        return;
+      }
+  
+      // Prepare the payload
+      const payload = { Bill_Paid: 'yes'};
+  
+      // Make the API call
+      const response = await fetch(`/api/Billing/${selectedBill._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      const result = await response.json();
+      console.log(result);
+      if (result.success) {
+        alert("Bill marked as paid!");
+        // Update the local state with the updated bill data
+        setSelectedBill(result.data);
+      } else {
+        alert("Failed to update bill: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error updating bill:", error);
+      alert("An error occurred while updating the bill.");
+    }
+  };
+  
+
   // Function to add new item to the bill
   const handleAddItem = async () => {
     if (newItem.trim() && newPrice.trim()) {
@@ -323,7 +359,7 @@ export default function Billing() {
               <div className="mt-9 flex justify-between gap-1">
                 <button
                   onClick={() => console.log("Food button clicked")}
-                  className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
+                  className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition"
                 >
                   Food
                 </button>
@@ -341,7 +377,7 @@ export default function Billing() {
                 </button>
                 <button
                   onClick={markBillAsPaid}
-                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-red-700 transition"
+                  className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
                 >
                   Bill Paid
                 </button>
