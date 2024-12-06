@@ -63,7 +63,9 @@ const StockReportPage = () => {
                 <th className="border border-gray-300 px-4 py-2">Item Name</th>
                 <th className="border border-gray-300 px-4 py-2">Item Code</th>
                 <th className="border border-gray-300 px-4 py-2">Item Category</th>
-                <th className="border border-gray-300 px-4 py-2">Purchase Date</th>
+                <th className="border border-gray-300 px-4 py-2">Order Date</th>
+                <th className="border border-gray-300 px-4 py-2">In Stock</th>
+                <th className="border border-gray-300 px-4 py-2">Out Stock</th>
                 <th className="border border-gray-300 px-4 py-2">Available Quantity</th>
                 <th className="border border-gray-300 px-4 py-2">Unit</th>
                 <th className="border border-gray-300 px-4 py-2">Rate</th>
@@ -93,6 +95,16 @@ const StockReportPage = () => {
                         : 'N/A'}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
+                      {report.purorsell === 'purchase' 
+                        ? (report.quantityAmount || 0) 
+                        : 'N/A'}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {report.purorsell === 'sell' 
+                        ? (report.quantityAmount || 0) 
+                        : 'N/A'}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
                       {report.quantity?.stock || 0}
                     </td>
                     <td className="border border-gray-300 px-4 py-2">
@@ -111,7 +123,7 @@ const StockReportPage = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9" className="border border-gray-300 px-4 py-2 text-center">
+                  <td colSpan="11" className="border border-gray-300 px-4 py-2 text-center">
                     No stock reports available.
                   </td>
                 </tr>
