@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
@@ -89,12 +91,26 @@ const SalesReportPage = () => {
   };
 
   const handlePurchase = async () => {
+    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem || 
+      !quantityAmount || !rate) {
+        toast.warn('🥲 Please fill in all fields!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      return;
+    }
+  
     if (!selectedItem) {
       setError("Please select an item");
       return;
     }
-
-
+  
     const purchaseData = {
       purchaseorderno,
       name: selectedItem._id,
@@ -108,7 +124,7 @@ const SalesReportPage = () => {
       total: parseFloat(total),
       purorsell: "sell",
     };
-
+  
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -117,9 +133,9 @@ const SalesReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
         await updateStockQuantity(
           selectedItem._id,
@@ -127,10 +143,32 @@ const SalesReportPage = () => {
           selectedItem.stock
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
-        handleCloseModal(); 
-        window.location.reload();
+        handleCloseModal();
+  
+        // Show success toast with onClose callback to reload the page
+        toast.success('👍 Item Sold Successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          onClose: () => window.location.reload()
+        });
       } else {
-        setError(result.error || "Failed to save sales report");
+        setError(result.error || "Failed to save purchase report");
+        toast.error('👎 Failed to save sales report', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       }
     } catch (error) {
       console.error("Error saving sales report:", error);
@@ -176,9 +214,6 @@ const SalesReportPage = () => {
     }
   };
 
-
-
-
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -186,6 +221,18 @@ const SalesReportPage = () => {
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Sales Report</h1>
@@ -365,7 +412,7 @@ const SalesReportPage = () => {
             <TextField
               required
               id="quantityAmount"
-              label="Purchase Quantity"
+              label="Sales Quantity"
               variant="outlined"
               type="number"
               value={quantityAmount}
