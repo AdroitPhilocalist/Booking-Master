@@ -94,18 +94,11 @@ const PurchaseReportPage = () => {
       return;
     }
 
-    // Format the purchase date
-    const formatDate = (date) => {
-      const [year, month, day] = date.split("-");
-      return `${day}/${month}/${year}`;
-    };
-
-    const formattedPurchaseDate = formatDate(purchasedate);
 
     const purchaseData = {
       purchaseorderno,
       name: selectedItem._id,
-      purchasedate: formattedPurchaseDate,
+      purchasedate: new Date(purchasedate),
       Invoiceno,
       quantity: selectedItem._id,
       quantityAmount: parseFloat(quantityAmount),
@@ -135,6 +128,7 @@ const PurchaseReportPage = () => {
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
         handleCloseModal();
+        window.location.reload();
       } else {
         setError(result.error || "Failed to save purchase report");
       }
@@ -166,37 +160,22 @@ const PurchaseReportPage = () => {
     }
   };
 
+  // Filter Function
   const filterByDate = () => {
     if (startDate && endDate) {
-      const parseDate = (dateStr) => {
-        // Parse the date from dd/mm/yyyy to yyyy-mm-dd
-        const [day, month, year] = dateStr.split("/");
-        return new Date(`${year}-${month}-${day}`);
-      };
-  
-      const start = parseDate(startDate);
-      const end = parseDate(endDate);
-  
-      // Ensure the dates are set to 00:00:00 for accurate comparison
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-  
       const filtered = purchaseReports.filter((report) => {
-        const [year, month, day] = report.purchasedate.split("-");
-        const purchaseDate = new Date(`${year}-${month}-${day}`);
-  
-        // Set purchaseDate to 00:00:00 for consistency
-        purchaseDate.setHours(0, 0, 0, 0);
-  
-        return purchaseDate >= start && purchaseDate <= end;
+        const purchaseDate = new Date(report.purchasedate);
+        return (
+          purchaseDate >= new Date(startDate) &&
+          purchaseDate <= new Date(endDate)
+        );
       });
-  
       setFilteredReports(filtered);
     } else {
-      setFilteredReports(purchaseReports);
+      setFilteredReports(purchaseReports); // Show all reports if no dates are selected
     }
   };
-  
+
 
 
 
@@ -262,39 +241,38 @@ const PurchaseReportPage = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ color: "white" }}>Purchase No</TableCell>
-                <TableCell sx={{ color: "white" }}>Item Name</TableCell>
-                <TableCell sx={{ color: "white" }}>Purchase Date</TableCell>
-                <TableCell sx={{ color: "white" }}>Invoice No</TableCell>
-                <TableCell sx={{ color: "white" }}>Available Quantity</TableCell>
-                <TableCell sx={{ color: "white" }}>Unit</TableCell>
-                <TableCell sx={{ color: "white" }}>Rate</TableCell>
-                <TableCell sx={{ color: "white" }}>Tax Percent</TableCell>
-                <TableCell sx={{ color: "white" }}>Total</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Purchase No</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Name</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Purchase Date</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Invoice No</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Available Quantity</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Rate</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Tax Percent</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredReports.length > 0 ? (
                 filteredReports.map((report) => (
                   <TableRow key={report._id} sx={{ backgroundColor: "#BBF7D0" }}>
-                    <TableCell>{report.purchaseorderno}</TableCell>
-                    <TableCell>{report.name?.name}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.purchaseorderno}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.name?.name}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
                       {(() => {
                         const date = new Date(report.purchasedate);
                         const day = String(date.getDate()).padStart(2, "0");
-                        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
                         const year = date.getFullYear();
                         return `${day}/${month}/${year}`;
                       })()}
                     </TableCell>
-
-                    <TableCell>{report.Invoiceno}</TableCell>
-                    <TableCell>{report.quantity?.stock}</TableCell>
-                    <TableCell>{report.unit?.quantityUnit}</TableCell>
-                    <TableCell>{report.rate}</TableCell>
-                    <TableCell>{report.taxpercent?.tax}</TableCell>
-                    <TableCell>{report.total}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.Invoiceno}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.quantity?.stock}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.unit?.quantityUnit}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.rate}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.taxpercent?.tax}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{report.total}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -305,8 +283,8 @@ const PurchaseReportPage = () => {
                 </TableRow>
               )}
             </TableBody>
-
           </Table>
+
         </TableContainer>
       </div>
 
