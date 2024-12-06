@@ -128,6 +128,7 @@ const PurchaseReportPage = () => {
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
         handleCloseModal();
+        window.location.reload();
       } else {
         setError(result.error || "Failed to save purchase report");
       }
