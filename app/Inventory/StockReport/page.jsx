@@ -64,14 +64,6 @@ const StockReportPage = () => {
     }
   };
 
-  // Render loading state
-  if (isLoading) {
-    return (
-      <div className="bg-amber-50 min-h-screen flex items-center justify-center">
-        <div className="text-xl font-semibold">Loading stock reports...</div>
-      </div>
-    );
-  }
 
   // Render error state
   if (error) {
