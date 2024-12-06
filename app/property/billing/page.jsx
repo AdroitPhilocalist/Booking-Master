@@ -2,6 +2,11 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { ErrorOutline } from "@mui/icons-material";
+import Snackbar from "@mui/material/Snackbar";
+
+
 import jsPDF from "jspdf";
 import { FaTrashAlt } from "react-icons/fa";
 export default function Billing() {
@@ -14,6 +19,10 @@ export default function Billing() {
 const [amountToBePaid, setAmountToBePaid] = useState(0);
 const openPaymentModal = () => setIsPaymentModalOpen(true);
 const closePaymentModal = () => setIsPaymentModalOpen(false);
+const [openDueDialog, setOpenDueDialog] = useState(false);
+const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+const [snackbarMessage, setSnackbarMessage] = React.useState("");
+
   // Fetch room and billing data
   useEffect(() => {
     const fetchUnpaidBillingData = async () => {
@@ -145,6 +154,10 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
         alert("No bill selected!");
         return;
       }
+      if (selectedBill.dueAmount > 0) {
+        setOpenDueDialog(true); // Show the dialog if there is still a due amount
+        return;
+      }
   
       // Prepare the payload
       const payload = { Bill_Paid: 'yes'};
@@ -157,7 +170,7 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
         },
         body: JSON.stringify(payload),
       });
-  
+      
       const result = await response.json();
       console.log(result);
       if (result.success) {
@@ -172,6 +185,8 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
       alert("An error occurred while updating the bill.");
     }
   };
+  const handleCloseDialog = () => setOpenDueDialog(false);
+  
   
 
   // Function to add new item to the bill
@@ -469,15 +484,45 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
       </div>
       
       {/* Amount to Be Paid */}
-      <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">Amount to Be Paid:</label>
-        <input
-          type="number"
-          value={amountToBePaid}
-          onChange={(e) => setAmountToBePaid(e.target.value)}
-          className="w-full px-4 py-2 border rounded-md"
-        />
-      </div>
+<div className="mb-4">
+  <label className="block text-gray-700 font-medium mb-2">Amount to Be Paid:</label>
+  <input
+    type="number"
+    value={amountToBePaid}
+    onChange={(e) => {
+      const value = parseFloat(e.target.value);
+      if (value < 0) {
+        setSnackbarMessage("Amount cannot be negative!");
+        setSnackbarOpen(true);
+      } else if (value > selectedBill?.dueAmount) {
+        setSnackbarMessage("Amount cannot exceed the due amount!");
+        setSnackbarOpen(true);
+      } else {
+        setAmountToBePaid(value);
+      }
+    }}
+    className="w-full px-4 py-2 border rounded-md"
+  />
+</div>
+
+{/* Snackbar for validation messages */}
+<Snackbar
+  open={snackbarOpen}
+  autoHideDuration={4000}
+  onClose={() => setSnackbarOpen(false)}
+  message={snackbarMessage}
+  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+  action={
+    <Button
+      color="inherit"
+      size="small"
+      onClick={() => setSnackbarOpen(false)}
+    >
+      Close
+    </Button>
+  }
+/>
+
 
       {/* Buttons */}
       <div className="flex justify-end gap-4">
@@ -545,6 +590,22 @@ const closePaymentModal = () => setIsPaymentModalOpen(false);
           </div>
         </div>
       )}
+      {/* Due Amount Dialog */}
+      <Dialog open={openDueDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Bill Payment Alert</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" color="error" align="center">
+            <ErrorOutline fontSize="large" />
+            <br />
+            💸 There is still a due amount of ₹{selectedBill?.dueAmount}. Please pay the full amount before marking the bill as paid! 💰
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Footer */}
       <Footer />
