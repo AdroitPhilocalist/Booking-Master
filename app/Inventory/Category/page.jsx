@@ -3,6 +3,14 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import TextField from '@mui/material/TextField';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
 
 export default function InventoryCategory() {
   const [products, setProducts] = useState([]);
@@ -85,58 +93,65 @@ export default function InventoryCategory() {
       console.error("Error toggling status:", error);
     }
   };
-  
-  
 
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
       <div className="container mx-auto p-4">
         <h1 className="text-xl font-bold mb-4">Inventory Category</h1>
-        <button
+        <Button 
+          variant="contained" 
+          color="primary" 
           onClick={() => {
             setShowModal(true);
-            setCurrentProduct(null); // Add new product
+            setCurrentProduct(null);
           }}
-          className="bg-green-500 text-white px-4 py-2 rounded mb-4"
+          className="mb-4"
         >
           Add New +
-        </button>
+        </Button>
 
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product._id}>
-                <td className="border border-gray-300 px-4 py-2">{product.itemName}</td>
-                <td className="border border-gray-300 px-4 py-2">
-                  <button
-                    onClick={() => toggleActiveStatus(product._id)}
-                    className={`px-4 py-2 rounded ${
-                      product.isActive ? "bg-green-500" : "bg-red-500"
-                    } text-white`}
-                  >
-                    {product.isActive ? "Active" : "Inactive"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowModal(true);
-                      setCurrentProduct(product); // Edit existing product
-                    }}
-                    className="bg-blue-500 text-white px-4 py-2 rounded ml-2"
-                  >
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#164E63" }}>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Name</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Status</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product._id} sx={{ backgroundColor: "white" }}>
+                  <TableCell sx={{ textAlign: "center" }}>{product.itemName}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Button
+                      variant="contained"
+                      color={product.isActive ? "success" : "error"}
+                      size="small"
+                      onClick={() => toggleActiveStatus(product._id)}
+                    >
+                      {product.isActive ? "Active" : "Inactive"}
+                    </Button>
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setShowModal(true);
+                        setCurrentProduct(product);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
       {showModal && (
         <AddProductModal
@@ -156,27 +171,33 @@ const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded shadow">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">Add/Edit Product</h2>
-        <TextField id="Product name" label="Product Name" variant="outlined"
+        <TextField 
+          id="Product name" 
+          label="Product Name" 
+          variant="outlined"
           type="text"
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
-          className="border rounded w-full p-2 "
+          className="w-full mb-4"
+          fullWidth
         />
-        <div className="flex justify-between m-3">
-          <button onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={onClose}
+            className="bg-gray-500 text-white px-4 py-2 rounded"
+          >
             Cancel
           </button>
           <button
             onClick={() => onSubmit(productName)}
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
-            Submit
+            {initialValue ? 'Update' : 'Add'} Product
           </button>
         </div>
       </div>
     </div>
   );
 };
-
