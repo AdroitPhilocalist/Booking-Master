@@ -91,26 +91,26 @@ const SalesReportPage = () => {
   };
 
   const handlePurchase = async () => {
-    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem || 
+    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem ||
       !quantityAmount || !rate) {
-        toast.warn('🥲 Please fill in all fields!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
+      toast.warn('🥲 Please fill in all fields!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       return;
     }
-  
+
     if (!selectedItem) {
       setError("Please select an item");
       return;
     }
-  
+
     const purchaseData = {
       purchaseorderno,
       name: selectedItem._id,
@@ -124,7 +124,7 @@ const SalesReportPage = () => {
       total: parseFloat(total),
       purorsell: "sell",
     };
-  
+
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -133,9 +133,9 @@ const SalesReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         await updateStockQuantity(
           selectedItem._id,
@@ -144,7 +144,7 @@ const SalesReportPage = () => {
         );
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
         handleCloseModal();
-  
+
         // Show success toast with onClose callback to reload the page
         toast.success('👍 Item Sold Successfully!', {
           position: "top-right",
@@ -448,29 +448,20 @@ const SalesReportPage = () => {
               className="w-full"
             />
             <div className="flex justify-end">
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
+              <button
                 onClick={handlePurchase}
+                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
               >
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                sx={{
-                  color: 'red',
-                  borderColor: 'red',
-                  '&:hover': {
-                    borderColor: 'darkred',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                  },
-                }}
+                Sell
+              </button>
+              <button
                 onClick={handleCloseModal}
-                className="ml-4"
+                className="ml-4 border border-red-500 text-red-500 py-2 px-4 rounded hover:border-red-700 hover:bg-red-100"
               >
                 Cancel
-              </Button>
+              </button>
             </div>
+
           </form>
         </Box>
       </Modal>

@@ -148,17 +148,15 @@ export default function InventoryList() {
       <Navbar />
       <div className="container mx-auto p-4">
         <h1 className="text-xl font-bold mb-4">Inventory List</h1>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <button
           onClick={() => {
             setShowModal(true);
             setCurrentItem(null);
           }}
-          className="mb-4"
-        >
+          className="bg-green-500 text-white px-4 py-2 rounded mb-4">
+        
           Add Items +
-        </Button>
+        </button>
 
         <TableContainer component={Paper}>
           <Table>
