@@ -466,7 +466,7 @@ const SalesReportPage = () => {
                   },
                 }}
                 onClick={handleCloseModal}
-                className="ml-2"
+                className="ml-4"
               >
                 Cancel
               </Button>
