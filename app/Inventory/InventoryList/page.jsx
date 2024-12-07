@@ -3,6 +3,15 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import TextField from '@mui/material/TextField';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
 
 export default function InventoryList() {
   const [items, setItems] = useState([]);
@@ -60,31 +69,27 @@ export default function InventoryList() {
     }
   };
 
-  // In your main page component, update the handleStock function:
   const handleStock = async (itemId, stockDetails) => {
     try {
-      // Find the current item
       const currentItem = items.find(item => item._id === itemId);
       if (!currentItem) {
         throw new Error("Item not found");
       }
   
-      // Prepare complete stock details
       const completeStockDetails = {
         purchaseorderno: stockDetails.purchaseorderno,
-        name: currentItem._id, // Use item _id as reference
+        name: currentItem._id,
         purchasedate: new Date(stockDetails.purchasedate),
         Invoiceno: stockDetails.Invoiceno,
-        quantity: currentItem._id, // Use item _id as reference
+        quantity: currentItem._id,
         quantityAmount: stockDetails.quantityAmount,
-        unit: currentItem._id, // Use item _id as reference
+        unit: currentItem._id,
         rate: stockDetails.rate,
-        taxpercent: currentItem._id, // Use item _id as reference
+        taxpercent: currentItem._id,
         total: stockDetails.total,
         purorsell: stockDetails.purorsell
       };
   
-      // Create stock report
       const stockReportResponse = await fetch("/api/stockreport", {
         method: "POST",
         headers: { 
@@ -93,7 +98,6 @@ export default function InventoryList() {
         body: JSON.stringify(completeStockDetails),
       });
   
-      // Check if response is ok and parse JSON
       if (!stockReportResponse.ok) {
         const errorData = await stockReportResponse.json().catch(() => ({
           error: `Server returned ${stockReportResponse.status}`
@@ -103,12 +107,10 @@ export default function InventoryList() {
   
       const stockReportData = await stockReportResponse.json();
   
-      // Calculate new stock value
       const quantityChange = completeStockDetails.purorsell === 'purchase' 
         ? completeStockDetails.quantityAmount 
         : -completeStockDetails.quantityAmount;
   
-      // Update inventory
       const inventoryResponse = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
         headers: { 
@@ -126,7 +128,6 @@ export default function InventoryList() {
   
       const inventoryData = await inventoryResponse.json();
       
-      // Update local state
       setItems(prev =>
         prev.map(item => (item._id === itemId ? inventoryData.item : item))
       );
@@ -142,82 +143,68 @@ export default function InventoryList() {
     }
   };
 
-
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
       <div className="container mx-auto p-4">
         <h1 className="text-xl font-bold mb-4">Inventory List</h1>
-        <button
+        <Button 
+          variant="contained" 
+          color="primary" 
           onClick={() => {
             setShowModal(true);
             setCurrentItem(null);
           }}
-          className="bg-green-500 text-white px-4 py-2 rounded mb-4">
-        
+          className="mb-4"
+        >
           Add Items +
-        </button>
+        </Button>
 
-        <table className="w-full border-collapse borderborder border-gray-200">
-          <thead>
-            <tr className="bg-cyan-900 text-white">
-              <th className="border border-gray-300 px-4 py-2">Item Code</th>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Group</th>
-              <th className="border border-gray-300 px-4 py-2">Segment</th>
-              <th className="border border-gray-300 px-4 py-2">Auditable</th>
-              <th className="border border-gray-300 px-4 py-2">Tax</th>
-              <th className="border border-gray-300 px-4 py-2">Stock</th>
-              <th className="border border-gray-300 px-4 py-2">Unit</th>
-              <th className="border border-gray-300 px-4 py-2">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item._id} className="bg-gray-50">
-                <td className="border border-gray-300 px-4 py-2">{item.itemCode}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.group}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.segment?.itemName}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.auditable}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.tax}%</td>
-                <td className="border border-gray-300 px-4 py-2">{item.stock}</td>
-                <td className="border border-gray-300 px-4 py-2">{item.quantityUnit}</td>
-                <td className="border border-gray-300 px-4 py-2">
-                  <button
-                    onClick={() => {
-                      setStockAction({ type: 'buy', itemId: item._id });
-                      setShowStockModal(true);
-                    }}
-                    className="bg-blue-500 text-white px-2 py-1 rounded mr-1"
-                  >
-                    Buy Stock
-                  </button>
-                  <button
-                    onClick={() => {
-                      setStockAction({ type: 'sell', itemId: item._id });
-                      setShowStockModal(true);
-                    }}
-                    className="bg-orange-500 text-white px-2 py-1 rounded mr-1"
-                  >
-                    Sell Stock
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowModal(true);
-                      setCurrentItem(item);
-                    }}
-                    className="bg-green-500 text-white px-2 py-1 rounded"
-                  >
-                    Edit Item
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#164E63" }}>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Code</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Name</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Group</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Segment</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Auditable</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Tax</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Stock</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ color: "white", textAlign: "center" }}>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item._id} sx={{ backgroundColor: "white" }}>
+                  <TableCell sx={{ textAlign: "center" }}>{item.itemCode}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.name}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.group}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.segment?.itemName}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.auditable}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.tax}%</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.stock}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{item.quantityUnit}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      onClick={() => {
+                        setShowModal(true);
+                        setCurrentItem(item);
+                      }}
+                    >
+                      Edit Item
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
-
       {showModal && (
         <ItemModal
           onClose={() => setShowModal(false)}
