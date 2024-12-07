@@ -99,6 +99,7 @@ export default function InventoryCategory() {
       <Navbar />
       <div className="container mx-auto p-4">
         <h1 className="text-xl font-bold mb-4">Inventory Category</h1>
+        <div className="flex justify-start">
         <Button 
           variant="contained" 
           color="primary" 
@@ -106,11 +107,13 @@ export default function InventoryCategory() {
             setShowModal(true);
             setCurrentProduct(null);
           }}
-          className="mb-16"
+          className="mb-4"
         >
           Add New +
         </Button>
 
+        </div>
+        
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
