@@ -106,7 +106,7 @@ export default function InventoryCategory() {
             setShowModal(true);
             setCurrentProduct(null);
           }}
-          className="mb-4"
+          className="mb-16"
         >
           Add New +
         </Button>
