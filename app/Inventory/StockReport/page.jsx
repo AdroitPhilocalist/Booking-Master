@@ -86,7 +86,7 @@ const StockReportPage = () => {
                 fill="currentFill"
               />
             </svg>
-            <span className="mt-4 text-gray-700">Loading Purchase Reports...</span>
+            <span className="mt-4 text-gray-700">Loading Stock Reports...</span>
           </div>
         </div>
       )}

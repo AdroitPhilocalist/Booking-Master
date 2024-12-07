@@ -120,7 +120,7 @@ export default function InventoryCategory() {
                 fill="currentFill"
               />
             </svg>
-            <span className="mt-4 text-gray-700">Loading Purchase Reports...</span>
+            <span className="mt-4 text-gray-700">Loading Inventory Categories...</span>
           </div>
         </div>
       )}

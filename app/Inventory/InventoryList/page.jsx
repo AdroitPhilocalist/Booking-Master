@@ -169,7 +169,7 @@ export default function InventoryList() {
                 fill="currentFill"
               />
             </svg>
-            <span className="mt-4 text-gray-700">Loading Purchase Reports...</span>
+            <span className="mt-4 text-gray-700">Loading Inventory List...</span>
           </div>
         </div>
       )}
