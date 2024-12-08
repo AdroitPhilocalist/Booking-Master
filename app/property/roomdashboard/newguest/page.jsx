@@ -11,6 +11,9 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { Input } from '@mui/material';
+import { OutlinedInput } from '@mui/material';
+
 
 export default function BookingForm() {
     const [focusedInput, setFocusedInput] = useState(null);
@@ -271,30 +274,43 @@ export default function BookingForm() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    
-                                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
-                                    <InputLabel id="demo-simple-select-standard-label">Booking</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-standard-label"
-                                        id="demo-simple-select-standard"
-                                        value={formData.bookingType}
-                                        onChange={handleChange}
-                                        label="Booking"
-                                    >
-                                        {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
-                                            <MenuItem key={type} value={type}>
-                                                {type}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+
+                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
+                                        <InputLabel id="demo-simple-select-standard-label">Booking</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-standard-label"
+                                            id="demo-simple-select-standard"
+                                            value={formData.bookingType}
+                                            onChange={handleChange}
+                                            label="Booking"
+                                        >
+                                            {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
+                                                <MenuItem key={type} value={type}>
+                                                    {type}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                 </div>
 
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        Booking ID*
-                                    </label>
-                                    <input type="text" name="bookingId" value={formData.bookingId} readOnly className="appearance-none block w-full bg-amber-50 text-cyan-900 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
+                                    <TextField
+                                        label="Booking ID"
+                                        name="bookingId"
+                                        value={formData.bookingId}
+                                        InputProps={{
+                                            readOnly: true,
+                                        }}
+                                        fullWidth
+                                        variant="outlined"
+                                        sx={{ mb: 2 }}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        className="text-cyan-900"
+                                        disabled
+                                    />
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -314,19 +330,28 @@ export default function BookingForm() {
 
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="booking-source">
-                                        Booking Source*
-                                    </label>
-                                    <div className="relative">
-                                        <select name="bookingSource" value={formData.bookingSource} onChange={handleChange} className="block appearance-none w-full bg-amber-50 border border-amber-200 text-amber-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
-                                            {['Walk In', 'Front Office', 'Agent', 'Office', 'Goibibo', 'Make My Trip', 'Agoda.com', 'Booking.com', 'Cleartrip', 'Yatra', 'Expedia', 'Trivago', 'Ease My Trip', 'Hotels.com', 'Happy Easy Go', 'TBO', 'Booking Engine', 'GO-MMT', 'Booking Master', 'Hoichoi', 'Others'].map((source) => (
-                                                <option key={source} value={source}>{source}</option>
+                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
+                                        <InputLabel id="booking-source-label">Booking Source</InputLabel>
+                                        <Select
+                                            labelId="booking-source-label"
+                                            id="booking-source-select"
+                                            value={formData.bookingSource}
+                                            onChange={handleChange}
+                                            label="Booking Source"
+                                        >
+                                            {[
+                                                'Walk In', 'Front Office', 'Agent', 'Office', 'Goibibo', 'Make My Trip',
+                                                'Agoda.com', 'Booking.com', 'Cleartrip', 'Yatra', 'Expedia', 'Trivago',
+                                                'Ease My Trip', 'Hotels.com', 'Happy Easy Go', 'TBO', 'Booking Engine',
+                                                'GO-MMT', 'Booking Master', 'Hoichoi', 'Others'
+                                            ].map((source) => (
+                                                <MenuItem key={source} value={source}>
+                                                    {source}
+                                                </MenuItem>
                                             ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
-                                            <ChevronDown className="fill-current h-4 w-4" />
-                                        </div>
-                                    </div>
+                                        </Select>
+                                    </FormControl>
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -414,60 +439,105 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-amber-700 text-xs font-bold mb-2" htmlFor="guest-name">
-                                        Adults
-                                    </label>
-                                    <input type="number" name="adults" value={formData.adults} onChange={handleChange} min="1" className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
+                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
+                                        <InputLabel htmlFor="adults-input">Adults</InputLabel>
+                                        <Input
+                                            id="adults-input"
+                                            type="number"
+                                            name="adults"
+                                            value={formData.adults}
+                                            onChange={handleChange}
+                                            inputProps={{ min: 1 }}
+                                        />
+                                    </FormControl>
+
                                 </div>
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        Children
-                                    </label>
-                                    <input type="number" name="children" value={formData.children} onChange={handleChange} min="0" className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
+                                <div className="w-full md:w-1/2 px-3">
+                                    <FormControl fullWidth variant="outlined" sx={{ m: 1, minWidth: 120 }}>
+                                        <InputLabel htmlFor="children-input">Children</InputLabel>
+                                        <Input
+                                            id="children-input"
+                                            type="number"
+                                            name="children"
+                                            value={formData.children}
+                                            onChange={handleChange}
+                                            inputProps={{ min: 0 }}
+                                            label="Children"
+                                        />
+                                    </FormControl>
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="check-in">
-                                        Check-In*
-                                    </label>
-                                    <div className="relative">
-                                        <input type="date" name="checkIn" value={formData.checkIn} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-amber-700">
-                                        </div>
-                                    </div>
+                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                                        <InputLabel shrink htmlFor="check-in-input">
+                                            Check-In*
+                                        </InputLabel>
+                                        <Input
+                                            id="check-in-input"
+                                            type="date"
+                                            name="checkIn"
+                                            value={formData.checkIn}
+                                            onChange={handleChange}
+                                            required
+                                            label="Check-In*"
+                                        />
+                                    </FormControl>
+
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="check-out">
-                                        Check-Out*
-                                    </label>
-                                    <div className="relative">
-                                        <input type="date" name="checkOut" value={formData.checkOut} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
-                                        </div>
-                                    </div>
+                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                                        <InputLabel shrink htmlFor="check-out-input">
+                                            Check-Out*
+                                        </InputLabel>
+                                        <Input
+                                            id="check-out-input"
+                                            type="date"
+                                            name="checkOut"
+                                            value={formData.checkOut}
+                                            onChange={handleChange}
+                                            required
+                                            label="Check-Out*"
+                                        />
+                                    </FormControl>
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="expected-arrival">
-                                        Expected Arrival*
-                                    </label>
-                                    <div className="relative">
-                                        <input type="time" name="expectedArrival" value={formData.expectedArrival} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
-                                        </div>
-                                    </div>
+                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                                        <InputLabel shrink htmlFor="expected-arrival-input">
+                                            Expected Arrival*
+                                        </InputLabel>
+                                        <Input
+                                            id="expected-arrival-input"
+                                            type="time"
+                                            name="expectedArrival"
+                                            value={formData.expectedArrival}
+                                            onChange={handleChange}
+                                            required
+                                            label="Expected Arrival*"
+                                        />
+                                    </FormControl>
+
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="expected-departure">
-                                        Expected Departure*
-                                    </label>
-                                    <div className="relative">
-                                        <input type="time" name="expectedDeparture" value={formData.expectedDeparture} onChange={handleChange} required className="appearance-none block w-full bg-amber-50 text-amber-700 border border-amber-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-amber-500" id="expected-departure" />
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
-                                        </div>
-                                    </div>
+                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                                        <InputLabel shrink htmlFor="expected-departure-input">
+                                            Expected Departure*
+                                        </InputLabel>
+                                        <Input
+                                            id="expected-departure-input"
+                                            type="time"
+                                            name="expectedDeparture"
+                                            value={formData.expectedDeparture}
+                                            onChange={handleChange}
+                                            required
+                                            label="Expected Departure*"
+                                        />
+                                    </FormControl>
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -487,19 +557,24 @@ export default function BookingForm() {
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-cyan-700 text-xs font-bold mb-2" htmlFor="booking-source">
-                                        Booking Status*
-                                    </label>
-                                    <div className="relative">
-                                        <select name="bookingStatus" value={formData.bookingStatus} onChange={handleChange} required className="block appearance-none w-full bg-amber-50 border border-amber-200 text-amber-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
+                                    <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
+                                        <InputLabel htmlFor="booking-status-select">Booking Status*</InputLabel>
+                                        <Select
+                                            id="booking-status-select"
+                                            name="bookingStatus"
+                                            value={formData.bookingStatus}
+                                            onChange={handleChange}
+                                            required
+                                            label="Booking Status*"
+                                        >
                                             {['Confirmed', 'Blocked'].map((status) => (
-                                                <option key={status} value={status}>{status}</option>
+                                                <MenuItem key={status} value={status}>
+                                                    {status}
+                                                </MenuItem>
                                             ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-700">
-                                            <ChevronDown className="fill-current h-4 w-4" />
-                                        </div>
-                                    </div>
+                                        </Select>
+                                    </FormControl>
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -519,19 +594,24 @@ export default function BookingForm() {
                                     />
                                 </div>
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="booking-source">
-                                        Meal Plan
-                                    </label>
-                                    <div className="relative">
-                                        <select name="mealPlan" value={formData.mealPlan} onChange={handleChange} required className="block appearance-none w-full bg-amber-50 border border-amber-200 text-amber-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
+                                    <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
+                                        <InputLabel htmlFor="meal-plan-select">Meal Plan</InputLabel>
+                                        <Select
+                                            id="meal-plan-select"
+                                            name="mealPlan"
+                                            value={formData.mealPlan}
+                                            onChange={handleChange}
+                                            required
+                                            label="Meal Plan"
+                                        >
                                             {['EP', 'AP', 'CP', 'MAP'].map((meal) => (
-                                                <option key={meal} value={meal}>{meal}</option>
+                                                <MenuItem key={meal} value={meal}>
+                                                    {meal}
+                                                </MenuItem>
                                             ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
-                                            <ChevronDown className="fill-current h-4 w-4" />
-                                        </div>
-                                    </div>
+                                        </Select>
+                                    </FormControl>
+
                                 </div>
                             </div>
                             <div className="flex flex-wrap -mx-3">
@@ -559,19 +639,24 @@ export default function BookingForm() {
                             </div>
                             <div className="flex flex-wrap -mx-3">
                                 <div className="w-full md:w-1/2 px-3">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="booking-source">
-                                        Guest Type
-                                    </label>
-                                    <div className="relative">
-                                        <select name="guestType" value={formData.guestType} onChange={handleChange} className="block appearance-none w-full bg-amber-50 border border-amber-200 text-cyan-900 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-amber-500">
+                                    <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
+                                        <InputLabel htmlFor="guest-type-select">Guest Type</InputLabel>
+                                        <Select
+                                            id="guest-type-select"
+                                            name="guestType"
+                                            value={formData.guestType}
+                                            onChange={handleChange}
+                                            required
+                                            label="Guest Type"
+                                        >
                                             {['General', 'VIP Guest', 'VVIP Guest', 'Scanty baggage'].map((type) => (
-                                                <option key={type} value={type}>{type}</option>
+                                                <MenuItem key={type} value={type}>
+                                                    {type}
+                                                </MenuItem>
                                             ))}
-                                        </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-900">
-                                            <ChevronDown className="fill-current h-4 w-4" />
-                                        </div>
-                                    </div>
+                                        </Select>
+                                    </FormControl>
+
                                 </div>
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
 
@@ -621,20 +706,36 @@ export default function BookingForm() {
                                 </div>
                             </div>
                             <div className="flex items-center justify-end">
-                                <button
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                    type="button"
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    
                                     onClick={handleCheckAvailability}
+                                    sx={{
+                                        '&:hover': {
+                                            backgroundColor: '#3b82f6', // Blue shade for hover effect
+                                        },
+                                        fontWeight: 'bold',
+                                    }}
                                 >
                                     Check Room Availability
-                                </button>
-                                <button
+                                </Button>
+
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
                                     onClick={() => router.push('/property/roomdashboard')}
-                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
-                                    type="button"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        ml: 4, // Margin-left for spacing
+                                        '&:hover': {
+                                            backgroundColor: '#e0e0e0', // Light gray shade for hover effect
+                                        },
+                                    }}
                                 >
                                     Back
-                                </button>
+                                </Button>
+
                             </div>
                         </form>
                     </div>
