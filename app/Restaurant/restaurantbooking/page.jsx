@@ -127,12 +127,12 @@ const RestaurantBooking = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                <TableCell sx={{ color: "#2196f3" }}>Table No.</TableCell>
-                <TableCell sx={{ color: "#2196f3" }}>Date</TableCell>
-                <TableCell sx={{ color: "#2196f3" }}>Time</TableCell>
-                <TableCell sx={{ color: "#2196f3" }}>Guest Name</TableCell>
-                <TableCell sx={{ color: "#2196f3" }}>Action</TableCell>
+              <TableRow sx={{ bgcolor: "#164E63" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Table No.</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Time</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Guest Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -142,11 +142,19 @@ const RestaurantBooking = () => {
                 )
                 .map((booking) => (
                   <TableRow key={booking._id}>
-                    <TableCell>{booking.tableNo}</TableCell>
-                    <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{booking.time}</TableCell>
-                    <TableCell>{booking.guestName}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{booking.tableNo}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                        {(() => {
+                          const date = new Date(booking.date);
+                          const day = String(date.getDate()).padStart(2, "0");
+                          const month = String(date.getMonth() + 1).padStart(2, "0");
+                          const year = date.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        })()}
+                      </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{booking.time}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{booking.guestName}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
                       <IconButton onClick={() => handleEdit(booking._id)} sx={{ color: "#4caf50" }}>
                         <EditIcon />
                       </IconButton>

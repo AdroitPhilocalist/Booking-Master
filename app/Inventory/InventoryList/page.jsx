@@ -189,15 +189,15 @@ export default function InventoryList() {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Code</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Name</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Group</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Segment</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Auditable</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Tax</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Stock</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Unit</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Code</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Group</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Segment</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Auditable</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Tax</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Stock</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

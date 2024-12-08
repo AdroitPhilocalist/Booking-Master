@@ -67,24 +67,24 @@ export default function BookingManagement() {
         {/* Room Table */}
         <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
           <Table>
-            <TableHead sx={{ bgcolor: "#f5f5f5" }}>
+            <TableHead sx={{ bgcolor: "#164E63" }}>
               <TableRow>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Room Number
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Category
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Floor
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Clean
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Occupancy
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Billing Started
                 </TableCell>
               </TableRow>

@@ -242,25 +242,25 @@ const InvoicePage = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Invoice No.
                 </TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Date
                 </TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Customer Name
                 </TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Total Amount
                 </TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   GST
                 </TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Payable Amount
                 </TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
                   Action
                 </TableCell>
               </TableRow>

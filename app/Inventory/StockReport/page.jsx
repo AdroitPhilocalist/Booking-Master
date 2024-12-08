@@ -136,17 +136,17 @@ const StockReportPage = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Name</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Code</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Item Category</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Order Date</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>In Stock</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Out Stock</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Available Quantity</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Unit</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Rate</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Tax Percent</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Total</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Code</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Category</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Order Date</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>In Stock</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Out Stock</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Available Quantity</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Rate</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Tax Percent</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

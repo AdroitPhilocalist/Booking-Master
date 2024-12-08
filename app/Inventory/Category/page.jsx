@@ -140,9 +140,9 @@ export default function InventoryCategory() {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Name</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Status</TableCell>
-                <TableCell sx={{ color: "white", textAlign: "center" }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
