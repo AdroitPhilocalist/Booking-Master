@@ -201,13 +201,13 @@ const InvoicePage = () => {
                     {invoice.custname}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.totalamt}
+                    {invoice.totalamt.toFixed(2)}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.gst}
+                    {invoice.gst.toFixed(2)}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.payableamt}
+                    {invoice.payableamt.toFixed(2)}
                   </TableCell>
                   <TableCell sx={{ textAlign: "center", display: "flex", gap: "8px", justifyContent: "center" }}>
                     <Button
