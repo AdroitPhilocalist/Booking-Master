@@ -2,6 +2,7 @@
 
 import connectSTR from '../../lib/dbConnect';
 import Room from '../../lib/models/Rooms';
+import RoomCategory from '../../lib/models/RoomCategory';
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 
@@ -27,10 +28,12 @@ export async function POST(req) {
     }
 }
 
-export async function GET(req) {
+export async function GET() {
     try {
         await mongoose.connect(connectSTR);
-        
+        if (!mongoose.models.RoomCategory) {
+            mongoose.model('RoomCategory', RoomCategory.schema);
+        }
         const rooms = await Room.find()// Fetch all rooms from the database
         .populate({
             path: 'category',

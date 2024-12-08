@@ -14,7 +14,6 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import axios from "axios"; // For fetching data from your backend
 
 export default function BookingManagement() {
   const [rooms, setRooms] = useState([]); // State to hold room data
