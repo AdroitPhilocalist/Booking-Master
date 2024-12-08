@@ -1,9 +1,34 @@
-// api/restaurantinvoice/[id]/route.js
 import connectSTR from '../../../lib/dbConnect';
 import restaurantinvoice from '../../../lib/models/restaurantinvoice';
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 
+export async function GET(req, { params }) {
+    const { id } = params; // Get the invoice ID from the URL
+
+    try {
+        // Ensure database connection
+        await mongoose.connect(connectSTR);
+
+        // Find the invoice by ID and populate items if necessary
+        const invoice = await restaurantinvoice.findById(id);
+        
+        if (!invoice) {
+            return NextResponse.json({ success: false, error: 'Invoice not found' }, { status: 404 });
+        }
+
+        return NextResponse.json(invoice, { status: 200 });
+    } catch (error) {
+        console.error('Error fetching invoice:', error);
+        return NextResponse.json({ 
+            success: false, 
+            error: 'Failed to fetch invoice',
+            details: error.message 
+        }, { status: 400 });
+    }
+}
+
+// Keep existing methods
 export async function PUT(req, { params }) {
     const { id } = params; // Get the invoice ID from the URL
 

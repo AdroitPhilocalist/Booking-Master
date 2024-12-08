@@ -1,17 +1,17 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
   Button,
   Divider,
-  Grid
+  Grid,
 } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
@@ -22,12 +22,12 @@ const printStyles = `
     body * {
       visibility: hidden;
     }
-    
-    #printable-invoice, 
+
+    #printable-invoice,
     #printable-invoice * {
       visibility: visible;
     }
-    
+
     #printable-invoice {
       position: absolute;
       left: 0;
@@ -36,42 +36,93 @@ const printStyles = `
       print-color-adjust: exact;
       -webkit-print-color-adjust: exact;
     }
-    
+
     body {
       background: white !important;
     }
   }
 `;
 
-const PrintableInvoice = ({ invoice }) => {
+const PrintableInvoice = ({ invoiceId }) => {
+  const [invoice, setInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchInvoiceDetails = async () => {
+      try {
+        const response = await fetch(`/api/restaurantinvoice/${invoiceId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch invoice details');
+        }
+        const data = await response.json();
+        setInvoice(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    if (invoiceId) {
+      fetchInvoiceDetails();
+    }
+  }, [invoiceId]);
+
   const handlePrint = () => {
     window.print();
   };
 
-  // Prepare items with name, quantity, price, and total amount
-  const preparedItems = invoice.items.map((menuItem, index) => ({
-    name: menuItem.name || 'Unknown Item',
-    qty: invoice.quantity[index] || 0,
-    rate: menuItem.price || 0,
-    amount: (menuItem.price || 0) * (invoice.quantity[index] || 0)
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <Typography variant="h6">Loading invoice details...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <Typography variant="h6" color="error">Error: {error}</Typography>
+      </Box>
+    );
+  }
+
+  if (!invoice) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <Typography variant="h6">No invoice found</Typography>
+      </Box>
+    );
+  }
+
+  // Prepare items with correct attributes for display
+  const preparedItems = invoice.menuitem.map((item, index) => ({
+    name: item,
+    qty: invoice.quantity[index],
+    rate: invoice.price[index],
+    amount: invoice.quantity[index] * invoice.price[index]
   }));
+
+  // Calculate subtotal from items
+  const subtotal = preparedItems.reduce((total, item) => total + item.amount, 0);
 
   return (
     <>
-      {/* Add print-specific styles to the document */}
       <style>{printStyles}</style>
 
-      <Box 
+      <Box
         id="printable-invoice"
-        sx={{ 
-          p: 4, 
-          maxWidth: '800px', 
-          margin: 'auto', 
-          bgcolor: '#f5f5f5', 
+        sx={{
+          p: 4,
+          maxWidth: '800px',
+          margin: 'auto',
+          bgcolor: '#f5f5f5',
           borderRadius: 2,
-          maxHeight: '90vh', 
-          overflowY: 'auto', 
-          overflowX: 'hidden' 
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}
       >
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
@@ -87,7 +138,7 @@ const PrintableInvoice = ({ invoice }) => {
                 Invoice
               </Typography>
               <Typography variant="body1" color="textSecondary">
-                #{invoice.id}
+                #{invoice.invoiceno}
               </Typography>
             </Grid>
           </Grid>
@@ -97,14 +148,12 @@ const PrintableInvoice = ({ invoice }) => {
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid item xs={6}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Bill To:</Typography>
-              <Typography variant="body1">{invoice.customerName}</Typography>
-              <Typography variant="body2" color="textSecondary">{invoice.customerAddress}</Typography>
+              <Typography variant="body1">{invoice.custname}</Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Invoice Date:</Typography>
-              <Typography variant="body1">{invoice.date}</Typography>
-              <Typography variant="body1" sx={{ fontWeight: 'bold', mt: 2 }}>Due Date:</Typography>
-              <Typography variant="body1">{invoice.dueDate}</Typography>
+              <Typography variant="body1">{new Date(invoice.date).toLocaleDateString()}</Typography>
+              <Typography variant="body1" color="textSecondary">Time: {invoice.time}</Typography>
             </Grid>
           </Grid>
 
@@ -136,13 +185,13 @@ const PrintableInvoice = ({ invoice }) => {
               <Grid container spacing={1}>
                 <Grid item xs={6}>
                   <Typography variant="body1">Subtotal:</Typography>
-                  <Typography variant="body1">GST ({invoice.gstRate}%):</Typography>
+                  <Typography variant="body1">GST:</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                  <Typography variant="body1">₹{invoice.totalAmount.toFixed(2)}</Typography>
+                  <Typography variant="body1">₹{subtotal.toFixed(2)}</Typography>
                   <Typography variant="body1">₹{invoice.gst.toFixed(2)}</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>₹{invoice.payableAmount.toFixed(2)}</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>₹{invoice.payableamt.toFixed(2)}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -150,22 +199,28 @@ const PrintableInvoice = ({ invoice }) => {
 
           <Divider sx={{ my: 3 }} />
 
-          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-            Thank you for your business. Please pay within {invoice.paymentTerms} days.
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 2, textAlign: 'center' }}>
+            Thank you for your business.
           </Typography>
 
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
             <Button
               variant="contained"
               startIcon={<PrintIcon />}
               onClick={handlePrint}
               sx={{
                 bgcolor: '#00bcd4',
-                '&:hover': { bgcolor: '#00acc1' }
+                '&:hover': { bgcolor: '#00acc1' },
               }}
             >
               Print Invoice
             </Button>
+          </Box>
+
+          <Box sx={{ mt: 4, textAlign: 'center' }}>
+            <Typography variant="caption" color="textSecondary">
+              Invoice generated on {new Date().toLocaleString()}
+            </Typography>
           </Box>
         </Paper>
       </Box>
