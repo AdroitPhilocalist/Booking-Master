@@ -15,15 +15,23 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const InvoicePage = () => {
   const [menu, setMenu] = useState();
   const [invoices, setInvoices] = useState([]);
+  const [filteredInvoices, setFilteredInvoices] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [currentInvoice, setCurrentInvoice] = useState(null);
   const [printableInvoice, setPrintableInvoice] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Date filter states
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   const router = useRouter();
 
   useEffect(() => {
@@ -49,12 +57,29 @@ const InvoicePage = () => {
         const response = await fetch("/api/restaurantinvoice");
         const data = await response.json();
         setInvoices(data.invoices);
+        setFilteredInvoices(data.invoices);
       } catch (error) {
         console.error(error);
       }
     };
     fetchInvoices();
   }, []);
+
+  // Filter Function
+  const filterByDate = () => {
+    if (startDate && endDate) {
+      const filtered = invoices.filter((invoice) => {
+        const invoiceDate = new Date(invoice.date);
+        return (
+          invoiceDate >= new Date(startDate) &&
+          invoiceDate <= new Date(endDate)
+        );
+      });
+      setFilteredInvoices(filtered);
+    } else {
+      setFilteredInvoices(invoices); // Show all invoices if no dates are selected
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -63,7 +88,9 @@ const InvoicePage = () => {
       });
 
       if (response.ok) {
-        setInvoices(invoices.filter((invoice) => invoice._id !== id));
+        const updatedInvoices = invoices.filter((invoice) => invoice._id !== id);
+        setInvoices(updatedInvoices);
+        setFilteredInvoices(updatedInvoices);
       } else {
         console.error("Failed to delete invoice");
       }
@@ -99,6 +126,7 @@ const InvoicePage = () => {
             invoice._id === currentInvoice._id ? updatedInvoice : invoice
           );
           setInvoices(updatedInvoices);
+          setFilteredInvoices(updatedInvoices);
           setCurrentInvoice(null);
           setShowModal(false);
         } else {
@@ -109,7 +137,9 @@ const InvoicePage = () => {
       }
     } else {
       // Add new invoice
-      setInvoices((prev) => [...prev, updatedInvoice]);
+      const newInvoices = [...invoices, updatedInvoice];
+      setInvoices(newInvoices);
+      setFilteredInvoices(newInvoices);
       setShowModal(false);
     }
   };
@@ -122,6 +152,18 @@ const InvoicePage = () => {
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -147,7 +189,6 @@ const InvoicePage = () => {
       )}
       <div className="p-4">
         <h1 className="text-3xl font-bold mb-4">Restaurant Invoices</h1>
-
         <Button
           variant="contained"
           color="primary"
@@ -159,8 +200,44 @@ const InvoicePage = () => {
         >
           Create Invoice
         </Button>
-
-
+        <div className="flex space-x-4 mb-6">
+          <TextField
+            label="Start Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full"
+          />
+          <TextField
+            label="End Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full"
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={filterByDate}
+            className="ml-4"
+          >
+            Filter
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setStartDate("");
+              setEndDate("");
+              setFilteredInvoices(invoices); // Reset to show all invoices
+            }}
+            className="ml-4"
+          >
+            Reset
+          </Button>
+        </div>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -189,68 +266,82 @@ const InvoicePage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice._id} sx={{ backgroundColor: "white" }}>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.invoiceno}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {new Date(invoice.date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.custname}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.totalamt.toFixed(2)}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.gst.toFixed(2)}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {invoice.payableamt.toFixed(2)}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center", display: "flex", gap: "8px", justifyContent: "center" }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => handleEdit(invoice)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      size="small"
-                      onClick={() => handleDelete(invoice._id)}
-                    >
-                      Delete
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      size="small"
-                      onClick={() => handlePrintPreview(invoice)}
-                    >
-                      Print
-                    </Button>
+              {filteredInvoices.length > 0 ? (
+                filteredInvoices.map((invoice) => (
+                  <TableRow key={invoice._id} sx={{ backgroundColor: "white" }}>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {invoice.invoiceno}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                        {(() => {
+                          const date = new Date(invoice.date);
+                          const day = String(date.getDate()).padStart(2, "0");
+                          const month = String(date.getMonth() + 1).padStart(2, "0");
+                          const year = date.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        })()}
+                      </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {invoice.custname}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {invoice.totalamt.toFixed(2)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {invoice.gst.toFixed(2)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {invoice.payableamt.toFixed(2)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center", display: "flex", gap: "8px", justifyContent: "center" }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleEdit(invoice)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        onClick={() => handleDelete(invoice._id)}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        size="small"
+                        onClick={() => handlePrintPreview(invoice)}
+                      >
+                        Print
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    No invoices available.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
         {/* Modal for Create/Edit Invoice */}
         {showModal && (
-          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded shadow-lg">
+          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+
               <CreateInvoicePage
                 onInvoiceCreate={handleInvoiceSave}
                 existingInvoice={currentInvoice}
                 onCancel={handleCancelModal}
               />
-            </div>
+
           </div>
         )}
 

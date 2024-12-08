@@ -1,5 +1,31 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { 
+  Box, 
+  Button, 
+  Container, 
+  FormControl, 
+  InputLabel, 
+  MenuItem, 
+  Select, 
+  TextField, 
+  Typography, 
+  Paper, 
+  Grid, 
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   const [menu, setMenu] = useState([]);
@@ -93,9 +119,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       gst: calculateGST(totalAmount),
       payableamt: calculatePayableAmount(totalAmount)
     }));
-
-    // Reset the select dropdown
-    e.target.value = "";
   };
 
   const updateQuantity = (index, newQuantity) => {
@@ -177,8 +200,29 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
         if (onInvoiceCreate) onInvoiceCreate(data.data);
         // Reset form
         resetForm();
+        // Show success toast with onClose callback to reload the page
+        toast.success('👍 Item Saved Successfully!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       } else {
         console.error("Error saving invoice:", data.error);
+        toast.error('👎 Failed to save invoice', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       }
     } catch (error) {
       console.error("Error during invoice save:", error);
@@ -207,118 +251,173 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto relative">
-      {/* Removed cross/close icon */}
-      <div className="max-h-[600px] overflow-y-auto pr-2">
-        <h2 className="text-2xl font-bold mb-4 text-center sticky top-0 bg-white z-10">Create Invoice</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            { label: "Invoice No.", name: "invoiceno", type: "text" },
-            { label: "Date", name: "date", type: "date" },
-            { label: "Time", name: "time", type: "time" },
-            { label: "Customer Name", name: "custname", type: "text" },
-          ].map(({ label, name, type }) => (
-            <label key={name} className="block">
-              {label}
-              <input
-                type={type}
-                name={name}
-                value={formData[name]}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md"
-                required
-              />
-            </label>
-          ))}
-
-          {/* Menu Item Selection */}
-          <div>
-            <label className="block mb-2">Select Menu Items</label>
-            <select 
-              onChange={addMenuItem}
-              className="w-full px-3 py-2 border rounded-md mb-2"
-            >
-              <option value="">Select Item</option>
-              {menu.map((item) => (
-                <option key={item._id} value={item.itemName}>
-                  {item.itemName} - ₹{item.price}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Selected Items List */}
-          {selectedItems.map((item, index) => (
-            <div 
-              key={index} 
-              className="flex items-center justify-between border p-2 rounded-md mb-2"
-            >
-              <div>
-                <span>{item.name}</span>
-                <span className="ml-2 text-gray-600">₹{item.price}</span>
-              </div>
-              <div className="flex items-center">
-                <label className="mr-2">Qty:</label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  value={item.quantity}
-                  onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
-                  className="w-16 px-2 py-1 border rounded-md mr-2"
+    <Container 
+      maxWidth="sm" 
+      sx={{ 
+        height: '100vh', 
+        overflowY: 'auto', 
+        paddingY: 2 
+      }}
+    >
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          p: 3, 
+          mt: 3, 
+          maxHeight: 'calc(100vh - 100px)', 
+          overflowY: 'auto' 
+        }}
+      >
+        <Typography variant="h4" gutterBottom align="center">
+          Create Invoice
+        </Typography>
+        
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2} sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            {[
+              { label: "Invoice No.", name: "invoiceno", type: "text" },
+              { label: "Date", name: "date", type: "date" },
+              { label: "Time", name: "time", type: "time" },
+              { label: "Customer Name", name: "custname", type: "text" },
+            ].map(({ label, name, type }) => (
+              <Grid item xs={12} key={name}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  name={name}
+                  type={type}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  variant="outlined"
+                  required
+                  InputLabelProps={{
+                    shrink: type === "date" || type === "time" || !!formData[name]
+                  }}
                 />
-                <button 
-                  type="button"
-                  onClick={() => removeMenuItem(index)}
-                  className="bg-red-500 text-white px-2 py-1 rounded-md"
+              </Grid>
+            ))}
+
+            {/* Menu Item Selection */}
+            <Grid item xs={12}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Select Menu Items</InputLabel>
+                <Select
+                  label="Select Menu Items"
+                  onChange={addMenuItem}
+                  value=""
+                  sx={{ 
+                    maxHeight: 200, 
+                    overflowY: 'auto' 
+                  }}
                 >
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
+                  {menu.map((item) => (
+                    <MenuItem key={item._id} value={item.itemName}>
+                      {item.itemName} - ₹{item.price}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-          {/* Totals */}
-          <div className="mt-4 sticky bottom-0 bg-white pt-2">
-            <div className="flex justify-between">
-              <span>Total Amount:</span>
-              <span>₹{formData.totalamt.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>GST (18%):</span>
-              <span>₹{formData.gst.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span>Payable Amount:</span>
-              <span>₹{formData.payableamt.toFixed(2)}</span>
-            </div>
-          </div>
+            {/* Selected Items Table */}
+            {selectedItems.length > 0 && (
+              <Grid item xs={12}>
+                <TableContainer 
+                  component={Paper} 
+                  sx={{ 
+                    maxHeight: 300, 
+                    overflow: 'auto',
+                    '&::-webkit-scrollbar': {
+                      width: '8px'
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: '#f1f1f1'
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: '#888',
+                      borderRadius: '4px'
+                    },
+                    '&::-webkit-scrollbar-thumb:hover': {
+                      background: '#555'
+                    }
+                  }}
+                >
+                  <Table stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Item</TableCell>
+                        <TableCell align="right">Price</TableCell>
+                        <TableCell align="right">Quantity</TableCell>
+                        <TableCell align="right">Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedItems.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.name}</TableCell>
+                          <TableCell align="right">₹{item.price}</TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <IconButton 
+                              color="error" 
+                              onClick={() => removeMenuItem(index)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Grid>
+            )}
 
-          <div className="flex justify-center gap-4 mt-4 sticky bottom-0 bg-white pt-2">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-              disabled={selectedItems.length === 0}
-            >
-              Save Invoice
-            </button>
-            <button
-              type="button"
-              className="bg-gray-400 text-white px-4 py-2 rounded"
-              onClick={resetForm}
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              className="bg-red-500 text-white px-4 py-2 rounded"
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-          </div>
+            {/* Total Amount and Actions */}
+            <Grid item xs={12}>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 2
+              }}>
+                <Box>
+                  <Typography variant="h6">Total Amount: ₹{formData.totalamt}</Typography>
+                  <Typography variant="h6">GST (18%): ₹{formData.gst}</Typography>
+                  <Typography variant="h6">Payable Amount: ₹{formData.payableamt}</Typography>
+                </Box>
+
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 2,
+                  flexWrap: 'wrap'
+                }}>
+                  <Button variant="contained" color="primary" type="submit" startIcon={<SaveIcon />}>
+                    Save
+                  </Button>
+                  <Button variant="outlined" color="secondary" onClick={resetForm} startIcon={<RestartAltIcon />}>
+                    Reset
+                  </Button>
+                  <Button variant="outlined" color="error" onClick={handleCancel} startIcon={<CancelIcon />}>
+                    Cancel
+                  </Button>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
         </form>
-      </div>
-    </div>
+      </Paper>
+    </Container>
   );
 };
 
