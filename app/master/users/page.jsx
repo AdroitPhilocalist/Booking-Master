@@ -63,7 +63,7 @@ export default function Page() {
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
-                  <TableRow>
+                  <TableRow >
                     <TableCell>Name</TableCell>
                     <TableCell>Property</TableCell>
                     <TableCell>Email</TableCell>
