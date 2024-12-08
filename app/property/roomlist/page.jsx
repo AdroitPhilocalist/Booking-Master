@@ -24,8 +24,9 @@ export default function BookingManagement() {
     // Fetch room data from your backend
     const fetchRooms = async () => {
       try {
-        const response = await axios.get("/api/rooms"); // Update the endpoint to match your backend
-        setRooms(response.data);
+        const response = await fetch("/api/rooms"); // Update the endpoint to match your backend
+        const roomData = await response.json();
+        setRooms(roomData);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching rooms:", error);
