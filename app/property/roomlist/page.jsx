@@ -93,7 +93,7 @@ export default function BookingManagement() {
               {rooms.data.map((room) => (
                 <TableRow key={room._id}>
                   <TableCell align="center">{room.number}</TableCell>
-                  <TableCell align="center">{room.category.name}</TableCell>
+                  <TableCell align="center">{room.category.category}</TableCell>
                   <TableCell align="center">{room.floor}</TableCell>
                   <TableCell align="center">
                     {room.clean ? (

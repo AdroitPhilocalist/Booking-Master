@@ -31,8 +31,12 @@ export async function GET(req) {
     try {
         await mongoose.connect(connectSTR);
         
-        const rooms = await Room.find(); // Fetch all rooms from the database
-        
+        const rooms = await Room.find()// Fetch all rooms from the database
+        .populate({
+            path: 'category',
+            model: 'RoomCategory',
+            select: 'category',
+        });
         return NextResponse.json({ success: true, data: rooms }, { status: 200 });
     } catch (error) {
         console.error('Error fetching rooms:', error);
