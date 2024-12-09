@@ -1,12 +1,31 @@
 "use client";
 import Image from "next/image";
+import * as React from 'react';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TextField from "@mui/material/TextField";
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function Home() {
+  const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
-  
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+  const handleMouseUpPassword = (event) => {
+    event.preventDefault();
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault(); // Prevent default form submission behavior
     router.push("/hotelpage"); // Navigate to /hotelpage
@@ -31,13 +50,27 @@ export default function Home() {
               <TextField id="username" label="Username" variant="outlined" fullWidth />
             </div>
             <div>
-              <TextField
-                id="password"
-                label="Password"
-                type="password"
-                autoComplete="current-password"
-                fullWidth
-              />
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-password"
+                  type={showPassword ? 'text' : 'password'}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? 'hide the password' : 'display the password'}
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        onMouseUp={handleMouseUpPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Password"
+                />
+              </FormControl>
             </div>
             <div>
               <button
