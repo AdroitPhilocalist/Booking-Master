@@ -45,7 +45,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     payableamt: 0, 
   }); 
 
-
   useEffect(() => {
     const fetchMenu = async () => {
       try {
@@ -99,10 +98,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
     // Find the selected menu item
     const selectedMenuItem = menu.find(item => item.itemName === selectedItemName);
-    
-    // Check if item is already added
-    const isItemExists = selectedItems.some(item => item.name === selectedItemName);
-    if (isItemExists) return;
 
     // Create a new selected item object
     const newItem = {
@@ -207,7 +202,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
         if (onInvoiceCreate) onInvoiceCreate(data.data);
         // Reset form
         resetForm();
-        // Show success toast with onClose callback to reload the page
         toast.success('👍 Item Saved Successfully!', {
           position: "top-right",
           autoClose: 3000,
@@ -284,13 +278,9 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           > 
             {[ 
               { label: "Invoice No.", name: "invoiceno", type: "text" }, 
-              { label: "Date", name: "date", type: "date" }, 
-              { label: "Time", name: "time", type: "time" }, 
-              { label: "Customer Name", name: "custname", type: "text" }, 
-              { label: "Customer Phone", name: "custphone", type: "tel" }, 
-              { label: "GSTIN", name: "gstin", type: "text" }, 
+              { label: "Date", name: "date", type: "date" }
             ].map(({ label, name, type }) => ( 
-              <Grid item xs={12} key={name}> 
+              <Grid item xs={6} key={name}> 
                 <TextField 
                   fullWidth 
                   label={label} 
@@ -308,7 +298,49 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                   }} 
                 /> 
               </Grid> 
-            ))} 
+            ))}
+            
+            {[ 
+              { label: "Time", name: "time", type: "time" }, 
+              { label: "Customer Name", name: "custname", type: "text" }
+            ].map(({ label, name, type }) => ( 
+              <Grid item xs={6} key={name}> 
+                <TextField 
+                  fullWidth 
+                  label={label} 
+                  name={name} 
+                  type={type} 
+                  value={formData[name]} 
+                  onChange={handleChange} 
+                  variant="outlined" 
+                  required 
+                  InputLabelProps={{ 
+                    shrink: 
+                      type === "date" || 
+                      type === "time" || 
+                      !!formData[name] 
+                  }} 
+                /> 
+              </Grid> 
+            ))}
+
+            {[ 
+              { label: "Customer Phone", name: "custphone", type: "tel" }, 
+              { label: "GSTIN", name: "gstin", type: "text" }
+            ].map(({ label, name, type }) => ( 
+              <Grid item xs={6} key={name}> 
+                <TextField 
+                  fullWidth 
+                  label={label} 
+                  name={name} 
+                  type={type} 
+                  value={formData[name]} 
+                  onChange={handleChange} 
+                  variant="outlined" 
+                  required 
+                /> 
+              </Grid> 
+            ))}
 
             {/* Menu Item Selection */}
             <Grid item xs={12}>
@@ -332,40 +364,46 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
               </FormControl>
             </Grid>
 
-            {/* Selected Items Table */}
-            {selectedItems.length > 0 && (
-              <Grid item xs={12}>
-                <TableContainer 
-                  component={Paper} 
-                  sx={{ 
-                    maxHeight: 300, 
-                    overflow: 'auto',
-                    '&::-webkit-scrollbar': {
-                      width: '8px'
-                    },
-                    '&::-webkit-scrollbar-track': {
-                      background: '#f1f1f1'
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                      background: '#888',
-                      borderRadius: '4px'
-                    },
-                    '&::-webkit-scrollbar-thumb:hover': {
-                      background: '#555'
-                    }
-                  }}
-                >
-                  <Table stickyHeader>
-                    <TableHead>
+            {/* Selected Items Table - Always Visible */}
+            <Grid item xs={12}>
+              <TableContainer 
+                component={Paper} 
+                sx={{ 
+                  maxHeight: 300, 
+                  overflow: 'auto',
+                  '&::-webkit-scrollbar': {
+                    width: '8px'
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: '#f1f1f1'
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: '#888',
+                    borderRadius: '4px'
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: '#555'
+                  }
+                }}
+              >
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Item</TableCell>
+                      <TableCell align="right">Price</TableCell>
+                      <TableCell align="right">Quantity</TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedItems.length === 0 ? (
                       <TableRow>
-                        <TableCell>Item</TableCell>
-                        <TableCell align="right">Price</TableCell>
-                        <TableCell align="right">Quantity</TableCell>
-                        <TableCell align="right">Actions</TableCell>
+                        <TableCell colSpan={4} align="center">
+                          No items selected
+                        </TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {selectedItems.map((item, index) => (
+                    ) : (
+                      selectedItems.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell>{item.name}</TableCell>
                           <TableCell align="right">₹{item.price}</TableCell>
@@ -388,12 +426,12 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                             </IconButton>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-            )}
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
 
             {/* Total Amount and Actions */}
             <Grid item xs={12}>
@@ -416,22 +454,23 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                   flexWrap: 'wrap'
                 }}>
                   <Button variant="contained" color="primary" type="submit" startIcon={<SaveIcon />}>
-                    Save
-                  </Button>
-                  <Button variant="outlined" color="secondary" onClick={resetForm} startIcon={<RestartAltIcon />}>
-                    Reset
-                  </Button>
-                  <Button variant="outlined" color="error" onClick={handleCancel} startIcon={<CancelIcon />}>
-                    Cancel
-                  </Button>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
-    </Container>
-  );
-};
+                Save
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={resetForm} startIcon={<RestartAltIcon />}>
+                Reset
+              </Button>
+              <Button variant="outlined" color="error" onClick={handleCancel} startIcon={<CancelIcon />}>
+                Cancel
+              </Button>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </form>
+    <ToastContainer />
+  </Paper>
+</Container>
+);
+}
 
 export default CreateInvoicePage;
