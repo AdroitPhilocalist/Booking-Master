@@ -28,20 +28,23 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
-  const [menu, setMenu] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [formData, setFormData] = useState({
-    invoiceno: "",
-    date: "",
-    time: "",
-    custname: "",
+  const [menu, setMenu] = useState([]); 
+  const [selectedItems, setSelectedItems] = useState([]); 
+  const [formData, setFormData] = useState({ 
+    invoiceno: "", 
+    date: "", 
+    time: "", 
+    custname: "", 
+    custphone: "", 
+    gstin: "", 
     menuitem: [], 
     quantity: [], 
     price: [], 
-    totalamt: 0,
-    gst: 0,
-    payableamt: 0,
-  });
+    totalamt: 0, 
+    gst: 0, 
+    payableamt: 0, 
+  }); 
+
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -56,30 +59,34 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     fetchMenu();
   }, []);
 
-  useEffect(() => {
-    if (existingInvoice) {
-      setFormData({
-        invoiceno: existingInvoice.invoiceno || "",
-        date: existingInvoice.date
-          ? new Date(existingInvoice.date).toISOString().split("T")[0]
-          : "",
-        time: existingInvoice.time || "",
-        custname: existingInvoice.custname || "",
-        menuitem: existingInvoice.menuitem || [],
-        quantity: existingInvoice.quantity || [],
-        price: existingInvoice.price || [],
-        totalamt: existingInvoice.totalamt || 0,
-        gst: existingInvoice.gst || calculateGST(existingInvoice.totalamt || 0),
-        payableamt: existingInvoice.payableamt || calculatePayableAmount(existingInvoice.totalamt || 0),
-      });
-      setSelectedItems(
-        existingInvoice.menuitem?.map((item, index) => ({
-          name: item,
-          price: existingInvoice.price[index],
-          quantity: existingInvoice.quantity[index] || 1,
-        })) || []
-      );
-    }
+  useEffect(() => { 
+    if (existingInvoice) { 
+      setFormData({ 
+        invoiceno: existingInvoice.invoiceno || "", 
+        date: existingInvoice.date 
+          ? new Date(existingInvoice.date).toISOString().split("T")[0] 
+          : "", 
+        time: existingInvoice.time || "", 
+        custname: existingInvoice.custname || "", 
+        custphone: existingInvoice.custphone || "", 
+        gstin: existingInvoice.gstin || "", 
+        menuitem: existingInvoice.menuitem || [], 
+        quantity: existingInvoice.quantity || [], 
+        price: existingInvoice.price || [], 
+        totalamt: existingInvoice.totalamt || 0, 
+        gst: existingInvoice.gst || calculateGST(existingInvoice.totalamt || 0), 
+        payableamt: 
+          existingInvoice.payableamt || 
+          calculatePayableAmount(existingInvoice.totalamt || 0), 
+      }); 
+      setSelectedItems( 
+        existingInvoice.menuitem?.map((item, index) => ({ 
+          name: item, 
+          price: existingInvoice.price[index], 
+          quantity: existingInvoice.quantity[index] || 1, 
+        })) || [] 
+      ); 
+    } 
   }, [existingInvoice]);
 
   const handleChange = (e) => {
@@ -235,6 +242,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       date: "",
       time: "",
       custname: "",
+      custphone: "",
+      gstin: "",
       menuitem: [],
       quantity: [],
       price: [],
@@ -253,12 +262,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   return (
     <Container 
       maxWidth="sm" 
-      sx={{ 
-        height: '100vh', 
-        overflowY: 'auto', 
-        paddingY: 2 
-      }}
-    >
+      sx={{ height: '100vh', overflowY: 'auto', paddingY: 2 }} 
+    > 
       <Paper 
         elevation={3} 
         sx={{ 
@@ -266,36 +271,44 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           mt: 3, 
           maxHeight: 'calc(100vh - 100px)', 
           overflowY: 'auto' 
-        }}
-      >
-        <Typography variant="h4" gutterBottom align="center">
-          Create Invoice
-        </Typography>
-        
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2} sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
-            {[
-              { label: "Invoice No.", name: "invoiceno", type: "text" },
-              { label: "Date", name: "date", type: "date" },
-              { label: "Time", name: "time", type: "time" },
-              { label: "Customer Name", name: "custname", type: "text" },
-            ].map(({ label, name, type }) => (
-              <Grid item xs={12} key={name}>
-                <TextField
-                  fullWidth
-                  label={label}
-                  name={name}
-                  type={type}
-                  value={formData[name]}
-                  onChange={handleChange}
-                  variant="outlined"
-                  required
-                  InputLabelProps={{
-                    shrink: type === "date" || type === "time" || !!formData[name]
-                  }}
-                />
-              </Grid>
-            ))}
+        }} 
+      > 
+        <Typography variant="h4" gutterBottom align="center"> 
+          Create Invoice 
+        </Typography> 
+        <form onSubmit={handleSubmit}> 
+          <Grid 
+            container 
+            spacing={2} 
+            sx={{ maxHeight: '70vh', overflowY: 'auto' }} 
+          > 
+            {[ 
+              { label: "Invoice No.", name: "invoiceno", type: "text" }, 
+              { label: "Date", name: "date", type: "date" }, 
+              { label: "Time", name: "time", type: "time" }, 
+              { label: "Customer Name", name: "custname", type: "text" }, 
+              { label: "Customer Phone", name: "custphone", type: "tel" }, 
+              { label: "GSTIN", name: "gstin", type: "text" }, 
+            ].map(({ label, name, type }) => ( 
+              <Grid item xs={12} key={name}> 
+                <TextField 
+                  fullWidth 
+                  label={label} 
+                  name={name} 
+                  type={type} 
+                  value={formData[name]} 
+                  onChange={handleChange} 
+                  variant="outlined" 
+                  required 
+                  InputLabelProps={{ 
+                    shrink: 
+                      type === "date" || 
+                      type === "time" || 
+                      !!formData[name] 
+                  }} 
+                /> 
+              </Grid> 
+            ))} 
 
             {/* Menu Item Selection */}
             <Grid item xs={12}>

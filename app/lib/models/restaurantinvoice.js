@@ -18,15 +18,21 @@ const restaurantInvoiceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    quantity:{
-        type: [Number],
-        required: true,
+    custphone: {
+      type: String,
+      required: true,
     },
-    
+    gstin: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: [Number],
+      required: true,
+    },
     menuitem: {
-        type: [String],
-        
-        required: true,
+      type: [String],
+      required: true,
     },
     price: {
       type: [Number],
@@ -50,5 +56,5 @@ const restaurantInvoiceSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.models.restaurantinvoice ||
+export default mongoose.models.restaurantinvoice || 
   mongoose.model("restaurantinvoice", restaurantInvoiceSchema);
