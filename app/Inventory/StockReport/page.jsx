@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import TextField from "@mui/material/TextField";
@@ -22,6 +22,9 @@ const StockReportPage = () => {
   // Filters
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+    // Ref to access the table
+    const tableRef = useRef(null);
 
   // Fetch stock reports from the API when the component mounts
   useEffect(() => {
@@ -64,6 +67,49 @@ const StockReportPage = () => {
     }
   };
 
+  const printTable = () => {
+    if (!tableRef.current) return;
+  
+    const tableHTML = tableRef.current.outerHTML;
+    const originalContent = document.body.innerHTML;
+  
+    // Replace body content with table HTML
+    document.body.innerHTML = `
+      <html>
+        <head>
+          <title>Stock Report</title>
+          <style>
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            table, th, td {
+              border: 1px solid black;
+            }
+            th, td {
+              padding: 8px;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          ${tableHTML}
+        </body>
+      </html>
+    `;
+  
+    // Trigger print
+    window.print();
+  
+    // Restore original content
+    document.body.innerHTML = originalContent;
+  
+    // Reattach React event listeners after restoring DOM
+    window.location.reload();
+  };
+  
+
+
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
@@ -93,14 +139,15 @@ const StockReportPage = () => {
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-bold mb-4">Stock Report</h1>
 
-        <div className="flex space-x-4 mb-6">
+        <div className="flex space-x-2 mb-4">
           <TextField
             label="Start Date"
             type="date"
             InputLabelProps={{ shrink: true }}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full"
+            className="w-1/4"
+            size="small"
           />
           <TextField
             label="End Date"
@@ -108,13 +155,15 @@ const StockReportPage = () => {
             InputLabelProps={{ shrink: true }}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full"
+            className="w-1/4"
+            size="small"
           />
           <Button
             variant="contained"
             color="primary"
             onClick={filterByDate}
-            className="ml-4"
+            className="ml-2"
+            size="small"
           >
             Filter
           </Button>
@@ -126,14 +175,24 @@ const StockReportPage = () => {
               setEndDate("");
               setFilteredReports(stockReports); // Reset to show all reports
             }}
-            className="ml-4"
+            className="ml-2"
+            size="small"
           >
             Reset
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={printTable}
+            className="ml-2"
+            size="small"
+          >
+            Download/Export
           </Button>
         </div>
 
         <TableContainer component={Paper}>
-          <Table>
+          <Table  ref={tableRef}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#164E63" }}>
                 <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Name</TableCell>
