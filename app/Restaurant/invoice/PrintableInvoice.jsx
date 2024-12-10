@@ -156,6 +156,9 @@ const PrintableInvoice = ({ invoiceId }) => {
               <Typography variant="body1" color="textSecondary">
                 #{invoice.invoiceno}
               </Typography>
+              <Typography variant="caption" color="textSecondary">
+                GSTIN: {invoice.gstin}
+              </Typography>
             </Grid>
           </Grid>
 
@@ -165,6 +168,9 @@ const PrintableInvoice = ({ invoiceId }) => {
             <Grid item xs={6}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Bill To:</Typography>
               <Typography variant="body1">{invoice.custname}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Phone: {invoice.custphone}
+              </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Invoice Date:</Typography>
