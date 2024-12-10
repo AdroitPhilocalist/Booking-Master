@@ -328,8 +328,25 @@ const PurchaseReportPage = () => {
             <TableBody>
               {filteredReports.length > 0 ? (
                 filteredReports.map((report) => (
-                  <TableRow key={report._id} sx={{ backgroundColor: "#BBF7D0" }}>
-                    <TableCell sx={{ textAlign: "center" }}>{report.purchaseorderno}</TableCell>
+                  <TableRow
+                    key={report._id}
+                    sx={{
+                      '& > td': {
+                        backgroundColor: 'white',
+                      },
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        textAlign: 'center',
+                        background: `linear-gradient(
+                                      to right,
+                                      ${report.purorsell === 'purchase' ? '#00FF00' : '#FF0000'} 10%, 
+                                      white 10%
+                                      )`,
+                      }}
+                    >{report.purchaseorderno}
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{report.name?.name}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {(() => {
