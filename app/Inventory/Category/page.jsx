@@ -139,10 +139,10 @@ export default function InventoryCategory() {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Action</TableCell>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

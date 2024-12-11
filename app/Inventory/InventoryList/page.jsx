@@ -188,16 +188,16 @@ export default function InventoryList() {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Code</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Group</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Segment</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Auditable</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Tax</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Stock</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Unit</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Action</TableCell>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Code</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Group</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Segment</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Auditable</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tax</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Stock</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
