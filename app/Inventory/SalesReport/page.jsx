@@ -306,14 +306,7 @@ const SalesReportPage = () => {
       )}
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Sales Report</h1>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Sell Stock
-          </Button>
+          <h1 className="text-2xl font-bold">Sales Report</h1>        
         </div>
 
         <div className="flex space-x-2 mb-4">
@@ -370,6 +363,13 @@ const SalesReportPage = () => {
             }}
           >
             Download/Export
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Sell Stock
           </Button>
         </div>
 
