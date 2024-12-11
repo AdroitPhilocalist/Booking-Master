@@ -404,8 +404,8 @@ const PurchaseReportPage = () => {
                         textAlign: 'center',
                         background: `linear-gradient(
                                       to right,
-                                      ${report.purorsell === 'purchase' ? '#00FF00' : '#FF0000'} 10%, 
-                                      white 10%
+                                      ${report.purorsell === 'purchase' ?'#1ebc1e' : '#f24a23'} 5%, 
+                                      white 5%
                                       )`,
                       }}
                     >{report.purchaseorderno}

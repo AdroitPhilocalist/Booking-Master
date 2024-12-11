@@ -199,18 +199,18 @@ const StockReportPage = () => {
         <TableContainer component={Paper}>
           <Table  ref={tableRef}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Code</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Item Category</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Order Date</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>In Stock</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Out Stock</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Available Quantity</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Unit</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Rate</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Tax Percent</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Total</TableCell>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Code</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Category</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Order Date</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>In Stock</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Out Stock</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Available Quantity</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Unit</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Rate</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tax Percent</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -229,8 +229,8 @@ const StockReportPage = () => {
                         textAlign: 'center',
                         background: `linear-gradient(
                                       to right,
-                                      ${report.purorsell === 'purchase' ? '#00FF00' : '#FF0000'} 10%, 
-                                      white 10%
+                                      ${report.purorsell === 'purchase' ? '#1ebc1e' : '#f24a23'} 5%, 
+                                      white 5%
                                       )`,
                       }}
                     >
