@@ -444,8 +444,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
               }}>
                 <Box>
                   <Typography variant="h6">Total Amount: ₹{formData.totalamt}</Typography>
-                  <Typography variant="h6">GST (18%): ₹{formData.gst}</Typography>
-                  <Typography variant="h6">Payable Amount: ₹{formData.payableamt}</Typography>
+                  <Typography variant="h6">GST (18%): ₹{formData.gst.toFixed(2)}</Typography>
+                  <Typography variant="h6">Payable Amount: ₹{formData.payableamt.toFixed(2)}</Typography>
                 </Box>
 
                 <Box sx={{ 
