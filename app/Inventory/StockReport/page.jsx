@@ -182,10 +182,15 @@ const StockReportPage = () => {
           </Button>
           <Button
             variant="contained"
-            color="success"
             onClick={printTable}
             className="ml-2"
             size="small"
+            sx={{
+              backgroundColor: 'orange',
+              '&:hover': {
+                backgroundColor: 'darkorange',
+              },
+            }}
           >
             Download/Export
           </Button>
