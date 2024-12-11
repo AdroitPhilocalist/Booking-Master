@@ -16,12 +16,12 @@ export default function Billing() {
   const [newItem, setNewItem] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-const [amountToBePaid, setAmountToBePaid] = useState(0);
-const openPaymentModal = () => setIsPaymentModalOpen(true);
-const closePaymentModal = () => setIsPaymentModalOpen(false);
-const [openDueDialog, setOpenDueDialog] = useState(false);
-const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [amountToBePaid, setAmountToBePaid] = useState(0);
+  const openPaymentModal = () => setIsPaymentModalOpen(true);
+  const closePaymentModal = () => setIsPaymentModalOpen(false);
+  const [openDueDialog, setOpenDueDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
 
   // Fetch room and billing data
   useEffect(() => {
@@ -112,12 +112,12 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
     const newAmountAdvanced =
       selectedBill.amountAdvanced + parseFloat(amountToBePaid);
     console.log(newAmountAdvanced);
-  
+
     if (newAmountAdvanced > selectedBill.totalAmount) {
       alert("Payment exceeds the total amount due!");
       return;
     }
-  
+
     try {
       // Prepare the payload for updating the bill
       const payload = {
@@ -125,17 +125,17 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
       };
       console.log(newAmountAdvanced);
       console.log(payload);
-  
+
       // Update the bill via API
       const response = await fetch(`/api/Billing/${selectedBill._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
+
       const result = await response.json();
       console.log(result);
-  
+
       if (result.success) {
         setSelectedBill(result.data);
         alert("Payment updated successfully!");
@@ -158,10 +158,10 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
         setOpenDueDialog(true); // Show the dialog if there is still a due amount
         return;
       }
-  
+
       // Prepare the payload
-      const payload = { Bill_Paid: 'yes'};
-  
+      const payload = { Bill_Paid: 'yes' };
+
       // Make the API call
       const response = await fetch(`/api/Billing/${selectedBill._id}`, {
         method: "PUT",
@@ -170,7 +170,7 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
         },
         body: JSON.stringify(payload),
       });
-      
+
       const result = await response.json();
       console.log(result);
       if (result.success) {
@@ -186,8 +186,8 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
     }
   };
   const handleCloseDialog = () => setOpenDueDialog(false);
-  
-  
+
+
 
   // Function to add new item to the bill
   const handleAddItem = async () => {
@@ -310,9 +310,8 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
                 billingData.map((bill, index) => (
                   <tr
                     key={index}
-                    className={`${
-                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-white transition`}
+                    className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                      } hover:bg-white transition`}
                   >
                     <td className="px-6 py-4 text-sm text-gray-700 border-b">
                       {bill.roomNo || "N/A"}
@@ -440,11 +439,11 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
                   Bill Paid
                 </button>
                 <button
-    onClick={openPaymentModal}
-    className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
-  >
-    Bill Payment
-  </button>
+                  onClick={openPaymentModal}
+                  className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition"
+                >
+                  Bill Payment
+                </button>
                 <button
                   onClick={closeModal}
                   className="px-6 py-3 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
@@ -457,91 +456,89 @@ const [snackbarMessage, setSnackbarMessage] = React.useState("");
         </div>
       )}
       {isPaymentModalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white rounded-lg p-6 w-96">
-      <h3 className="text-lg font-medium mb-4">Bill Payment</h3>
-      
-      {/* Total Amount */}
-      <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">Total Amount:</label>
-        <input
-          type="text"
-          value={selectedBill.totalAmount}
-          readOnly
-          className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
-        />
-      </div>
-      
-      {/* Due Amount */}
-      <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">Due Amount:</label>
-        <input
-          type="text"
-          value={selectedBill.dueAmount - amountToBePaid}
-          readOnly
-          className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
-        />
-      </div>
-      
-      {/* Amount to Be Paid */}
-<div className="mb-4">
-  <label className="block text-gray-700 font-medium mb-2">Amount to Be Paid:</label>
-  <input
-    type="number"
-    value={amountToBePaid}
-    onChange={(e) => {
-      const value = parseFloat(e.target.value);
-      if (value < 0) {
-        setSnackbarMessage("Amount cannot be negative!");
-        setSnackbarOpen(true);
-      } else if (value > selectedBill?.dueAmount) {
-        setSnackbarMessage("Amount cannot exceed the due amount!");
-        setSnackbarOpen(true);
-      } else {
-        setAmountToBePaid(value);
-      }
-    }}
-    className="w-full px-4 py-2 border rounded-md"
-  />
-</div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h3 className="text-lg font-medium mb-4">Bill Payment</h3>
 
-{/* Snackbar for validation messages */}
-<Snackbar
-  open={snackbarOpen}
-  autoHideDuration={4000}
-  onClose={() => setSnackbarOpen(false)}
-  message={snackbarMessage}
-  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-  action={
-    <Button
-      color="inherit"
-      size="small"
-      onClick={() => setSnackbarOpen(false)}
-    >
-      Close
-    </Button>
-  }
-/>
+            {/* Total Amount */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">Total Amount:</label>
+              <input
+                type="text"
+                value={selectedBill.totalAmount}
+                readOnly
+                className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
+              />
+            </div>
 
+            {/* Due Amount */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">Due Amount:</label>
+              <input
+                type="text"
+                value={selectedBill.dueAmount - amountToBePaid}
+                readOnly
+                className="w-full px-4 py-2 border rounded-md bg-gray-100 text-gray-800"
+              />
+            </div>
 
-      {/* Buttons */}
-      <div className="flex justify-end gap-4">
-        <button
-          onClick={closePaymentModal}
-          className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handlePayment}
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-        >
-          Pay
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            {/* Amount to Be Paid */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">Amount to Be Paid:</label>
+              <input
+                type="number"
+                value={amountToBePaid}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  if (value < 0) {
+                    setSnackbarMessage("Amount cannot be negative!");
+                    setSnackbarOpen(true);
+                  } else if (value > selectedBill?.dueAmount) {
+                    setSnackbarMessage("Amount cannot exceed the due amount!");
+                    setSnackbarOpen(true);
+                  } else {
+                    setAmountToBePaid(value);
+                  }
+                }}
+                className="w-full px-4 py-2 border rounded-md"
+              />
+            </div>
+
+            {/* Snackbar for validation messages */}
+            <Snackbar
+              open={snackbarOpen}
+              autoHideDuration={4000}
+              onClose={() => setSnackbarOpen(false)}
+              message={snackbarMessage}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => setSnackbarOpen(false)}
+                >
+                  Close
+                </Button>
+              }
+            />
+            {/* Buttons */}
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={closePaymentModal}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePayment}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+              >
+                Pay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Edit Bill Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
