@@ -65,9 +65,6 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/guests">Guests</Link>
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/property/billing">Booking</Link>
-                </li>
               </ul>
             )}
           </li>
@@ -115,7 +112,6 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Inventory/InventoryList">Inventory List</Link>
                 </li>
-                
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Inventory/PurchaseReport">Purchase Report</Link>
                 </li>
@@ -124,6 +120,22 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Inventory/StockReport">Stock Report</Link>
+                </li>
+              </ul>
+            )}
+          </li>
+
+          {/* Billing Dropdown */}
+          <li
+            className="relative"
+            onMouseEnter={() => handleMouseEnter(9)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Billing</button>
+            {openDropdown === 9 && (
+              <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/property/billing">Booking</Link>
                 </li>
               </ul>
             )}

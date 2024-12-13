@@ -69,11 +69,12 @@ export default function BookingForm() {
 
     useEffect(() => {
         const generateBookingId = () => {
-            return Math.random().toString(36).substring(2, 12).toUpperCase();
+            return "BMX-" + Math.random().toString(36).substring(2, 12).toUpperCase();
         };
-
+    
         setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
     }, []);
+    
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;

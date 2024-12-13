@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
@@ -10,6 +11,7 @@ import Snackbar from "@mui/material/Snackbar";
 import jsPDF from "jspdf";
 import { FaTrashAlt } from "react-icons/fa";
 export default function Billing() {
+  const router = useRouter(); // Initialize Next.js router
   const [billingData, setBillingData] = useState([]);
   const [selectedBill, setSelectedBill] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -25,32 +27,53 @@ export default function Billing() {
 
   // Fetch room and billing data
   useEffect(() => {
-    const fetchUnpaidBillingData = async () => {
+    const fetchData = async () => {
       try {
-        // Step 1: Fetch all unpaid bills directly
-        const response = await fetch("/api/Billing"); // Assuming this endpoint filters by Bill_Paid
-        const billingData = await response.json();
+        // Fetch unpaid bills
+        const billingResponse = await fetch("/api/Billing");
+        const billingResult = await billingResponse.json();
 
-        if (billingData.success) {
-          // Step 2: Filter the bills with Bill_Paid === "No"
-          const unpaidBills = billingData.data.filter(
+        // Fetch booking data to match guest names
+        const bookingResponse = await fetch("/api/NewBooking");
+        const bookingResult = await bookingResponse.json();
+
+        if (billingResult.success && bookingResult.success) {
+          // Filter unpaid bills
+          const unpaidBills = billingResult.data.filter(
             (bill) => bill.Bill_Paid === "no"
           );
-          setBillingData(unpaidBills);
+
+          // Map guest names to bills based on room numbers
+          const enrichedBills = unpaidBills.map(bill => {
+            // Find the booking that includes this room number
+            const matchingBooking = bookingResult.data.find(booking =>
+              booking.roomNumbers.includes(parseInt(bill.roomNo))
+            );
+
+            // Return the bill with the guest name if found
+            return {
+              ...bill,
+              guestName: matchingBooking ? matchingBooking.guestName : "N/A"
+            };
+          });
+
+          setBillingData(enrichedBills);
+          setBookingData(bookingResult.data);
         } else {
-          console.error("Failed to fetch unpaid billing data");
+          console.error("Failed to fetch billing or booking data");
         }
       } catch (error) {
-        console.error("Error fetching unpaid billing data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchUnpaidBillingData();
+    fetchData();
   }, []);
 
   // Function to handle viewing bill details
   const handleViewBill = (bill) => {
-    setSelectedBill(bill); // Set the selected bill for modal display
+    // Navigate to GuestBill page with the bill ID
+    router.push(`/property/billing/guest-bill/${bill._id}`);
   };
 
   // Function to close the modal
@@ -352,6 +375,7 @@ export default function Billing() {
           </table>
         </div>
       </div>
+
       {/* Modal for Viewing Bill Details */}
       {selectedBill && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">

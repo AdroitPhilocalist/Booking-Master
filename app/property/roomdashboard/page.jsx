@@ -55,39 +55,50 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
   const handleEditSubmit = async () => {
     // Validation: Ensure a guest is selected when the room is set to "Occupied"
     if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
-        alert("Please select a guest before saving an occupied room.");
-        return; // Prevent submission if validation fails
-    }
+      alert("Please select a guest before saving an occupied room.");
+      return;
+  }
 
-    if (updatedRoom.occupied === "Occupied" && selectedGuest) {
-        try {
-            // Retrieve checkIn and checkOut from selected guest
-            const { checkIn, checkOut } = selectedGuest;
+  if (updatedRoom.occupied === "Occupied" && selectedGuest) {
+      try {
+          // Retrieve checkIn and checkOut from selected guest
+          const { checkIn, checkOut } = selectedGuest;
 
-            // Update the guest's roomNumbers in the database
-            await fetch(`/api/NewBooking/${selectedGuest._id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    roomNumbers: [...selectedGuest.roomNumbers, updatedRoom.number],
-                }),
-            });
+          // Find the matching room category
+          const matchingCategory = categories.find(
+              (cat) => cat._id === updatedRoom.category._id
+          );
+          console.log("Matching Category:", matchingCategory);
 
-            // Create billing entry when room status changes to "Occupied"
-            const newBilling = {
-                roomNo: updatedRoom.number,
-                itemList: ["Room Charge"], // Add more items as necessary
-                priceList: [updatedRoom.category.tarrif], // Assuming the room has a price field
-                billStartDate: checkIn, // Use the checkIn value from the selected guest
-                billEndDate: checkOut, // Use the checkOut value from the selected guest
-                totalAmount: 0,
-                amountAdvanced: 0,
-                dueAmount: 0,
-            };
+          // Calculate the number of nights (days between checkIn and checkOut)
+          const checkInDate = new Date(checkIn);
+          const checkOutDate = new Date(checkOut);
+          const numberOfNights = Math.ceil(
+              (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+          );
 
-            console.log("Submitting billing data:", newBilling);
+          console.log("Number of Nights:", numberOfNights);
+
+          // Calculate total room charge
+          const roomCharge = matchingCategory 
+              ? matchingCategory.total * numberOfNights 
+              : 0;
+
+              console.log("Room Charge:", roomCharge);
+
+          // Create billing entry when room status changes to "Occupied"
+          const newBilling = {
+            roomNo: updatedRoom.number,
+            itemList: ["Room Charge"], // Add more items as necessary
+            priceList: [roomCharge], // Assuming the room has a price field
+            billStartDate: checkIn, // Use the checkIn value from the selected guest
+            billEndDate: checkOut, // Use the checkOut value from the selected guest
+            totalAmount: roomCharge,
+            amountAdvanced: 0,
+            dueAmount: roomCharge,
+          };
+
+          console.log("Submitting billing data:", newBilling);
 
             // Create Billing Record in the database
             const billingResponse = await fetch("/api/Billing", {
@@ -172,7 +183,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
 
   // Find category name based on room's category ID
   const categoryName =
-    categories.find((cat) => cat._id === room.category)?.category ||
+    categories.find((cat) => cat._id === room.category._id)?.category ||
     "No Category";
 
   return (

@@ -98,6 +98,7 @@ export async function PUT(req, { params }) {
       const newTotalAmount =
         bill.totalAmount + newPriceList.reduce((sum, price) => sum + price, 0);
       bill.totalAmount = newTotalAmount;
+      bill.dueAmount = newTotalAmount - bill.amountAdvanced;
     }
 
     // Update the Bill_Paid attribute if provided
@@ -120,7 +121,7 @@ export async function PUT(req, { params }) {
       }
 
       bill.amountAdvanced = newAmountAdvanced;
-      bill.dueAmount=bill.totalAmount-bill.amountAdvanced;
+      bill.dueAmount=bill.dueAmount-bill.amountAdvanced;
 
       // // Update the Bill_Paid status based on payment completion
       // bill.Bill_Paid = newAmountAdvanced >= bill.totalAmount ? "Yes" : "No";
