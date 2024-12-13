@@ -45,6 +45,27 @@ const BillingSchema = new mongoose.Schema(
       enum: ['yes', 'no'], // Restrict values to 'yes' or 'no'
       default: 'no', // Default value for every new bill
     },
+    // New fields
+    DateOfPayment: {
+      type: [Date], // Array of payment dates
+      default: [], // Empty by default
+    },
+    ModeOfPayment: {
+      type: [String], // Array of modes of payment
+      default: [], // Empty by default
+      validate: {
+        validator: function (modes) {
+          const validModes = ['UPI', 'Cash', 'Credit Card', 'Debit Card', 'Net Banking', 'Other'];
+          return modes.every((mode) => validModes.includes(mode));
+        },
+        message: 'Invalid mode of payment. Allowed values are UPI, Cash, Credit Card, Debit Card, Net Banking, or Other.',
+      },
+    },
+    
+    AmountOfPayment: {
+      type: [Number], // Array of payment amounts
+      default: [], // Empty by default
+    },
   },
   {
     timestamps: true, // Automatically manage createdAt and updatedAt timestamps

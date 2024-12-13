@@ -126,6 +126,20 @@ export async function PUT(req, { params }) {
       // // Update the Bill_Paid status based on payment completion
       // bill.Bill_Paid = newAmountAdvanced >= bill.totalAmount ? "Yes" : "No";
     }
+    if (data.DateOfPayment) {
+      // Append new payment date(s)
+      bill.DateOfPayment = [...bill.DateOfPayment, ...data.DateOfPayment];
+    }
+
+    if (data.ModeOfPayment) {
+      // Append new payment mode(s)
+      bill.ModeOfPayment = [...bill.ModeOfPayment, ...data.ModeOfPayment];
+    }
+
+    if (data.AmountOfPayment) {
+      // Append new payment amount(s)
+      bill.AmountOfPayment = [...bill.AmountOfPayment, ...data.AmountOfPayment];
+    }
 
     // Save changes
     const updatedBill = await bill.save();
