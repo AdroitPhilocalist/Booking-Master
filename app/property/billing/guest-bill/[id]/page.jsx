@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "../../../../_components/Navbar";
@@ -6,10 +6,21 @@ import { Footer } from "../../../../_components/Footer";
 import axios from "axios";
 import PrintableRoomInvoice from "./printRoomInvoice";
 import PrintableServiceInvoice from "./printServiceInvoice";
-import { Modal, Box, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 
 const BookingDashboard = () => {
   const { id } = useParams(); // Get the ID from the URL
+  const [modeOfPayment, setModeOfPayment] = useState("");
   const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,19 +29,19 @@ const BookingDashboard = () => {
 
   // New state for services modal
   const [openServicesModal, setOpenServicesModal] = useState(false);
-  const [serviceName, setServiceName] = useState('');
-  const [servicePrice, setServicePrice] = useState('');
+  const [serviceName, setServiceName] = useState("");
+  const [servicePrice, setServicePrice] = useState("");
   const [services, setServices] = useState([]);
 
   // New state for food modal
   const [openFoodModal, setOpenFoodModal] = useState(false);
-  const [foodName, setFoodName] = useState('');
-  const [foodPrice, setFoodPrice] = useState('');
+  const [foodName, setFoodName] = useState("");
+  const [foodPrice, setFoodPrice] = useState("");
   const [foods, setFoods] = useState([]);
 
   // New state for bill payment modal
   const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState("");
   const [remainingDueAmount, setRemainingDueAmount] = useState(0);
   const [isPaymentComplete, setIsPaymentComplete] = useState(false);
 
@@ -48,7 +59,7 @@ const BookingDashboard = () => {
         setServices(
           existingServices.map((item, index) => ({
             name: item,
-            price: existingPrices[index] || 0
+            price: existingPrices[index] || 0,
           }))
         );
 
@@ -56,39 +67,40 @@ const BookingDashboard = () => {
         console.log(typeof billingData.roomNo, billingData.roomNo);
 
         // Find the matching booking using roomNo
-        const newBookingsResponse = await axios.get('/api/NewBooking');
+        const newBookingsResponse = await axios.get("/api/NewBooking");
         console.log(newBookingsResponse.data);
-        const matchedBooking = newBookingsResponse.data.data.find(booking =>
-          booking.roomNumbers.some(roomNumber => roomNumber.toString() === billingData.roomNo)
+        const matchedBooking = newBookingsResponse.data.data.find((booking) =>
+          booking.roomNumbers.some(
+            (roomNumber) => roomNumber.toString() === billingData.roomNo
+          )
         );
-
 
         console.log(matchedBooking);
 
         if (!matchedBooking) {
-          throw new Error('No matching booking found');
+          throw new Error("No matching booking found");
         }
 
         // Fetch room details
-        const roomsResponse = await axios.get('/api/rooms');
+        const roomsResponse = await axios.get("/api/rooms");
         console.log(roomsResponse.data);
-        const matchedRoom = roomsResponse.data.data.find(room =>
-          room.number === billingData.roomNo
+        const matchedRoom = roomsResponse.data.data.find(
+          (room) => room.number === billingData.roomNo
         );
 
         console.log(matchedRoom.category._id);
         console.log(matchedRoom._id);
 
         // Fetch room category details
-        const roomCategoriesResponse = await axios.get('/api/roomCategories');
+        const roomCategoriesResponse = await axios.get("/api/roomCategories");
         console.log(roomCategoriesResponse.data);
-        const matchedCategory = roomCategoriesResponse.data.data.find(category =>
-          category._id === matchedRoom.category._id
+        const matchedCategory = roomCategoriesResponse.data.data.find(
+          (category) => category._id === matchedRoom.category._id
         );
         console.log(matchedCategory.total);
 
         // Calculate due amount
-        const dueAmount = billingData.dueAmount
+        const dueAmount = billingData.dueAmount;
         setRemainingDueAmount(dueAmount);
         console.log(dueAmount);
         // Combine all fetched data
@@ -96,7 +108,7 @@ const BookingDashboard = () => {
           billing: billingData,
           booking: matchedBooking,
           room: matchedRoom,
-          category: matchedCategory
+          category: matchedCategory,
         });
         setLoading(false);
       } catch (err) {
@@ -110,13 +122,13 @@ const BookingDashboard = () => {
 
   // Modal style
   const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
     width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
+    bgcolor: "background.paper",
+    border: "2px solid #000",
     boxShadow: 24,
     p: 4,
   };
@@ -129,8 +141,8 @@ const BookingDashboard = () => {
   // Handle closing services modal
   const handleCloseServicesModal = () => {
     setOpenServicesModal(false);
-    setServiceName('');
-    setServicePrice('');
+    setServiceName("");
+    setServicePrice("");
   };
 
   // Handle opening room invoice modal
@@ -155,7 +167,7 @@ const BookingDashboard = () => {
   // Handle adding service
   const handleAddService = async () => {
     if (!serviceName || !servicePrice) {
-      alert('Please enter both service name and price');
+      alert("Please enter both service name and price");
       return;
     }
 
@@ -163,20 +175,23 @@ const BookingDashboard = () => {
       // Prepare the data to update
       const response = await axios.put(`/api/Billing/${id}`, {
         itemList: [serviceName],
-        priceList: [parseFloat(servicePrice)]
+        priceList: [parseFloat(servicePrice)],
       });
 
       // Update local state
-      setServices([...services, {
-        name: serviceName,
-        price: parseFloat(servicePrice)
-      }]);
+      setServices([
+        ...services,
+        {
+          name: serviceName,
+          price: parseFloat(servicePrice),
+        },
+      ]);
 
       // Close modal and reset fields
       handleCloseServicesModal();
     } catch (error) {
-      console.error('Error adding service:', error);
-      alert('Failed to add service');
+      console.error("Error adding service:", error);
+      alert("Failed to add service");
     }
   };
 
@@ -188,14 +203,14 @@ const BookingDashboard = () => {
   // Handle closing food modal
   const handleCloseFoodModal = () => {
     setOpenFoodModal(false);
-    setFoodName('');
-    setFoodPrice('');
+    setFoodName("");
+    setFoodPrice("");
   };
 
   // Handle adding food
   const handleAddFood = async () => {
     if (!foodName || !foodPrice) {
-      alert('Please enter both food name and price');
+      alert("Please enter both food name and price");
       return;
     }
 
@@ -203,20 +218,23 @@ const BookingDashboard = () => {
       // Prepare the data to update
       const response = await axios.put(`/api/Billing/${id}`, {
         itemList: [foodName],
-        priceList: [parseFloat(foodPrice)]
+        priceList: [parseFloat(foodPrice)],
       });
 
       // Update local state
-      setServices([...foods, {
-        name: foodName,
-        price: parseFloat(foodPrice)
-      }]);
+      setServices([
+        ...foods,
+        {
+          name: foodName,
+          price: parseFloat(foodPrice),
+        },
+      ]);
 
       // Close modal and reset fields
       handleCloseFoodModal();
     } catch (error) {
-      console.error('Error adding food:', error);
-      alert('Failed to add food');
+      console.error("Error adding food:", error);
+      alert("Failed to add food");
     }
   };
 
@@ -228,7 +246,7 @@ const BookingDashboard = () => {
   // Handle closing bill payment modal
   const handleCloseBillPaymentModal = () => {
     setOpenBillPaymentModal(false);
-    setPaymentAmount('');
+    setPaymentAmount("");
   };
 
   // Handle adding payment
@@ -236,20 +254,29 @@ const BookingDashboard = () => {
     const paymentAmountNum = Number(paymentAmount);
 
     if (!paymentAmount || paymentAmountNum <= 0) {
-      alert('Please enter a valid payment amount');
+      alert("Please enter a valid payment amount");
       return;
     }
 
     if (paymentAmountNum > remainingDueAmount) {
-      alert(`Payment amount cannot exceed remaining due amount of ${remainingDueAmount}`);
+      alert(
+        `Payment amount cannot exceed remaining due amount of ${remainingDueAmount}`
+      );
+      return;
+    }
+    if (!modeOfPayment) {
+      alert("Please select a mode of payment");
       return;
     }
 
     try {
-    
+      const currentDate = new Date().toISOString();
       // Prepare the data to update - note the conversion to number
       const response = await axios.put(`/api/Billing/${id}`, {
-        amountAdvanced: (paymentAmountNum + billing.amountAdvanced)
+        amountAdvanced: paymentAmountNum + billing.amountAdvanced,
+        DateOfPayment: [currentDate],
+        ModeOfPayment: [modeOfPayment],
+        AmountOfPayment: [paymentAmountNum],
       });
 
       // Update local state based on the server response
@@ -265,9 +292,11 @@ const BookingDashboard = () => {
 
       // Close modal and reset fields
       handleCloseBillPaymentModal();
+      setPaymentAmount("");
+      setModeOfPayment("");
     } catch (error) {
-      console.error('Error adding payment:', error);
-      alert(error.response?.data?.error || 'Failed to add payment');
+      console.error("Error adding payment:", error);
+      alert(error.response?.data?.error || "Failed to add payment");
     }
   };
 
@@ -277,16 +306,16 @@ const BookingDashboard = () => {
       // Step 1: Update Billing API - Set Bill_Paid to "yes"
       const billingUpdateResponse = await axios.put(`/api/Billing/${id}`, {
         Bill_Paid: "yes",
-        dueAmount: 0
+        dueAmount: 0,
       });
 
-      // Step 2: Update Room API 
+      // Step 2: Update Room API
       // First, get the room number from the current billing data
       const roomNo = room._id;
       const roomUpdateResponse = await axios.put(`/api/rooms/${roomNo}`, {
-        occupied: 'Vacant',
-        billingStarted: 'No',
-        currentBillingId: null
+        occupied: "Vacant",
+        billingStarted: "No",
+        currentBillingId: null,
       });
 
       // Set payment complete state
@@ -300,11 +329,10 @@ const BookingDashboard = () => {
       // Optionally show a success message
       alert("Payment completed successfully!");
     } catch (error) {
-      console.error('Error completing payment:', error);
-      alert('Failed to complete payment');
+      console.error("Error completing payment:", error);
+      alert("Failed to complete payment");
     }
   };
-
 
   if (loading) {
     return <div>Loading...</div>;
@@ -323,30 +351,42 @@ const BookingDashboard = () => {
         <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-6">
           {/* Header */}
           <h2 className="text-xl font-semibold text-gray-800">
-            Booking Dashboard <span className="text-gray-500">({booking.bookingId})</span>
+            Booking Dashboard{" "}
+            <span className="text-gray-500">({booking.bookingId})</span>
           </h2>
 
           {/* Booking Information */}
           <div className="mt-4 bg-blue-100 p-4 rounded">
             <p className="text-lg font-semibold">
-              {booking.guestName} <span className="text-sm text-green-700 bg-green-100 px-2 py-1 rounded">Posting On</span>
+              {booking.guestName}{" "}
+              <span className="text-sm text-green-700 bg-green-100 px-2 py-1 rounded">
+                Posting On
+              </span>
             </p>
             <p className="mt-2 text-sm text-gray-700">
-              Check-In: <strong>{new Date(booking.checkIn).toLocaleString()}</strong> |
-              Expected Check-Out: <strong>{new Date(booking.checkOut).toLocaleString()}</strong> |
+              Check-In:{" "}
+              <strong>{new Date(booking.checkIn).toLocaleString()}</strong> |
+              Expected Check-Out:{" "}
+              <strong>{new Date(booking.checkOut).toLocaleString()}</strong> |
               Phone No: <strong>+91 {booking.mobileNo}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
-              Booking Point: <strong>{booking.bookingPoint}</strong> |
-              Booked By: <strong>{booking.bookingPoint}</strong> |
-              Booking Type: <strong>{booking.bookingType}</strong> |
-              Booking Source: <strong>{booking.bookingSource}</strong>
+              Booking Point: <strong>{booking.bookingPoint}</strong> | Booked
+              By: <strong>{booking.bookingPoint}</strong> | Booking Type:{" "}
+              <strong>{booking.bookingType}</strong> | Booking Source:{" "}
+              <strong>{booking.bookingSource}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
-              Booked On: <strong>{new Date(booking.createdAt).toLocaleDateString()}</strong> |
-              PAX: <strong>{booking.adults} Adult {booking.children} Child</strong> |
-              Meal Plan: <strong>{booking.mealPlan}</strong> |
-              Notes: <strong>{booking.guestNotes || '-'}</strong>
+              Booked On:{" "}
+              <strong>
+                {new Date(booking.createdAt).toLocaleDateString()}
+              </strong>{" "}
+              | PAX:{" "}
+              <strong>
+                {booking.adults} Adult {booking.children} Child
+              </strong>{" "}
+              | Meal Plan: <strong>{booking.mealPlan}</strong> | Notes:{" "}
+              <strong>{booking.guestNotes || "-"}</strong>
             </p>
           </div>
 
@@ -354,8 +394,11 @@ const BookingDashboard = () => {
           <div className="mt-6 bg-blue-50 p-4 rounded">
             <h3 className="font-semibold text-gray-800">Rooms Booked</h3>
             <p className="text-sm text-gray-700">
-              {new Date(booking.checkIn).toLocaleDateString()} ({new Date(booking.checkIn).toLocaleString('default', { weekday: 'short' })})
-              (1) &raquo; Room No.: {billing.roomNo}
+              {new Date(booking.checkIn).toLocaleDateString()} (
+              {new Date(booking.checkIn).toLocaleString("default", {
+                weekday: "short",
+              })}
+              ) (1) &raquo; Room No.: {billing.roomNo}
             </p>
           </div>
 
@@ -366,21 +409,24 @@ const BookingDashboard = () => {
                 label: "Add Services",
                 color: "primary",
                 variant: "contained",
-                onClick: handleOpenServicesModal
+                onClick: handleOpenServicesModal,
               },
               {
                 label: "Add Food",
                 color: "success",
                 variant: "contained",
-                onClick: handleOpenFoodModal
+                onClick: handleOpenFoodModal,
               },
               {
                 label: "Bill Payment",
                 color: remainingDueAmount <= 0 ? "secondary" : "error",
                 variant: "contained",
-                onClick: remainingDueAmount > 0 ? handleOpenBillPaymentModal : undefined,
-                disabled: remainingDueAmount <= 0
-              }
+                onClick:
+                  remainingDueAmount > 0
+                    ? handleOpenBillPaymentModal
+                    : undefined,
+                disabled: remainingDueAmount <= 0,
+              },
             ].map((btn, index) => (
               <Button
                 key={index}
@@ -414,10 +460,31 @@ const BookingDashboard = () => {
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 inputProps={{
                   max: remainingDueAmount,
-                  min: 0
+                  min: 0,
                 }}
               />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+              <TextField
+                fullWidth
+                margin="normal"
+                select
+                label="Mode of Payment"
+                value={modeOfPayment}
+                onChange={(e) => setModeOfPayment(e.target.value)}
+                SelectProps={{
+                  native: true,
+                }}
+              >
+                <option value="" disabled></option>
+                <option value="UPI">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Credit Card">Credit Card</option>
+                <option value="Debit Card">Debit Card</option>
+                <option value="Net Banking">Net Banking</option>
+                <option value="Other">Other</option>
+              </TextField>
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
+              >
                 <Button
                   variant="contained"
                   color="primary"
@@ -450,44 +517,63 @@ const BookingDashboard = () => {
               <div className="text-gray-800 font-semibold text-right">
                 <p>
                   {(
-                    ((parseFloat(category.total)) *
-                      ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24)))
+                    parseFloat(category.total) *
+                    ((new Date(booking.checkOut) - new Date(booking.checkIn)) /
+                      (1000 * 3600 * 24))
                   ).toFixed(2)}
                 </p>
 
-                <p>
-                  {(parseFloat(billing.totalAmount).toFixed(2))}
-                </p>
+                <p>{parseFloat(billing.totalAmount).toFixed(2)}</p>
 
                 <p>{parseFloat(billing.amountAdvanced).toFixed(2)}</p>
 
-                <p>
-                  {(parseFloat(billing.dueAmount).toFixed(2))}
-                </p>
-
+                <p>{parseFloat(billing.dueAmount).toFixed(2)}</p>
               </div>
             </div>
           </div>
 
           {/* Payments and Room Tokens */}
           <div className="mt-6">
-            <h3 className="font-semibold text-gray-800 text-center">Payments (1)</h3>
+            <h3 className="font-semibold text-gray-800 text-center">
+              Payments (1)
+            </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Date</th>
-                  <th className="p-2 text-left">Particulars</th>
+                  <th className="p-2 text-left">Mode of Payment</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="p-2 text-left">{new Date(billing.billStartDate).toLocaleString()}</td>
+                {/* Row for the advance payment */}
+                {/* <tr>
+                  <td className="p-2 text-left">
+                    {new Date(billing.billStartDate).toLocaleString()}
+                  </td>
                   <td className="p-2 text-left">Advance Payment</td>
-                  <td className="p-2 text-right">{parseFloat(billing.amountAdvanced).toFixed(2)}</td>
-                </tr>
+                  <td className="p-2 text-right">
+                    {parseFloat(billing.amountAdvanced).toFixed(2)}
+                  </td>
+                </tr> */}
+
+                {/* Rows for each payment in the arrays */}
+                {billing.DateOfPayment.map((date, index) => (
+                  <tr key={index}>
+                    <td className="p-2 text-left">
+                      {new Date(date).toLocaleString()}
+                    </td>
+                    <td className="p-2 text-left">
+                      {billing.ModeOfPayment[index]}
+                    </td>
+                    <td className="p-2 text-right">
+                      {parseFloat(billing.AmountOfPayment[index]).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
+
             <Button
               variant="contained"
               color="warning"
@@ -498,7 +584,9 @@ const BookingDashboard = () => {
               Complete Payment
             </Button>
 
-            <h3 className="mt-4 font-semibold text-gray-800 text-center">Room Tokens (1)</h3>
+            <h3 className="mt-4 font-semibold text-gray-800 text-center">
+              Room Tokens (1)
+            </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
@@ -509,9 +597,15 @@ const BookingDashboard = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="p-2 text-left">{new Date(booking.checkIn).toLocaleString()}</td>
-                  <td className="p-2 text-left">Room #{billing.roomNo} - {room.category.category}</td>
-                  <td className="p-2 text-right">{category.total.toFixed(2)}</td>
+                  <td className="p-2 text-left">
+                    {new Date(booking.checkIn).toLocaleString()}
+                  </td>
+                  <td className="p-2 text-left">
+                    Room #{billing.roomNo} - {room.category.category}
+                  </td>
+                  <td className="p-2 text-right">
+                    {category.total.toFixed(2)}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -531,18 +625,18 @@ const BookingDashboard = () => {
             >
               <Box
                 sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '90%',
-                  maxWidth: '900px',
-                  maxHeight: '90vh',
-                  overflowY: 'auto',
-                  bgcolor: 'background.paper',
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "90%",
+                  maxWidth: "900px",
+                  maxHeight: "90vh",
+                  overflowY: "auto",
+                  bgcolor: "background.paper",
                   boxShadow: 24,
                   p: 4,
-                  borderRadius: 2
+                  borderRadius: 2,
                 }}
               >
                 <PrintableRoomInvoice
@@ -551,7 +645,9 @@ const BookingDashboard = () => {
                 />
               </Box>
             </Modal>
-            <h3 className="font-semibold text-gray-800 text-center">Services ({services.length})</h3>
+            <h3 className="font-semibold text-gray-800 text-center">
+              Services ({services.length})
+            </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
@@ -565,7 +661,9 @@ const BookingDashboard = () => {
                   <tr key={index}>
                     <td className="p-2 text-left">{service.name}</td>
                     <td className="p-2 text-center">18%</td>
-                    <td className="p-2 text-right">{service.price.toFixed(2)}</td>
+                    <td className="p-2 text-right">
+                      {service.price.toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -595,7 +693,13 @@ const BookingDashboard = () => {
                   value={servicePrice}
                   onChange={(e) => setServicePrice(e.target.value)}
                 />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 2,
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="primary"
@@ -638,7 +742,13 @@ const BookingDashboard = () => {
                   value={foodPrice}
                   onChange={(e) => setFoodPrice(e.target.value)}
                 />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 2,
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="primary"
@@ -672,18 +782,18 @@ const BookingDashboard = () => {
             >
               <Box
                 sx={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '90%',
-                  maxWidth: '900px',
-                  maxHeight: '90vh',
-                  overflowY: 'auto',
-                  bgcolor: 'background.paper',
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "90%",
+                  maxWidth: "900px",
+                  maxHeight: "90vh",
+                  overflowY: "auto",
+                  bgcolor: "background.paper",
                   boxShadow: 24,
                   p: 4,
-                  borderRadius: 2
+                  borderRadius: 2,
                 }}
               >
                 <PrintableServiceInvoice
