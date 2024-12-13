@@ -305,11 +305,12 @@ const PurchaseReportPage = () => {
         </div>
       )}
       <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-4">
+        <div  className=" justify-center items-center  bg-gray-100 p-4 rounded mb-4 ">
+        <div className="flex justify-center items-center  bg-gray-100 p-4 rounded mb-4 ">
           <h1 className="text-2xl font-bold">Purchase Report</h1>
         </div>
 
-        <div className="flex space-x-2 mb-4">
+        <div className="flex space-x-2  justify-center mb-4">
           <TextField
             label="Start Date"
             type="date"
@@ -372,8 +373,9 @@ const PurchaseReportPage = () => {
             Purchase Stock
           </Button>
         </div>
+        </div>
 
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table ref={tableRef}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>

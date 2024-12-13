@@ -45,14 +45,8 @@ export default function RestaurantList() {
             <Navbar />
             <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
                 <h1 style={{ color: '#4a5568', marginBottom: '20px' }}>Booking Master Control Panel</h1>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                    <span style={{ color: '#4299e1' }}>Home</span>
-                    <span style={{ margin: '0 5px' }}>•</span>
-                    <span>Restaurant</span>
-                </div>
-                <div style={{ backgroundColor: '#4a5568', color: 'white', padding: '10px', marginBottom: '20px' }}>
-                    <h2 style={{ margin: 0 }}>⚡ Restaurant List</h2>
-                </div>
+                
+                
                 <div style={{ marginBottom: '20px' }}>
                     <button
                         style={{ backgroundColor: '#48bb78', color: 'white', border: 'none', padding: '10px', marginRight: '10px', cursor: 'pointer' }}
@@ -77,18 +71,18 @@ export default function RestaurantList() {
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#edf2f7' }}>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Item Code</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Category</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Segment</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Item Name</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Price (INR)</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>GST (%)</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Total (incl. GST)</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>In Profile?</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Is Special?</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Disc. Allowed?</th>
-                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Action</th>
+                        <tr style={{ backgroundColor: '#f5f5f5' }}>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Item Code</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Category</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Segment</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Item Name</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Price (INR)</th>
+                            <th style={{fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>GST (%)</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Total (incl. GST)</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>In Profile?</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Is Special?</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Disc. Allowed?</th>
+                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: ' #28bfdb' }}>Action</th>
                         </tr>
                     </thead>
                     <tbody>

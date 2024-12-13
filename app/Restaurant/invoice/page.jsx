@@ -241,26 +241,26 @@ const InvoicePage = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#164E63" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Invoice No.
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Date
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Customer Name
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Total Amount
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   GST
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Payable Amount
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Action
                 </TableCell>
               </TableRow>
