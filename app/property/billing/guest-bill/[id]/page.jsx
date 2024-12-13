@@ -246,9 +246,10 @@ const BookingDashboard = () => {
     }
 
     try {
+    
       // Prepare the data to update - note the conversion to number
       const response = await axios.put(`/api/Billing/${id}`, {
-        amountAdvanced: paymentAmountNum
+        amountAdvanced: (paymentAmountNum + billing.amountAdvanced)
       });
 
       // Update local state based on the server response
@@ -443,7 +444,7 @@ const BookingDashboard = () => {
               <div className="text-gray-700">
                 <p>Total Room Charges (incl. GST: {category.gst}%):</p>
                 <p>Billed Amount:</p>
-                <p>Last Paid Amount:</p>
+                <p>Cumulative Paid Amount:</p>
                 <p>Due Amount:</p>
               </div>
               <div className="text-gray-800 font-semibold text-right">
@@ -455,23 +456,12 @@ const BookingDashboard = () => {
                 </p>
 
                 <p>
-                  {/* {(
-                    (parseFloat(billing.totalAmount) +
-                      (parseFloat(category.total) *
-                        ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24)))
-                    )).toFixed(2)} */}
                   {(parseFloat(billing.totalAmount).toFixed(2))}
                 </p>
 
                 <p>{parseFloat(billing.amountAdvanced).toFixed(2)}</p>
 
                 <p>
-                  {/* {(
-                    parseFloat(billing.totalAmount) +
-                    (parseFloat(category.total) *
-                      ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))) -
-                    parseFloat(billing.amountAdvanced)
-                  ).toFixed(2)} */}
                   {(parseFloat(billing.dueAmount).toFixed(2))}
                 </p>
 

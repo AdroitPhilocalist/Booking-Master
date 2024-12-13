@@ -121,7 +121,7 @@ export async function PUT(req, { params }) {
       }
 
       bill.amountAdvanced = newAmountAdvanced;
-      bill.dueAmount=bill.dueAmount-bill.amountAdvanced;
+      bill.dueAmount=bill.totalAmount-bill.amountAdvanced;
 
       // // Update the Bill_Paid status based on payment completion
       // bill.Bill_Paid = newAmountAdvanced >= bill.totalAmount ? "Yes" : "No";
