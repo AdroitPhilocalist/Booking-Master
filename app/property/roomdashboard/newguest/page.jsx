@@ -71,10 +71,10 @@ export default function BookingForm() {
         const generateBookingId = () => {
             return "BMX-" + Math.random().toString(36).substring(2, 12).toUpperCase();
         };
-    
+
         setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
     }, []);
-    
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -128,115 +128,143 @@ export default function BookingForm() {
     };
 
     const handleSubmit = async () => {
-        console.log('Selected rooms:', selectedRooms);
+        try {
+            console.log('Selected rooms:', selectedRooms);
+            const roomNumbers = selectedRooms.map((room) => Number(room)); // Ensure roomNumbers is numeric
+            const bookingData = { ...formData, roomNumbers: roomNumbers };
+            console.log('Booking data to be sent:', bookingData);
 
-        const roomNumbers = selectedRooms.map((room) => Number(room)); // Ensure roomNumbers is numeric
-        const bookingData = { ...formData, roomNumbers: roomNumbers };
-        console.log('Booking data to be sent:', bookingData);
+            // Submit the booking data
+            const bookingResponse = await fetch('/api/NewBooking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData),
+            });
 
-        // Submit the booking data
-        const bookingResponse = await fetch('/api/NewBooking', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bookingData),
-        });
+            if (!bookingResponse.ok) {
+                alert('Failed to create booking');
+                return;
+            }
 
-        if (!bookingResponse.ok) {
-            alert('Failed to create booking');
-            return;
-        }
+            // Get the newly created guest's ID
+            const bookingResult = await bookingResponse.json();
+            const guestId = bookingResult.data._id; // Adjust based on your API response structure
 
-        // Get the newly created guest's ID
-        const bookingResult = await bookingResponse.json();
-        const guestId = bookingResult.data._id; // Adjust based on your API response structure
+            console.log('New Guest ID:', guestId);
 
-        console.log('New Guest ID:', guestId);
+            // Fetch all rooms and room categories to match and calculate pricing
+            const [roomsResponse, categoriesResponse] = await Promise.all([
+                fetch('/api/rooms'),
+                fetch('/api/roomCategories')
+            ]);
 
-        // Loop through the selected rooms and handle billing and room updates
-        for (const room of selectedRooms) {
-            console.log(room)
-            try {
-                // Step 1: Create a new billing record
-                const newBilling = {
-                    roomNo: room,
-                    itemList: ['Room Charge'],
-                    priceList: [room.category], // Assuming tariff is part of the room data
-                    billStartDate: formData.checkIn,
-                    billEndDate: formData.checkOut,
-                    totalAmount: 0,
-                    amountAdvanced: 0,
-                    dueAmount: 0,
-                    Bill_Paid: 'no',
-                };
+            const roomsData = await roomsResponse.json();
+            const categoriesData = await categoriesResponse.json();
 
-                console.log('Submitting billing data:', newBilling);
+            if (!roomsData.success || !categoriesData.success) {
+                throw new Error('Failed to fetch room or category data');
+            }
+            console.log(roomsData.data);
+            const rooms = roomsData.data;
+            const categories = categoriesData.data;
 
-                const billingResponse = await fetch('/api/Billing', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newBilling),
-                });
+            // Process each selected room
+            for (const selectedRoomNumber of selectedRooms) {
+                // Find the matching room from the rooms API
+                console.log(rooms.number);
+                const matchedRoom = rooms.find(room => room.number === (selectedRoomNumber));
 
-                if (!billingResponse.ok) {
-                    console.error(`Failed to create billing record for room ${room.number}`);
+
+                console.log('Matched room:', matchedRoom);
+                if (!matchedRoom) {
+                    console.error(`Room with number ${selectedRoomNumber} not found`);
                     continue;
                 }
 
-                const billingResult = await billingResponse.json();
-                const billId = billingResult.data._id; // Adjust based on your API response structure
+                // Find the matching category from roomCategories
+                const matchedCategory = categories.find(
+                    category => category._id === matchedRoom.category._id
+                );
+                console.log('Matched category:', matchedCategory);
+                if (!matchedCategory) {
+                    console.error(`Category for room ${selectedRoomNumber} not found`);
+                    continue;
+                }
 
-                console.log(`Bill ID for room ${room}:`, billId);
+                // Calculate number of nights
+                const checkInDate = new Date(formData.checkIn);
+                const checkOutDate = new Date(formData.checkOut);
+                const numberOfNights = Math.ceil(
+                    (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+                );
+                console.log('Number of nights:', numberOfNights);
+                // Calculate total room charge
+                const roomCharge = matchedCategory.total * numberOfNights;
+                console.log('Room charge:', roomCharge);
+                // Prepare billing data
+                const newBilling = {
+                    roomNo: selectedRoomNumber,
+                    itemList: ['Room Charge'],
+                    priceList: [roomCharge],
+                    billStartDate: checkInDate,
+                    billEndDate: checkOutDate,
+                    totalAmount: roomCharge,
+                    amountAdvanced: 0,
+                    dueAmount: roomCharge,
+                    Bill_Paid: 'no'
+                };
 
-                // Step 2: Update room attributes
+                // Create billing record
+                const billingResponse = await fetch('/api/Billing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newBilling)
+                });
+
+                const billingData = await billingResponse.json();
+
+                if (!billingData.success) {
+                    console.error(`Failed to create billing for room ${selectedRoomNumber}:`, billingData.error);
+                    continue;
+                }
+
+                const billId = billingData.data._id;
+
+                // Prepare room update data
                 const roomUpdate = {
                     currentBillingId: billId,
                     billingStarted: 'Yes',
-                    currentGuestId: guestId,
                     occupied: 'Occupied',
+                    currentGuestId: guestId // Assuming guestId is from the previous booking creation step
                 };
-                const allRoomsResponse = await fetch('/api/rooms', {
-                    method: 'GET', // Assuming this endpoint returns all room data
-                    headers: { 'Content-Type': 'application/json' },
+
+                // Update room status
+                const roomUpdateResponse = await fetch(`/api/rooms/${matchedRoom._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(roomUpdate)
                 });
 
-                if (!allRoomsResponse.ok) {
-                    console.error('Failed to fetch all rooms');
-                    return; // Handle the error or exit the function
+                const roomUpdateData = await roomUpdateResponse.json();
+
+                if (!roomUpdateData.success) {
+                    console.error(`Failed to update room ${selectedRoomNumber}:`, roomUpdateData.error);
                 }
-
-                const allRoomsData = await allRoomsResponse.json();
-
-                // Filter the room with number = 49
-                const targetRoom = allRoomsData.data.find((rooms) => rooms.number === room);
-
-                if (!targetRoom) {
-                    console.error(`Room with number ${room} not found`);
-                    return; // Handle the case where the room doesn't exist
-                }
-
-                const roomId = targetRoom._id; // Extract the room ID
-                console.log(`Room ID for room number 49: ${roomId}`);
-
-                const roomUpdateResponse = await fetch(`/api/rooms/${roomId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(roomUpdate),
-                });
-
-                if (!roomUpdateResponse.ok) {
-                    console.error(`Failed to update room ${room}`);
-                    continue;
-                }
-
-                console.log(`Room ${room} updated successfully.`);
-            } catch (error) {
-                console.error(`Error processing room ${room.number}:`, error);
             }
-        }
 
-        alert('Booking created successfully!');
-        setModalOpen(false);
-        router.push('/property/roomdashboard');
+            // Finalize booking submission (similar to your existing code)
+            alert('Booking created successfully!');
+            setModalOpen(false);
+            router.push('/property/roomdashboard');
+
+        } catch (error) {
+            console.error('Error in booking submission:', error);
+            alert('Failed to create booking');
+        }
     };
 
 
@@ -710,7 +738,7 @@ export default function BookingForm() {
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    
+
                                     onClick={handleCheckAvailability}
                                     sx={{
                                         '&:hover': {
