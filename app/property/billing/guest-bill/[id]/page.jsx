@@ -410,12 +410,14 @@ const BookingDashboard = () => {
                 color: "primary",
                 variant: "contained",
                 onClick: handleOpenServicesModal,
+                disabled: billing.Bill_Paid === "yes",
               },
               {
                 label: "Add Food",
                 color: "success",
                 variant: "contained",
                 onClick: handleOpenFoodModal,
+                disabled: billing.Bill_Paid === "yes",
               },
               {
                 label: "Bill Payment",
@@ -578,7 +580,7 @@ const BookingDashboard = () => {
               variant="contained"
               color="warning"
               className="mt-6 mb-4"
-              disabled={remainingDueAmount > 0}
+              disabled={remainingDueAmount > 0 || billing.Bill_Paid === "yes"}
               onClick={handleCompletePayment}
             >
               Complete Payment
