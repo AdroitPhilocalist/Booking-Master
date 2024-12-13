@@ -140,6 +140,7 @@ export async function PUT(req, { params }) {
       // Append new payment amount(s)
       bill.AmountOfPayment = [...bill.AmountOfPayment, ...data.AmountOfPayment];
     }
+    
 
     // Save changes
     const updatedBill = await bill.save();
