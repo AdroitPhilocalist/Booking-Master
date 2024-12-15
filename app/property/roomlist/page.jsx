@@ -141,26 +141,26 @@ export default function BookingManagement() {
         </div>
 
         {/* Room Table */}
-        <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
+        <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table>
-            <TableHead sx={{ bgcolor: "#164E63" }}>
+            <TableHead sx={{ bgcolor: "#f5f5f5" }}>
               <TableRow>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Room Number
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Category
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Floor
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Clean
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Occupancy
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>
+                <TableCell align="center" sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Billing Started
                 </TableCell>
               </TableRow>
