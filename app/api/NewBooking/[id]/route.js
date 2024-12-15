@@ -30,3 +30,24 @@ export async function PUT(req, { params }) {
         return NextResponse.json({ success: false, error: 'Failed to update guest room numbers' }, { status: 400 });
     }
 }
+
+export async function DELETE(req, { params }) {
+    try {
+        await mongoose.connect(connectSTR);
+
+        // Extract guest ID from the route params
+        const { id } = params;
+
+        // Delete the guest by ID
+        const deletedGuest = await NewBooking.findByIdAndDelete(id);
+
+        if (!deletedGuest) {
+            return NextResponse.json({ success: false, error: 'Guest not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, message: 'Guest successfully deleted' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting guest:', error);
+        return NextResponse.json({ success: false, error: 'Failed to delete guest' }, { status: 400 });
+    }
+}
