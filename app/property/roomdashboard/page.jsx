@@ -210,7 +210,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
       icon: CheckCircle2
     },
     Occupied: {
-      bgColor: "bg-red-50",
+      bgColor: "bg-red-100",
       textColor: "text-red-600",
 
       icon: XCircle
@@ -333,8 +333,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                 </div>
               </div>
             </div>
-
-
             {/* Status Indicator */}
             <div className={`
                 flex items-center space-x-2 

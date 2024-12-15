@@ -3,33 +3,49 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { 
+  Button, 
+  Dialog, 
+  DialogActions, 
+  DialogContent, 
+  DialogTitle, 
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper
+} from "@mui/material";
 import { ErrorOutline } from "@mui/icons-material";
 import Snackbar from "@mui/material/Snackbar";
-
-
 import jsPDF from "jspdf";
 import { FaTrashAlt } from "react-icons/fa";
+
 export default function Billing() {
-  const router = useRouter(); // Initialize Next.js router
+  const router = useRouter();
   const [billingData, setBillingData] = useState([]);
+  const [originalBillingData, setOriginalBillingData] = useState([]);
   const [selectedBill, setSelectedBill] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [newItem, setNewItem] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [amountToBePaid, setAmountToBePaid] = useState(0);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+
   const openPaymentModal = () => setIsPaymentModalOpen(true);
   const closePaymentModal = () => setIsPaymentModalOpen(false);
   const [openDueDialog, setOpenDueDialog] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
 
   // Fetch room and billing data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch unpaid bills
+        // Fetch billing data
         const billingResponse = await fetch("/api/Billing");
         const billingResult = await billingResponse.json();
 
@@ -38,27 +54,22 @@ export default function Billing() {
         const bookingResult = await bookingResponse.json();
 
         if (billingResult.success && bookingResult.success) {
-          // Filter unpaid bills
-          const unpaidBills = billingResult.data.filter(
-            (bill) => bill.Bill_Paid === "no"
-          );
-
           // Map guest names to bills based on room numbers
-          const enrichedBills = unpaidBills.map(bill => {
+          const enrichedBills = billingResult.data.map(bill => {
             // Find the booking that includes this room number
-            const matchingBooking = bookingResult.data.find(booking =>
+            const matchingBooking = bookingResult.data.find(booking => 
               booking.roomNumbers.includes(parseInt(bill.roomNo))
             );
 
             // Return the bill with the guest name if found
-            return {
-              ...bill,
-              guestName: matchingBooking ? matchingBooking.guestName : "N/A"
+            return { 
+              ...bill, 
+              guestName: matchingBooking ? matchingBooking.guestName : "N/A" 
             };
           });
 
           setBillingData(enrichedBills);
-          setBookingData(bookingResult.data);
+          setOriginalBillingData(enrichedBills);
         } else {
           console.error("Failed to fetch billing or booking data");
         }
@@ -69,6 +80,19 @@ export default function Billing() {
 
     fetchData();
   }, []);
+
+  // Filter bills based on status
+  useEffect(() => {
+    if (filterStatus === "all") {
+      setBillingData(originalBillingData);
+    } else {
+      const filteredBills = originalBillingData.filter(
+        bill => bill.Bill_Paid === (filterStatus === "paid" ? "yes" : "no")
+      );
+      setBillingData(filteredBills);
+    }
+  }, [filterStatus, originalBillingData]);
+
 
   // Function to handle viewing bill details
   const handleViewBill = (bill) => {
@@ -298,82 +322,122 @@ export default function Billing() {
     <div className="min-h-screen bg-amber-50">
       {/* Navigation */}
       <Navbar />
-
+      {/* Filter Buttons */}
+      <div className="container mx-auto py-4 flex justify-center space-x-4">
+        <Button 
+          variant="contained"
+          onClick={() => setFilterStatus("all")}
+          sx={{ 
+            backgroundColor: filterStatus === "all" ? "#28bfdb" : "#f5f5f5",
+            color: filterStatus === "all" ? "white" : "#28bfdb",
+            '&:hover': { 
+              backgroundColor: filterStatus === "all" ? "#1e9ab8" : "#e0e0e0" 
+            }
+          }}
+        >
+          All Bills
+        </Button>
+        <Button 
+          variant="contained"
+          onClick={() => setFilterStatus("unpaid")}
+          sx={{ 
+            backgroundColor: filterStatus === "unpaid" ? "#f24a23" : "#f5f5f5",
+            color: filterStatus === "unpaid" ? "white" : "#f24a23",
+            '&:hover': { 
+              backgroundColor: filterStatus === "unpaid" ? "#d13a1a" : "#e0e0e0" 
+            }
+          }}
+        >
+          Unpaid Bills
+        </Button>
+        <Button 
+          variant="contained"
+          onClick={() => setFilterStatus("paid")}
+          sx={{ 
+            backgroundColor: filterStatus === "paid" ? "#1ebc1e" : "#f5f5f5",
+            color: filterStatus === "paid" ? "white" : "#1ebc1e",
+            '&:hover': { 
+              backgroundColor: filterStatus === "paid" ? "#17a817" : "#e0e0e0" 
+            }
+          }}
+        >
+          Paid Bills
+        </Button>
+      </div>
       {/* Billing Table */}
-      <div className="container mx-auto py-10 px-4">
-        <h1 className="text-3xl font-semibold text-center mb-8 text-gray-700">
-          Current Billing Information
-        </h1>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
-            <thead className="bg-cyan-800">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
+      <div className="container mx-auto py-4 px-4">
+        <TableContainer component={Paper} sx={{ maxWidth: '80%', margin: '0 auto' }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Room Number
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Guest
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Total Amount
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Amount Paid in Advance
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Due Amount
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-white uppercase tracking-wider border-b">
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
+                  Bill Status
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                   Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {billingData.length > 0 ? (
                 billingData.map((bill, index) => (
-                  <tr
-                    key={index}
-                    className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-white transition`}
+                  <TableRow 
+                    key={index} 
+                    sx={{ 
+                      '& > td': { 
+                        backgroundColor: 'white',
+                        textAlign: 'center'
+                      },
+                      background: `linear-gradient( to right, ${bill.Bill_Paid === 'yes' ? '#1ebc1e' : '#f24a23'} 5%, white 5% )`
+                    }}
                   >
-                    <td className="px-6 py-4 text-sm text-gray-700 border-b">
-                      {bill.roomNo || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 border-b">
-                      {bill.guestName || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 border-b">
-                      ₹{bill.totalAmount || 0}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 border-b">
-                      ₹{bill.amountAdvanced || 0}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 border-b">
-                      ₹{bill.dueAmount || 0}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center border-b">
-                      <button
+                    <TableCell>{bill.roomNo || "N/A"}</TableCell>
+                    <TableCell>{bill.guestName || "N/A"}</TableCell>
+                    <TableCell>₹{bill.totalAmount || 0}</TableCell>
+                    <TableCell>₹{bill.amountAdvanced || 0}</TableCell>
+                    <TableCell>₹{bill.dueAmount || 0}</TableCell>
+                    <TableCell>
+                      {bill.Bill_Paid === 'yes' ? 'Paid' : 'Unpaid'}
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="contained" 
                         onClick={() => handleViewBill(bill)}
-                        className="px-4 py-2 bg-cyan-600 text-white font-semibold rounded-md hover:bg-cyan-700 transition"
+                        sx={{ 
+                          backgroundColor: "#28bfdb",
+                          '&:hover': { backgroundColor: "#1e9ab8" }
+                        }}
                       >
                         View Bill
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-6 py-4 text-center text-gray-500 border-b"
-                  >
-                    No current billing records available.
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    No billing records available.
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
 
       {/* Modal for Viewing Bill Details */}
