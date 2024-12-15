@@ -126,7 +126,7 @@ export default function Billing() {
       <Navbar />
       {/* Filter Section */}
       <Box 
-        className="container mx-auto py-6 px-4"
+        className="container mx-auto py-4 px-4"
         sx={{ 
           display: 'flex', 
           flexDirection: 'column', 
@@ -136,7 +136,7 @@ export default function Billing() {
       >
         {/* Status Filters */}
         <Box 
-          className="flex justify-center space-x-4 mb-4"
+          className="flex justify-center space-x-4 mb-2"
           sx={{ width: '100%' }}
         >
           <Button 
@@ -182,7 +182,7 @@ export default function Billing() {
 
         {/* Search Filters */}
         <Box 
-          className="flex justify-center space-x-4 mb-4"
+          className="flex justify-center space-x-4 mb-2"
           sx={{ width: '100%', maxWidth: '800px' }}
         >
           <TextField
@@ -234,45 +234,6 @@ export default function Billing() {
             }}
           />
         </Box>
-
-        {/* Active Filters */}
-        {activeFilters.length > 0 && (
-          <Fade in={activeFilters.length > 0}>
-            <Box 
-              className="flex items-center justify-center space-x-2 mb-4"
-              sx={{ width: '100%' }}
-            >
-              <FilterListIcon color="action" />
-              {activeFilters.map((filter, index) => (
-                <Zoom key={index} in={true}>
-                  <Chip
-                    label={filter}
-                    onDelete={() => {
-                      if (filter.startsWith("Room:")) setSearchRoom("");
-                      else if (filter.startsWith("Guest:")) setSearchGuest("");
-                      else setFilterStatus("all");
-                    }}
-                    color="primary"
-                    variant="outlined"
-                  />
-                </Zoom>
-              ))}
-              {activeFilters.length > 1 && (
-                <Button 
-                  size="small" 
-                  onClick={clearAllFilters}
-                  sx={{ 
-                    color: '#f24a23', 
-                    textTransform: 'none',
-                    '&:hover': { backgroundColor: 'rgba(242, 74, 35, 0.1)' }
-                  }}
-                >
-                  Clear All
-                </Button>
-              )}
-            </Box>
-          </Fade>
-        )}
       </Box>
 
       {/* Billing Table */}
