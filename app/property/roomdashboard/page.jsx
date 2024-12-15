@@ -16,9 +16,10 @@ import {
   Key,
   Building,
   Tags,
+  Info
 } from "lucide-react";
-import Navbar from "@/app/_components/Navbar";
-import { Footer } from "@/app/_components/Footer";
+import Navbar from "../../_components/Navbar";
+import { Footer } from "../../_components/Footer";
 
 // Component for summary items at the top of the page
 const SummaryItem = ({ icon: Icon, title, count }) => (
@@ -31,6 +32,73 @@ const SummaryItem = ({ icon: Icon, title, count }) => (
   </div>
 );
 
+// Guest Information Modal
+const GuestInfoModal = ({ guest, onClose }) => {
+  if (!guest) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+      <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-red-500 transition-colors"
+          >
+            <XCircle size={28} />
+          </button>
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3">
+            <User className="text-amber-600" size={24} />
+            <div>
+              <p className="font-semibold text-gray-800">{guest.guestName}</p>
+              <p className="text-sm text-gray-500">{guest.guestType || "Guest"}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
+            <div>
+              <p className="text-xs text-gray-500">Mobile</p>
+              <p className="font-medium">{guest.mobileNo}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Email</p>
+              <p className="font-medium">{guest.guestEmail || "N/A"}</p>
+            </div>
+          </div>
+          <div className="bg-amber-50 p-3 rounded-lg">
+            <div className="flex justify-between mb-2">
+              <div>
+                <p className="text-xs text-gray-500">Check-In</p>
+                <p className="font-medium">
+                  {new Date(guest.checkIn).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Check-Out</p>
+                <p className="font-medium">
+                  {new Date(guest.checkOut).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <User size={16} className="text-gray-500" />
+              <p className="text-sm text-gray-600">
+                {guest.adults} Adults, {guest.children} Children
+              </p>
+            </div>
+          </div>
+          {guest.remarks && (
+            <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
+              <p className="text-xs text-gray-500">Remarks</p>
+              <p className="text-sm">{guest.remarks}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -38,6 +106,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
   const [updatedRoom, setUpdatedRoom] = useState(room);
   const [guestList, setGuestList] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [currentGuest, setCurrentGuest] = useState(null);
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -45,20 +115,35 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
 
     // Fetch guests when status changes to "Occupied"
     if (e.target.name === "occupied" && e.target.value === "Occupied") {
-      console.log("occupied");
       fetchGuests();
     }
   };
   const fetchGuests = async () => {
     try {
-      const response = await fetch("/api/NewBooking"); // Replace with your actual API endpoint
+      const response = await fetch("/api/NewBooking");
       const data = await response.json();
-      console.log(data.data);
       setGuestList(data.data);
     } catch (error) {
       console.error("Error fetching guests:", error);
     }
   };
+  // Fetch guest details when room becomes occupied
+  const fetchGuestDetails = async () => {
+    if (room.occupied === "Occupied" && room.currentGuestId) {
+      try {
+        const response = await fetch("/api/NewBooking");
+        const data = await response.json();
+        // Find the guest matching the currentGuestId
+        const guest = data.data.find(g => g._id === room.currentGuestId);
+        setCurrentGuest(guest);
+      } catch (error) {
+        console.error("Error fetching guest details:", error);
+      }
+    }
+  };
+  useEffect(() => {
+    fetchGuestDetails();
+  }, [room.occupied, room.currentGuestId]);
 
   const handleEditSubmit = async () => {
     // Validation: Ensure a guest is selected when the room is set to "Occupied"
@@ -76,7 +161,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         const matchingCategory = categories.find(
           (cat) => cat._id === updatedRoom.category._id
         );
-        console.log("Matching Category:", matchingCategory);
 
         // Calculate the number of nights (days between checkIn and checkOut)
         const checkInDate = new Date(checkIn);
@@ -85,14 +169,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
           (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
         );
 
-        console.log("Number of Nights:", numberOfNights);
-
         // Calculate total room charge
-        const roomCharge = matchingCategory
-          ? matchingCategory.total * numberOfNights
-          : 0;
-
-        console.log("Room Charge:", roomCharge);
+        const roomCharge = matchingCategory ? matchingCategory.total * numberOfNights : 0;
 
         // Create billing entry when room status changes to "Occupied"
         const newBilling = {
@@ -106,8 +184,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
           dueAmount: roomCharge,
         };
 
-        console.log("Submitting billing data:", newBilling);
-
         // Create Billing Record in the database
         const billingResponse = await fetch("/api/Billing", {
           method: "POST",
@@ -119,25 +195,23 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
 
         const billingData = await billingResponse.json();
         if (billingData.success) {
-          console.log('Billing created successfully:', billingData.data);
-
           // Get the generated billing record's ID
           const billingId = billingData.data._id;
-          console.log('Billing ID:', billingId);
 
-          // Update the updatedRoom object with the new billing details
+          // Update the updatedRoom object with the new billing details and guest ID
           const updatedRoomWithBilling = {
             ...updatedRoom,
             billingStarted: "Yes",
             currentBillingId: billingId,
+            currentGuestId: selectedGuest._id, // Add the current guest's ID
           };
-
-          console.log('Updated Room with Billing:', updatedRoomWithBilling);
 
           // Update the room in the database directly
           const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoomWithBilling._id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json"
+            },
             body: JSON.stringify(updatedRoomWithBilling),
           });
 
@@ -165,7 +239,9 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
       try {
         const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoom._id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify(updatedRoom),
         });
 
@@ -183,51 +259,28 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         console.error("Error updating room:", error);
       }
     }
-    window.location.reload();
-    // Finalize editing
+
+    window.location.reload(); // Finalize editing
     setIsEditing(false);
   };
-
-
-  // Find category name based on room's category ID
-  const categoryName =
-    categories.find((cat) => cat._id === room.category._id)?.category ||
-    "No Category";
 
   // Find category name and icon based on room's category ID
   const categoryInfo = categories.find((cat) => cat._id === room.category._id) || {
     category: "No Category",
-    icon: Tags  // Default icon if no category found
+    icon: Tags // Default icon if no category found
   };
 
   // Color and icon mapping for room status
   const statusConfig = {
-    Vacant: {
-      bgColor: "bg-green-50",
-      textColor: "text-green-600",
-
-      icon: CheckCircle2
-    },
-    Occupied: {
-      bgColor: "bg-red-100",
-      textColor: "text-red-600",
-
-      icon: XCircle
-    }
+    Vacant: { bgColor: "bg-green-50", textColor: "text-green-600", icon: CheckCircle2 },
+    Occupied: { bgColor: "bg-red-100", textColor: "text-red-600", icon: XCircle }
   };
 
   const cleanStatusConfig = {
-    true: {
-      bgColor: "bg-emerald-100",
-      textColor: "text-emerald-700",
-      label: "Clean"
-    },
-    false: {
-      bgColor: "bg-yellow-100",
-      textColor: "text-yellow-700",
-      label: "Needs Cleaning"
-    }
+    true: { bgColor: "bg-emerald-100", textColor: "text-emerald-700", label: "Clean" },
+    false: { bgColor: "bg-yellow-100", textColor: "text-yellow-700", label: "Needs Cleaning" }
   };
+
 
   return (
     <div
@@ -236,70 +289,67 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Room Card Container with Enhanced Hover Effect */}
-      <div className={`
-          relative overflow-hidden 
-          transition-all duration-400 ease-in-out
-          border border-gray-200 
-          rounded-lg shadow-md 
-          transform 
-          ${isHovered ? 'scale-[1.03] shadow-xl' : 'scale-100 shadow-md'}
+      <div
+        className={`
+          relative overflow-hidden transition-all duration-400 ease-in-out 
+          border border-gray-200 rounded-lg shadow-md 
+          transform ${isHovered ? 'scale-[1.03] shadow-xl' : 'scale-100 shadow-md'}
           ${statusConfig[room.occupied].bgColor}
-        `}>
+        `}
+      >
         {/* Room Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <Building
               className={`
-                  text-amber-500 
-                  transition-transform duration-300 
-                  ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'}
-                `}
+                text-amber-500 transition-transform duration-300
+                ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'}
+              `}
               size={24}
             />
-            <h3 className={`
-                text-xl font-semibold text-gray-800
-                transition-all duration-300
+            <h3
+              className={`
+                text-xl font-semibold text-gray-800 transition-all duration-300
                 ${isHovered ? 'text-amber-700' : 'text-gray-800'}
-              `}>
+              `}
+            >
               Room {room.number}
+              {/* Guest Info Icon (only shows when occupied) */}
+              {room.occupied === "Occupied" && currentGuest && (
+                <button
+                  onClick={() => setShowGuestModal(true)}
+                  className="ml-2 text-amber-600 hover:text-amber-800 transition-colors"
+                >
+                  <Info size={20} />
+                </button>
+              )}
             </h3>
           </div>
 
           {/* Action Buttons with Advanced Hover Effects */}
-          <div className={`
-              flex space-x-2 
-              transition-all duration-300 ease-in-out
+          <div
+            className={`
+              flex space-x-2 transition-all duration-300 ease-in-out
               ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
-            `}>
+            `}
+          >
             <button
               onClick={() => setIsEditing(true)}
               className="
-                  text-blue-500 
-                  hover:bg-blue-100 
-                  p-2 rounded-full 
-                  transition-all duration-300 
-                  hover:rotate-6 
-                  hover:scale-110
-                  focus:outline-none 
-                  focus:ring-2 
-                  focus:ring-blue-300
-                "
+                text-blue-500 hover:bg-blue-100 p-2 rounded-full 
+                transition-all duration-300 hover:rotate-6 hover:scale-110
+                focus:outline-none focus:ring-2 focus:ring-blue-300
+              "
             >
               <Edit2 size={20} />
             </button>
             <button
               onClick={() => onDelete(room._id)}
               className="
-                  text-red-500 
-                  hover:bg-red-100 
-                  p-2 rounded-full 
-                  transition-all duration-300 
-                  hover:rotate-6 
-                  hover:scale-110
-                  focus:outline-none 
-                  focus:ring-2 
-                  focus:ring-red-300
-                "
+                text-red-500 hover:bg-red-100 p-2 rounded-full 
+                transition-all duration-300 hover:rotate-6 hover:scale-110
+                focus:outline-none focus:ring-2 focus:ring-red-300
+              "
             >
               <Trash2 size={20} />
             </button>
@@ -363,39 +413,80 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
             {cleanStatusConfig[room.clean].label}
           </div>
 
-          {/* Guest Information (if occupied) */}
-          {room.guest && (
-            <div className={`
-                flex items-center space-x-2 
-                bg-gray-100 p-2 rounded
-                transition-all duration-300
-                ${isHovered ? 'translate-x-3 shadow-md' : 'translate-x-0'}
-              `}>
-              <User
-                className={`
-                    text-gray-500 
-                    transition-transform duration-300
-                    ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'}
-                  `}
-                size={20}
-              />
+          {/* Guest Information Modal */}
+          {/* {showGuestModal && currentGuest && (
+          <GuestInfoModal 
+            guest={currentGuest} 
+            onClose={() => setShowGuestModal(false)} 
+          />
+        )} */}
+        </div>
+      </div>
+      {/* Guest Modal (similar to Edit Modal) */}
+      {showGuestModal && currentGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+          <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
+          <button
+            onClick={()=> {setShowGuestModal(false)}}
+            className="text-gray-500 hover:text-red-500 transition-colors"
+          >
+            <XCircle size={28} />
+          </button>
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3">
+            <User className="text-amber-600" size={24} />
+            <div>
+              <p className="font-semibold text-gray-800">{currentGuest.guestName}</p>
+              <p className="text-sm text-gray-500">{currentGuest.guestType || "Guest"}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
+            <div>
+              <p className="text-xs text-gray-500">Mobile</p>
+              <p className="font-medium">{currentGuest.mobileNo}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
+            <div>
+              <p className="text-xs text-gray-500">Email</p>
+              <p className="font-medium">{currentGuest.guestEmail || "N/A"}</p>
+            </div>
+          </div>
+          <div className="bg-amber-50 p-3 rounded-lg">
+            <div className="flex justify-between mb-2">
               <div>
-                <div className={`
-                    font-semibold text-gray-800
-                    transition-colors duration-300
-                    ${isHovered ? 'text-amber-700' : 'text-gray-800'}
-                  `}>
-                  {room.guest.name}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {room.guest.id}
-                </div>
+                <p className="text-xs text-gray-500">Check-In</p>
+                <p className="font-medium">
+                  {new Date(currentGuest.checkIn).toLocaleDateString()}
+                </p>
               </div>
+              <div>
+                <p className="text-xs text-gray-500">Check-Out</p>
+                <p className="font-medium">
+                  {new Date(currentGuest.checkOut).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <User size={16} className="text-gray-500" />
+              <p className="text-sm text-gray-600">
+                {currentGuest.adults} Adults, {currentGuest.children} Children
+              </p>
+            </div>
+          </div>
+          {currentGuest.remarks && (
+            <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
+              <p className="text-xs text-gray-500">Remarks</p>
+              <p className="text-sm">{currentGuest.remarks}</p>
             </div>
           )}
         </div>
       </div>
-
+    </div>
+      )}
       {/* Edit Modal (Centered and Animated) */}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
@@ -583,7 +674,7 @@ export default function RoomDashboard() {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-      }  finally {
+      } finally {
         setIsLoading(false);
       }
     };
@@ -718,7 +809,7 @@ export default function RoomDashboard() {
         </div>
 
         {/* Rooms List */}
-        { (
+        {(
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredRooms.map((room) => (
               <RoomCard
