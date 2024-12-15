@@ -150,10 +150,10 @@ export default function GuestList() {
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-amber-200">
+                                <tbody className="bg-#f5f5f5-y divide-amber-200">
                                     {guests.map((guest) => (
                                         <tr key={guest._id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-cyan-900">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-#28bfdb">
                                                 {guest.guestName}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-cyan-900">
@@ -162,7 +162,7 @@ export default function GuestList() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-cyan-900">
                                                 {guest.guestEmail}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-cyan-900">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-#28bfdb">
                                                 {guest.address}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
