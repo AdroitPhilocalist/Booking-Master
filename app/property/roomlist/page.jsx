@@ -1,8 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react";
-import Navbar from "@/app/_components/Navbar";
-import { Footer } from "@/app/_components/Footer";
-import Link from "next/link";
+import Navbar from "../../_components/Navbar";
+import { Footer } from "../../_components/Footer";
 import {
   Table,
   TableBody,
@@ -13,28 +12,107 @@ import {
   Paper,
   Typography,
   Button,
+  Modal,
+  Box,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 export default function BookingManagement() {
-  const [rooms, setRooms] = useState([]); // State to hold room data
-  const [loading, setLoading] = useState(true); // Loading state
+  const [rooms, setRooms] = useState({ data: [] }); // Initialize with an empty data array
+  const [loading, setLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const [categories, setCategories] = useState([]);
 
+  // Form state
+  const [roomNumber, setRoomNumber] = useState("");
+  const [category, setCategory] = useState("");
+  const [floorNumber, setFloorNumber] = useState("");
+  const [clean, setClean] = useState("Yes");
+
+  // Fetch rooms and categories
   useEffect(() => {
-    // Fetch room data from your backend
-    const fetchRooms = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/rooms"); // Update the endpoint to match your backend
-        const roomData = await response.json();
+        // Fetch rooms
+        const roomsResponse = await fetch("/api/rooms");
+        const roomData = await roomsResponse.json();
         setRooms(roomData);
+
+        // Fetch categories
+        const categoriesResponse = await fetch("/api/roomCategories");
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData.data);
+
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching rooms:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
 
-    fetchRooms();
+    fetchData();
   }, []);
+
+  // Modal open/close handlers
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
+
+  // Submit room handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const newRoom = {
+      number: roomNumber,
+      category,
+      floor: floorNumber,
+      clean: clean === "Yes",
+    };
+
+    try {
+      const res = await fetch("/api/rooms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newRoom),
+      });
+
+      if (res.ok) {
+        // Refresh rooms data
+        const updatedRoomsResponse = await fetch("/api/rooms");
+        const updatedRoomsData = await updatedRoomsResponse.json();
+        setRooms(updatedRoomsData);
+
+        // Reset form and close modal
+        setRoomNumber("");
+        setCategory("");
+        setFloorNumber("");
+        setClean("Yes");
+        handleCloseModal();
+      } else {
+        console.error("Failed to create new room", res.statusText);
+      }
+    } catch (error) {
+      console.error("An error occurred while creating the room:", error);
+    }
+  };
+
+  // Modal style
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 2,
+  };
 
   if (loading) {
     return (
@@ -57,11 +135,9 @@ export default function BookingManagement() {
           <Typography variant="h4" component="h1" className="font-bold text-gray-800">
             Room Management
           </Typography>
-          <Link href="roomlist/addRoom">
-            <Button variant="contained" color="primary">
-              Add Room
-            </Button>
-          </Link>
+          <Button variant="contained" color="primary" onClick={handleOpenModal}>
+            Add Room
+          </Button>
         </div>
 
         {/* Room Table */}
@@ -187,6 +263,92 @@ export default function BookingManagement() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Add Room Modal */}
+        <Modal
+          open={openModal}
+          onClose={handleCloseModal}
+          aria-labelledby="add-room-modal-title"
+        >
+          <Box sx={modalStyle}>
+            <Typography id="add-room-modal-title" variant="h6" component="h2" className="mb-4">
+              Add New Room
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <TextField 
+                  fullWidth
+                  label="Room Number" 
+                  variant="outlined" 
+                  value={roomNumber}
+                  onChange={(e) => setRoomNumber(e.target.value)}
+                  required 
+                />
+              </div>
+
+              <div className="mb-4">
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel>Room Category</InputLabel>
+                  <Select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    label="Room Category"
+                    required
+                  >
+                    {categories.map((cat) => (
+                      <MenuItem key={cat._id} value={cat._id}>
+                        {cat.category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
+
+              <div className="mb-4">
+                <TextField 
+                  fullWidth
+                  label="Floor Number" 
+                  variant="outlined"
+                  value={floorNumber}
+                  onChange={(e) => setFloorNumber(e.target.value)}
+                  required 
+                />
+              </div>
+
+              <div className="mb-4">
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel>Clean Status</InputLabel>
+                  <Select
+                    value={clean}
+                    onChange={(e) => setClean(e.target.value)}
+                    label="Clean Status"
+                    required
+                  >
+                    <MenuItem value="Yes">Yes</MenuItem>
+                    <MenuItem value="No">No</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+
+              <div className="flex justify-between">
+                <Button 
+                  variant="outlined" 
+                  color="secondary" 
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="contained" 
+                  color="primary"
+                >
+                  Add Room
+                </Button>
+              </div>
+            </form>
+          </Box>
+        </Modal>
       </div>
 
       {/* Footer */}
@@ -194,4 +356,3 @@ export default function BookingManagement() {
     </div>
   );
 }
-

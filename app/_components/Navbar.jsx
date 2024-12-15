@@ -40,6 +40,9 @@ export default function Navbar() {
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/master/users">Users</Link>
                 </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/master/profile">Profile</Link>
+                </li>
               </ul>
             )}
           </li>

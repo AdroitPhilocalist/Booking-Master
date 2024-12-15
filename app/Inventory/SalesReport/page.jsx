@@ -373,7 +373,7 @@ const SalesReportPage = () => {
           </Button>
         </div>
 
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper}style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table ref={tableRef}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
