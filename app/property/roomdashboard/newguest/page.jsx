@@ -309,17 +309,18 @@ export default function BookingForm() {
                                         <Select
                                             labelId="demo-simple-select-standard-label"
                                             id="demo-simple-select-standard"
+                                            name="bookingType"
                                             value={formData.bookingType}
                                             onChange={handleChange}
-                                            label="Booking"
                                         >
-                                            {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
-                                                <MenuItem key={type} value={type}>
-                                                    {type}
+                                            {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((status) => (
+                                                <MenuItem key={status} value={status}>
+                                                    {status}
                                                 </MenuItem>
                                             ))}
                                         </Select>
                                     </FormControl>
+
                                 </div>
 
                                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -364,9 +365,9 @@ export default function BookingForm() {
                                         <Select
                                             labelId="booking-source-label"
                                             id="booking-source-select"
+                                            name="bookingSource"
                                             value={formData.bookingSource}
                                             onChange={handleChange}
-                                            label="Booking Source"
                                         >
                                             {[
                                                 'Walk In', 'Front Office', 'Agent', 'Office', 'Goibibo', 'Make My Trip',
@@ -380,6 +381,7 @@ export default function BookingForm() {
                                             ))}
                                         </Select>
                                     </FormControl>
+
 
                                 </div>
                             </div>
