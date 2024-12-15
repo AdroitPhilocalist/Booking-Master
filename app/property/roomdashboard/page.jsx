@@ -9,6 +9,14 @@ import {
   PlaneTakeoff,
   UserCheck,
   UserPlus,
+  Edit2,
+  Trash2,
+  CheckCircle2,
+  XCircle,
+  User,
+  Key,
+  Building,
+  Tags,
 } from "lucide-react";
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
@@ -27,6 +35,7 @@ const SummaryItem = ({ icon: Icon, title, count }) => (
 
 const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [updatedRoom, setUpdatedRoom] = useState(room);
   const [guestList, setGuestList] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState(null);
@@ -57,128 +66,128 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
     if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
       alert("Please select a guest before saving an occupied room.");
       return;
-  }
-
-  if (updatedRoom.occupied === "Occupied" && selectedGuest) {
-      try {
-          // Retrieve checkIn and checkOut from selected guest
-          const { checkIn, checkOut } = selectedGuest;
-
-          // Find the matching room category
-          const matchingCategory = categories.find(
-              (cat) => cat._id === updatedRoom.category._id
-          );
-          console.log("Matching Category:", matchingCategory);
-
-          // Calculate the number of nights (days between checkIn and checkOut)
-          const checkInDate = new Date(checkIn);
-          const checkOutDate = new Date(checkOut);
-          const numberOfNights = Math.ceil(
-              (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
-          );
-
-          console.log("Number of Nights:", numberOfNights);
-
-          // Calculate total room charge
-          const roomCharge = matchingCategory 
-              ? matchingCategory.total * numberOfNights 
-              : 0;
-
-              console.log("Room Charge:", roomCharge);
-
-          // Create billing entry when room status changes to "Occupied"
-          const newBilling = {
-            roomNo: updatedRoom.number,
-            itemList: ["Room Charge"], // Add more items as necessary
-            priceList: [roomCharge], // Assuming the room has a price field
-            billStartDate: checkIn, // Use the checkIn value from the selected guest
-            billEndDate: checkOut, // Use the checkOut value from the selected guest
-            totalAmount: roomCharge,
-            amountAdvanced: 0,
-            dueAmount: roomCharge,
-          };
-
-          console.log("Submitting billing data:", newBilling);
-
-            // Create Billing Record in the database
-            const billingResponse = await fetch("/api/Billing", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newBilling),
-            });
-
-            const billingData = await billingResponse.json();
-            if (billingData.success) {
-                console.log('Billing created successfully:', billingData.data);
-
-                // Get the generated billing record's ID
-                const billingId = billingData.data._id;
-                console.log('Billing ID:', billingId);
-
-                // Update the updatedRoom object with the new billing details
-                const updatedRoomWithBilling = {
-                    ...updatedRoom,
-                    billingStarted: "Yes",
-                    currentBillingId: billingId,
-                };
-
-                console.log('Updated Room with Billing:', updatedRoomWithBilling);
-
-                // Update the room in the database directly
-                const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoomWithBilling._id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(updatedRoomWithBilling),
-                });
-
-                const roomUpdateData = await roomUpdateResponse.json();
-                if (roomUpdateData.success) {
-                    setRooms((prevRooms) =>
-                        prevRooms.map((room) =>
-                            room._id === updatedRoomWithBilling._id ? updatedRoomWithBilling : room
-                        )
-                    );
-                } else {
-                    console.error("Failed to update room in database:", roomUpdateData.error);
-                }
-            } else {
-                console.error("Error creating billing:", billingData.error);
-            }
-        } catch (error) {
-            console.error(
-                "Error updating guest room numbers or creating billing:",
-                error
-            );
-        }
-    } else {
-        // Update the room in the database directly if no billing creation is needed
-        try {
-            const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoom._id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedRoom),
-            });
-
-            const roomUpdateData = await roomUpdateResponse.json();
-            if (roomUpdateData.success) {
-                setRooms((prevRooms) =>
-                    prevRooms.map((room) =>
-                        room._id === updatedRoom._id ? updatedRoom : room
-                    )
-                );
-            } else {
-                console.error("Failed to update room in database:", roomUpdateData.error);
-            }
-        } catch (error) {
-            console.error("Error updating room:", error);
-        }
     }
 
+    if (updatedRoom.occupied === "Occupied" && selectedGuest) {
+      try {
+        // Retrieve checkIn and checkOut from selected guest
+        const { checkIn, checkOut } = selectedGuest;
+
+        // Find the matching room category
+        const matchingCategory = categories.find(
+          (cat) => cat._id === updatedRoom.category._id
+        );
+        console.log("Matching Category:", matchingCategory);
+
+        // Calculate the number of nights (days between checkIn and checkOut)
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        const numberOfNights = Math.ceil(
+          (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+        );
+
+        console.log("Number of Nights:", numberOfNights);
+
+        // Calculate total room charge
+        const roomCharge = matchingCategory
+          ? matchingCategory.total * numberOfNights
+          : 0;
+
+        console.log("Room Charge:", roomCharge);
+
+        // Create billing entry when room status changes to "Occupied"
+        const newBilling = {
+          roomNo: updatedRoom.number,
+          itemList: ["Room Charge"], // Add more items as necessary
+          priceList: [roomCharge], // Assuming the room has a price field
+          billStartDate: checkIn, // Use the checkIn value from the selected guest
+          billEndDate: checkOut, // Use the checkOut value from the selected guest
+          totalAmount: roomCharge,
+          amountAdvanced: 0,
+          dueAmount: roomCharge,
+        };
+
+        console.log("Submitting billing data:", newBilling);
+
+        // Create Billing Record in the database
+        const billingResponse = await fetch("/api/Billing", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newBilling),
+        });
+
+        const billingData = await billingResponse.json();
+        if (billingData.success) {
+          console.log('Billing created successfully:', billingData.data);
+
+          // Get the generated billing record's ID
+          const billingId = billingData.data._id;
+          console.log('Billing ID:', billingId);
+
+          // Update the updatedRoom object with the new billing details
+          const updatedRoomWithBilling = {
+            ...updatedRoom,
+            billingStarted: "Yes",
+            currentBillingId: billingId,
+          };
+
+          console.log('Updated Room with Billing:', updatedRoomWithBilling);
+
+          // Update the room in the database directly
+          const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoomWithBilling._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedRoomWithBilling),
+          });
+
+          const roomUpdateData = await roomUpdateResponse.json();
+          if (roomUpdateData.success) {
+            setRooms((prevRooms) =>
+              prevRooms.map((room) =>
+                room._id === updatedRoomWithBilling._id ? updatedRoomWithBilling : room
+              )
+            );
+          } else {
+            console.error("Failed to update room in database:", roomUpdateData.error);
+          }
+        } else {
+          console.error("Error creating billing:", billingData.error);
+        }
+      } catch (error) {
+        console.error(
+          "Error updating guest room numbers or creating billing:",
+          error
+        );
+      }
+    } else {
+      // Update the room in the database directly if no billing creation is needed
+      try {
+        const roomUpdateResponse = await fetch(`/api/rooms/${updatedRoom._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedRoom),
+        });
+
+        const roomUpdateData = await roomUpdateResponse.json();
+        if (roomUpdateData.success) {
+          setRooms((prevRooms) =>
+            prevRooms.map((room) =>
+              room._id === updatedRoom._id ? updatedRoom : room
+            )
+          );
+        } else {
+          console.error("Failed to update room in database:", roomUpdateData.error);
+        }
+      } catch (error) {
+        console.error("Error updating room:", error);
+      }
+    }
+    window.location.reload();
     // Finalize editing
     setIsEditing(false);
-};
+  };
 
 
   // Find category name based on room's category ID
@@ -186,55 +195,214 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
     categories.find((cat) => cat._id === room.category._id)?.category ||
     "No Category";
 
+  // Find category name and icon based on room's category ID
+  const categoryInfo = categories.find((cat) => cat._id === room.category._id) || {
+    category: "No Category",
+    icon: Tags  // Default icon if no category found
+  };
+
+  // Color and icon mapping for room status
+  const statusConfig = {
+    Vacant: {
+      bgColor: "bg-green-50",
+      textColor: "text-green-600",
+
+      icon: CheckCircle2
+    },
+    Occupied: {
+      bgColor: "bg-red-50",
+      textColor: "text-red-600",
+
+      icon: XCircle
+    }
+  };
+
+  const cleanStatusConfig = {
+    true: {
+      bgColor: "bg-emerald-100",
+      textColor: "text-emerald-700",
+      label: "Clean"
+    },
+    false: {
+      bgColor: "bg-yellow-100",
+      textColor: "text-yellow-700",
+      label: "Needs Cleaning"
+    }
+  };
+
   return (
-    <div className="bg-white rounded shadow p-4 relative">
-      {/* Edit and Delete Buttons */}
-      <div className="flex justify-between mb-2">
-        <button onClick={() => setIsEditing(true)} className="text-blue-600">
-          Edit
-        </button>
-        <button onClick={() => onDelete(room._id)} className="text-red-600">
-          Delete
-        </button>
-      </div>
+    <div
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Room Card Container with Enhanced Hover Effect */}
+      <div className={`
+          relative overflow-hidden 
+          transition-all duration-400 ease-in-out
+          border border-gray-200 
+          rounded-lg shadow-md 
+          transform 
+          ${isHovered ? 'scale-[1.03] shadow-xl' : 'scale-100 shadow-md'}
+          ${statusConfig[room.occupied].bgColor}
+        `}>
+        {/* Room Header */}
+        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <Building
+              className={`
+                  text-amber-500 
+                  transition-transform duration-300 
+                  ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'}
+                `}
+              size={24}
+            />
+            <h3 className={`
+                text-xl font-semibold text-gray-800
+                transition-all duration-300
+                ${isHovered ? 'text-amber-700' : 'text-gray-800'}
+              `}>
+              Room {room.number}
+            </h3>
+          </div>
 
-      {/* Room Information */}
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="text-2xl font-bold">Room {room.number}</div>
-          <div className="text-xs text-gray-500">Floor {room.floor}</div>{" "}
-          {/* Display floor info */}
-          <div className="text-xs text-gray-500">{categoryName}</div>
+          {/* Action Buttons with Advanced Hover Effects */}
+          <div className={`
+              flex space-x-2 
+              transition-all duration-300 ease-in-out
+              ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
+            `}>
+            <button
+              onClick={() => setIsEditing(true)}
+              className="
+                  text-blue-500 
+                  hover:bg-blue-100 
+                  p-2 rounded-full 
+                  transition-all duration-300 
+                  hover:rotate-6 
+                  hover:scale-110
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-blue-300
+                "
+            >
+              <Edit2 size={20} />
+            </button>
+            <button
+              onClick={() => onDelete(room._id)}
+              className="
+                  text-red-500 
+                  hover:bg-red-100 
+                  p-2 rounded-full 
+                  transition-all duration-300 
+                  hover:rotate-6 
+                  hover:scale-110
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-red-300
+                "
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Room Details with Hover Animations */}
+        <div className="p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <div className="p-4 space-y-3">
+              <div className={`flex flex-col items-start space-y-1 transition-all duration-300`}>
+                {/* Floor Information */}
+                <div className="flex items-center space-x-2">
+                  <Key
+                    className={`text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                      }`}
+                    size={20}
+                  />
+                  <span className="text-sm text-gray-600">Floor: {room.floor}</span>
+                </div>
+
+                {/* Category Information */}
+                <div className="flex items-center space-x-2">
+                  {React.createElement(categoryInfo.icon || Tags, {
+                    className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                      }`,
+                    size: 20,
+                  })}
+                  <span className="text-sm text-gray-600">{categoryInfo.category}</span>
+                </div>
+              </div>
+            </div>
+
+
+            {/* Status Indicator */}
+            <div className={`
+                flex items-center space-x-2 
+                px-3 py-1 rounded-full 
+                transition-all duration-300
+                ${statusConfig[room.occupied].textColor}
+                ${statusConfig[room.occupied].bgColor}
+                ${isHovered ? 'scale-105' : 'scale-100'}
+              `}>
+              {React.createElement(statusConfig[room.occupied].icon, {
+                size: 16,
+                className: "transition-transform duration-300 " +
+                  (isHovered ? 'rotate-12' : 'rotate-0')
+              })}
+              <span className="text-xs font-medium">
+                {room.occupied}
+              </span>
+            </div>
+          </div>
+
+          {/* Clean Status with Hover Effect */}
+          <div className={`
+              text-center py-1 rounded 
+              transition-all duration-300
+              ${cleanStatusConfig[room.clean].bgColor} 
+              ${cleanStatusConfig[room.clean].textColor}
+              ${isHovered ? 'scale-105 shadow-md' : 'scale-100'}
+            `}>
+            {cleanStatusConfig[room.clean].label}
+          </div>
+
+          {/* Guest Information (if occupied) */}
+          {room.guest && (
+            <div className={`
+                flex items-center space-x-2 
+                bg-gray-100 p-2 rounded
+                transition-all duration-300
+                ${isHovered ? 'translate-x-3 shadow-md' : 'translate-x-0'}
+              `}>
+              <User
+                className={`
+                    text-gray-500 
+                    transition-transform duration-300
+                    ${isHovered ? 'rotate-6 scale-110' : 'rotate-0 scale-100'}
+                  `}
+                size={20}
+              />
+              <div>
+                <div className={`
+                    font-semibold text-gray-800
+                    transition-colors duration-300
+                    ${isHovered ? 'text-amber-700' : 'text-gray-800'}
+                  `}>
+                  {room.guest.name}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {room.guest.id}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Vacant/Occupied Status */}
-      <div
-        className={`mt-2 px-2 py-1 rounded text-xs font-bold ${room.occupied === "Vacant"
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
-          }`}
-      >
-        {room.occupied === "Vacant" ? "Vacant" : "Occupied"}
-      </div>
-
-      {/* Guest Information */}
-      {room.guest && (
-        <div className="mt-2">
-          <div className="font-semibold">{room.guest.name}</div>
-          <div className="text-xs text-gray-500">{room.guest.id}</div>
-        </div>
-      )}
-
-      {/* Clean/Dirty Status */}
-      <div className="mt-2 text-center py-1 rounded bg-gray-100 text-gray-800">
-        {room.clean ? "CLEAN" : "DIRTY"}
-      </div>
-
-      {/* Edit Modal */}
+      {/* Edit Modal (Centered and Animated) */}
       {isEditing && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+          <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up">
             <h3 className="text-lg font-bold">Edit Room</h3>
             <div className="mt-2">
               <label className="block">
