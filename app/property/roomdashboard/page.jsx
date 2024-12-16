@@ -33,71 +33,71 @@ const SummaryItem = ({ icon: Icon, title, count }) => (
 );
 
 // Guest Information Modal
-const GuestInfoModal = ({ guest, onClose }) => {
-  if (!guest) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
-      <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500 transition-colors"
-          >
-            <XCircle size={28} />
-          </button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <User className="text-amber-600" size={24} />
-            <div>
-              <p className="font-semibold text-gray-800">{guest.guestName}</p>
-              <p className="text-sm text-gray-500">{guest.guestType || "Guest"}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
-            <div>
-              <p className="text-xs text-gray-500">Mobile</p>
-              <p className="font-medium">{guest.mobileNo}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Email</p>
-              <p className="font-medium">{guest.guestEmail || "N/A"}</p>
-            </div>
-          </div>
-          <div className="bg-amber-50 p-3 rounded-lg">
-            <div className="flex justify-between mb-2">
-              <div>
-                <p className="text-xs text-gray-500">Check-In</p>
-                <p className="font-medium">
-                  {new Date(guest.checkIn).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Check-Out</p>
-                <p className="font-medium">
-                  {new Date(guest.checkOut).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <User size={16} className="text-gray-500" />
-              <p className="text-sm text-gray-600">
-                {guest.adults} Adults, {guest.children} Children
-              </p>
-            </div>
-          </div>
-          {guest.remarks && (
-            <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
-              <p className="text-xs text-gray-500">Remarks</p>
-              <p className="text-sm">{guest.remarks}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+// const GuestInfoModal = ({ guest, onClose }) => {
+//   if (!guest) return null;
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+//       <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
+//         <div className="flex justify-between items-center mb-4">
+//           <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
+//           <button
+//             onClick={onClose}
+//             className="text-gray-500 hover:text-red-500 transition-colors"
+//           >
+//             <XCircle size={28} />
+//           </button>
+//         </div>
+//         <div className="space-y-3">
+//           <div className="flex items-center space-x-3">
+//             <User className="text-amber-600" size={24} />
+//             <div>
+//               <p className="font-semibold text-gray-800">{guest.guestName}</p>
+//               <p className="text-sm text-gray-500">{guest.guestType || "Guest"}</p>
+//             </div>
+//           </div>
+//           <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
+//             <div>
+//               <p className="text-xs text-gray-500">Mobile</p>
+//               <p className="font-medium">{guest.mobileNo}</p>
+//             </div>
+//             <div>
+//               <p className="text-xs text-gray-500">Email</p>
+//               <p className="font-medium">{guest.guestEmail || "N/A"}</p>
+//             </div>
+//           </div>
+//           <div className="bg-amber-50 p-3 rounded-lg">
+//             <div className="flex justify-between mb-2">
+//               <div>
+//                 <p className="text-xs text-gray-500">Check-In</p>
+//                 <p className="font-medium">
+//                   {new Date(guest.checkIn).toLocaleDateString()}
+//                 </p>
+//               </div>
+//               <div>
+//                 <p className="text-xs text-gray-500">Check-Out</p>
+//                 <p className="font-medium">
+//                   {new Date(guest.checkOut).toLocaleDateString()}
+//                 </p>
+//               </div>
+//             </div>
+//             <div className="flex items-center space-x-2 mt-2">
+//               <User size={16} className="text-gray-500" />
+//               <p className="text-sm text-gray-600">
+//                 {guest.adults} Adults, {guest.children} Children
+//               </p>
+//             </div>
+//           </div>
+//           {guest.remarks && (
+//             <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
+//               <p className="text-xs text-gray-500">Remarks</p>
+//               <p className="text-sm">{guest.remarks}</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 
 const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) => {
@@ -111,7 +111,19 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setUpdatedRoom({ ...updatedRoom, [name]: value });
+  
+  // Special handling for 'clean' to convert string to boolean
+  if (name === 'clean') {
+    setUpdatedRoom({ 
+      ...updatedRoom, 
+      [name]: value === 'true' // This will convert 'true' to true, and 'false' to false
+    });
+  } else {
+    setUpdatedRoom({ 
+      ...updatedRoom, 
+      [name]: value 
+    });
+  }
 
     // Fetch guests when status changes to "Occupied"
     if (e.target.name === "occupied" && e.target.value === "Occupied") {
@@ -427,7 +439,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-amber-700">Guest</h2>
+          <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
           <button
             onClick={()=> {setShowGuestModal(false)}}
             className="text-gray-500 hover:text-red-500 transition-colors"
