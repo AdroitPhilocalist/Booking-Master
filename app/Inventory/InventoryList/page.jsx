@@ -12,6 +12,8 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
+import { IconButton } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 
 export default function InventoryList() {
   const [items, setItems] = useState([]);
@@ -79,7 +81,7 @@ export default function InventoryList() {
       if (!currentItem) {
         throw new Error("Item not found");
       }
-  
+
       const completeStockDetails = {
         purchaseorderno: stockDetails.purchaseorderno,
         name: currentItem._id,
@@ -93,31 +95,31 @@ export default function InventoryList() {
         total: stockDetails.total,
         purorsell: stockDetails.purorsell
       };
-  
+
       const stockReportResponse = await fetch("/api/stockreport", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(completeStockDetails),
       });
-  
+
       if (!stockReportResponse.ok) {
         const errorData = await stockReportResponse.json().catch(() => ({
           error: `Server returned ${stockReportResponse.status}`
         }));
         throw new Error(errorData.error || 'Failed to create stock report');
       }
-  
+
       const stockReportData = await stockReportResponse.json();
-  
-      const quantityChange = completeStockDetails.purorsell === 'purchase' 
-        ? completeStockDetails.quantityAmount 
+
+      const quantityChange = completeStockDetails.purorsell === 'purchase'
+        ? completeStockDetails.quantityAmount
         : -completeStockDetails.quantityAmount;
-  
+
       const inventoryResponse = await fetch(`/api/InventoryList/${itemId}`, {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -125,22 +127,22 @@ export default function InventoryList() {
           stock: currentItem.stock + quantityChange
         }),
       });
-  
+
       if (!inventoryResponse.ok) {
         throw new Error("Failed to update inventory");
       }
-  
+
       const inventoryData = await inventoryResponse.json();
-      
+
       setItems(prev =>
         prev.map(item => (item._id === itemId ? inventoryData.item : item))
       );
-      
+
       setShowStockModal(false);
       setStockAction({ type: '', itemId: '' });
-      
+
       alert(completeStockDetails.purorsell === 'purchase' ? 'Purchase completed successfully' : 'Sale completed successfully');
-      
+
     } catch (error) {
       console.error("Error managing stock:", error);
       alert(error.message || "Error managing stock. Please try again.");
@@ -153,19 +155,19 @@ export default function InventoryList() {
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-            <svg 
-              aria-hidden="true" 
-              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" 
-              viewBox="0 0 100 101" 
-              fill="none" 
+            <svg
+              aria-hidden="true"
+              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+              viewBox="0 0 100 101"
+              fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path 
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" 
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                 fill="currentColor"
               />
-              <path 
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" 
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
                 fill="currentFill"
               />
             </svg>
@@ -174,16 +176,19 @@ export default function InventoryList() {
         </div>
       )}
       <div className="container mx-auto p-4">
-        <h1 className="text-xl font-bold mb-4">Inventory List</h1>
-        <button
-          onClick={() => {
-            setShowModal(true);
-            setCurrentItem(null);
-          }}
-          className="bg-green-500 text-white px-4 py-2 rounded mb-4">
-        
-          Add Items +
-        </button>
+       
+        <h1 className="text-3xl font-bold mb-4  flex justify-center text-cyan-900">Inventory List</h1>
+        <div className="container mx-auto p-2 flex justify-center" >
+                  <button
+                    onClick={() => {
+                      setShowModal(true);
+                      setCurrentItem(null);
+                    }}
+                    className="bg-green-500 text-white px-4 py-2 rounded mb-4 ">
+
+                    Add Items +
+                  </button>
+        </div>
 
         <TableContainer component={Paper}>
           <Table>
@@ -212,7 +217,7 @@ export default function InventoryList() {
                   <TableCell sx={{ textAlign: "center" }}>{item.stock}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>{item.quantityUnit}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    <Button
+                    {/* <Button
                       variant="contained"
                       color="success"
                       size="small"
@@ -222,7 +227,16 @@ export default function InventoryList() {
                       }}
                     >
                       Edit Item
-                    </Button>
+                    </Button> */}
+                    <IconButton
+                      color="primary"
+                      onClick={() => {
+                        setShowModal(true);
+                        setCurrentItem(item);
+                      }}
+                    >
+                      <Edit />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -270,36 +284,36 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[80vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">{initialData ? 'Edit' : 'Add'} Item</h2>
-        
+
         <div className="space-y-4">
           <TextField id="Item Code" label="Item Code" variant="outlined"
             type="text"
-          
+
             value={formData.itemCode}
-            onChange={(e) => setFormData({...formData, itemCode: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, itemCode: e.target.value })}
             className="w-full border p-2 rounded"
           />
-          
+
           <TextField id="Name" label="Name" variant="outlined"
             type="text"
-          
+
             value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           />
-          
+
           <TextField id="Group" label="Group" variant="outlined"
             type="text"
-          
+
             value={formData.group}
-            onChange={(e) => setFormData({...formData, group: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, group: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           />
-          
-          
+
+
           <select
             value={formData.segment}
-            onChange={(e) => setFormData({...formData, segment: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, segment: e.target.value })}
             className="w-full border p-3 rounded mt-2"
           >
             <option value="">Select Segment</option>
@@ -309,39 +323,39 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
               </option>
             ))}
           </select>
-          
+
           <label className="p-2 mt-3">Auditable</label>
           <select
             value={formData.auditable}
-            onChange={(e) => setFormData({...formData, auditable: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, auditable: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           >
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </select>
-          
+
           <label className="mb-2">Tax (%)</label>
           <input
             type="number"
             placeholder="Tax (%)"
             value={formData.tax}
-            onChange={(e) => setFormData({...formData, tax: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, tax: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           />
-          
+
           <label className="mb-2">Initial Stock</label>
           <input
             type="number"
             placeholder="Initial Stock"
             value={formData.stock}
-            onChange={(e) => setFormData({...formData, stock: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           />
-          
+
           <label className="mb-2">Quantity Unit</label>
           <select
             value={formData.quantityUnit}
-            onChange={(e) => setFormData({...formData, quantityUnit: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, quantityUnit: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           >
             <option value="pieces">Pieces</option>
@@ -379,7 +393,7 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   const [selectedQuantity, setSelectedQuantity] = useState('');
   const [rate, setRate] = useState('');
   const [total, setTotal] = useState('');
-  
+
   const selectedItem = inventoryList.find(item => item._id === action.itemId);
 
   const calculateTotal = () => {
@@ -395,28 +409,28 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
   }, [rate, selectedQuantity, selectedItem]);
 
   const handleSubmit = () => {
-  if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
-    alert("Please fill all required fields");
-    return;
-  }
+    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedQuantity || !rate) {
+      alert("Please fill all required fields");
+      return;
+    }
 
-  if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
-    alert("Not enough stocks available");
-    return;
-  }
+    if (action.type === 'sell' && selectedQuantity > selectedItem.stock) {
+      alert("Not enough stocks available");
+      return;
+    }
 
-  const formData = {
-    purchaseorderno,
-    purchasedate,
-    Invoiceno,
-    quantityAmount: parseFloat(selectedQuantity),
-    rate: parseFloat(rate),
-    total: parseFloat(total),
-    purorsell: action.type === 'buy' ? 'purchase' : 'sell'
+    const formData = {
+      purchaseorderno,
+      purchasedate,
+      Invoiceno,
+      quantityAmount: parseFloat(selectedQuantity),
+      rate: parseFloat(rate),
+      total: parseFloat(total),
+      purorsell: action.type === 'buy' ? 'purchase' : 'sell'
+    };
+
+    onSubmit(formData);
   };
-
-  onSubmit(formData);
-};
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded shadow-lg w-96 max-h-[90vh] overflow-auto">
@@ -481,8 +495,8 @@ const StockModal = ({ onClose, onSubmit, action, inventoryList }) => {
             onChange={(e) => setSelectedQuantity(e.target.value)}
             className="w-full"
             error={action.type === 'sell' && selectedQuantity > selectedItem.stock}
-            helperText={action.type === 'sell' && selectedQuantity > selectedItem.stock 
-              ? `Available stock: ${selectedItem.stock}` 
+            helperText={action.type === 'sell' && selectedQuantity > selectedItem.stock
+              ? `Available stock: ${selectedItem.stock}`
               : ''}
           />
 
