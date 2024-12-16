@@ -19,7 +19,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useRouter } from 'next/navigation';
-
+import axios from 'axios';
 export default function Page() {
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
@@ -80,7 +80,7 @@ export default function Page() {
   // Handle PUT request to update user details
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+// console.log(selectedUser._id)
     try {
       const response = await fetch(`/api/User/${selectedUser._id}`, {
         method: 'PUT',
