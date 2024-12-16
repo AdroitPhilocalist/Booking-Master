@@ -6,6 +6,8 @@ import { Button, TextField, Grid, Typography, Paper, Box, Container } from '@mui
 import { styled } from '@mui/system';
 import { useForm } from 'react-hook-form';
 import MenuItem from '@mui/material/MenuItem';
+import Navbar from '@/app/_components/Navbar';
+import { Footer } from '@/app/_components/Footer';
 // Custom styling using Material UI's styled API
 const FormContainer = styled(Paper)({
   padding: '30px',
@@ -49,7 +51,9 @@ export default function AddUser() {
   };
 
   return (
-    <Container maxWidth="sm">
+    <div className='bg-amber-50 min-h-screen'>
+      <Navbar />
+      <Container maxWidth="sm" sx={{ py: 4 }}>
       <FormContainer>
         <Typography variant="h4" gutterBottom align="center">
           Add New User
@@ -125,6 +129,7 @@ export default function AddUser() {
               <Box textAlign="center">
                 <Button
                   variant="contained"
+                  fullWidth
                   color="primary"
                   type="submit"
                   disabled={loading}
@@ -138,5 +143,7 @@ export default function AddUser() {
         </form>
       </FormContainer>
     </Container>
+    <Footer />
+    </div>
   );
 }
