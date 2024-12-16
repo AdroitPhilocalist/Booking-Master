@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+"use client"
+import React, { useState, useEffect } from "react";
 import {
     TextField,
     Button,
@@ -25,6 +26,28 @@ const ProfilePage = () => {
         pinCode: "",
     });
 
+    // State to track if the profile already exists
+    const [profileExists, setProfileExists] = useState(false);
+
+    // Fetch existing profile data (GET request)
+    const fetchProfileData = async () => {
+        try {
+            const response = await fetch("/api/Profile");
+            const result = await response.json();
+
+            if (result.success && result.data.length > 0) {
+                setFormData(result.data[0]); // Assuming only one profile exists
+                setProfileExists(true);
+            }
+        } catch (error) {
+            console.error("Error fetching profile data:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfileData(); // Fetch data when the component mounts
+    }, []);
+
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,13 +57,13 @@ const ProfilePage = () => {
         }));
     };
 
-    // Handle form submission
+    // Handle form submission (POST request)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await fetch("/api/profile", {
-                method: "POST",
+            const response = await fetch("/api/Profile", {
+                method: profileExists ? "PUT" : "POST", // Use PUT if profile exists, POST if new
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -50,13 +73,13 @@ const ProfilePage = () => {
             const result = await response.json();
 
             if (result.success) {
-                alert("Profile created successfully!");
+                alert(profileExists ? "Profile updated successfully!" : "Profile created successfully!");
             } else {
-                alert("Error creating profile: " + result.error);
+                alert("Error creating/updating profile: " + result.error);
             }
         } catch (error) {
             console.error("Error posting data:", error);
-            alert("Error creating profile");
+            alert("Error creating/updating profile");
         }
     };
 
@@ -235,7 +258,7 @@ const ProfilePage = () => {
                                 },
                             }}
                         >
-                            Save
+                            {profileExists ? "Update" : "Save"}
                         </Button>
                     </Box>
                 </form>
@@ -246,3 +269,4 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
