@@ -21,6 +21,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 export default function Page() {
+  const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
@@ -51,6 +52,32 @@ export default function Page() {
       value.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+  const handleOpenDialog = (userId) => {
+    setSelectedUser(userId);
+    setOpenDialog(true);
+  };
+
+  // Function to close the confirmation dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedUser(null);
+  };
+
+  // Handle deletion of the user after confirmation
+  const handleDeleteUser = async () => {
+    try {
+      const response = await axios.delete(`/api/User/${selectedUser}`);
+      if (response.data.success) {
+        // Remove the user from the state after deletion
+        setUsers((prevUsers) => prevUsers.filter(user => user._id !== selectedUser));
+        setOpenDialog(false); // Close the dialog
+      } else {
+        console.error('Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
 
   // Handle Add New button
   const handleAddNew = () => {
@@ -166,13 +193,39 @@ export default function Page() {
                           Active
                         </Button> */}
                         <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => handleOpenEdit(user)}
-                        >
-                          Edit
-                        </Button>
+  variant="contained"
+  color="primary"
+  size="small"
+  onClick={() => handleOpenEdit(user)}
+  sx={{ marginRight: 2 }} // Adds right margin to space it from the next button
+>
+  Edit
+</Button>
+<Button
+  variant="contained"
+  color="error"
+  onClick={() => handleOpenDialog(user._id)}
+  sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
+>
+  Delete
+</Button>
+
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <p>Are you sure you want to delete this user?</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteUser} color="secondary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
