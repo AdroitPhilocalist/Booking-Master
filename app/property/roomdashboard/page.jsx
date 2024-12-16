@@ -16,7 +16,8 @@ import {
   Key,
   Building,
   Tags,
-  Info
+  Info,
+  Calendar
 } from "lucide-react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
@@ -267,6 +268,16 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <Info size={20} />
                 </button>
               )}
+              {currentGuest &&(<div className="flex items-center space-x-2">
+                  {React.createElement(categoryInfo.icon || Calendar, {
+                    className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                      }`,
+                    size: 20,
+                  })}
+                  <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString()}-{new Date(currentGuest.checkOut).toLocaleDateString()}</span>
+                  
+                </div>)}
+                
             </h3>
           </div>
 
@@ -323,7 +334,10 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                     size: 20,
                   })}
                   <span className="text-sm text-gray-600">{categoryInfo.category}</span>
+                  
                 </div>
+                
+
               </div>
             </div>
             {/* Status Indicator */}
