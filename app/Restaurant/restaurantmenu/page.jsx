@@ -1,24 +1,43 @@
-'use client'
-import { useRouter } from "next/navigation";
-import { Footer } from '../../_components/Footer'
-import Navbar from '../../_components/Navbar'
-import { useState, useEffect } from 'react'
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Tooltip,
+    Typography,
+    Paper,
+} from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
+import { Footer } from '@/app/_components/Footer'
+import Navbar from '@/app/_components/Navbar'
 
 export default function RestaurantList() {
     const router = useRouter();
-    
-    // State to store menu items
+
     const [restaurantItems, setRestaurantItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
 
-    // Fetch data from the API on component mount
     useEffect(() => {
         const fetchMenuItems = async () => {
             try {
-
-                const response = await fetch("/api/menuItem"); // Adjust the endpoint if necessary
-
+                const response = await fetch('/api/menuItem');
                 const result = await response.json();
 
                 if (result.success) {
@@ -37,84 +56,165 @@ export default function RestaurantList() {
         fetchMenuItems();
     }, []);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
+    const handleEditClick = (item) => {
+        setSelectedItem(item);
+        setOpenEditModal(true);
+    };
+
+    const handleDeleteClick = (item) => {
+        setSelectedItem(item);
+        setOpenDeleteDialog(true);
+    };
+
+    const handleEditSave = async () => {
+        try {
+            const response = await fetch(`/api/menuItem/${selectedItem._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(selectedItem),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setRestaurantItems((prev) =>
+                    prev.map((item) => (item._id === selectedItem._id ? result.data : item))
+                );
+                setOpenEditModal(false);
+            } else {
+                alert(result.error);
+            }
+        } catch (err) {
+            console.error('Error updating item:', err);
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
+        try {
+            const response = await fetch(`/api/menuItem/${selectedItem._id}`, {
+                method: 'DELETE',
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setRestaurantItems((prev) =>
+                    prev.filter((item) => item._id !== selectedItem._id)
+                );
+                setOpenDeleteDialog(false);
+            } else {
+                alert(result.error);
+            }
+        } catch (err) {
+            console.error('Error deleting item:', err);
+        }
+    };
+
+    if (loading) return <Typography>Loading...</Typography>;
+    if (error) return <Typography>Error: {error}</Typography>;
 
     return (
-        <div className="min-h-screen bg-amber-50">
+        <Box>
             <Navbar />
-            <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-                <h1 style={{ color: '#4a5568', marginBottom: '20px' }}>Booking Master Control Panel</h1>
-                
-                
-                <div style={{ marginBottom: '20px' }}>
-                    <button
-                        style={{ backgroundColor: '#48bb78', color: 'white', border: 'none', padding: '10px', marginRight: '10px', cursor: 'pointer' }}
-                        onClick={() => router.push("/Restaurant/restaurantmenu/add")}
-                    >
-                        Add New +
-                    </button>
-                    <button style={{ backgroundColor: '#ed8936', color: 'white', border: 'none', padding: '10px', marginRight: '10px', cursor: 'pointer' }}>
-                        Import Data ☁
-                    </button>
-                    <button style={{ backgroundColor: '#4299e1', color: 'white', border: 'none', padding: '10px', cursor: 'pointer' }}>
-                        Export Data ⬇
-                    </button>
-                </div>
-                <div style={{ marginBottom: '20px' }}>
-                    <label>Display </label>
-                    <select style={{ marginRight: '10px' }}>
-                        <option>15</option>
-                    </select>
-                    <span>records</span>
-                    <input type="text" placeholder="Search:" style={{ float: 'right', padding: '5px' }} />
-                </div>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#f5f5f5' }}>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Item Code</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Category</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Segment</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Item Name</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Price (INR)</th>
-                            <th style={{fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>GST (%)</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Total (incl. GST)</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>In Profile?</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Is Special?</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: '#28bfdb' }}>Disc. Allowed?</th>
-                            <th style={{ fontWeight: "bold", textAlign: 'left', borderBottom: ' #28bfdb' }}>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {restaurantItems.map((item, index) => (
-                            <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                <td style={{ padding: '10px' }}>{item.itemCode}</td>
-                                <td style={{ padding: '10px' }}>{item.itemCategory}</td>
-                                <td style={{ padding: '10px' }}>{item.itemSegment}</td>
-                                <td style={{ padding: '10px' }}>{item.itemName}</td>
-                                <td style={{ padding: '10px' }}>{item.price}</td>
-                                <td style={{ padding: '10px' }}>{item.gst}</td>
-                                <td style={{ padding: '10px' }}>{item.total}</td>
-                                <td style={{ padding: '10px' }}>{item.showInProfile}</td>
-                                <td style={{ padding: '10px' }}>{item.isSpecialItem}</td>
-                                <td style={{ padding: '10px' }}>{item.discountAllowed}</td>
-                                <td style={{ padding: '10px' }}>
-                                    <span style={{ backgroundColor: item.status === 'Active' ? '#48bb78' : '#e53e3e', color: 'white', padding: '2px 5px', borderRadius: '3px', marginRight: '5px' }}>
-                                        {item.status}
-                                    </span>
-                                    <button style={{ backgroundColor: '#4299e1', color: 'white', border: 'none', padding: '2px 5px', cursor: 'pointer', marginRight: '5px' }}>
-                                        ✏ Edit
-                                    </button>
-                                    <button style={{ backgroundColor: '#e53e3e', color: 'white', border: 'none', padding: '2px 5px', cursor: 'pointer' }}>
-                                        🗑 Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <Box sx={{ padding: 4 }}>
+                <Typography variant="h4" gutterBottom>
+                    Restaurant Menu
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => router.push('/Restaurant/restaurantmenu/add')}
+                >
+                    Add New Item
+                </Button>
+                <TableContainer component={Paper} sx={{ marginTop: 4 }}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Item Code</TableCell>
+                                <TableCell>Category</TableCell>
+                                <TableCell>Segment</TableCell>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Price (INR)</TableCell>
+                                <TableCell>Actions</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {restaurantItems.map((item) => (
+                                <TableRow key={item._id}>
+                                    <TableCell>{item.itemCode}</TableCell>
+                                    <TableCell>{item.itemCategory}</TableCell>
+                                    <TableCell>{item.itemSegment}</TableCell>
+                                    <TableCell>{item.itemName}</TableCell>
+                                    <TableCell>{item.price}</TableCell>
+                                    <TableCell>
+                                        <Tooltip title="Edit">
+                                            <IconButton onClick={() => handleEditClick(item)}>
+                                                <Edit />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Delete">
+                                            <IconButton onClick={() => handleDeleteClick(item)}>
+                                                <Delete color="error" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
             <Footer />
-        </div>
+
+            {/* Edit Modal */}
+            <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
+                <DialogTitle>Edit Menu Item</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        margin="dense"
+                        label="Item Name"
+                        fullWidth
+                        value={selectedItem?.itemName || ''}
+                        onChange={(e) =>
+                            setSelectedItem((prev) => ({ ...prev, itemName: e.target.value }))
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Price"
+                        fullWidth
+                        value={selectedItem?.price || ''}
+                        onChange={(e) =>
+                            setSelectedItem((prev) => ({ ...prev, price: e.target.value }))
+                        }
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEditModal(false)}>Cancel</Button>
+                    <Button onClick={handleEditSave} color="primary">
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to delete this menu item?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+                    <Button onClick={handleDeleteConfirm} color="error">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Box>
     );
 }
