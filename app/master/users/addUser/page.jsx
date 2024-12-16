@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, TextField, Grid, Typography, Paper, Box, Container } from '@mui/material';
 import { styled } from '@mui/system';
 import { useForm } from 'react-hook-form';
-
+import MenuItem from '@mui/material/MenuItem';
 // Custom styling using Material UI's styled API
 const FormContainer = styled(Paper)({
   padding: '30px',
@@ -26,7 +26,7 @@ export default function AddUser() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/user', {
+      const response = await fetch('/api/User', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export default function AddUser() {
       const result = await response.json();
       
       if (result.success) {
-        router.push('/'); // Navigate back to the user list page
+        router.back(); // Navigate back to the user list page
       } else {
         alert('Failed to create user');
       }

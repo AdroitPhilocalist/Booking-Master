@@ -31,7 +31,7 @@ export default function Page() {
     )
   );
   const handleAddNew = () => {
-    router.push('/user/add');
+    router.push('users/addUser');
   };
 
   return (
