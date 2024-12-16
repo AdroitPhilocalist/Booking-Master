@@ -235,6 +235,7 @@ export default function BookingForm() {
                 // Prepare room update data
                 const roomUpdate = {
                     currentBillingId: billId,
+                    clean: false,
                     billingStarted: 'Yes',
                     occupied: 'Occupied',
                     currentGuestId: guestId // Assuming guestId is from the previous booking creation step

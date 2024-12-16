@@ -43,7 +43,7 @@ const BookingDashboard = () => {
   const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [remainingDueAmount, setRemainingDueAmount] = useState(0);
-  const [isPaymentComplete, setIsPaymentComplete] = useState(false);
+
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -317,19 +317,13 @@ const BookingDashboard = () => {
       const roomNo = room._id;
       const roomUpdateResponse = await axios.put(`/api/rooms/${roomNo}`, {
         occupied: "Vacant",
+        clean: true,
         billingStarted: "No",
         currentBillingId: null,
       });
 
       // Set payment complete state
-      setIsPaymentComplete(true);
       setRemainingDueAmount(0);
-
-      // Optional: Refresh booking data
-      // Trigger a re-fetch of booking details or update local state
-      // You might want to refetch the entire booking data or update specific fields
-
-      // Optionally show a success message
       alert("Payment completed successfully!");
       window.location.reload();
     } catch (error) {
@@ -574,17 +568,6 @@ const BookingDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* Row for the advance payment */}
-                {/* <tr>
-                  <td className="p-2 text-left">
-                    {new Date(billing.billStartDate).toLocaleString()}
-                  </td>
-                  <td className="p-2 text-left">Advance Payment</td>
-                  <td className="p-2 text-right">
-                    {parseFloat(billing.amountAdvanced).toFixed(2)}
-                  </td>
-                </tr> */}
-
                 {/* Rows for each payment in the arrays */}
                 {billing.DateOfPayment.map((date, index) => (
                   <tr key={index}>
@@ -669,7 +652,6 @@ const BookingDashboard = () => {
               >
                 <PrintableRoomInvoice
                   bookingDetails={bookingData}
-                  isPaymentComplete={isPaymentComplete}
                 />
               </Box>
             </Modal>
@@ -826,7 +808,6 @@ const BookingDashboard = () => {
               >
                 <PrintableServiceInvoice
                   bookingDetails={{ ...bookingData, services: services }}
-                  isPaymentComplete={isPaymentComplete}
                 />
               </Box>
             </Modal>
