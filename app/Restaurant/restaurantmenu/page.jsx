@@ -136,12 +136,14 @@ export default function RestaurantList() {
     if (error) return <Typography>Error: {error}</Typography>;
 
     return (
-        <Box>
+        <div className="bg-amber-50 min-h-screen">
+            <Box>
             <Navbar />
-            <Box sx={{ padding: 4 }}>
-                <Typography variant="h4" gutterBottom>
+            <Box sx={{ padding: 4 ,justifyItems:"center"}}>
+                <Typography variant="h4" gutterBottom sx={{justifyItems:"center",color: "#064c61",fontWeight: "bold"}}  >
                     Restaurant Menu
                 </Typography>
+                
                 <Button
                     variant="contained"
                     color="primary"
@@ -342,5 +344,6 @@ export default function RestaurantList() {
                 </DialogActions>
             </Dialog>
         </Box>
+        </div>
     );
 }
