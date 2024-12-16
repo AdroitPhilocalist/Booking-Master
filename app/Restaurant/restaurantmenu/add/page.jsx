@@ -76,7 +76,7 @@ export default function AddRestaurant() {
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <div style={{ backgroundColor: '#4a5568', color: 'white', padding: '10px', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>⚡ Add Restaurant</h1>
+        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>⚡ Add Restaurant Menu</h1>
       </div>
       <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '20px', borderRadius: '4px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
         <h2 style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '20px' }}>Restaurant Details</h2>
