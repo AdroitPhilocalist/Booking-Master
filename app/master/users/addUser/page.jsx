@@ -1,0 +1,142 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button, TextField, Grid, Typography, Paper, Box, Container } from '@mui/material';
+import { styled } from '@mui/system';
+import { useForm } from 'react-hook-form';
+
+// Custom styling using Material UI's styled API
+const FormContainer = styled(Paper)({
+  padding: '30px',
+  maxWidth: '600px',
+  margin: 'auto',
+  borderRadius: '10px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  background: '#f9f9f9',
+});
+
+export default function AddUser() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  // Handle form submission
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        router.push('/'); // Navigate back to the user list page
+      } else {
+        alert('Failed to create user');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error occurred while creating user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container maxWidth="sm">
+      <FormContainer>
+        <Typography variant="h4" gutterBottom align="center">
+          Add New User
+        </Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Name"
+                fullWidth
+                required
+                variant="outlined"
+                {...register('name', { required: 'Name is required' })}
+                error={!!errors.name}
+                helperText={errors.name?.message}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Property"
+                fullWidth
+                required
+                variant="outlined"
+                {...register('property', { required: 'Property is required' })}
+                error={!!errors.property}
+                helperText={errors.property?.message}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Email"
+                fullWidth
+                required
+                variant="outlined"
+                {...register('email', { 
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/,
+                    message: 'Invalid email address'
+                  }
+                })}
+                error={!!errors.email}
+                helperText={errors.email?.message}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Phone"
+                fullWidth
+                required
+                variant="outlined"
+                {...register('phone', { required: 'Phone number is required' })}
+                error={!!errors.phone}
+                helperText={errors.phone?.message}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="User Type"
+                fullWidth
+                required
+                select
+                variant="outlined"
+                {...register('userType', { required: 'User type is required' })}
+                error={!!errors.userType}
+                helperText={errors.userType?.message}
+              >
+                <MenuItem value="Online">Online</MenuItem>
+                <MenuItem value="Offline">Offline</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <Box textAlign="center">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={loading}
+                  size="large"
+                >
+                  {loading ? 'Submitting...' : 'Add User'}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </form>
+      </FormContainer>
+    </Container>
+  );
+}
