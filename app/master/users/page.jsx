@@ -14,7 +14,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-
+import { useRouter } from 'next/navigation';
 const users = [
   { name: "Booking.Com", property: "Hotel Raj International", email: "abcdefg@gmail.com", phone: "2222222222", userType: "Online" },
   { name: "Go-ibibo", property: "Hotel Raj International", email: "abcdefg@gmail.com", phone: "1111111111", userType: "Online" },
@@ -24,12 +24,15 @@ const users = [
 
 export default function Page() {
   const [searchTerm, setSearchTerm] = useState('');
-
+  const router = useRouter();
   const filteredUsers = users.filter((user) =>
     Object.values(user).some((value) =>
       value.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+  const handleAddNew = () => {
+    router.push('/user/add');
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-amber-50">
