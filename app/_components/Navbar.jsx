@@ -34,7 +34,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(1)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Master</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded ">Master</button>
             {openDropdown === 1 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -53,7 +53,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(2)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Property</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded ">Property</button>
             {openDropdown === 2 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -106,7 +106,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(8)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Inventory</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded ">Inventory</button>
             {openDropdown === 8 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -144,11 +144,11 @@ export default function Navbar() {
           </li>
           <li
             className="relative"
-            onMouseEnter={() => handleMouseEnter(9)}
+            onMouseEnter={() => handleMouseEnter(10)}
             onMouseLeave={handleMouseLeave}
           >
             <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded">Reports</button>
-            {openDropdown === 9 && (
+            {openDropdown === 10 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/report/rooms">Room Report</Link>
