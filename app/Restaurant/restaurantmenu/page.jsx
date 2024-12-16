@@ -170,35 +170,141 @@ export default function RestaurantList() {
             <Footer />
 
             {/* Edit Modal */}
-            <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
-                <DialogTitle>Edit Menu Item</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        margin="dense"
-                        label="Item Name"
-                        fullWidth
-                        value={selectedItem?.itemName || ''}
-                        onChange={(e) =>
-                            setSelectedItem((prev) => ({ ...prev, itemName: e.target.value }))
-                        }
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Price"
-                        fullWidth
-                        value={selectedItem?.price || ''}
-                        onChange={(e) =>
-                            setSelectedItem((prev) => ({ ...prev, price: e.target.value }))
-                        }
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditModal(false)}>Cancel</Button>
-                    <Button onClick={handleEditSave} color="primary">
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
+<Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
+    <DialogTitle>Edit Menu Item</DialogTitle>
+    <DialogContent>
+        <TextField
+            margin="dense"
+            label="Item Code"
+            fullWidth
+            disabled // Item Code should not be editable as it's unique
+            value={selectedItem?.itemCode || ''}
+        />
+        <TextField
+            margin="dense"
+            label="Item Category"
+            fullWidth
+            value={selectedItem?.itemCategory || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, itemCategory: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="Item Segment"
+            fullWidth
+            value={selectedItem?.itemSegment || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, itemSegment: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="Item Name"
+            fullWidth
+            value={selectedItem?.itemName || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, itemName: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="Price"
+            type="number"
+            fullWidth
+            value={selectedItem?.price || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, price: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="GST (%)"
+            type="number"
+            fullWidth
+            value={selectedItem?.gst || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, gst: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="Total (incl. GST)"
+            type="number"
+            fullWidth
+            value={selectedItem?.total || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, total: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="Show in Profile"
+            select
+            fullWidth
+            SelectProps={{ native: true }}
+            value={selectedItem?.showInProfile || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, showInProfile: e.target.value }))
+            }
+        >
+            <option value="Yes (Visible)">Yes (Visible)</option>
+            <option value="No (Hidden)">No (Hidden)</option>
+        </TextField>
+        <TextField
+            margin="dense"
+            label="Is Special Item"
+            select
+            fullWidth
+            SelectProps={{ native: true }}
+            value={selectedItem?.isSpecialItem || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, isSpecialItem: e.target.value }))
+            }
+        >
+            <option value="Yes (Editable)">Yes (Editable)</option>
+            <option value="No (Not Editable)">No (Not Editable)</option>
+        </TextField>
+        <TextField
+            margin="dense"
+            label="Discount Allowed"
+            select
+            fullWidth
+            SelectProps={{ native: true }}
+            value={selectedItem?.discountAllowed || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, discountAllowed: e.target.value }))
+            }
+        >
+            <option value="Yes (Allowed)">Yes (Allowed)</option>
+            <option value="No (Not Allowed)">No (Not Allowed)</option>
+        </TextField>
+        <TextField
+            margin="dense"
+            label="Store Item Code"
+            fullWidth
+            value={selectedItem?.storeItemCode || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, storeItemCode: e.target.value }))
+            }
+        />
+        <TextField
+            margin="dense"
+            label="Ingredient Code"
+            fullWidth
+            value={selectedItem?.ingredientCode || ''}
+            onChange={(e) =>
+                setSelectedItem((prev) => ({ ...prev, ingredientCode: e.target.value }))
+            }
+        />
+    </DialogContent>
+    <DialogActions>
+        <Button onClick={() => setOpenEditModal(false)}>Cancel</Button>
+        <Button onClick={handleEditSave} color="primary">
+            Save
+        </Button>
+    </DialogActions>
+</Dialog>
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
