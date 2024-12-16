@@ -12,6 +12,12 @@ import {
   CardHeader,
 } from "@mui/material";
 import Loader from "../../_components/Loader";
+// Import Material-UI icons
+import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
+import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
+import EventIcon from '@mui/icons-material/Event';
+import PersonIcon from '@mui/icons-material/Person';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Today");
@@ -145,13 +151,20 @@ export default function Dashboard() {
                   }}
                 >
                   <CardHeader
+                    avatar={<TableRestaurantIcon color="primary" />}
                     title={`Table-${table.tableNo}`}
                     titleTypographyProps={{
                       variant: "h6",
                       fontWeight: "bold",
                       color: "#007BFF",
                     }}
-                    sx={{ backgroundColor: "#F0F4FF", padding: "16px" }}
+                    sx={{ 
+                      backgroundColor: "#F0F4FF", 
+                      padding: "16px",
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2
+                    }}
                   />
                   <CardContent sx={{ padding: "16px" }}>
                     {booking ? (
@@ -159,6 +172,7 @@ export default function Dashboard() {
                         variant="contained"
                         color="primary"
                         fullWidth
+                        startIcon={<BookmarkAddedIcon />}
                         onClick={() => handleBookingDetails(booking)}
                         sx={{
                           textTransform: "capitalize",
@@ -172,8 +186,16 @@ export default function Dashboard() {
                         Booking Details
                       </Button>
                     ) : (
-                      <Typography variant="body2" color="textSecondary">
-                        No bookings for this table.
+                      <Typography 
+                        variant="body2" 
+                        color="textSecondary"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}
+                      >
+                        <TableRestaurantIcon fontSize="small" /> No bookings for this table.
                       </Typography>
                     )}
                   </CardContent>
@@ -214,21 +236,30 @@ export default function Dashboard() {
             >
               <Typography
                 variant="h5"
-                sx={{ fontWeight: "bold", color: "#007BFF", textAlign: "center", mb: 2 }}
+                sx={{ 
+                  fontWeight: "bold", 
+                  color: "#007BFF", 
+                  textAlign: "center", 
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2
+                }}
               >
-                Booking Details
+                <BookmarkAddedIcon fontSize="large" /> Booking Details
               </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Table:</strong> {selectedBooking.tableNo}
+              <Typography variant="body1" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <TableRestaurantIcon /> <strong>Table:</strong> {selectedBooking.tableNo}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Date:</strong> {new Date(selectedBooking.date).toDateString()}
+              <Typography variant="body1" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EventIcon /> <strong>Date:</strong> {new Date(selectedBooking.date).toDateString()}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Time:</strong> {selectedBooking.time}
+              <Typography variant="body1" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AccessTimeIcon /> <strong>Time:</strong> {selectedBooking.time}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                <strong>Guest Name:</strong> {selectedBooking.guestName}
+              <Typography variant="body1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PersonIcon /> <strong>Guest Name:</strong> {selectedBooking.guestName}
               </Typography>
             </Card>
           </Box>

@@ -22,6 +22,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
+import InputLabel from '@mui/material/InputLabel';
+
 
 export default function Page() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -252,11 +254,11 @@ export default function Page() {
                           Delete
                         </Button> */}
                         <IconButton
-                                                color="secondary"
-                                                onClick={() => handleOpenDialog(user._id)}
-                                              >
-                                                <Delete />
-                                              </IconButton>
+                          color="secondary"
+                          onClick={() => handleOpenDialog(user._id)}
+                        >
+                          <Delete />
+                        </IconButton>
 
 
                         {/* Confirmation Dialog */}
@@ -292,6 +294,7 @@ export default function Page() {
             <TextField
               label="Name"
               name="name"
+              className="border rounded w-full py-4 mb-2"
               value={selectedUser?.name || ''}
               onChange={handleChange}
               fullWidth
@@ -300,6 +303,7 @@ export default function Page() {
             <TextField
               label="Property"
               name="property"
+              className="border rounded w-full py-4 mb-2 "
               value={selectedUser?.property || ''}
               onChange={handleChange}
               fullWidth
@@ -308,6 +312,7 @@ export default function Page() {
             <TextField
               label="Email"
               name="email"
+              className="border rounded w-full py-4 mb-2"
               value={selectedUser?.email || ''}
               onChange={handleChange}
               fullWidth
@@ -316,14 +321,19 @@ export default function Page() {
             <TextField
               label="Phone"
               name="phone"
+              className="border rounded w-full py-4 mb-2 "
               value={selectedUser?.phone || ''}
               onChange={handleChange}
               fullWidth
               required
             />
+            <InputLabel id="User Type">User Type</InputLabel>
             <Select
               label="User Type"
               name="userType"
+              id="UserType"
+              variant="outlined"
+              className="border rounded w-full  mb-2"
               value={selectedUser?.userType || ''}
               onChange={handleChange}
               fullWidth
@@ -333,8 +343,8 @@ export default function Page() {
               <MenuItem value="Offline">Offline</MenuItem>
             </Select>
             <DialogActions>
-              <Button onClick={handleClose} color="secondary">Cancel</Button>
-              <Button type="submit" color="primary">Save</Button>
+              <Button onClick={handleClose} color="error" variant="contained">Cancel</Button>
+              <Button type="submit" color="success" variant="contained">Save</Button>
             </DialogActions>
           </form>
         </DialogContent>

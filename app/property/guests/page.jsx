@@ -132,7 +132,7 @@ export default function GuestList() {
                 <div className="px-4 py-6 sm:px-0">
                     <div className="bg-white shadow rounded-lg p-6">
                         <h1 className="text-2xl font-semibold text-cyan-800 mb-4">
-                            Booking Master Control Panel
+                            Guest List
                         </h1>
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-amber-200">
