@@ -78,7 +78,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(7)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Restaurant</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded">Restaurant</button>
             {openDropdown === 7 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -134,14 +134,13 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(9)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded hover:text-yellow-200">Billing</button>
-            {openDropdown === 9 && (
-              <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/property/billing">Booking</Link>
-                </li>
-              </ul>
-            )}
+            <Link href="/property/billing">
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded " href="/property/billing">Booking</button>
+            
+              
+            </Link>
+            
+            
           </li>
         </ul>
       </div>
