@@ -304,19 +304,19 @@ const SalesReportPage = () => {
           </div>
         </div>
       )}
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Sales Report</h1>        
+      <div className="container mx-auto p-6 ">
+        <div className="mb-4">
+          <h1 className="text-3xl font-bold text-cyan-900 flex justify-center">Sales Report</h1>        
         </div>
 
-        <div className="flex space-x-2 mb-4">
+        <div className="flex space-x-2 mb-4 justify-center">
           <TextField
             label="Start Date"
             type="date"
             InputLabelProps={{ shrink: true }}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-1/4"
+            className="w-1/4 flex justify-center"
             size="small"
           />
           <TextField
@@ -325,15 +325,16 @@ const SalesReportPage = () => {
             InputLabelProps={{ shrink: true }}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-1/4"
+            className="w-1/4 flex justify-center "
             size="small"
           />
           <Button
             variant="contained"
             color="primary"
             onClick={filterByDate}
-            className="ml-2"
+            className="ml-2 flex justify-center"
             size="small"
+            
           >
             Filter
           </Button>
@@ -345,7 +346,7 @@ const SalesReportPage = () => {
               setEndDate("");
               setFilteredReports(purchaseReports); // Reset to show all reports
             }}
-            className="ml-2"
+            className="ml-2 flex justify-center"
             size="small"
           >
             Reset
@@ -353,7 +354,7 @@ const SalesReportPage = () => {
           <Button
             variant="contained"
             onClick={printTable}
-            className="ml-2"
+            className="ml-2 flex justify-center"
             size="small"
             sx={{
               backgroundColor: 'orange',
@@ -366,6 +367,7 @@ const SalesReportPage = () => {
           </Button>
           <Button
             variant="contained"
+            className="ml-2 flex justify-center  "
             color="error"
             onClick={() => setIsModalOpen(true)}
           >
