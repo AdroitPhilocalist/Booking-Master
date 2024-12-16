@@ -42,7 +42,7 @@ export default function Page() {
           </div>
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
-              <Button variant="contained" color="success">
+            <Button variant="contained" color="success" onClick={handleAddNew}>
                 Add New +
               </Button>
               <div className="flex items-center space-x-4">
