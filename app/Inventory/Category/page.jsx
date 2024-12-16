@@ -136,7 +136,7 @@ export default function InventoryCategory() {
           Add New +
         </button>
         
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper}style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>

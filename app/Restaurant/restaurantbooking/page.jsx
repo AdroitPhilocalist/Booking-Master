@@ -97,13 +97,13 @@ const RestaurantBooking = () => {
 
   return (
     <div className="bg-amber-50 min-h-screen">
-    <Navbar/>
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3, color: "#1976d2" }}>
-        Booking
-      </Typography>
+      <Navbar />
+      <Box sx={{p:3,justifyItems:"center"}}>
+        <Typography variant="h4" sx={{ mb: 3, color: "#064c61", fontWeight: "bold" }}>
+          Restaurant Booking 
+        </Typography>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3, gap: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mb: 3, gap: 2 }}>
           <TextField
             placeholder="Search By Guest Name"
             variant="outlined"
@@ -116,18 +116,20 @@ const RestaurantBooking = () => {
             variant="contained"
             onClick={handleOpen}
             sx={{
-              bgcolor: "#2196f3",
-              "&:hover": { bgcolor: "#1976d2" },
+              bgcolor: "#064c61",
+              fontWeight: "bold",
+              color: "white",
+              "&:hover": { bgcolor: "#002171" },
             }}
           >
             Add New Booking
           </Button>
         </Box>
 
-        <TableContainer component={Paper}>
-          <Table>
+        <TableContainer component={Paper} sx={{ maxWidth: "80%", margin: "0 auto" }}>
+          <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: "#164E63" }}>
+              <TableRow sx={{ bgcolor: "#064c61" }}>
                 <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Table No.</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Date</TableCell>
                 <TableCell sx={{ fontWeight: "bold", color: "white", textAlign: "center" }}>Time</TableCell>
@@ -141,26 +143,26 @@ const RestaurantBooking = () => {
                   booking.guestName.toLowerCase().includes(search.toLowerCase())
                 )
                 .map((booking) => (
-                  <TableRow key={booking._id}>
+                  <TableRow key={booking._id} hover>
                     <TableCell sx={{ textAlign: "center" }}>{booking.tableNo}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                        {(() => {
-                          const date = new Date(booking.date);
-                          const day = String(date.getDate()).padStart(2, "0");
-                          const month = String(date.getMonth() + 1).padStart(2, "0");
-                          const year = date.getFullYear();
-                          return `${day}/${month}/${year}`;
-                        })()}
-                      </TableCell>
+                      {(() => {
+                        const date = new Date(booking.date);
+                        const day = String(date.getDate()).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const year = date.getFullYear();
+                        return `${day}/${month}/${year}`;
+                      })()}
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{booking.time}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{booking.guestName}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton onClick={() => handleEdit(booking._id)} sx={{ color: "#4caf50" }}>
+                      <IconButton onClick={() => handleEdit(booking._id)} sx={{ color: "#388E3C" }}>
                         <EditIcon />
                       </IconButton>
                       <IconButton
                         onClick={() => handleDelete(booking._id)}
-                        sx={{ color: "#f44336" }}
+                        sx={{ color: "#D32F2F" }}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -169,7 +171,7 @@ const RestaurantBooking = () => {
                 ))}
               {bookings.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={5} align="center" sx={{ fontStyle: "italic", color: "#616161" }}>
                     No bookings available.
                   </TableCell>
                 </TableRow>
@@ -191,6 +193,7 @@ const RestaurantBooking = () => {
               p: 4,
               borderRadius: 2,
               minWidth: 400,
+              maxWidth: "80%",
             }}
           >
             <AddNewBookingForm onSubmit={addBooking} />

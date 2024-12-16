@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from "next/navigation";
-import { Footer } from '@/app/_components/Footer'
-import Navbar from '@/app/_components/Navbar'
+import { Footer } from '../../_components/Footer'
+import Navbar from '../../_components/Navbar'
 import { useState, useEffect } from 'react'
 
 export default function RestaurantList() {
