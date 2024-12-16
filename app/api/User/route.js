@@ -3,7 +3,20 @@ import connectSTR from '../../lib/dbConnect'; // Your database connection string
 import User from '../../lib/models/User'; // Your User model
 import { NextResponse } from 'next/server';
 
-
+// GET: Fetch all users
+export async function GET(req) {
+    try {
+      await mongoose.connect(connectSTR);
+      const users = await User.find({});
+      return NextResponse.json({ success: true, data: users }, { status: 200 });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch users' },
+        { status: 400 }
+      );
+    }
+  }
 
 // POST: Create a new user
 export async function POST(req) {
