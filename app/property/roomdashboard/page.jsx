@@ -427,7 +427,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
+          <h2 className="text-2xl font-bold text-amber-700">Guest</h2>
           <button
             onClick={()=> {setShowGuestModal(false)}}
             className="text-gray-500 hover:text-red-500 transition-colors"
