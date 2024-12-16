@@ -28,8 +28,9 @@ export default function RoomCategories() {
     try {
       setIsLoading(true);
       const res = await fetch("/api/roomCategories");
-      if (!res.ok) throw new Error("Failed to fetch categories");
+      console.log(res);
       const data = await res.json();
+      console.log(data);
       if (data.success && data.data) setCategories(data.data);
       else setCategories([]);
     } catch (error) {
