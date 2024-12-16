@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/app/_components/Navbar';
 import { Footer } from '@/app/_components/Footer';
 import Table from '@mui/material/Table';
@@ -14,22 +14,125 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-
-const users = [
-  { name: "Booking.Com", property: "Hotel Raj International", email: "abcdefg@gmail.com", phone: "2222222222", userType: "Online" },
-  { name: "Go-ibibo", property: "Hotel Raj International", email: "abcdefg@gmail.com", phone: "1111111111", userType: "Online" },
-  { name: "Make My Trip", property: "Hotel Raj International", email: "abcdefg@gmail.com", phone: "0000000000", userType: "Online" },
-  // Add more user data here...
-];
-
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 export default function Page() {
+  const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [users, setUsers] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null); // Store selected user data
+  const router = useRouter();
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/User');
+        const data = await response.json();
+        if (data.success) {
+          setUsers(data.data);
+        } else {
+          console.error('Failed to fetch users');
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter((user) =>
     Object.values(user).some((value) =>
       value.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+  const handleOpenDialog = (userId) => {
+    setSelectedUser(userId);
+    setOpenDialog(true);
+  };
+
+  // Function to close the confirmation dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedUser(null);
+  };
+
+  // Handle deletion of the user after confirmation
+  const handleDeleteUser = async () => {
+    try {
+      const response = await axios.delete(`/api/User/${selectedUser}`);
+      if (response.data.success) {
+        // Remove the user from the state after deletion
+        setUsers((prevUsers) => prevUsers.filter(user => user._id !== selectedUser));
+        setOpenDialog(false); // Close the dialog
+      } else {
+        console.error('Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  // Handle Add New button
+  const handleAddNew = () => {
+    router.push('users/addUser');
+  };
+
+  // Open the edit modal
+  const handleOpenEdit = (user) => {
+    setSelectedUser(user);
+    setOpen(true);
+  };
+
+  // Close the modal
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedUser(null);
+  };
+
+  // Handle form input changes
+  const handleChange = (e) => {
+    setSelectedUser({
+      ...selectedUser,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle PUT request to update user details
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+// console.log(selectedUser._id)
+    try {
+      const response = await fetch(`/api/User/${selectedUser._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(selectedUser),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the users state after successful update
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user._id === selectedUser._id ? selectedUser : user
+          )
+        );
+        handleClose(); // Close the modal after submission
+      } else {
+        console.error('Failed to update user');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-amber-50">
@@ -42,7 +145,7 @@ export default function Page() {
           </div>
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
-              <Button variant="contained" color="success">
+              <Button variant="contained" color="success" onClick={handleAddNew}>
                 Add New +
               </Button>
               <div className="flex items-center space-x-4">
@@ -63,7 +166,7 @@ export default function Page() {
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
-                  <TableRow >
+                  <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Property</TableCell>
                     <TableCell>Email</TableCell>
@@ -73,29 +176,56 @@ export default function Page() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers.map((user, index) => (
-                    <TableRow key={index}>
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user._id}>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>{user.property}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.phone}</TableCell>
                       <TableCell>{user.userType}</TableCell>
                       <TableCell>
-                        <Button
+                        {/* <Button
                           variant="contained"
                           color="success"
                           size="small"
                           sx={{ marginRight: 1 }}
                         >
                           Active
-                        </Button>
+                        </Button> */}
                         <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                        >
-                          Edit
-                        </Button>
+  variant="contained"
+  color="primary"
+  size="small"
+  onClick={() => handleOpenEdit(user)}
+  sx={{ marginRight: 2 }} // Adds right margin to space it from the next button
+>
+  Edit
+</Button>
+<Button
+  variant="contained"
+  color="error"
+  onClick={() => handleOpenDialog(user._id)}
+  sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
+>
+  Delete
+</Button>
+
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <p>Are you sure you want to delete this user?</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteUser} color="secondary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -105,6 +235,63 @@ export default function Page() {
           </div>
         </div>
       </main>
+
+      {/* Edit User Modal */}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Edit User</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Name"
+              name="name"
+              value={selectedUser?.name || ''}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Property"
+              name="property"
+              value={selectedUser?.property || ''}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Email"
+              name="email"
+              value={selectedUser?.email || ''}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Phone"
+              name="phone"
+              value={selectedUser?.phone || ''}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <Select
+              label="User Type"
+              name="userType"
+              value={selectedUser?.userType || ''}
+              onChange={handleChange}
+              fullWidth
+              required
+            >
+              <MenuItem value="Online">Online</MenuItem>
+              <MenuItem value="Offline">Offline</MenuItem>
+            </Select>
+            <DialogActions>
+              <Button onClick={handleClose} color="secondary">Cancel</Button>
+              <Button type="submit" color="primary">Save</Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
