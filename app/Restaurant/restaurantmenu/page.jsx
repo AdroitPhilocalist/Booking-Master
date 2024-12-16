@@ -44,7 +44,7 @@ export default function RestaurantList() {
         <div className="min-h-screen bg-amber-50">
             <Navbar />
             <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-                <h1 style={{ color: '#4a5568', marginBottom: '20px' }}>Booking Master Control Panel</h1>
+                <h1 style={{ color: '#4a5568', marginBottom: '20px' }}>Restaurant Menu</h1>
                 
                 
                 <div style={{ marginBottom: '20px' }}>
@@ -54,12 +54,12 @@ export default function RestaurantList() {
                     >
                         Add New +
                     </button>
-                    <button style={{ backgroundColor: '#ed8936', color: 'white', border: 'none', padding: '10px', marginRight: '10px', cursor: 'pointer' }}>
+                    {/* <button style={{ backgroundColor: '#ed8936', color: 'white', border: 'none', padding: '10px', marginRight: '10px', cursor: 'pointer' }}>
                         Import Data ☁
                     </button>
                     <button style={{ backgroundColor: '#4299e1', color: 'white', border: 'none', padding: '10px', cursor: 'pointer' }}>
                         Export Data ⬇
-                    </button>
+                    </button> */}
                 </div>
                 <div style={{ marginBottom: '20px' }}>
                     <label>Display </label>
@@ -99,9 +99,9 @@ export default function RestaurantList() {
                                 <td style={{ padding: '10px' }}>{item.isSpecialItem}</td>
                                 <td style={{ padding: '10px' }}>{item.discountAllowed}</td>
                                 <td style={{ padding: '10px' }}>
-                                    <span style={{ backgroundColor: item.status === 'Active' ? '#48bb78' : '#e53e3e', color: 'white', padding: '2px 5px', borderRadius: '3px', marginRight: '5px' }}>
+                                    {/* <span style={{ backgroundColor: item.status === 'Active' ? '#48bb78' : '#e53e3e', color: 'white', padding: '2px 5px', borderRadius: '3px', marginRight: '5px' }}>
                                         {item.status}
-                                    </span>
+                                    </span> */}
                                     <button style={{ backgroundColor: '#4299e1', color: 'white', border: 'none', padding: '2px 5px', cursor: 'pointer', marginRight: '5px' }}>
                                         ✏ Edit
                                     </button>
