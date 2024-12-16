@@ -20,6 +20,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { IconButton } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
+
 export default function Page() {
   const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +110,7 @@ export default function Page() {
   // Handle PUT request to update user details
   const handleSubmit = async (e) => {
     e.preventDefault();
-// console.log(selectedUser._id)
+    // console.log(selectedUser._id)
     try {
       const response = await fetch(`/api/User/${selectedUser._id}`, {
         method: 'PUT',
@@ -192,7 +195,7 @@ export default function Page() {
                         >
                           Active
                         </Button> */}
-                        <Button
+                        {/* <Button
   variant="contained"
   color="primary"
   size="small"
@@ -200,32 +203,44 @@ export default function Page() {
   sx={{ marginRight: 2 }} // Adds right margin to space it from the next button
 >
   Edit
-</Button>
-<Button
-  variant="contained"
-  color="error"
-  onClick={() => handleOpenDialog(user._id)}
-  sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
->
-  Delete
-</Button>
+</Button> */}
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenEdit(user)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        {/* <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleOpenDialog(user._id)}
+                          sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
+                        >
+                          Delete
+                        </Button> */}
+                        <IconButton
+                                                color="secondary"
+                                                onClick={() => handleOpenDialog(user._id)}
+                                              >
+                                                <Delete />
+                                              </IconButton>
 
 
-      {/* Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <p>Are you sure you want to delete this user?</p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteUser} color="secondary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+                        {/* Confirmation Dialog */}
+                        <Dialog open={openDialog} onClose={handleCloseDialog}>
+                          <DialogTitle>Confirm Deletion</DialogTitle>
+                          <DialogContent>
+                            <p>Are you sure you want to delete this user?</p>
+                          </DialogContent>
+                          <DialogActions>
+                            <Button onClick={handleCloseDialog} color="primary">
+                              Cancel
+                            </Button>
+                            <Button onClick={handleDeleteUser} color="secondary">
+                              Confirm
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
