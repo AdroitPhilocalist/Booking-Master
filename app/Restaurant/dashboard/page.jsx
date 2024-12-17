@@ -11,6 +11,13 @@ import {
   CardContent,
   CardHeader,
 } from "@mui/material";
+import Loader from "../../_components/Loader";
+// Import Material-UI icons
+import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
+import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
+import EventIcon from '@mui/icons-material/Event';
+import PersonIcon from '@mui/icons-material/Person';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("Today");
