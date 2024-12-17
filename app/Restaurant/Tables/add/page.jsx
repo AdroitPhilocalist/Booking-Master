@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { BoltIcon } from 'lucide-react'
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
-
+import Navbar from '@/app/_components/Navbar';
+import { Footer } from '@/app/_components/Footer'
 
 export default function AddTable() {
     const router=useRouter();
@@ -37,19 +38,8 @@ export default function AddTable() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Booking Master Control Panel</h1>
-        </div>
-      </header>
-      <nav className="bg-gray-200 px-4 py-2">
-        <div className="max-w-7xl mx-auto">
-          <span className="text-blue-600 hover:underline cursor-pointer">Home</span>
-          <span className="mx-2 text-gray-500">•</span>
-          <span className="text-gray-600">Table</span>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-amber-50">
+      <Navbar />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -100,6 +90,7 @@ export default function AddTable() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => router.back()}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
                 >
                   Back
@@ -109,6 +100,7 @@ export default function AddTable() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
