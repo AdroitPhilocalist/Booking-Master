@@ -52,6 +52,11 @@ const newBookingSchema = new mongoose.Schema({
     enum:['adhaar','driving license'],
     required:true
   },
+  referenceno:{
+    type:Number,
+    required: true
+
+  },
   companyName: {
     type: String
   },
@@ -78,11 +83,11 @@ const newBookingSchema = new mongoose.Schema({
     required: true
   },
   expectedArrival: {
-    type: String,
+    type: Date,
     required: true
   },
   expectedDeparture: {
-    type: String,
+    type: Date,
     required: true
   },
   bookingStatus: {
