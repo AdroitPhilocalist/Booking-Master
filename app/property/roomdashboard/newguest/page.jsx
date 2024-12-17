@@ -22,9 +22,14 @@ export default function BookingForm() {
         bookingId: '',
         bookingSource: 'Walk In',
         bookingPoint: '',
+        
+        dateofbirth:'',
+        dateofanniversary:'',
         pinCode: '',
         mobileNo: '',
         guestName: '',
+        guestid:'',
+        guestidno:'',
         companyName: '',
         gstin: '',
         guestEmail: '',
@@ -52,6 +57,8 @@ export default function BookingForm() {
         mobileNo: 'Enter Mobile Number',
         guestName: 'Enter Guest Name',
         companyName: 'Enter Company Name',
+        dateofbirth:'Enter date of birth',
+        dateofanniversary:'Enter date of anniversary',
         gstin: 'Enter GSTIN',
         guestEmail: 'Enter Guest Email',
         address: 'Enter Guest Address',
@@ -383,6 +390,42 @@ export default function BookingForm() {
                                         </Select>
                                     </FormControl>
 
+
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap -mx-3">
+                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                                        <InputLabel shrink htmlFor="dateofbirth-input">
+                                            Date of Birth*
+                                        </InputLabel>
+                                        <Input
+                                            id="dateofbirth-input"
+                                            type="date"
+                                            name="dateofbirth"
+                                            value={formData.dateofbirth}
+                                            onChange={handleChange}
+                                            required
+                                            label="Date-of-birth*"
+                                        />
+                                    </FormControl>
+
+                                </div>
+                                <div className="w-full md:w-1/2 px-3">
+                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
+                                        <InputLabel shrink htmlFor="dateofanniversary-input">
+                                            Date of Anniversary*
+                                        </InputLabel>
+                                        <Input
+                                            id="check-out-input"
+                                            type="date"
+                                            name="checkOut"
+                                            value={formData.dateofanniversary}
+                                            onChange={handleChange}
+                                            required
+                                            label="Date of Anniversary*"
+                                        />
+                                    </FormControl>
 
                                 </div>
                             </div>

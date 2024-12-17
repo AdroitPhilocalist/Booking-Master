@@ -23,6 +23,15 @@ const newBookingSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+
+  dateofbirth:{
+    type:Date,
+    required:true
+  },
+  dateofanniversary:{
+    type:Date,
+    required:true
+  },
   pinCode: {
     type: String
   },
@@ -31,6 +40,16 @@ const newBookingSchema = new mongoose.Schema({
   },
   guestName: {
     type: String,
+    required:true
+  },
+  guestid:{
+    type: String,
+    enum:['adhaar','driving license'],
+    required:true
+  },
+  guestidno:{    
+    type: String,
+    enum:['adhaar','driving license'],
     required:true
   },
   companyName: {
