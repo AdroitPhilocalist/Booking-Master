@@ -556,20 +556,29 @@ const SalesReportPage = () => {
               className="w-full"
             />
             <div className="flex justify-end">
-              <button
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
                 onClick={handlePurchase}
-                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
               >
-                Sell
-              </button>
-              <button
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                sx={{
+                  color: 'red',
+                  borderColor: 'red',
+                  '&:hover': {
+                    borderColor: 'darkred',
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                  },
+                }}
                 onClick={handleCloseModal}
-                className="ml-4 border border-red-500 text-red-500 py-2 px-4 rounded hover:border-red-700 hover:bg-red-100"
+                className="ml-2"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
-
           </form>
         </Box>
       </Modal>
