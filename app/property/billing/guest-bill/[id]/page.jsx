@@ -712,7 +712,7 @@ const BookingDashboard = () => {
               </Box>
             </Modal>
             <h3 className="font-semibold text-gray-800 text-center">
-              Services ({services.length})
+              Services ({services.length-1})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
