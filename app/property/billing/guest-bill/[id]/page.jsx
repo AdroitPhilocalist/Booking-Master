@@ -36,9 +36,13 @@ const BookingDashboard = () => {
   const [services, setServices] = useState([]);
 
   // New state for food modal
+  const [menuItems, setMenuItems] = useState([]);
   const [openFoodModal, setOpenFoodModal] = useState(false);
+  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
+  const [foodTax, setFoodTax] = useState("");
+
   const [foods, setFoods] = useState([]);
 
   // New state for bill payment modal
@@ -135,6 +139,21 @@ const BookingDashboard = () => {
     }
   }, [servicePrice, serviceTax]);
 
+  useEffect(() => {
+    // Fetch menu items
+    const fetchMenuItems = async () => {
+      try {
+        const menuResponse = await axios.get("/api/menuItem");
+        setMenuItems(menuResponse.data.data);
+        console.log(menuResponse.data.data);
+      } catch (err) {
+        console.error("Error fetching menu items:", err);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
+
 
   // Modal style
   const modalStyle = {
@@ -223,39 +242,52 @@ const BookingDashboard = () => {
   // Handle opening food modal
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
+    setSelectedFoodItem(null);
+    setFoodName("");
+    setFoodPrice("");
+    setFoodTax("");
   };
+
 
   // Handle closing food modal
   const handleCloseFoodModal = () => {
     setOpenFoodModal(false);
-    setFoodName("");
-    setFoodPrice("");
+  };
+
+  const handleFoodItemChange = (event) => {
+    const selectedItem = menuItems.find(item => item.itemName === event.target.value);
+    if (selectedItem) {
+      setSelectedFoodItem(selectedItem);
+      setFoodName(selectedItem.itemName);
+      setFoodPrice(selectedItem.price);
+      setFoodTax(selectedItem.gst);
+    }
   };
 
   // Handle adding food
   const handleAddFood = async () => {
-    if (!foodName || !foodPrice) {
-      alert("Please enter both food name and price");
+    if (!selectedFoodItem) {
+      alert("Please select a food item");
       return;
     }
 
     try {
-      // Prepare the data to update
       const response = await axios.put(`/api/Billing/${id}`, {
-        itemList: [foodName],
-        priceList: [parseFloat(foodPrice)],
+        itemList: [selectedFoodItem.itemName],
+        priceList: [parseFloat(selectedFoodItem.price)],
+        taxList: [parseFloat(selectedFoodItem.gst)]
       });
 
       // Update local state
       setServices([
-        ...foods,
+        ...services,
         {
-          name: foodName,
-          price: parseFloat(foodPrice),
-        },
+          name: selectedFoodItem.itemName,
+          price: parseFloat(selectedFoodItem.price),
+          tax: parseFloat(selectedFoodItem.gst)
+        }
       ]);
 
-      // Close modal and reset fields
       handleCloseFoodModal();
       window.location.reload();
     } catch (error) {
@@ -691,15 +723,17 @@ const BookingDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {services.map((service, index) => (
-                  <tr key={index}>
-                    <td className="p-2 text-left">{service.name}</td>
-                    <td className="p-2 text-center">{service.tax}%</td>
-                    <td className="p-2 text-right">
-                      {service.price.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
+                {services
+                  .filter(service => service.name !== `Room ${billing.roomNo}`) // Exclude room charges
+                  .map((service, index) => (
+                    <tr key={index}>
+                      <td className="p-2 text-left">{service.name}</td>
+                      <td className="p-2 text-center">{service.tax}%</td>
+                      <td className="p-2 text-right">
+                        {service.price.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
             {/* Add Services Modal */}
@@ -776,36 +810,61 @@ const BookingDashboard = () => {
               onClose={handleCloseFoodModal}
               aria-labelledby="add-food-modal"
             >
-              <Box sx={modalStyle}>
+              <Box sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 400,
+                bgcolor: "background.paper",
+                border: "2px solid #000",
+                boxShadow: 24,
+                p: 4
+              }}>
                 <Typography id="add-food-modal" variant="h6" component="h2">
                   Add Food
                 </Typography>
-                <TextField
-                  fullWidth
-                  margin="normal"
-                  label="Food Name"
-                  value={foodName}
-                  onChange={(e) => setFoodName(e.target.value)}
-                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Food Item</InputLabel>
+                  <Select
+                    value={foodName}
+                    label="Food Item"
+                    onChange={handleFoodItemChange}
+                  >
+                    {menuItems.map((item) => (
+                      <MenuItem key={item._id} value={item.itemName}>
+                        {item.itemName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 <TextField
                   fullWidth
                   margin="normal"
                   label="Food Price"
-                  type="number"
                   value={foodPrice}
-                  onChange={(e) => setFoodPrice(e.target.value)}
+                  InputProps={{ readOnly: true }}
                 />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mt: 2,
-                  }}
-                >
+
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Food Tax (%)"
+                  value={foodTax}
+                  InputProps={{ readOnly: true }}
+                />
+
+                <Box sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mt: 2
+                }}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={handleAddFood}
+                    disabled={!selectedFoodItem}
                   >
                     Submit
                   </Button>
