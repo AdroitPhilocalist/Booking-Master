@@ -441,28 +441,29 @@ const BookingDashboard = () => {
             </p>
             <p className="mt-2 text-sm text-gray-700">
               Check-In:{" "}
-              <strong>{new Date(booking.checkIn).toLocaleString()}</strong> |
+              <strong>{new Date(booking.checkIn).toLocaleDateString('en-GB')}</strong> |
               Expected Check-Out:{" "}
-              <strong>{new Date(booking.checkOut).toLocaleString()}</strong> |
+              <strong>{new Date(booking.checkOut).toLocaleDateString('en-GB')}</strong> |
               Phone No: <strong>+91 {booking.mobileNo}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
-              Booking Point: <strong>{booking.bookingPoint}</strong> | Booked
-              By: <strong>{booking.bookingPoint}</strong> | Booking Type:{" "}
+              Guest ID: <strong>{booking.guestid}</strong> | Date of 
+              Birth: <strong>{new Date(booking.dateofbirth).toLocaleDateString('en-GB')}
+              </strong> | Booking Type:{" "}
               <strong>{booking.bookingType}</strong> | Booking Source:{" "}
               <strong>{booking.bookingSource}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
               Booked On:{" "}
               <strong>
-                {new Date(booking.createdAt).toLocaleDateString()}
+                {new Date(booking.createdAt).toLocaleDateString('en-GB')}
               </strong>{" "}
               | PAX:{" "}
               <strong>
                 {booking.adults} Adult {booking.children} Child
               </strong>{" "}
               | Meal Plan: <strong>{booking.mealPlan}</strong> | Notes:{" "}
-              <strong>{booking.guestNotes || "-"}</strong>
+              <strong>{booking.remarks || "-"}</strong>
             </p>
           </div>
 
@@ -628,7 +629,7 @@ const BookingDashboard = () => {
                 {billing.DateOfPayment.map((date, index) => (
                   <tr key={index}>
                     <td className="p-2 text-left">
-                      {new Date(date).toLocaleString()}
+                      {new Date(date).toLocaleDateString('en-GB')}
                     </td>
                     <td className="p-2 text-left">
                       {billing.ModeOfPayment[index]}
@@ -665,7 +666,7 @@ const BookingDashboard = () => {
               <tbody>
                 <tr>
                   <td className="p-2 text-left">
-                    {new Date(booking.checkIn).toLocaleString()}
+                    {new Date(booking.checkIn).toLocaleDateString('en-GB')}
                   </td>
                   <td className="p-2 text-left">
                     Room #{billing.roomNo} - {room.category.category}
@@ -772,6 +773,8 @@ const BookingDashboard = () => {
                 <TextField
                   fullWidth
                   margin="normal"
+                  readOnly
+                  disabled
                   label="Total Amount"
                   type="number"
                   value={serviceTotal}
@@ -842,6 +845,8 @@ const BookingDashboard = () => {
                 <TextField
                   fullWidth
                   margin="normal"
+                  readOnly
+                  disabled
                   label="Food Price"
                   value={foodPrice}
                   InputProps={{ readOnly: true }}
@@ -850,6 +855,8 @@ const BookingDashboard = () => {
                 <TextField
                   fullWidth
                   margin="normal"
+                  readOnly
+                  disabled
                   label="Food Tax (%)"
                   value={foodTax}
                   InputProps={{ readOnly: true }}

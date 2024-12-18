@@ -27,7 +27,7 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
   const { services } = bookingDetails;
   // Get current date and time
   const currentDate = new Date(); 
-  const formattedDate = currentDate.toLocaleDateString(); 
+  const formattedDate = currentDate.toLocaleDateString('en-GB'); 
   const formattedTime = currentDate.toLocaleTimeString(); 
 
   const totalServicesAmount = services.filter(service => service.name === `Room Charge`).reduce((total, service) => total + service.price, 0);
@@ -113,7 +113,7 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
               </TableHead> 
               <TableBody> 
                 <TableRow> 
-                  <TableCell>{new Date(booking.checkIn).toLocaleString()}</TableCell> 
+                  <TableCell>{new Date(booking.checkIn).toLocaleDateString('en-GB')}</TableCell> 
                   <TableCell> 
                     Room #{billing.roomNo} - {room.category.category} 
                   </TableCell> 
@@ -132,15 +132,9 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography> 
                 </Grid> 
                 <Grid item xs={6} sx={{ textAlign: 'right' }}> 
-                  {/* <Typography variant="body1"> 
-                    ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
-                  </Typography>  */}
                   <Typography variant="body1"> 
                     {(serviceTax)}% 
                   </Typography>
-                  {/* <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}> 
-                    ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
-                  </Typography>  */}
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}> 
                     ₹{(totalServicesAmount).toFixed(2)} 
                   </Typography> 
@@ -171,7 +165,7 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
 
           <Box sx={{ mt: 4, textAlign: 'center' }}> 
             <Typography variant="caption" color="textSecondary"> 
-              Invoice generated on {currentDate.toLocaleString()} 
+              Invoice generated on {currentDate.toLocaleDateString('en-GB')} at {currentDate.toLocaleTimeString()}
             </Typography> 
           </Box> 
         </Paper> 
