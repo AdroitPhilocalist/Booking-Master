@@ -24,11 +24,14 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
   const handlePrint = () => { 
     window.print(); 
   }; 
-
+  const { services } = bookingDetails;
   // Get current date and time
   const currentDate = new Date(); 
   const formattedDate = currentDate.toLocaleDateString(); 
   const formattedTime = currentDate.toLocaleTimeString(); 
+
+  const totalServicesAmount = services.filter(service => service.name === `Room Charge`).reduce((total, service) => total + service.price, 0);
+  const serviceTax = services.filter(service => service.name === `Room Charge`).reduce((tax, service) => tax + service.tax, 0);
 
   // Debug logging
   console.log('Booking Details:', bookingDetails); 
@@ -125,15 +128,21 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
             <Box sx={{ width: '250px' }}> 
               <Grid container spacing={1}> 
                 <Grid item xs={6}> 
-                  <Typography variant="body1">Room Charges:</Typography> 
+                  <Typography variant="body1">Room Tax:</Typography> 
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography> 
                 </Grid> 
                 <Grid item xs={6} sx={{ textAlign: 'right' }}> 
+                  {/* <Typography variant="body1"> 
+                    ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
+                  </Typography>  */}
                   <Typography variant="body1"> 
+                    {(serviceTax)}% 
+                  </Typography>
+                  {/* <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}> 
                     ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
-                  </Typography> 
+                  </Typography>  */}
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}> 
-                    ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
+                    ₹{(totalServicesAmount).toFixed(2)} 
                   </Typography> 
                 </Grid> 
               </Grid> 

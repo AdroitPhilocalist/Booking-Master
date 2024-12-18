@@ -707,7 +707,7 @@ const BookingDashboard = () => {
                 }}
               >
                 <PrintableRoomInvoice
-                  bookingDetails={bookingData}
+                  bookingDetails={{ ...bookingData, services: services }}
                 />
               </Box>
             </Modal>
