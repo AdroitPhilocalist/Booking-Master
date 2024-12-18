@@ -724,7 +724,7 @@ const BookingDashboard = () => {
               </thead>
               <tbody>
                 {services
-                  .filter(service => service.name !== `Room ${billing.roomNo}`) // Exclude room charges
+                  .filter(service => service.name !== `Room Charge`) // Exclude room charges
                   .map((service, index) => (
                     <tr key={index}>
                       <td className="p-2 text-left">{service.name}</td>
