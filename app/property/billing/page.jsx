@@ -38,7 +38,7 @@ export default function Billing() {
         setIsLoading(true);
         const billingResponse = await fetch("/api/Billing");
         const billingResult = await billingResponse.json();
-        
+        console.log(billingResult);
         // Fetch booking data to match guest names
         const bookingResponse = await fetch("/api/NewBooking");
         const bookingResult = await bookingResponse.json();

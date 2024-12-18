@@ -207,12 +207,14 @@ export default function BookingForm() {
                 console.log('Number of nights:', numberOfNights);
                 // Calculate total room charge
                 const roomCharge = matchedCategory.total * numberOfNights;
+                const roomTax = matchedCategory.gst;
                 console.log('Room charge:', roomCharge);
                 // Prepare billing data
                 const newBilling = {
                     roomNo: selectedRoomNumber,
                     itemList: ['Room Charge'],
                     priceList: [roomCharge],
+                    taxList: [roomTax],
                     billStartDate: checkInDate,
                     billEndDate: checkOutDate,
                     totalAmount: roomCharge,
@@ -438,7 +440,7 @@ export default function BookingForm() {
                     value={formData.guestid}
                     onChange={handleChange}
                   >
-                    {['Adhaar', 'Driving License'].map((idType) => (
+                    {['adhaar', 'driving license'].map((idType) => (
                       <MenuItem key={idType} value={idType}>{idType}</MenuItem>
                     ))}
                   </Select>

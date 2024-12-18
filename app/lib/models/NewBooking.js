@@ -19,10 +19,10 @@ const newBookingSchema = new mongoose.Schema({
     enum:['Walk In','Front Office','Agent','Office','Goibibo','Make My Trip','Agoda.com','Booking.com','Cleartrip','Yatra','Expedia','Trivago','Ease My Trip','Hotels.com','Happy Easy Go','TBO','Booking Engine','GO-MMT','Booking Master','Hoichoi','Others'],
     default:'Walk In'
   },
-  bookingPoint: {
-    type: String,
-    required: true
-  },
+  // bookingPoint: {
+  //   type: String,
+  //   required: true
+  // },
 
   dateofbirth:{
     type:Date,
@@ -49,7 +49,6 @@ const newBookingSchema = new mongoose.Schema({
   },
   guestidno:{    
     type: String,
-    enum:['adhaar','driving license'],
     required:true
   },
   referenceno:{

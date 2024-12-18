@@ -13,7 +13,7 @@ export async function POST(req) {
             bookingType: data.bookingType,
             bookingId: data.bookingId,
             bookingSource: data.bookingSource,
-            bookingPoint: data.bookingPoint,
+            // bookingPoint: data.bookingPoint,
             pinCode: data.pinCode,
             mobileNo: data.mobileNo,
             guestName: data.guestName,
@@ -36,7 +36,12 @@ export async function POST(req) {
             guestType: data.guestType,
             guestNotes: data.guestNotes,
             internalNotes: data.internalNotes,
-            roomNumbers: data.roomNumbers
+            roomNumbers: data.roomNumbers,
+            referenceno: data.referenceno,
+            guestidno: data.guestidno,
+            guestid: data.guestid,
+            dateofbirth: data.dateofbirth,
+            dateofanniversary: data.dateofanniversary
         });
 
         await newBooking.save(); // Save new booking to the database
