@@ -177,7 +177,7 @@ export default function InventoryList() {
       )}
       <div className="container mx-auto p-4">
        
-        <h1 className="text-3xl font-bold mb-4   text-cyan-900">Inventory List</h1>
+        <h1 className="text-3xl font-bold mb-4   text-cyan-900" style={{ maxWidth: '80%', margin: '0 auto' }}>Inventory List</h1>
         <div className="flex justify-end" style={{ maxWidth: '80%', margin: '0 auto' }} >
                   <button
                     onClick={() => {

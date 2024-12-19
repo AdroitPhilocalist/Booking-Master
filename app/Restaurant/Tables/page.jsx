@@ -4,6 +4,16 @@ import { useRouter } from "next/navigation";
 import { Footer } from '@/app/_components/Footer'
 import Navbar from '@/app/_components/Navbar'
 import { useState, useEffect } from 'react'
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import { IconButton } from '@mui/material';
 
 export default function BookingMasterControlPanel() {
   const router = useRouter();
@@ -87,12 +97,12 @@ export default function BookingMasterControlPanel() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="  rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className=" flex justify-between mb-4">
               <h2 className="text-3xl font-semibold text-cyan-900 ">
                 {/* <BoltIcon className="h-6 w-6 mr-2 text-yellow-500" /> */}
                 Table List
               </h2>
-              <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded" onClick={() => router.push("/Restaurant/Tables/add")}>
+              <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded" onClick={() => router.push("/Restaurant/Tables/add")} >
                 Add New +
               </button>
             </div>
@@ -121,45 +131,72 @@ export default function BookingMasterControlPanel() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-100">
-                  <tr>
-                    {['Table No.', 'POS', 'Action'].map((header) => (
-                      <th
-                        key={header}
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                        onClick={() => handleSort(header.toLowerCase())}
-                      >
-                        <div className="flex items-center">
-                          {header}
-                          {sortColumn === header.toLowerCase() && (
-                            sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
-                          )}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {sortedData.slice(0, displayCount).map((item) => (
-                    <tr key={item._id}> {/* Use _id from MongoDB */}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.tableNo}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.pos}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          item.active === 'yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {item.active === 'yes' ? 'Active' : 'Inactive'}
-                        </span>
-                        <button className="ml-2 text-indigo-600 hover:text-indigo-900">
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                      {['Table No.', 'POS', 'Action'].map((header) => (
+                        <TableCell
+                          key={header}
+                          sx={{
+                            fontWeight: 'bold',
+                            color: '#28bfdb',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => handleSort(header.toLowerCase())}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {header}
+                            {sortColumn === header.toLowerCase() && (
+                              sortDirection === 'asc' ? (
+                                <ChevronUpIcon style={{ marginLeft: '5px', width: '16px', height: '16px' }} />
+                              ) : (
+                                <ChevronDownIcon style={{ marginLeft: '5px', width: '16px', height: '16px' }} />
+                              )
+                            )}
+                          </div>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {sortedData.slice(0, displayCount).length > 0 ? (
+                      sortedData.slice(0, displayCount).map((item) => (
+                        <TableRow key={item._id} sx={{ borderBottom: '1px solid #e5e5e5' }}>
+                          <TableCell sx={{ textAlign: 'center' }}>{item.tableNo}</TableCell>
+                          <TableCell sx={{ textAlign: 'center' }}>{item.pos}</TableCell>
+                          <TableCell sx={{ textAlign: 'center' }}>
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: item.active === 'yes' ? '#1c7c1c' : '#a83232',
+                                backgroundColor: item.active === 'yes' ? '#dff7df' : '#fddede',
+                              }}
+                            >
+                              {item.active === 'yes' ? 'Active' : 'Inactive'}
+                            </span>
+                            <IconButton style={{ marginLeft: '10px', color: '#2563eb' }}>
+                              <PencilIcon style={{ width: '16px', height: '16px' }} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} sx={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                          No data available.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
             </div>
           </div>
         </div>

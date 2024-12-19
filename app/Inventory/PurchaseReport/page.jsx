@@ -9,13 +9,17 @@ import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+// import TableContainer from '@mui/material/TableContainer';
+// import TableHead from '@mui/material/TableHead';
+// import TableRow from '@mui/material/TableRow';
+// import Paper from '@mui/material/Paper';
+// import Table from '@mui/material/Table';
+// import TableBody from '@mui/material/TableBody';
+// import TableCell from '@mui/material/TableCell';
+import React from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
+import { ChevronUpIcon, ChevronDownIcon, PencilIcon } from '@heroicons/react/outline'; // Ensure you have @heroicons/react installed
+
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -305,12 +309,12 @@ const PurchaseReportPage = () => {
         </div>
       )}
       <div className="container mx-auto p-4">
-        <div  className="   bg-amber-50 p-4 rounded mb-4 ">
-        <div className=" bg-amber-50 p-4 rounded mb-4 ">
-          <h1 className="text-3xl font-bold text-cyan-900 ">Purchase Report</h1>
+        <div  className="   bg-amber-50 mb-4 ">
+        <div className=" bg-amber-50 p-4  mb-4 ">
+          <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Purchase Report</h1>
         </div>
 
-        <div className="flex space-x-2  justify-center mb-4">
+        <div className=" space-x-3  justify-center " style={{ maxWidth: '80%', margin: '0 auto' }}>
           <TextField
             label="Start Date"
             type="date"

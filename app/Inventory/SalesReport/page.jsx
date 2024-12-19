@@ -306,7 +306,7 @@ const SalesReportPage = () => {
       )}
       <div className="container mx-auto p-6 ">
         <div className="mb-4">
-          <h1 className="text-3xl font-bold text-cyan-900 ">Sales Report</h1>        
+          <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Sales Report</h1>        
         </div>
 
         <div className="flex space-x-2 mb-4 justify-center">
