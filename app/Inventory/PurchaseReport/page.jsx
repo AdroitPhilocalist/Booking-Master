@@ -9,13 +9,17 @@ import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+// import TableContainer from '@mui/material/TableContainer';
+// import TableHead from '@mui/material/TableHead';
+// import TableRow from '@mui/material/TableRow';
+// import Paper from '@mui/material/Paper';
+// import Table from '@mui/material/Table';
+// import TableBody from '@mui/material/TableBody';
+// import TableCell from '@mui/material/TableCell';
+import React from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
+import { ChevronUpIcon, ChevronDownIcon, PencilIcon } from '@heroicons/react/outline'; // Ensure you have @heroicons/react installed
+
 
 const PurchaseReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -304,20 +308,20 @@ const PurchaseReportPage = () => {
           </div>
         </div>
       )}
-      <div className="container mx-auto p-6">
-        <div  className=" justify-center items-center  bg-gray-100 p-4 rounded mb-4 ">
-        <div className="flex justify-center items-center  bg-gray-100 p-4 rounded mb-4 ">
-          <h1 className="text-2xl font-bold">Purchase Report</h1>
+      <div className="container mx-auto p-4">
+        <div  className="   bg-amber-50 mb-4 ">
+        <div className=" bg-amber-50 p-4  mb-4 ">
+          <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Purchase Report</h1>
         </div>
 
-        <div className="flex space-x-2  justify-center mb-4">
+        <div className=" space-x-3  justify-center " style={{ maxWidth: '80%', margin: '0 auto' }}>
           <TextField
             label="Start Date"
             type="date"
             InputLabelProps={{ shrink: true }}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-1/4"
+            className="w-1/4 "
             size="small"
           />
           <TextField
@@ -558,7 +562,7 @@ const PurchaseReportPage = () => {
             <div className="flex justify-end">
               <Button
                 variant="contained"
-                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
+                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' }}}
                 onClick={handlePurchase}
               >
                 Save
@@ -572,9 +576,10 @@ const PurchaseReportPage = () => {
                     borderColor: 'darkred',
                     backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
+                  ml:2
                 }}
                 onClick={handleCloseModal}
-                className="ml-2"
+                
               >
                 Cancel
               </Button>

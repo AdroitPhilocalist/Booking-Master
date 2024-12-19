@@ -271,7 +271,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
             `}
           >
-            <button
+            {/* <button
               onClick={() => setIsEditing(true)}
               className="
                 text-blue-500 hover:bg-blue-100 p-2 rounded-full 
@@ -280,8 +280,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Edit2 size={20} />
-            </button>
-            <button
+            </button> */}
+            {/* <button
               onClick={() => onDelete(room._id)}
               className="
                 text-red-500 hover:bg-red-100 p-2 rounded-full 
@@ -290,7 +290,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Trash2 size={20} />
-            </button>
+            </button> */}
           </div>
         </div>
 

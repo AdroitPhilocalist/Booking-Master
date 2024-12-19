@@ -137,9 +137,9 @@ const StockReportPage = () => {
         </div>
       )}
       <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-4 text-cyan-900 flex justify-center">Stock Report</h1>
+        <h1 className="text-3xl font-bold mb-4 text-cyan-900 p-4 " style={{ maxWidth: '80%', margin: '0 auto' }}>Stock Report</h1>
 
-        <div className=" space-x-2 mb-4 flex justify-center">
+        <div className="space-x-2 mb-4 justify-center p-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
           <TextField
             label="Start Date"
             type="date"
