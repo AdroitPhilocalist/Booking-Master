@@ -128,15 +128,17 @@ export default function InventoryCategory() {
       )}
       <div className="container mx-auto p-4 ">
         <h1 className="text-3xl font-bold mb-4 text-cyan-900 flex justify-center">Inventory Category</h1>
-        <button
-          onClick={() => {
-            setShowModal(true);
-            setCurrentProduct(null); // Add new product
-          }}
-          className="bg-green-500 text-white px-4 py-2 rounded mb-4 flex justify-center"
-        >
-          Add New +
-        </button>
+        <div className="flex justify-end" style={{ maxWidth: '80%', margin: '0 auto' }}>
+    <button
+      onClick={() => {
+        setShowModal(true);
+        setCurrentProduct(null); // Add new product
+      }}
+      className="bg-green-500 text-white px-4 py-2 rounded mb-4"
+    >
+      Add New +
+    </button>
+  </div>
 
         <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table>
