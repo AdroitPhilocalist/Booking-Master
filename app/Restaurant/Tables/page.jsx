@@ -95,18 +95,18 @@ export default function BookingMasterControlPanel() {
         </div>
       )}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="  rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className=" flex justify-between mb-4">
+        <div className="  rounded-lg" >
+          <div className="px-4 py-5 sm:p-6" >
+            <div className=" flex justify-between mb-3" style={{ maxWidth: '80%', margin: '0 auto' }}>
               <h2 className="text-3xl font-semibold text-cyan-900 ">
                 {/* <BoltIcon className="h-6 w-6 mr-2 text-yellow-500" /> */}
                 Table List
               </h2>
-              <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded" onClick={() => router.push("/Restaurant/Tables/add")} >
+              <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4" onClick={() => router.push("/Restaurant/Tables/add")} >
                 Add New +
               </button>
             </div>
-            <div className="flex justify-between mb-4">
+            <div className="flex justify-between mb-4 " style={{ maxWidth: '80%', margin: '0 auto' }}>
               <div className="flex items-center">
                 <span className="mr-2">Display</span>
                 <select
@@ -126,7 +126,7 @@ export default function BookingMasterControlPanel() {
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border rounded px-2 py-1"
+                  className="border rounded px-2 py-1 mb-4"
                 />
               </div>
             </div>

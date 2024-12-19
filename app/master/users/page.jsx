@@ -176,10 +176,10 @@ export default function Page() {
         </div>
       )}
       <main className="flex-grow p-8">
-        <h1 className="text-2xl font-semibold mb-4">Booking Master Control Panel</h1>
-        <div className="bg-white shadow rounded-lg">
-          <div className="bg-cyan-900 p-4 rounded-t-lg">
-            <h2 className="text-lg font-semibold text-white">Users</h2>
+        <h1 className="text-3xl font-semibold mb-4 text-cyan-900">Booking Master Control Panel</h1>
+        <div className="bg-white shadow  rounded-lg">
+          <div className="bg-gray-50 p-4 rounded-t-lg text-2xl">
+            <h2 className="text-lg font-semibold text-cyan-900">Users</h2>
           </div>
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
