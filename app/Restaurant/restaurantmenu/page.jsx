@@ -148,28 +148,31 @@ export default function RestaurantList() {
                         </div>
                     </div>
                 )}
-                <Box sx={{ padding: 4, justifyItems: "center" }}>
-                    <Typography variant="h4" gutterBottom sx={{ justifyItems: "center", color: "#064c61", fontWeight: "bold" }}  >
+                <Box sx={{ padding: 4, justifyItems: "flex-end" }} style={{ maxWidth: '80%', margin: '0 auto' }}>
+                    <Typography variant="h4"  sx={{ color: "#064c61", fontWeight: "bold" }} style={{ maxWidth: '80%', margin: '0 auto' }} >
                         Restaurant Menu
                     </Typography>
 
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => router.push('/Restaurant/restaurantmenu/add')}
-                    >
-                        Add New Item
-                    </Button>
-                    <TableContainer component={Paper} sx={{ marginTop: 4 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }} style={{ maxWidth: '80%', margin: '0 auto' }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => router.push('/Restaurant/restaurantmenu/add')}
+                            sx={{ minWidth: '150px' }}
+                        >
+                            Add New Item
+                        </Button>
+                    </Box>
+                    <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Item Code</TableCell>
-                                    <TableCell>Category</TableCell>
-                                    <TableCell>Segment</TableCell>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Price (INR)</TableCell>
-                                    <TableCell>Actions</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Item Code</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Category</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb"}}>Segment</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb"}}>Name</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb"}}>Price (INR)</TableCell>
+                                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb"}}>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
