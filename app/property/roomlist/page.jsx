@@ -143,11 +143,11 @@ export default function BookingManagement() {
       )}
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="flex justify-between items-center mb-6">
-          <Typography variant="h4" component="h1" className="font-bold text-gray-800">
+        <div className="flex justify-between mb-6" style={{ maxWidth: '80%', margin: '0 auto' }}>
+          <Typography variant="h4" component="h2" className="font-bold text-cyan-900" >
             Room Management
           </Typography>
-          <Button variant="contained" color="primary" onClick={handleOpenModal}>
+          <Button variant="contained" color="primary" onClick={handleOpenModal} >
             Add Room
           </Button>
         </div>
