@@ -175,11 +175,11 @@ export default function Page() {
           </div>
         </div>
       )}
-      <main className="flex-grow p-8">
-        <h1 className="text-3xl font-semibold mb-4 text-cyan-900">Booking Master Control Panel</h1>
-        <div className="bg-white shadow  rounded-lg">
-          <div className="bg-gray-50 p-4 rounded-t-lg text-2xl">
-            <h2 className="text-lg font-semibold text-cyan-900">Users</h2>
+      <main className="flex-grow p-8" >
+        <h1 className="text-3xl font-semibold mb-4 text-cyan-900 ml-4">Booking Master Control Panel</h1>
+        <div className= "rounded-lg">
+          <div className="p-4 rounded-t-lg text-2xl">
+            <h2 className="text-2xl font-semibold text-cyan-900">Users</h2>
           </div>
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
@@ -205,12 +205,12 @@ export default function Page() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Property</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Phone</TableCell>
-                    <TableCell>User Type</TableCell>
-                    <TableCell>Action</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Name</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Property</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Phone</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>User Type</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

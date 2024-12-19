@@ -131,49 +131,48 @@ const RestaurantBooking = () => {
           </div>
         </div>
       )}
-      <Box sx={{ p: 3 }} >
-        <Typography variant="h4" sx={{ mb: 3, color: "#064c61", fontWeight: "bold" }} style={{ maxWidth: "80%", margin: "0 auto" }}>
-          Restaurant Booking
-        </Typography>
-        <Box sx={{ maxWidth: '80%', margin: '0 auto'}}>
-          {/* Container for search bar - centered */}
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ maxWidth: '80%', margin: '0 auto', mb: 3 }}>
           <Box sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            mb: 3
           }}>
+            {/* Header */}
+            <Typography variant="h4" sx={{
+              color: "#064c61",
+              fontWeight: "bold",
+              flex: 1
+            }}>
+              Restaurant Booking
+            </Typography>
+
             {/* Search field */}
-            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end',mx:4 }}>
-              <TextField
-                placeholder="Search By Guest Name"
-                variant="outlined"
-                size="small"
-                sx={{ minWidth: '300px' }}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </Box>
+            <TextField
+              placeholder="Search By Guest Name"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: '300px', mx: 2 }}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
             {/* Add New Booking button */}
-            <Box>
-              <Button
-                variant="contained"
-                onClick={handleOpen}
-                sx={{
-                  bgcolor: "#064c61",
-                  fontWeight: "bold",
-                  color: "white",
-                  "&:hover": { bgcolor: "#002171" },
-                  minWidth: '150px'
-                }}
-              >
-                Add New Booking
-              </Button>
-            </Box>
+            <Button
+              variant="contained"
+              onClick={handleOpen}
+              sx={{
+                bgcolor: "#3b8242",
+                fontWeight: "bold",
+                color: "white",
+                "&:hover": { bgcolor: "#173b1a" },
+                minWidth: '150px'
+              }}
+            >
+              Add New Booking
+            </Button>
           </Box>
         </Box>
-
 
         <TableContainer component={Paper} sx={{ maxWidth: "80%", margin: "0 auto" }}>
           <Table size="small">
