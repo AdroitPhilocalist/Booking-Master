@@ -20,27 +20,44 @@ const RoomSchema = new mongoose.Schema({
     },
     occupied: {
       type: String,
-      enum: ['Vacant', 'Confirmed'], // Accept only these values
+      enum: ['Vacant', 'Confirmed'],
       required: true,
-      default: 'Vacant', // Set default to "Vacant"
+      default: 'Vacant',
     },
     billingStarted: {
       type: String,
-      enum: ['Yes', 'No'], // Enum for Yes/No values
-      default: 'No', // Default to "No"
+      enum: ['Yes', 'No'],
+      default: 'No',
     },
     currentBillingId: {
-      type: mongoose.Schema.Types.ObjectId, // Reference to the Invoice table
-      ref: 'Invoice',
-      default: null, // Default to null
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Billing',
+      default: null,
     },
     currentGuestId: {
-      type: mongoose.Schema.Types.ObjectId, // Reference to the NewBooking table
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'NewBooking',
-      default: null, // Default to null
+      default: null,
     },
-  });
+    checkInDateList: [{
+      type: Date,
+      required: true
+    }],
+    checkOutDateList: [{
+      type: Date,
+      required: true
+    }],
+    guestWaitlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'NewBooking',
+      default: []
+    }],
+    billWaitlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Billing',
+      default: []
+    }]
+});
 
 export default mongoose.models.Room || mongoose.model('Room', RoomSchema);
-
 

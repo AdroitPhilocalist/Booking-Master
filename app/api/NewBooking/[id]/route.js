@@ -3,6 +3,35 @@ import NewBooking from '../../../lib/models/NewBooking';
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 
+export async function GET(req, { params }) {
+    try {
+        // Connect to the database
+        await mongoose.connect(connectSTR);
+
+        // Extract guest ID from the route params
+        const { id } = params;
+
+        // Find the guest by ID
+        const guest = await NewBooking.findById(id);
+
+        if (!guest) {
+            return NextResponse.json(
+                { success: false, error: 'Guest not found' },
+                { status: 404 }
+            );
+        }
+
+        // Respond with the guest data
+        return NextResponse.json({ success: true, data: guest }, { status: 200 });
+    } catch (error) {
+        console.error('Error retrieving guest details:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to retrieve guest details' },
+            { status: 400 }
+        );
+    }
+}
+
 export async function PUT(req, { params }) {
     try {
         // Connect to the database

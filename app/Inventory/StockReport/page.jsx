@@ -63,7 +63,7 @@ const StockReportPage = () => {
       });
       setFilteredReports(filtered);
     } else {
-      setFilteredReports(stockReports); // Show all reports if no dates are selected
+      setFilteredReports([]); // Show all reports if no dates are selected
     }
   };
 
@@ -214,7 +214,7 @@ const StockReportPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredReports.length > 0 ? (
+              {startDate && endDate && filteredReports.length > 0 ? (
                 filteredReports.map((report) => (
                   <TableRow
                     key={report._id}

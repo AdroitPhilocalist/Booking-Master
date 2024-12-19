@@ -1,24 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  Bed,
-  Home,
-  PlaneLanding,
-  PlaneTakeoff,
-  UserCheck,
-  UserPlus,
-  Edit2,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-  User,
-  Key,
-  Building,
-  Tags,
-  Info,
-  Calendar
-} from "lucide-react";
+import {Bed,Home,PlaneLanding,PlaneTakeoff,UserCheck,UserPlus,Edit2,Trash2,CheckCircle2,XCircle,User,Key,Building,Tags,Info,Calendar} from "lucide-react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 
@@ -274,7 +257,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                       }`,
                     size: 20,
                   })}
-                  <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString()}-{new Date(currentGuest.checkOut).toLocaleDateString()}</span>
+                  <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-{new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}</span>
                   
                 </div>)}
                 
@@ -605,39 +588,104 @@ export default function RoomDashboard() {
     }
   };
 
-  // Fetch rooms and categories from the backend API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [roomsResponse, categoriesResponse] = await Promise.all([
-          fetch("/api/rooms"),
-          fetch("/api/roomCategories"),
-        ]);
-        const roomsData = await roomsResponse.json();
-        const categoriesData = await categoriesResponse.json();
+  const updateRoomStatusBasedOnDate = async (rooms) => {
+    const today = new Date();
+    console.log(today);
+    today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
 
-        if (roomsData.success && Array.isArray(roomsData.data)) {
-          setRooms(roomsData.data);
-        } else {
-          console.error("Failed to fetch rooms or rooms is not an array");
-        }
+    const updatedRooms = await Promise.all(
+      rooms.map(async (room) => {
+        if (room.currentGuestId) {
+          try {
+            // Fetch guest details
+            const response = await fetch("/api/NewBooking");
+            const data = await response.json();
+            const guest = data.data.find(g => g._id === room.currentGuestId);
 
-        if (categoriesData.success && Array.isArray(categoriesData.data)) {
-          setCategories(categoriesData.data);
-        } else {
-          console.error(
-            "Failed to fetch categories or categories is not an array"
-          );
+            if (guest) {
+              const checkInDate = new Date(guest.checkIn);
+              checkInDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+
+              // Check if today is check-in day
+              if (checkInDate.getTime() === today.getTime()) {
+                // Only update if the status needs to change
+                if (room.occupied !== "Occupied" || room.clean !== false) {
+                  const updatedRoom = {
+                    ...room,
+                    occupied: "Occupied",
+                    clean: false
+                  };
+
+                  // Update room in the database
+                  const updateResponse = await fetch(`/api/rooms/${room._id}`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(updatedRoom),
+                  });
+
+                  if (updateResponse.ok) {
+                    return updatedRoom;
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error("Error updating room status:", error);
+          }
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
+        return room;
+      })
+    );
+
+    return updatedRooms;
+  };
+
+ // Modified useEffect to include room status updates
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const [roomsResponse, categoriesResponse] = await Promise.all([
+        fetch("/api/rooms"),
+        fetch("/api/roomCategories"),
+      ]);
+
+      const roomsData = await roomsResponse.json();
+      const categoriesData = await categoriesResponse.json();
+
+      if (roomsData.success && Array.isArray(roomsData.data)) {
+        // Update room statuses based on check-in dates
+        const updatedRooms = await updateRoomStatusBasedOnDate(roomsData.data);
+        setRooms(updatedRooms);
+      } else {
+        console.error("Failed to fetch rooms or rooms is not an array");
       }
-    };
-    fetchData();
-  }, []);
+
+      if (categoriesData.success && Array.isArray(categoriesData.data)) {
+        setCategories(categoriesData.data);
+      } else {
+        console.error("Failed to fetch categories or categories is not an array");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchData();
+
+  // Set up an interval to check and update room status every hour
+  const intervalId = setInterval(async () => {
+    const updatedRooms = await updateRoomStatusBasedOnDate(rooms);
+    setRooms(updatedRooms);
+  }, 3600000); // 1 hour in milliseconds
+
+  // Cleanup interval on component unmount
+  return () => clearInterval(intervalId);
+}, []);
 
   // Filter rooms based on search term and selected filter
   const filteredRooms = rooms.filter((room) => {
@@ -737,7 +785,7 @@ export default function RoomDashboard() {
             >
               Vacant
             </button>
-            <button
+            {/* <button
               onClick={() => setFilter("clean")}
               className="bg-yellow-500 text-white px-4 py-2 rounded"
             >
@@ -748,7 +796,7 @@ export default function RoomDashboard() {
               className="bg-purple-500 text-white px-4 py-2 rounded"
             >
               Dirty
-            </button>
+            </button> */}
           </div>
           <div className="flex space-x-2">
             {/* <Link
