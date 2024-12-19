@@ -166,7 +166,7 @@ export default function RestaurantList() {
                     <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
                         <Table>
                             <TableHead>
-                                <TableRow>
+                                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Item Code</TableCell>
                                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Category</TableCell>
                                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb"}}>Segment</TableCell>
