@@ -572,9 +572,10 @@ const SalesReportPage = () => {
                     borderColor: 'darkred',
                     backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
+                  ml:2
                 }}
                 onClick={handleCloseModal}
-                className="ml-2"
+                
               >
                 Cancel
               </Button>

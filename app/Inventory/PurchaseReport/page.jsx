@@ -562,7 +562,7 @@ const PurchaseReportPage = () => {
             <div className="flex justify-end">
               <Button
                 variant="contained"
-                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
+                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' }}}
                 onClick={handlePurchase}
               >
                 Save
@@ -576,9 +576,10 @@ const PurchaseReportPage = () => {
                     borderColor: 'darkred',
                     backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
+                  ml:2
                 }}
                 onClick={handleCloseModal}
-                className="ml-2"
+                
               >
                 Cancel
               </Button>

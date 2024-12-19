@@ -98,101 +98,103 @@ export default function RoomCategories() {
 
           {/* <div className="grid grid-cols-9 gap-4 mb-4 px-4"> */}
           {/* Header aligned with Image column */}
-          <div className="col-span-1 flex" style={{ maxWidth: '80%', margin: '0 auto' }}>
-            <h2 style={{ color: "#082930", fontWeight: "bold", fontSize: "1.75rem" }}>
-              Category List
-            </h2>
-          </div>
-
-          {/* Display and Search controls aligned with Description column */}
-          <div className="flex justify-end items-center px-4 py-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
-            {/* Display and Search controls */}
-            <div className="flex items-center space-x-2">
-              <span>Display</span>
-              <select className="border p-1 rounded">
-                <option>15</option>
-              </select>
-              <span>records</span>
-              <input
-                type="search"
-                placeholder="Search..."
-                className="ml-4 border rounded p-2 w-64 mr-4"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                
-              />
+          <div className="flex justify-start items-center px-4 py-4 " style={{ maxWidth: '80%', margin: '0 auto' }}>
+            {/* Category List header */}
+            
+              <h2 style={{ color: "#082930", fontWeight: "bold", fontSize: "1.75rem" }}>
+                Category List
+              </h2>
             </div>
 
-            {/* Add New button */}
-            <div>
-              <Button
-                variant="contained"
-                color="success"
-                className="ml-10"
-                onClick={() => router.push("/property/roomcategories/addRoomCategory")}
-              >
-                Add New +
-              </Button>
-            </div>
-          </div>
+            {/* Display and Search controls aligned with Description column */}
+            <div className="flex justify-end items-center px-4 py-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
+              {/* Display and Search controls */}
+              <div className="flex items-center space-x-2">
+                <span>Display</span>
+                <select className="border p-1 rounded">
+                  <option>15</option>
+                </select>
+                <span>records</span>
+                <input
+                  type="search"
+                  placeholder="Search..."
+                  className="ml-4 border rounded p-2 w-64 mr-4"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
 
-          <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
-            <Table>
-              <TableHead>
-                <TableRow style={{ backgroundColor: "#f5f5f5" }}>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Image</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Category</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Description</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tariff (INR)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>GST (%)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total (incl. GST)</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Booking Eng.</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Conf. Room</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredCategories.map((room) => (
-                  <TableRow key={room.id} style={{ backgroundColor: "#f8f9fa" }}>
-                    <TableCell>
-                      <Image
-                        src={room.image}
-                        alt={room.category}
-                        width={100}
-                        height={100}
-                      />
-                    </TableCell>
-                    <TableCell>{room.category}</TableCell>
-                    <TableCell>{room.description}</TableCell>
-                    <TableCell>{room.tariff}</TableCell>
-                    <TableCell>{room.gst}</TableCell>
-                    <TableCell>{room.total}</TableCell>
-                    <TableCell>{room.bookingEng}</TableCell>
-                    <TableCell>{room.confRoom}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-center items-center space-x-2">
-                        <IconButton
-                          color="primary"
-                          onClick={() => router.push(`/property/roomcategories/updateRoomCategory/${room.id}`)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton
-                          color="secondary"
-                          onClick={() => deleteCategory(room.id)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </div>
-                    </TableCell>
+                />
+              </div>
+
+              {/* Add New button */}
+              <div>
+                <Button
+                  variant="contained"
+                  color="success"
+                  className="ml-10"
+                  onClick={() => router.push("/property/roomcategories/addRoomCategory")}
+                >
+                  Add New +
+                </Button>
+              </div>
+            </div>
+
+            <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
+              <Table>
+                <TableHead>
+                  <TableRow style={{ backgroundColor: "#f5f5f5" }}>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Image</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Category</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tariff (INR)</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>GST (%)</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total (incl. GST)</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Booking Eng.</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Conf. Room</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {filteredCategories.map((room) => (
+                    <TableRow key={room.id} style={{ backgroundColor: "#f8f9fa" }}>
+                      <TableCell>
+                        <Image
+                          src={room.image}
+                          alt={room.category}
+                          width={100}
+                          height={100}
+                        />
+                      </TableCell>
+                      <TableCell>{room.category}</TableCell>
+                      <TableCell>{room.description}</TableCell>
+                      <TableCell>{room.tariff}</TableCell>
+                      <TableCell>{room.gst}</TableCell>
+                      <TableCell>{room.total}</TableCell>
+                      <TableCell>{room.bookingEng}</TableCell>
+                      <TableCell>{room.confRoom}</TableCell>
+                      <TableCell>
+                        <div className="flex justify-center items-center space-x-2">
+                          <IconButton
+                            color="primary"
+                            onClick={() => router.push(`/property/roomcategories/updateRoomCategory/${room.id}`)}
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton
+                            color="secondary"
+                            onClick={() => deleteCategory(room.id)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
         </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
-  );
+      );
 }
