@@ -21,6 +21,7 @@ import Box from "@mui/material/Box";
 import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 
 const InvoicePage = () => {
   const [menu, setMenu] = useState();
@@ -368,14 +369,20 @@ const InvoicePage = () => {
                         >
                           <Delete />
                         </IconButton>
-                        <Button
+                        {/* <Button
                           variant="contained"
                           color="secondary"
                           size="small"
                           onClick={() => handlePrintPreview(invoice)}
                         >
                           Print
-                        </Button>
+                        </Button> */}
+                        <IconButton
+                          color="secondary"
+                          onClick={() => handlePrintPreview(invoice)}
+                        >
+                          <PrintOutlinedIcon />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   ))
