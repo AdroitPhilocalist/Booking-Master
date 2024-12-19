@@ -20,7 +20,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Box from "@mui/material/Box";
 import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-
+import Typography from '@mui/material/Typography';
 
 const InvoicePage = () => {
   const [menu, setMenu] = useState();
@@ -191,57 +191,94 @@ const InvoicePage = () => {
           </div>
         </div>
       )}
-      <div className="p-4 justify-center">
-        <h1 className="text-3xl font-bold mb-4 flex justify-center text-cyan-900 ">Restaurant Invoices</h1>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mb: 2 ,justifyItems:"center"}}
-          onClick={() => {
-            setCurrentInvoice(null);
-            setShowModal(true);
-          }}
-        >
-          Create Invoice
-        </Button>
-        <div className="flex space-x-4 mb-6">
-          <TextField
-            label="Start Date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full"
-          />
-          <TextField
-            label="End Date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-full"
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={filterByDate}
-            className="ml-4"
-          >
-            Filter
-          </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => {
-              setStartDate("");
-              setEndDate("");
-              setFilteredInvoices(invoices); // Reset to show all invoices
-            }}
-            className="ml-4"
-          >
-            Reset
-          </Button>
-        </div>
+      <div className="p-4 ">
+        {/* Header */}
+        <h1 className="text-3xl font-bold text-cyan-900 mb-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
+          Restaurant Invoices
+        </h1>
+
+        {/* Controls Container */}
+        <Box sx={{
+          maxWidth: '80%',
+          margin: '0 auto',
+          mb: 3,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          {/* Empty div for left alignment */}
+          <div style={{ flex: 1 }}></div>
+
+          {/* Center - Date filters */}
+          <Box sx={{
+            display: 'flex',
+            gap: 2,
+            alignItems: 'center',
+            flex: '2',
+            justifyContent: 'center'
+          }}>
+            <TextField
+              label="Start Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              sx={{ width: '160px' }}
+              size="small"
+            />
+            <TextField
+              label="End Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              sx={{ width: '160px' }}
+              size="small"
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={filterByDate}
+              sx={{ height: '40px' }}
+            >
+              Filter
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+                setFilteredInvoices(invoices);
+              }}
+              sx={{ height: '40px' }}
+            >
+              Reset
+            </Button>
+          </Box>
+
+          {/* Right - Create Invoice button */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            flex: 1
+          }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setCurrentInvoice(null);
+                setShowModal(true);
+              }}
+              sx={{
+                minWidth: '150px',
+                height: '40px'
+              }}
+            >
+              Create Invoice
+            </Button>
+          </Box>
+        </Box>
 
         <Box sx={{ maxWidth: "80%", margin: "0 auto", overflowX: "auto" }}>
           <TableContainer component={Paper}>
@@ -312,11 +349,11 @@ const InvoicePage = () => {
                           Edit
                         </Button> */}
                         <IconButton
-                        color="primary"
-                        onClick={() => handleEdit(invoice)}
-                      >
-                        <Edit />
-                      </IconButton>
+                          color="primary"
+                          onClick={() => handleEdit(invoice)}
+                        >
+                          <Edit />
+                        </IconButton>
                         {/* <Button
                           variant="contained"
                           color="error"
@@ -326,11 +363,11 @@ const InvoicePage = () => {
                           Delete
                         </Button> */}
                         <IconButton
-                        color="secondary"
-                        onClick={() => handleDelete(invoice._id)}
-                      >
-                        <Delete />
-                      </IconButton>
+                          color="secondary"
+                          onClick={() => handleDelete(invoice._id)}
+                        >
+                          <Delete />
+                        </IconButton>
                         <Button
                           variant="contained"
                           color="secondary"
