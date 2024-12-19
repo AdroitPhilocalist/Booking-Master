@@ -41,7 +41,7 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
 
     // Get current date and time
     const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString();
+    const formattedDate = currentDate.toLocaleDateString('en-GB');
     const formattedTime = currentDate.toLocaleTimeString();
 
     if (!bookingDetails) {
@@ -55,8 +55,8 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
     const { booking, billing, services } = bookingDetails;
 
     // Calculate total services amount
-    const totalServicesAmount = services.reduce((total, service) => total + service.price, 0);
-    const serviceTax = 0.18; // 18% service tax
+    const totalServicesAmount = services.filter(service => service.name !== `Room Charge`).reduce((total, service) => total + service.price, 0);
+    const serviceTax = services.filter(service => service.name !== `Room Charge`).reduce((tax, service) => tax + service.tax, 0);
     const totalWithTax = totalServicesAmount * (1 + serviceTax);
 
     return (
@@ -120,22 +120,18 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
                             <TableHead>
                                 <TableRow sx={{ bgcolor: '#00bcd4' }}>
                                     <TableCell sx={{ color: 'white' }}>Service</TableCell>
-                                    <TableCell align="right" sx={{ color: 'white' }}>Rate</TableCell>
-                                    <TableCell align="right" sx={{ color: 'white' }}>Tax (18%)</TableCell>
+                                    <TableCell align="right" sx={{ color: 'white' }}>Tax(%)</TableCell>
                                     <TableCell align="right" sx={{ color: 'white' }}>Total</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {services.map((service, index) => (
+                                {services.filter(service => service.name !== `Room Charge`).map((service, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{service.name}</TableCell>
+                                        <TableCell align="right">
+                                            {(service.tax)}
+                                        </TableCell>
                                         <TableCell align="right">₹{service.price.toFixed(2)}</TableCell>
-                                        <TableCell align="right">
-                                            ₹{(service.price * serviceTax).toFixed(2)}
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            ₹{(service.price * (1 + serviceTax)).toFixed(2)}
-                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -147,19 +143,15 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
                         <Box sx={{ width: '250px' }}>
                             <Grid container spacing={1}>
                                 <Grid item xs={6}>
-                                    <Typography variant="body1">Subtotal:</Typography>
-                                    <Typography variant="body1">ServiceTax(18%):</Typography>
+                                    <Typography variant="body1">Total Tax(%):</Typography>
                                     <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                                 </Grid>
                                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
                                     <Typography variant="body1">
-                                        ₹{totalServicesAmount.toFixed(2)}
-                                    </Typography>
-                                    <Typography variant="body1">
-                                        ₹{(totalServicesAmount * serviceTax).toFixed(2)}
+                                        {serviceTax}%
                                     </Typography>
                                     <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>
-                                        ₹{totalWithTax.toFixed(2)}
+                                        ₹{(totalServicesAmount).toFixed(2)}
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -207,7 +199,7 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
 
                     <Box sx={{ mt: 4, textAlign: 'center' }}>
                         <Typography variant="caption" color="textSecondary">
-                            Invoice generated on {currentDate.toLocaleString()}
+                            Invoice generated on {currentDate.toLocaleDateString('en-GB')} at {currentDate.toLocaleTimeString()}
                         </Typography>
                     </Box>
                 </Paper>

@@ -20,18 +20,25 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { IconButton } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
+import InputLabel from '@mui/material/InputLabel';
+
+
 export default function Page() {
   const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null); // Store selected user data
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   // Fetch user data
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch('/api/User');
         const data = await response.json();
         if (data.success) {
@@ -41,6 +48,8 @@ export default function Page() {
         }
       } catch (error) {
         console.error('Error fetching users:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -66,6 +75,7 @@ export default function Page() {
   // Handle deletion of the user after confirmation
   const handleDeleteUser = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.delete(`/api/User/${selectedUser}`);
       if (response.data.success) {
         // Remove the user from the state after deletion
@@ -76,6 +86,8 @@ export default function Page() {
       }
     } catch (error) {
       console.error('Error deleting user:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -107,8 +119,9 @@ export default function Page() {
   // Handle PUT request to update user details
   const handleSubmit = async (e) => {
     e.preventDefault();
-// console.log(selectedUser._id)
+    // console.log(selectedUser._id)
     try {
+      setIsLoading(true);
       const response = await fetch(`/api/User/${selectedUser._id}`, {
         method: 'PUT',
         headers: {
@@ -131,12 +144,37 @@ export default function Page() {
       }
     } catch (error) {
       console.error('Error updating user:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-amber-50">
       <Navbar />
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+            <svg
+              aria-hidden="true"
+              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+              viewBox="0 0 100 101"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="currentColor"
+              />
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="currentFill"
+              />
+            </svg>
+            <span className="mt-4 text-gray-700">Loading Users...</span>
+          </div>
+        </div>
+      )}
       <main className="flex-grow p-8">
         <h1 className="text-2xl font-semibold mb-4">Booking Master Control Panel</h1>
         <div className="bg-white shadow rounded-lg">
@@ -192,7 +230,7 @@ export default function Page() {
                         >
                           Active
                         </Button> */}
-                        <Button
+                        {/* <Button
   variant="contained"
   color="primary"
   size="small"
@@ -200,32 +238,44 @@ export default function Page() {
   sx={{ marginRight: 2 }} // Adds right margin to space it from the next button
 >
   Edit
-</Button>
-<Button
-  variant="contained"
-  color="error"
-  onClick={() => handleOpenDialog(user._id)}
-  sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
->
-  Delete
-</Button>
+</Button> */}
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenEdit(user)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        {/* <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleOpenDialog(user._id)}
+                          sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
+                        >
+                          Delete
+                        </Button> */}
+                        <IconButton
+                          color="secondary"
+                          onClick={() => handleOpenDialog(user._id)}
+                        >
+                          <Delete />
+                        </IconButton>
 
 
-      {/* Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <p>Are you sure you want to delete this user?</p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteUser} color="secondary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+                        {/* Confirmation Dialog */}
+                        <Dialog open={openDialog} onClose={handleCloseDialog}>
+                          <DialogTitle>Confirm Deletion</DialogTitle>
+                          <DialogContent>
+                            <p>Are you sure you want to delete this user?</p>
+                          </DialogContent>
+                          <DialogActions>
+                            <Button onClick={handleCloseDialog} color="primary">
+                              Cancel
+                            </Button>
+                            <Button onClick={handleDeleteUser} color="secondary">
+                              Confirm
+                            </Button>
+                          </DialogActions>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -244,6 +294,7 @@ export default function Page() {
             <TextField
               label="Name"
               name="name"
+              className="border rounded w-full py-4 mb-2"
               value={selectedUser?.name || ''}
               onChange={handleChange}
               fullWidth
@@ -252,6 +303,7 @@ export default function Page() {
             <TextField
               label="Property"
               name="property"
+              className="border rounded w-full py-4 mb-2 "
               value={selectedUser?.property || ''}
               onChange={handleChange}
               fullWidth
@@ -260,6 +312,7 @@ export default function Page() {
             <TextField
               label="Email"
               name="email"
+              className="border rounded w-full py-4 mb-2"
               value={selectedUser?.email || ''}
               onChange={handleChange}
               fullWidth
@@ -268,14 +321,19 @@ export default function Page() {
             <TextField
               label="Phone"
               name="phone"
+              className="border rounded w-full py-4 mb-2 "
               value={selectedUser?.phone || ''}
               onChange={handleChange}
               fullWidth
               required
             />
+            <InputLabel id="User Type">User Type</InputLabel>
             <Select
               label="User Type"
               name="userType"
+              id="UserType"
+              variant="outlined"
+              className="border rounded w-full  mb-2"
               value={selectedUser?.userType || ''}
               onChange={handleChange}
               fullWidth
@@ -285,8 +343,8 @@ export default function Page() {
               <MenuItem value="Offline">Offline</MenuItem>
             </Select>
             <DialogActions>
-              <Button onClick={handleClose} color="secondary">Cancel</Button>
-              <Button type="submit" color="primary">Save</Button>
+              <Button onClick={handleClose} color="error" variant="contained">Cancel</Button>
+              <Button type="submit" color="success" variant="contained">Save</Button>
             </DialogActions>
           </form>
         </DialogContent>

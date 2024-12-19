@@ -133,7 +133,7 @@ const RoomCategoryForm = () => {
     };
 
     try {
-      let response = await fetch("https://booking-master-psi.vercel.app/api/roomCategories", {
+      let response = await fetch("/api/roomCategories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

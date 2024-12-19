@@ -24,11 +24,14 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
   const handlePrint = () => { 
     window.print(); 
   }; 
-
+  const { services } = bookingDetails;
   // Get current date and time
   const currentDate = new Date(); 
-  const formattedDate = currentDate.toLocaleDateString(); 
+  const formattedDate = currentDate.toLocaleDateString('en-GB'); 
   const formattedTime = currentDate.toLocaleTimeString(); 
+
+  const totalServicesAmount = services.filter(service => service.name === `Room Charge`).reduce((total, service) => total + service.price, 0);
+  const serviceTax = services.filter(service => service.name === `Room Charge`).reduce((tax, service) => tax + service.tax, 0);
 
   // Debug logging
   console.log('Booking Details:', bookingDetails); 
@@ -110,7 +113,7 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
               </TableHead> 
               <TableBody> 
                 <TableRow> 
-                  <TableCell>{new Date(booking.checkIn).toLocaleString()}</TableCell> 
+                  <TableCell>{new Date(booking.checkIn).toLocaleDateString('en-GB')}</TableCell> 
                   <TableCell> 
                     Room #{billing.roomNo} - {room.category.category} 
                   </TableCell> 
@@ -125,15 +128,15 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
             <Box sx={{ width: '250px' }}> 
               <Grid container spacing={1}> 
                 <Grid item xs={6}> 
-                  <Typography variant="body1">Room Charges:</Typography> 
+                  <Typography variant="body1">Room Tax:</Typography> 
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography> 
                 </Grid> 
                 <Grid item xs={6} sx={{ textAlign: 'right' }}> 
                   <Typography variant="body1"> 
-                    ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
-                  </Typography> 
+                    {(serviceTax)}% 
+                  </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}> 
-                    ₹{(category.total * ((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 3600 * 24))).toFixed(2)} 
+                    ₹{(totalServicesAmount).toFixed(2)} 
                   </Typography> 
                 </Grid> 
               </Grid> 
@@ -162,7 +165,7 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
 
           <Box sx={{ mt: 4, textAlign: 'center' }}> 
             <Typography variant="caption" color="textSecondary"> 
-              Invoice generated on {currentDate.toLocaleString()} 
+              Invoice generated on {currentDate.toLocaleDateString('en-GB')} at {currentDate.toLocaleTimeString()}
             </Typography> 
           </Box> 
         </Paper> 

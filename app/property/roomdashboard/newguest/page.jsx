@@ -22,9 +22,14 @@ export default function BookingForm() {
         bookingId: '',
         bookingSource: 'Walk In',
         bookingPoint: '',
+        
+        dateofbirth:'',
+        dateofanniversary:'',
         pinCode: '',
         mobileNo: '',
         guestName: '',
+        guestid:'',
+        guestidno:'',
         companyName: '',
         gstin: '',
         guestEmail: '',
@@ -52,6 +57,8 @@ export default function BookingForm() {
         mobileNo: 'Enter Mobile Number',
         guestName: 'Enter Guest Name',
         companyName: 'Enter Company Name',
+        dateofbirth:'Enter date of birth',
+        dateofanniversary:'Enter date of anniversary',
         gstin: 'Enter GSTIN',
         guestEmail: 'Enter Guest Email',
         address: 'Enter Guest Address',
@@ -200,12 +207,14 @@ export default function BookingForm() {
                 console.log('Number of nights:', numberOfNights);
                 // Calculate total room charge
                 const roomCharge = matchedCategory.total * numberOfNights;
+                const roomTax = matchedCategory.gst;
                 console.log('Room charge:', roomCharge);
                 // Prepare billing data
                 const newBilling = {
                     roomNo: selectedRoomNumber,
                     itemList: ['Room Charge'],
                     priceList: [roomCharge],
+                    taxList: [roomTax],
                     billStartDate: checkInDate,
                     billEndDate: checkOutDate,
                     totalAmount: roomCharge,
@@ -290,453 +299,269 @@ export default function BookingForm() {
         <div className="min-h-screen bg-amber-50">
             <Navbar />
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="px-4 py-6 sm:px-0">
-                    <div className="bg-white shadow rounded-lg p-6">
-                        <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Booking Master Control Panel</h1>
-                        <div className="mb-4 flex items-center text-sm text-cyan-900">
-                            <a href="#" className="hover:underline">Home</a>
-                            <span className="mx-2">&gt;</span>
-                            <span>Reservations</span>
-                        </div>
-                        <div className="bg-cyan-800 text-white p-4 rounded-lg mb-6">
-                            <h2 className="text-lg font-semibold">Add Booking</h2>
-                        </div>
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3">
+            <div className="px-4 py-6 sm:px-0">
+          <div className="bg-white shadow rounded-lg p-6">
+            <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Booking Master Control Panel</h1>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Booking ID */}
+                <TextField
+                  label="Booking ID"
+                  name="bookingId"
+                  value={formData.bookingId}
+                  InputProps={{ readOnly: true }}
+                  variant="outlined"
+                  fullWidth
+                  disabled
+                />
 
-                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
-                                        <InputLabel id="demo-simple-select-standard-label">Booking</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-standard-label"
-                                            id="demo-simple-select-standard"
-                                            name="bookingType"
-                                            value={formData.bookingType}
-                                            onChange={handleChange}
-                                        >
-                                            {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((status) => (
-                                                <MenuItem key={status} value={status}>
-                                                    {status}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                {/* Booking Type */}
+                <FormControl fullWidth>
+                  <InputLabel>Booking Type</InputLabel>
+                  <Select
+                    name="bookingType"
+                    value={formData.bookingType}
+                    onChange={handleChange}
+                  >
+                    {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
+                      <MenuItem key={type} value={type}>{type}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-                                </div>
+                {/* Booking Reference */}
+                <TextField
+                  label="Booking Reference"
+                  name="bookingReference"
+                  value={formData.bookingReference}
+                  onChange={handleChange}
+                  fullWidth
+                  variant="outlined"
+                />
 
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <TextField
-                                        label="Booking ID"
-                                        name="bookingId"
-                                        value={formData.bookingId}
-                                        InputProps={{
-                                            readOnly: true,
-                                        }}
-                                        fullWidth
-                                        variant="outlined"
-                                        sx={{ mb: 2 }}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        className="text-cyan-900"
-                                        disabled
-                                    />
+                {/* Reference Number */}
+                <TextField
+                  label="Reference Number"
+                  name="referenceno"
+                  value={formData.referenceno}
+                  onChange={handleChange}
+                  fullWidth
+                  variant="outlined"
+                />
 
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                {/* Booking Status */}
+                <FormControl fullWidth>
+                  <InputLabel>Booking Status</InputLabel>
+                  <Select
+                    name="bookingStatus"
+                    value={formData.bookingStatus}
+                    onChange={handleChange}
+                  >
+                    {['Confirmed', 'Blocked'].map((status) => (
+                      <MenuItem key={status} value={status}>{status}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-                                    <TextField id="Booking Point" label="Booking Point" variant="outlined"
-                                        type="text"
-                                        name="bookingPoint"
-                                        value={formData.bookingPoint}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('bookingPoint')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        required
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'bookingPoint' ? '' : placeholders.bookingPoint}
-                                    />
+                {/* Guest Name */}
+                <TextField
+                  label="Guest Name"
+                  name="guestName"
+                  value={formData.guestName}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                />
 
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
-                                        <InputLabel id="booking-source-label">Booking Source</InputLabel>
-                                        <Select
-                                            labelId="booking-source-label"
-                                            id="booking-source-select"
-                                            name="bookingSource"
-                                            value={formData.bookingSource}
-                                            onChange={handleChange}
-                                        >
-                                            {[
-                                                'Walk In', 'Front Office', 'Agent', 'Office', 'Goibibo', 'Make My Trip',
-                                                'Agoda.com', 'Booking.com', 'Cleartrip', 'Yatra', 'Expedia', 'Trivago',
-                                                'Ease My Trip', 'Hotels.com', 'Happy Easy Go', 'TBO', 'Booking Engine',
-                                                'GO-MMT', 'Booking Master', 'Hoichoi', 'Others'
-                                            ].map((source) => (
-                                                <MenuItem key={source} value={source}>
-                                                    {source}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                {/* Mobile Number */}
+                <TextField
+                  label="Mobile Number"
+                  name="mobileNo"
+                  value={formData.mobileNo}
+                  onChange={handleChange}
+                  fullWidth
+                  required
+                />
 
+                {/* Mail ID */}
+                <TextField
+                  label="Email ID"
+                  name="guestEmail"
+                  value={formData.guestEmail}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                {/* Date of Birth */}
+                <TextField
+                  label="Date of Birth"
+                  type="date"
+                  name="dateofbirth"
+                  value={formData.dateofbirth}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
 
+                {/* Date of Anniversary */}
+                <TextField
+                  label="Date of Anniversary"
+                  type="date"
+                  name="dateofanniversary"
+                  value={formData.dateofanniversary}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
 
-                                    <TextField id="Mobile Number" label="Mobile Number" variant="outlined"
-                                        type="text"
-                                        name="mobileNo"
-                                        value={formData.mobileNo}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('mobileNo')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'mobileNo' ? '' : placeholders.mobileNo}
-                                    />
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <TextField id="Pincode" label="Pincode" variant="outlined"
-                                        type="text"
-                                        name="pinCode"
-                                        value={formData.pinCode}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('pinCode')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'pinCode' ? '' : placeholders.pinCode}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3">
-                                    <TextField id="Guest Name" label="Guest Name" variant="outlined"
-                                        type="text"
-                                        name="guestName"
-                                        value={formData.guestName}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('guestName')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'guestName' ? '' : placeholders.guestName}
-                                    />
-                                </div>
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <TextField id="Company Name" label="Company Name" variant="outlined"
-                                        type="text"
-                                        name="companyName"
-                                        value={formData.companyName}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('companyName')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        className="border rounded w-full"
-                                        placeholder={focusedInput === 'companyName' ? '' : placeholders.companyName}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3">
-                                    <TextField id="GSTIN" label="GSTIN" variant="outlined"
-                                        type="text"
-                                        name="gstin"
-                                        value={formData.gstin}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('gstin')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'gstin' ? '' : placeholders.gstin}
-                                    />
-                                </div>
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                {/* Company Name */}
+                <TextField
+                  label="Company Name"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
+                {/* GSTIN */}
+                <TextField
+                  label="GSTIN"
+                  name="gstin"
+                  value={formData.gstin}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
-                                    <TextField id="Guest Email" label="Guest Email" variant="outlined"
-                                        type="email"
-                                        name="guestEmail"
-                                        value={formData.guestEmail}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('guestEmail')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        required
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'guestEmail' ? '' : placeholders.guestEmail}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth>
-                                        <InputLabel htmlFor="adults-input">Adults</InputLabel>
-                                        <Input
-                                            id="adults-input"
-                                            type="number"
-                                            name="adults"
-                                            value={formData.adults}
-                                            onChange={handleChange}
-                                            inputProps={{ min: 1 }}
-                                        />
-                                    </FormControl>
+                {/* Guest ID */}
+                <FormControl fullWidth>
+                  <InputLabel>Guest ID</InputLabel>
+                  <Select
+                    name="guestid"
+                    value={formData.guestid}
+                    onChange={handleChange}
+                  >
+                    {['adhaar', 'driving license'].map((idType) => (
+                      <MenuItem key={idType} value={idType}>{idType}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl fullWidth variant="outlined" sx={{ m: 1, minWidth: 120 }}>
-                                        <InputLabel htmlFor="children-input">Children</InputLabel>
-                                        <Input
-                                            id="children-input"
-                                            type="number"
-                                            name="children"
-                                            value={formData.children}
-                                            onChange={handleChange}
-                                            inputProps={{ min: 0 }}
-                                            label="Children"
-                                        />
-                                    </FormControl>
+                {/* Guest ID Number */}
+                <TextField
+                  label="Guest ID Number"
+                  name="guestidno"
+                  value={formData.guestidno}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                        <InputLabel shrink htmlFor="check-in-input">
-                                            Check-In*
-                                        </InputLabel>
-                                        <Input
-                                            id="check-in-input"
-                                            type="date"
-                                            name="checkIn"
-                                            value={formData.checkIn}
-                                            onChange={handleChange}
-                                            required
-                                            label="Check-In*"
-                                        />
-                                    </FormControl>
+                {/* Adults */}
+                <TextField
+                  label="Adults"
+                  type="number"
+                  name="adults"
+                  value={formData.adults}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                        <InputLabel shrink htmlFor="check-out-input">
-                                            Check-Out*
-                                        </InputLabel>
-                                        <Input
-                                            id="check-out-input"
-                                            type="date"
-                                            name="checkOut"
-                                            value={formData.checkOut}
-                                            onChange={handleChange}
-                                            required
-                                            label="Check-Out*"
-                                        />
-                                    </FormControl>
+                {/* Children */}
+                <TextField
+                  label="Children"
+                  type="number"
+                  name="children"
+                  value={formData.children}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                        <InputLabel shrink htmlFor="expected-arrival-input">
-                                            Expected Arrival*
-                                        </InputLabel>
-                                        <Input
-                                            id="expected-arrival-input"
-                                            type="time"
-                                            name="expectedArrival"
-                                            value={formData.expectedArrival}
-                                            onChange={handleChange}
-                                            required
-                                            label="Expected Arrival*"
-                                        />
-                                    </FormControl>
+                {/* Check-in */}
+                <TextField
+                  label="Check-in"
+                  type="date"
+                  name="checkIn"
+                  value={formData.checkIn}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
 
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-                                        <InputLabel shrink htmlFor="expected-departure-input">
-                                            Expected Departure*
-                                        </InputLabel>
-                                        <Input
-                                            id="expected-departure-input"
-                                            type="time"
-                                            name="expectedDeparture"
-                                            value={formData.expectedDeparture}
-                                            onChange={handleChange}
-                                            required
-                                            label="Expected Departure*"
-                                        />
-                                    </FormControl>
+                {/* Check-out */}
+                <TextField
+                  label="Check-out"
+                  type="date"
+                  name="checkOut"
+                  value={formData.checkOut}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
 
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                {/* Expected Arrival */}
+                <TextField
+                  label="Expected Arrival"
+                  type="date"
+                  name="expectedArrival"
+                  value={formData.expectedArrival}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
 
+                {/* Expected Departure */}
+                <TextField
+                  label="Expected Departure"
+                  type="date"
+                  name="expectedDeparture"
+                  value={formData.expectedDeparture}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
 
-                                    <TextField id="Address" label="Address" variant="outlined"
-                                        type="text"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('address')}
-                                        onBlur={() => setFocusedInput(null)}
-                                        required
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'address' ? '' : placeholders.address}
-                                    />
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
-                                        <InputLabel htmlFor="booking-status-select">Booking Status*</InputLabel>
-                                        <Select
-                                            id="booking-status-select"
-                                            name="bookingStatus"
-                                            value={formData.bookingStatus}
-                                            onChange={handleChange}
-                                            required
-                                            label="Booking Status*"
-                                        >
-                                            {['Confirmed', 'Blocked'].map((status) => (
-                                                <MenuItem key={status} value={status}>
-                                                    {status}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
+                {/* State */}
+                <TextField
+                  label="State"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  fullWidth
+                />
 
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                {/* Meal Plan */}
+                <FormControl fullWidth>
+                  <InputLabel>Meal Plan</InputLabel>
+                  <Select
+                    name="mealPlan"
+                    value={formData.mealPlan}
+                    onChange={handleChange}
+                  >
+                    {['EP', 'AP', 'CP', 'MAP'].map((plan) => (
+                      <MenuItem key={plan} value={plan}>{plan}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
+                {/* Address */}
+                <TextField
+                  label="Address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  fullWidth
+                  multiline
+                />
 
-                                    <TextField id="State" label="State" variant="outlined"
-                                        type="text"
-                                        name="state"
-                                        value={formData.state}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('state')}
-                                        onBlur={() => setFocusedInput(null)}
-
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'state' ? '' : placeholders.state}
-                                    />
-                                </div>
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
-                                        <InputLabel htmlFor="meal-plan-select">Meal Plan</InputLabel>
-                                        <Select
-                                            id="meal-plan-select"
-                                            name="mealPlan"
-                                            value={formData.mealPlan}
-                                            onChange={handleChange}
-                                            required
-                                            label="Meal Plan"
-                                        >
-                                            {['EP', 'AP', 'CP', 'MAP'].map((meal) => (
-                                                <MenuItem key={meal} value={meal}>
-                                                    {meal}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3">
-
-
-                                    <TextField id="Booking Reference" label="Booking Reference" variant="outlined"
-                                        type="text"
-                                        name="bookingReference"
-                                        value={formData.bookingReference}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('bookingReference')}
-                                        onBlur={() => setFocusedInput(null)}
-
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'bookingReference' ? '' : placeholders.bookingReference}
-                                    />
-                                </div>
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                                    <label className="block uppercase tracking-wide text-cyan-900 text-xs font-bold mb-2" htmlFor="mobile-no">
-                                        Stop Posting
-                                    </label>
-                                    <input type="checkbox" name="stopPosting" checked={formData.stopPosting} onChange={(e) => setFormData((prev) => ({ ...prev, stopPosting: e.target.checked }))} />
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full md:w-1/2 px-3">
-                                    <FormControl fullWidth variant="standard" sx={{ mb: 2 }}>
-                                        <InputLabel htmlFor="guest-type-select">Guest Type</InputLabel>
-                                        <Select
-                                            id="guest-type-select"
-                                            name="guestType"
-                                            value={formData.guestType}
-                                            onChange={handleChange}
-                                            required
-                                            label="Guest Type"
-                                        >
-                                            {['General', 'VIP Guest', 'VVIP Guest', 'Scanty baggage'].map((type) => (
-                                                <MenuItem key={type} value={type}>
-                                                    {type}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-
-                                </div>
-                                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-
-
-                                    <TextField id="Guest Notes" label="Guest Notes" variant="outlined"
-                                        type="text"
-                                        name="guestNotes"
-                                        value={formData.guestNotes}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('guestNotes')}
-                                        onBlur={() => setFocusedInput(null)}
-
-                                        className="border rounded w-full "
-                                        placeholder={focusedInput === 'guestNotes' ? '' : placeholders.guestNotes}
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap -mx-3">
-                                <div className="w-full px-3">
-
-
-                                    <TextField id="Internal Notes" label="Internal notes" variant="outlined"
-
-                                        name="internalNotes"
-                                        value={formData.internalNotes}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('internalNotes')}
-                                        onBlur={() => setFocusedInput(null)}
-
-                                        className="border rounded w-full p-2"
-                                        placeholder={focusedInput === 'internalNotes' ? '' : placeholders.internalNotes}>
-                                    </TextField>
-
-                                    <TextField id="Remarks" label="Remarks" variant="outlined"
-
-                                        name="remarks"
-                                        value={formData.remarks}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedInput('remarks')}
-                                        onBlur={() => setFocusedInput(null)}
-
-                                        className="border rounded w-full p-2"
-                                        placeholder={focusedInput === 'remarks' ? '' : placeholders.remarks}>
-
-                                    </TextField>
-
-                                </div>
-                            </div>
+                {/* Remarks */}
+                <TextField
+                  label="Remarks"
+                  name="remarks"
+                  value={formData.remarks}
+                  onChange={handleChange}
+                  fullWidth
+                  multiline
+                />
+              </div>
                             <div className="flex items-center justify-end">
                                 <Button
                                     variant="contained"

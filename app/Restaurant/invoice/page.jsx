@@ -18,6 +18,9 @@ import Button from '@mui/material/Button';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Box from "@mui/material/Box";
+import { IconButton } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
+
 
 const InvoicePage = () => {
   const [menu, setMenu] = useState();
@@ -189,11 +192,11 @@ const InvoicePage = () => {
         </div>
       )}
       <div className="p-4 justify-center">
-        <h1 className="text-3xl font-bold mb-4 ">Restaurant Invoices</h1>
+        <h1 className="text-3xl font-bold mb-4 flex justify-center text-cyan-900 ">Restaurant Invoices</h1>
         <Button
           variant="contained"
           color="primary"
-          sx={{ mb: 2 , justifyItems:"center"}}
+          sx={{ mb: 2 ,justifyItems:"center"}}
           onClick={() => {
             setCurrentInvoice(null);
             setShowModal(true);
@@ -300,22 +303,34 @@ const InvoicePage = () => {
                           justifyContent: "center",
                         }}
                       >
-                        <Button
+                        {/* <Button
                           variant="contained"
                           color="primary"
                           size="small"
                           onClick={() => handleEdit(invoice)}
                         >
                           Edit
-                        </Button>
-                        <Button
+                        </Button> */}
+                        <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(invoice)}
+                      >
+                        <Edit />
+                      </IconButton>
+                        {/* <Button
                           variant="contained"
                           color="error"
                           size="small"
                           onClick={() => handleDelete(invoice._id)}
                         >
                           Delete
-                        </Button>
+                        </Button> */}
+                        <IconButton
+                        color="secondary"
+                        onClick={() => handleDelete(invoice._id)}
+                      >
+                        <Delete />
+                      </IconButton>
                         <Button
                           variant="contained"
                           color="secondary"

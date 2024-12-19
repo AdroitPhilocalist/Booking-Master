@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
+import Navbar from '@/app/_components/Navbar';
+import { Footer } from '@/app/_components/Footer';
+
 export default function AddRestaurant() {
     const router = useRouter();
   const [formData, setFormData] = useState({
@@ -74,7 +77,9 @@ export default function AddRestaurant() {
   
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+    <div className='bg-amber-50 min-h-screen'>
+      <Navbar />
+      <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <div style={{ backgroundColor: '#4a5568', color: 'white', padding: '10px', marginBottom: '20px' }}>
         <h1 style={{ margin: 0, fontSize: '1.5rem' }}>⚡ Add Restaurant Menu Item</h1>
       </div>
@@ -264,6 +269,8 @@ export default function AddRestaurant() {
           </button>
         </div>
       </form>
+    </div>
+    <Footer />
     </div>
   );
 }
