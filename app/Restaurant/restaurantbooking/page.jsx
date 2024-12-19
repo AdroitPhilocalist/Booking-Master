@@ -135,34 +135,42 @@ const RestaurantBooking = () => {
         <Typography variant="h4" sx={{ mb: 3, color: "#064c61", fontWeight: "bold" }} style={{ maxWidth: "80%", margin: "0 auto" }}>
           Restaurant Booking
         </Typography>
-        <Box sx={{ maxWidth: '80%', margin: '0 auto', mb: 3 }}>
+        <Box sx={{ maxWidth: '80%', margin: '0 auto'}}>
           {/* Container for search bar - centered */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <TextField
-              placeholder="Search By Guest Name"
-              variant="outlined"
-              size="small"
-              sx={{ minWidth: 300 }}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </Box>
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3
+          }}>
+            {/* Search field */}
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end',mx:4 }}>
+              <TextField
+                placeholder="Search By Guest Name"
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: '300px' }}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </Box>
 
-          {/* Container for Add New Booking button - right aligned */}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              onClick={handleOpen}
-              sx={{
-                bgcolor: "#064c61",
-                fontWeight: "bold",
-                color: "white",
-                "&:hover": { bgcolor: "#002171" },
-                minWidth: '150px'  // Added for consistent button width
-              }}
-            >
-              Add New Booking
-            </Button>
+            {/* Add New Booking button */}
+            <Box>
+              <Button
+                variant="contained"
+                onClick={handleOpen}
+                sx={{
+                  bgcolor: "#064c61",
+                  fontWeight: "bold",
+                  color: "white",
+                  "&:hover": { bgcolor: "#002171" },
+                  minWidth: '150px'
+                }}
+              >
+                Add New Booking
+              </Button>
+            </Box>
           </Box>
         </Box>
 

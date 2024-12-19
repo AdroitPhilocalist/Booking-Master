@@ -158,7 +158,8 @@ export default function RestaurantList() {
                             variant="contained"
                             color="primary"
                             onClick={() => router.push('/Restaurant/restaurantmenu/add')}
-                            sx={{ minWidth: '150px' }}
+                            sx={{ minWidth: '150px'}}
+                            className='mb-4'
                         >
                             Add New Item
                         </Button>
