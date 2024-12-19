@@ -177,8 +177,8 @@ export default function InventoryList() {
       )}
       <div className="container mx-auto p-4">
        
-        <h1 className="text-3xl font-bold mb-4  flex justify-center text-cyan-900">Inventory List</h1>
-        <div className="container mx-auto p-2 flex justify-center" >
+        <h1 className="text-3xl font-bold mb-4   text-cyan-900">Inventory List</h1>
+        <div className="flex justify-end" style={{ maxWidth: '80%', margin: '0 auto' }} >
                   <button
                     onClick={() => {
                       setShowModal(true);
@@ -190,7 +190,7 @@ export default function InventoryList() {
                   </button>
         </div>
 
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>

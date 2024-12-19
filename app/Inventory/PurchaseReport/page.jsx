@@ -304,10 +304,10 @@ const PurchaseReportPage = () => {
           </div>
         </div>
       )}
-      <div className="container mx-auto p-6">
-        <div  className=" justify-center items-center  bg-gray-100 p-4 rounded mb-4 ">
-        <div className="flex justify-center items-center  bg-gray-100 p-4 rounded mb-4 ">
-          <h1 className="text-2xl font-bold">Purchase Report</h1>
+      <div className="container mx-auto p-4">
+        <div  className="   bg-amber-50 p-4 rounded mb-4 ">
+        <div className=" bg-amber-50 p-4 rounded mb-4 ">
+          <h1 className="text-3xl font-bold text-cyan-900 ">Purchase Report</h1>
         </div>
 
         <div className="flex space-x-2  justify-center mb-4">
@@ -317,7 +317,7 @@ const PurchaseReportPage = () => {
             InputLabelProps={{ shrink: true }}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-1/4"
+            className="w-1/4 "
             size="small"
           />
           <TextField

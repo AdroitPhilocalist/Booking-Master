@@ -85,11 +85,11 @@ export default function BookingMasterControlPanel() {
         </div>
       )}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg">
+        <div className="  rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <BoltIcon className="h-6 w-6 mr-2 text-yellow-500" />
+              <h2 className="text-3xl font-semibold text-cyan-900 ">
+                {/* <BoltIcon className="h-6 w-6 mr-2 text-yellow-500" /> */}
                 Table List
               </h2>
               <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded" onClick={() => router.push("/Restaurant/Tables/add")}>
@@ -122,7 +122,7 @@ export default function BookingMasterControlPanel() {
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-100">
                   <tr>
                     {['Table No.', 'POS', 'Action'].map((header) => (
                       <th
