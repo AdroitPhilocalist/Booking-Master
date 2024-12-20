@@ -138,7 +138,7 @@ export default function InventoryList() {
       )}
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4 text-cyan-900" style={{ maxWidth: '80%', margin: '0 auto' }}>Stock Reports</h1>
-        <div className="space-x-2 mb-4 justify-center p-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
+        <div className="flex space-x-2 mb-4 justify-center mt-4">
           <TextField 
             type="date" 
             label="Start Date" 
@@ -160,11 +160,9 @@ export default function InventoryList() {
           <Button 
             variant="contained" 
             onClick={handleFilter}
+            color="primary"
             size="small"
-            sx={{ 
-              backgroundColor: "#28bfdb", 
-              '&:hover': { backgroundColor: "#1fa5bf" }
-            }}
+            className="ml-2 flex justify-center"
           >
             Filter
           </Button>
@@ -172,11 +170,8 @@ export default function InventoryList() {
             variant="outlined" 
             onClick={handleReset}
             size="small"
-            sx={{ 
-              color: "#28bfdb", 
-              borderColor: "#28bfdb",
-              '&:hover': { borderColor: "#1fa5bf", color: "#1fa5bf" }
-            }}
+            color="secondary"
+            className="ml-2 flex justify-center"
           >
             Reset
           </Button>
@@ -184,9 +179,11 @@ export default function InventoryList() {
             variant="contained" 
             onClick={printTable}
             size="small"
-            sx={{ 
+            sx={{
               backgroundColor: 'orange',
-              '&:hover': { backgroundColor: 'darkorange' }
+              '&:hover': {
+                backgroundColor: 'darkorange',
+              },
             }}
           >
             Download/Export
