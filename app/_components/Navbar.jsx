@@ -53,7 +53,7 @@ export default function Navbar() {
             onMouseEnter={() => handleMouseEnter(2)}
             onMouseLeave={handleMouseLeave}
           >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded ">Property</button>
+            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded ">Property & Frontdesk</button>
             {openDropdown === 2 && (
               <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
                 <li className="px-4 py-2 hover:bg-gray-100">
@@ -67,6 +67,12 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/property/guests">Guests</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/property/billing">Booking</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/property/roomreport">Room Report</Link>
                 </li>
               </ul>
             )}
@@ -95,6 +101,9 @@ export default function Navbar() {
                 </li>
                 <li className="px-4 py-2 hover:bg-gray-100">
                   <Link href="/Restaurant/invoice">Invoice</Link>
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100">
+                  <Link href="/Restaurant/restaurantreport">Restaurant Report</Link>
                 </li>
               </ul>
             )}
@@ -128,39 +137,8 @@ export default function Navbar() {
             )}
           </li>
 
-          {/* Billing Dropdown */}
-          <li
-            className="relative"
-            onMouseEnter={() => handleMouseEnter(9)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <Link href="/property/billing">
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded " href="/property/billing">Booking</button>
-            
-              
-            </Link>
-            
-            
-          </li>
-          <li
-            className="relative"
-            onMouseEnter={() => handleMouseEnter(10)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <button className="px-1 py-1 focus:outline-none hover:bg-cyan-800 rounded">Reports</button>
-            {openDropdown === 10 && (
-              <ul className="absolute top-full left-0 mt-0 w-48 bg-white text-black rounded shadow-lg z-10">
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/report/rooms">Room Report</Link>
-                </li>
-                <li className="px-4 py-2 hover:bg-gray-100">
-                  <Link href="/report/restaurant">Restaurant Report</Link>
-                </li>
-
-                
-              </ul>
-            )}
-          </li>
+          
+          
         </ul>
       </div>
     </nav>

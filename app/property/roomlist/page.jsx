@@ -147,7 +147,7 @@ export default function BookingManagement() {
           <Typography variant="h4" component="h2" className="font-bold text-cyan-900 mb-4" >
             Room Management
           </Typography>
-          <Button variant="contained" color="primary" onClick={handleOpenModal} className="mb-4" >
+          <Button variant="contained" color="primary" onClick={handleOpenModal} className="mb-4" style={{ marginBottom: "16px" }} >
             Add Room
           </Button>
         </div>

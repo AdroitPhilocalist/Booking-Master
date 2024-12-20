@@ -95,36 +95,36 @@ export default function RoomCategories() {
       )}
       <div className="p-4">
         <div className="p-4">
-          {/* Updated header section with proper alignment */}
-          <div className="flex justify-between items-center px-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
-            {/* Left side - Category List header */}
-            <div className="flex-none mb-4">
+          {/* Header container */}
+          <div style={{ maxWidth: '80%', margin: '0 auto', marginBottom: '2rem' }}>
+            {/* First row - Title and Display records */}
+            <div className="flex justify-between items-center mb-6">
               <h2 style={{ color: "#082930", fontWeight: "bold", fontSize: "1.75rem" }}>
                 Category List
               </h2>
-            </div>
 
-            {/* Right side - Controls */}
-            <div className="flex items-center mb-4">
               <div className="flex items-center space-x-2">
                 <span>Display</span>
                 <select className="border p-1 rounded">
                   <option>15</option>
                 </select>
                 <span>records</span>
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  className="ml-4 border rounded p-2 w-64 mr-4 mb-3"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
               </div>
+            </div>
 
+            {/* Second row - Search and Add New button */}
+            <div className="flex justify-between items-center">
+              <input
+                type="search"
+                placeholder="Search..."
+                className="border rounded p-2 w-64"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              
               <Button
                 variant="contained"
                 color="success"
-                className="ml-10 mb-4"
                 onClick={() => router.push("/property/roomcategories/addRoomCategory")}
               >
                 Add New +
