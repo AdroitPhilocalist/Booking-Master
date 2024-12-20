@@ -3,10 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
-import { 
-  Button, TableContainer, Table, TableHead, TableBody, 
-  TableRow, TableCell, Paper, TextField, Box 
-} from "@mui/material";
+import { Button, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, TextField, Box } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -23,53 +20,50 @@ export default function Billing() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
         // 1. Fetch all data in parallel
-        const [billingResponse, roomsResponse, bookingResponse] = await Promise.all([
-          fetch("/api/Billing"),
+        const [roomsResponse, billingResponse, bookingResponse] = await Promise.all([
           fetch("/api/rooms"),
+          fetch("/api/Billing"),
           fetch("/api/NewBooking")
         ]);
 
-        const [billingResult, roomsResult, bookingResult] = await Promise.all([
-          billingResponse.json(),
+        const [roomsResult, billingResult, bookingResult] = await Promise.all([
           roomsResponse.json(),
+          billingResponse.json(),
           bookingResponse.json()
         ]);
 
-        if (billingResult.success && roomsResult.success && bookingResult.success) {
-          // Create a Set to track processed billing IDs
-          const processedBillingIds = new Set();
-          
-          // First, create a map of all billing records for quick lookup
+        if (roomsResult.success && billingResult.success && bookingResult.success) {
+          // Create maps for quick lookups
           const billingsMap = new Map(
             billingResult.data.map(bill => [bill._id, bill])
           );
 
-          // Process only current active bills from rooms
-          const enrichedBills = roomsResult.data
-            .filter(room => room.currentBillingId && !processedBillingIds.has(room.currentBillingId))
-            .map(room => {
-              // Get the current billing record
-              const currentBill = billingsMap.get(room.currentBillingId);
-              if (!currentBill) return null;
+          const bookingsMap = new Map(
+            bookingResult.data.map(booking => [booking._id, booking])
+          );
 
-              // Find guest using currentGuestId
-              const matchedGuest = bookingResult.data.find(booking => 
-                booking._id === room.currentGuestId
-              );
+          // Process all bills from each room's billWaitlist
+          const enrichedBills = roomsResult.data.flatMap(room => {
+            // Only process rooms that have bills in waitlist
+            if (!room.billWaitlist || room.billWaitlist.length === 0) return [];
 
-              // Add this billing ID to processed set
-              processedBillingIds.add(room.currentBillingId);
+            return room.billWaitlist.map((billId, index) => {
+              const bill = billingsMap.get(billId);
+              if (!bill) return null;
+
+              // Get corresponding guest from guestWaitlist
+              const guestId = room.guestWaitlist[index];
+              const guest = bookingsMap.get(guestId);
 
               return {
-                ...currentBill,
+                ...bill,
                 roomNo: room.number.toString(),
-                guestName: matchedGuest ? matchedGuest.guestName : "N/A",
-                currentBillingId: room.currentBillingId
+                guestName: guest ? guest.guestName : "N/A",
+                currentBillingId: billId
               };
-            })
-            .filter(Boolean); // Remove null entries
+            });
+          }).filter(Boolean); // Remove null entries
 
           setBillingData(enrichedBills);
           setOriginalBillingData(enrichedBills);
@@ -88,25 +82,25 @@ export default function Billing() {
 
   const filteredBillingData = useMemo(() => {
     let result = originalBillingData;
-
+    
     if (filterStatus !== "all") {
       result = result.filter(
         bill => bill.Bill_Paid === (filterStatus === "paid" ? "yes" : "no")
       );
     }
-
+    
     if (searchRoom) {
       result = result.filter(bill => 
         bill.roomNo.toString().toLowerCase().includes(searchRoom.toLowerCase())
       );
     }
-
+    
     if (searchGuest) {
       result = result.filter(bill =>
         bill.guestName.toLowerCase().includes(searchGuest.toLowerCase())
       );
     }
-
+    
     return result;
   }, [originalBillingData, filterStatus, searchRoom, searchGuest]);
 
@@ -114,7 +108,6 @@ export default function Billing() {
     router.push(`/property/billing/guest-bill/${bill.currentBillingId}`);
   };
 
-  // Rest of the component remains the same...
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
@@ -123,8 +116,8 @@ export default function Billing() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
             <svg aria-hidden="true" className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
             </svg>
             <span className="mt-4 text-gray-700">Loading Bills...</span>
           </div>
@@ -196,8 +189,12 @@ export default function Billing() {
               flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: '12px',
-                '&:hover fieldset': { borderColor: '#28bfdb' },
-                '&.Mui-focused fieldset': { borderColor: '#28bfdb' }
+                '&:hover fieldset': {
+                  borderColor: '#28bfdb'
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#28bfdb'
+                }
               }
             }}
           />
@@ -220,8 +217,12 @@ export default function Billing() {
               flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: '12px',
-                '&:hover fieldset': { borderColor: '#28bfdb' },
-                '&.Mui-focused fieldset': { borderColor: '#28bfdb' }
+                '&:hover fieldset': {
+                  borderColor: '#28bfdb'
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#28bfdb'
+                }
               }
             }}
           />
@@ -285,7 +286,9 @@ export default function Billing() {
                         onClick={() => handleViewBill(bill)}
                         sx={{
                           backgroundColor: "#28bfdb",
-                          '&:hover': { backgroundColor: "#1e9ab8" }
+                          '&:hover': {
+                            backgroundColor: "#1e9ab8"
+                          }
                         }}
                       >
                         View Bill

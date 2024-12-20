@@ -19,24 +19,10 @@ export async function POST(req) {
             );
         }
 
-        // Calculate total amount including taxes and considering quantities
-        let totalAmount = 0;
-        const subtotalList = data.priceList.map((price, index) => price * (data.quantityList[index] || 1));
-        const subTotal = subtotalList.reduce((sum, subtotal) => sum + subtotal, 0);
-        const taxTotal = data.taxList ? data.taxList.reduce((sum, tax) => sum + tax, 0) : 0;
-        totalAmount = subTotal + taxTotal;
-
-        // Add totalAmount to data before creating the bill
-        const newBillData = { 
-            ...data, 
-            totalAmount, 
-            dueAmount: totalAmount - (data.amountAdvanced || 0) 
-        };
-
-        const newBill = new Billing(newBillData);
+        const newBill = new Billing(data);
         const result = await newBill.save();
-
         return NextResponse.json({ success: true, data: result }, { status: 201 });
+    
     } catch (error) {
         console.error('Error creating bill:', error);
         return NextResponse.json(
