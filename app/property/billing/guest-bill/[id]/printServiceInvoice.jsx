@@ -120,7 +120,8 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
                             <TableHead>
                                 <TableRow sx={{ bgcolor: '#00bcd4' }}>
                                     <TableCell sx={{ color: 'white' }}>Service</TableCell>
-                                    <TableCell align="right" sx={{ color: 'white' }}>Tax(%)</TableCell>
+                                    <TableCell align="center" sx={{ color: 'white' }}>Quantity</TableCell>
+                                    <TableCell align="center" sx={{ color: 'white' }}>Tax(%)</TableCell>
                                     <TableCell align="right" sx={{ color: 'white' }}>Total</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -128,9 +129,8 @@ const PrintableServiceInvoice = ({ bookingDetails, isPaymentComplete }) => {
                                 {services.filter(service => service.name !== `Room Charge`).map((service, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{service.name}</TableCell>
-                                        <TableCell align="right">
-                                            {(service.tax)}
-                                        </TableCell>
+                                        <TableCell align="center">{service.quantity}</TableCell>
+                                        <TableCell align="center">{(service.tax)}</TableCell>
                                         <TableCell align="right">₹{service.price.toFixed(2)}</TableCell>
                                     </TableRow>
                                 ))}

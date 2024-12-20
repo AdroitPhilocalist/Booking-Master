@@ -50,15 +50,19 @@ const BookingDashboard = () => {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [remainingDueAmount, setRemainingDueAmount] = useState(0);
 
+  // Add new state variables for managing food items
+  const [selectedFoodItems, setSelectedFoodItems] = useState([]); // Array to store multiple food items
+  const [foodQuantity, setFoodQuantity] = useState(1);
+
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
-        // Fetch billing details
+        // 1. First fetch billing details
         const billingResponse = await axios.get(`/api/Billing/${id}`);
         const billingData = billingResponse.data.data;
 
-        // Fetch existing services if any
+        // 2. Fetch existing services if any
         const existingServices = billingData.itemList || [];
         const existingPrices = billingData.priceList || [];
         const existingTaxes = billingData.taxList || [];
@@ -67,50 +71,41 @@ const BookingDashboard = () => {
           existingServices.map((item, index) => ({
             name: item,
             price: existingPrices[index] || 0,
+            quantity: billingData.quantityList[index] || 1,
             tax: existingTaxes[index] || 0,
           }))
         );
 
-        console.log(billingData);
-        console.log(typeof billingData.roomNo, billingData.roomNo);
-
-        // Find the matching booking using roomNo
-        const newBookingsResponse = await axios.get("/api/NewBooking");
-        console.log(newBookingsResponse.data);
-        const matchedBooking = newBookingsResponse.data.data.find((booking) =>
-          booking.roomNumbers.some(
-            (roomNumber) => roomNumber.toString() === billingData.roomNo
-          )
+        // 3. Fetch and find matched room
+        const roomsResponse = await axios.get("/api/rooms");
+        const matchedRoom = roomsResponse.data.data.find(
+          (room) => room.number === billingData.roomNo
         );
 
-        console.log(matchedBooking);
+        if (!matchedRoom) {
+          throw new Error("No matching room found");
+        }
+
+        // 4. Fetch bookings and match using currentGuestId
+        const newBookingsResponse = await axios.get("/api/NewBooking");
+        const matchedBooking = newBookingsResponse.data.data.find(
+          (booking) => booking._id === matchedRoom.currentGuestId
+        );
 
         if (!matchedBooking) {
           throw new Error("No matching booking found");
         }
 
-        // Fetch room details
-        const roomsResponse = await axios.get("/api/rooms");
-        console.log(roomsResponse.data);
-        const matchedRoom = roomsResponse.data.data.find(
-          (room) => room.number === billingData.roomNo
-        );
-
-        console.log(matchedRoom.category._id);
-        console.log(matchedRoom._id);
-
-        // Fetch room category details
+        // 5. Fetch room category details
         const roomCategoriesResponse = await axios.get("/api/roomCategories");
-        console.log(roomCategoriesResponse.data);
         const matchedCategory = roomCategoriesResponse.data.data.find(
           (category) => category._id === matchedRoom.category._id
         );
-        console.log(matchedCategory.total);
 
         // Calculate due amount
         const dueAmount = billingData.dueAmount;
         setRemainingDueAmount(dueAmount);
-        console.log(dueAmount);
+
         // Combine all fetched data
         setBookingData({
           billing: billingData,
@@ -122,6 +117,7 @@ const BookingDashboard = () => {
       } catch (err) {
         setError(err.message);
         setLoading(false);
+        console.error("Error fetching booking details:", err);
       }
     };
 
@@ -211,15 +207,17 @@ const BookingDashboard = () => {
       alert("Please enter service name, price, and tax");
       return;
     }
-
+    console.log(serviceName, servicePrice, serviceTax);
+    console.log(id);
     try {
       // Prepare the data to update
       const response = await axios.put(`/api/Billing/${id}`, {
         itemList: [serviceName],
         priceList: [parseFloat(serviceTotal)],
+        quantityList: [1], // Send quantity as 1
         taxList: [parseFloat(serviceTax)], // Send tax to taxList
       });
-
+      console.log(response.data);
       // Update local state
       setServices([
         ...services,
@@ -261,21 +259,77 @@ const BookingDashboard = () => {
       setFoodName(selectedItem.itemName);
       setFoodPrice(selectedItem.price);
       setFoodTax(selectedItem.gst);
+      setFoodQuantity(1); // Reset quantity when new item selected
     }
   };
 
-  // Handle adding food
-  const handleAddFood = async () => {
+  // Add function to handle quantity change
+  const handleQuantityChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (value > 0) {
+      setFoodQuantity(value);
+    }
+  };
+
+  // Add function to add item to selected items list
+  const handleAddToList = () => {
     if (!selectedFoodItem) {
       alert("Please select a food item");
       return;
     }
 
+    const newItem = {
+      ...selectedFoodItem,
+      quantity: foodQuantity,
+      totalPrice: selectedFoodItem.price * foodQuantity
+    };
+
+    setSelectedFoodItems([...selectedFoodItems, newItem]);
+
+    // Reset selection fields
+    setSelectedFoodItem(null);
+    setFoodName("");
+    setFoodPrice("");
+    setFoodTax("");
+    setFoodQuantity(1);
+  };
+
+  // Add function to remove item from list
+  const handleRemoveItem = (index) => {
+    const updatedItems = selectedFoodItems.filter((_, idx) => idx !== index);
+    setSelectedFoodItems(updatedItems);
+  };
+
+  // Add function to update quantity in the list
+  const handleUpdateQuantity = (index, newQuantity) => {
+    if (newQuantity < 1) return;
+
+    const updatedItems = selectedFoodItems.map((item, idx) => {
+      if (idx === index) {
+        return {
+          ...item,
+          quantity: newQuantity,
+          totalPrice: item.price * newQuantity
+        };
+      }
+      return item;
+    });
+    setSelectedFoodItems(updatedItems);
+  };
+
+  // Update handleAddFood function to handle multiple items
+  const handleAddFood = async () => {
+    if (selectedFoodItems.length === 0) {
+      alert("Please add at least one food item");
+      return;
+    }
+
     try {
       const response = await axios.put(`/api/Billing/${id}`, {
-        itemList: [selectedFoodItem.itemName],
-        priceList: [parseFloat(selectedFoodItem.price)],
-        taxList: [parseFloat(selectedFoodItem.gst)]
+        itemList: selectedFoodItems.map(item => item.itemName),
+        priceList: selectedFoodItems.map(item => item.totalPrice),
+        quantityList: selectedFoodItems.map(item => item.quantity),
+        taxList: selectedFoodItems.map(item => parseFloat(item.gst))
       });
 
       console.log(response.data);
@@ -283,11 +337,11 @@ const BookingDashboard = () => {
       // Update local state
       setServices([
         ...services,
-        {
-          name: selectedFoodItem.itemName,
-          price: parseFloat(selectedFoodItem.price),
-          tax: parseFloat(selectedFoodItem.gst)
-        }
+        ...selectedFoodItems.map(item => ({
+          name: item.itemName,
+          price: item.totalPrice,
+          tax: parseFloat(item.gst)
+        }))
       ]);
 
       handleCloseFoodModal();
@@ -297,7 +351,6 @@ const BookingDashboard = () => {
       alert("Failed to add food");
     }
   };
-
   // Handle opening bill payment modal
   const handleOpenBillPaymentModal = () => {
     setOpenBillPaymentModal(true);
@@ -449,7 +502,7 @@ const BookingDashboard = () => {
               Phone No: <strong>+91 {booking.mobileNo}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
-              Guest ID: <strong>{booking.guestid}</strong> | Date of 
+              Guest ID: <strong>{booking.guestid}</strong> | Date of
               Birth: <strong>{new Date(booking.dateofbirth).toLocaleDateString('en-GB')}
               </strong> | Booking Type:{" "}
               <strong>{booking.bookingType}</strong> | Booking Source:{" "}
@@ -615,14 +668,14 @@ const BookingDashboard = () => {
 
           {/* Payments and Room Tokens */}
           <div className="mt-6">
-            <h3 className="font-semibold text-gray-800 text-center">
+            <h3 className="font-semibold text-gray-800 text-center ml-16">
               Payments (1)
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Date</th>
-                  <th className="p-2 text-left">Mode of Payment</th>
+                  <th className="p-2 text-center">Mode of Payment</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
@@ -633,7 +686,7 @@ const BookingDashboard = () => {
                     <td className="p-2 text-left">
                       {new Date(date).toLocaleDateString('en-GB')}
                     </td>
-                    <td className="p-2 text-left">
+                    <td className="p-2 text-center">
                       {billing.ModeOfPayment[index]}
                     </td>
                     <td className="p-2 text-right">
@@ -654,14 +707,14 @@ const BookingDashboard = () => {
               Complete Payment
             </Button>
 
-            <h3 className="mt-4 font-semibold text-gray-800 text-center">
+            <h3 className="mt-4 font-semibold text-gray-800 text-center ml-16">
               Room Tokens (1)
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Date</th>
-                  <th className="p-2 text-left">Room Details</th>
+                  <th className="p-2 text-center">Room Details</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
@@ -670,7 +723,7 @@ const BookingDashboard = () => {
                   <td className="p-2 text-left">
                     {new Date(booking.checkIn).toLocaleDateString('en-GB')}
                   </td>
-                  <td className="p-2 text-left">
+                  <td className="p-2 text-center">
                     Room #{billing.roomNo} - {room.category.category}
                   </td>
                   <td className="p-2 text-right">
@@ -714,13 +767,14 @@ const BookingDashboard = () => {
                 />
               </Box>
             </Modal>
-            <h3 className="font-semibold text-gray-800 text-center">
-              Services ({services.length-1})
+            <h3 className="font-semibold text-gray-800 text-center ml-16">
+              Services ({services.length - 1})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Item</th>
+                  <th className="p-2 text-center">Item Quantity</th>
                   <th className="p-2 text-center">Item Tax</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
@@ -731,6 +785,7 @@ const BookingDashboard = () => {
                   .map((service, index) => (
                     <tr key={index}>
                       <td className="p-2 text-left">{service.name}</td>
+                      <td className="p-2 text-center">{service.quantity}</td>
                       <td className="p-2 text-center">{service.tax}%</td>
                       <td className="p-2 text-right">
                         {service.price.toFixed(2)}
@@ -810,72 +865,141 @@ const BookingDashboard = () => {
             </Modal>
 
             {/* Add Food Modal */}
-            <Modal
-              open={openFoodModal}
-              onClose={handleCloseFoodModal}
-              aria-labelledby="add-food-modal"
-            >
+            <Modal open={openFoodModal} onClose={handleCloseFoodModal} aria-labelledby="add-food-modal">
               <Box sx={{
                 position: "absolute",
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: 400,
+                width: 600,
                 bgcolor: "background.paper",
                 border: "2px solid #000",
                 boxShadow: 24,
                 p: 4
               }}>
                 <Typography id="add-food-modal" variant="h6" component="h2">
-                  Add Food
+                  Add Food Items
                 </Typography>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Food Item</InputLabel>
-                  <Select
-                    value={foodName}
-                    label="Food Item"
-                    onChange={handleFoodItemChange}
+
+                {/* Food Selection Form */}
+                <div className="mb-4">
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Food Item</InputLabel>
+                    <Select
+                      value={foodName}
+                      label="Food Item"
+                      onChange={handleFoodItemChange}
+                    >
+                      {menuItems.map((item) => (
+                        <MenuItem key={item._id} value={item.itemName}>
+                          {item.itemName}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    readOnly
+                    disabled
+                    label="Food Price"
+                    value={foodPrice}
+                    InputProps={{ readOnly: true }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    readOnly
+                    disabled
+                    label="Food Tax (%)"
+                    value={foodTax}
+                    InputProps={{ readOnly: true }}
+                  />
+
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    type="number"
+                    label="Quantity"
+                    value={foodQuantity}
+                    onChange={handleQuantityChange}
+                    inputProps={{ min: 1 }}
+                  />
+
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleAddToList}
+                    disabled={!selectedFoodItem}
+                    sx={{ mt: 2 }}
                   >
-                    {menuItems.map((item) => (
-                      <MenuItem key={item._id} value={item.itemName}>
-                        {item.itemName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    Add to List
+                  </Button>
+                </div>
 
-                <TextField
-                  fullWidth
-                  margin="normal"
-                  readOnly
-                  disabled
-                  label="Food Price"
-                  value={foodPrice}
-                  InputProps={{ readOnly: true }}
-                />
+                {/* Selected Items Table */}
+                {selectedFoodItems.length > 0 && (
+                  <div className="mt-4">
+                    <Typography className="text-center" variant="h6">Selected Items</Typography>
+                    <table className="w-full mt-2">
+                      <thead>
+                        <tr>
+                          <th className="text-left">Item Name</th>
+                          <th className="text-center">Price</th>
+                          <th className="text-center">Quantity</th>
+                          <th className="text-center">Total</th>
+                          <th className="text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedFoodItems.map((item, index) => (
+                          <tr key={index}>
+                            <td className="text-left">{item.itemName}</td>
+                            <td className="text-center">₹{item.price}</td>
+                            <td className="text-center">
+                              <div>
+                                <Button
+                                  size="small"
+                                  onClick={() => handleUpdateQuantity(index, item.quantity - 1)}
+                                >
+                                  -
+                                </Button>
+                                <span className="text-center mx-2">{item.quantity}</span>
+                                <Button
+                                  size="small"
+                                  onClick={() => handleUpdateQuantity(index, item.quantity + 1)}
+                                >
+                                  +
+                                </Button>
+                              </div>
+                            </td>
+                            <td className="text-center">₹{item.totalPrice}</td>
+                            <td className="text-right">
+                              <Button
+                                color="error"
+                                size="small"
+                                onClick={() => handleRemoveItem(index)}
+                              >
+                                Delete
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
-                <TextField
-                  fullWidth
-                  margin="normal"
-                  readOnly
-                  disabled
-                  label="Food Tax (%)"
-                  value={foodTax}
-                  InputProps={{ readOnly: true }}
-                />
-
-                <Box sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mt: 2
-                }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={handleAddFood}
-                    disabled={!selectedFoodItem}
+                    disabled={selectedFoodItems.length === 0}
                   >
-                    Submit
+                    Submit All Items
                   </Button>
                   <Button
                     variant="outlined"
