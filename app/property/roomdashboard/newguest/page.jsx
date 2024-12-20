@@ -857,7 +857,8 @@ export default function BookingForm() {
                 <Button 
                   disabled={selectedRooms.length === 0}
                   onClick={handleSubmit}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white transition-all duration-300 ease-in-out hover:opacity-90"
+                  sx={{ fontWeight: 'bold', color: 'white' }}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 transition-all duration-300 ease-in-out hover:opacity-90"
                 >
                   Confirm Selection
                 </Button>
