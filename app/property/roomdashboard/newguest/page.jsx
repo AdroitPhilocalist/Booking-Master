@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Bed, Users, Calendar, Clock, Building, Tag, 
+import {
+  Bed, Users, Calendar, Clock, Building, Tag,
   ArrowRight, CheckCircle, Home, Hotel, Coffee
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -166,7 +166,7 @@ export default function BookingForm() {
           const existingCheckOut = new Date(room.checkOutDateList[i]);
 
           // Check for overlap
-          const hasOverlap = !(checkOutDate <= existingCheckIn || checkInDate >= existingCheckOut);
+          const hasOverlap = !(checkOutDate < existingCheckIn || checkInDate >= existingCheckOut);
 
           if (hasOverlap) {
             return false; // Room is not available if there's any overlap
@@ -364,18 +364,18 @@ export default function BookingForm() {
   };
 
   const modalAnimation = {
-    hidden: { 
+    hidden: {
       opacity: 0,
       scale: 0.95,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: [0.4, 0, 0.2, 1]
       }
     },
-    visible: { 
+    visible: {
       opacity: 1,
       scale: 1,
-      transition: { 
+      transition: {
         duration: 0.4,
         ease: [0.4, 0, 0.2, 1]
       }
@@ -383,7 +383,7 @@ export default function BookingForm() {
     exit: {
       opacity: 0,
       scale: 0.95,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: [0.4, 0, 0.2, 1]
       }
@@ -391,18 +391,18 @@ export default function BookingForm() {
   };
 
   const cardAnimation = {
-    hidden: { 
+    hidden: {
       opacity: 0,
       y: 20,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: [0.4, 0, 0.2, 1]
       }
     },
-    visible: { 
+    visible: {
       opacity: 1,
       y: 0,
-      transition: { 
+      transition: {
         duration: 0.4,
         ease: [0.4, 0, 0.2, 1]
       }
@@ -410,7 +410,7 @@ export default function BookingForm() {
     exit: {
       opacity: 0,
       y: -20,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: [0.4, 0, 0.2, 1]
       }
@@ -426,30 +426,30 @@ export default function BookingForm() {
   };
 
   const filterAnimation = {
-    hidden: { 
+    hidden: {
       opacity: 0,
       x: -20,
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: [0.4, 0, 0.2, 1]
       }
     },
-    visible: { 
+    visible: {
       opacity: 1,
       x: 0,
-      transition: { 
+      transition: {
         duration: 0.4,
         ease: [0.4, 0, 0.2, 1]
       }
     }
   };
 
-    // Function to handle modal close
-    const handleCloseModal = () => {
-      setSelectedRooms([]); // Reset selected rooms
-      setSelectedCategory('all'); // Reset category filter
-      setModalOpen(false); // Close the modal
-    };
+  // Function to handle modal close
+  const handleCloseModal = () => {
+    setSelectedRooms([]); // Reset selected rooms
+    setSelectedCategory('all'); // Reset category filter
+    setModalOpen(false); // Close the modal
+  };
 
   return (
     <div className="min-h-screen bg-amber-50">
@@ -560,26 +560,26 @@ export default function BookingForm() {
                 />
 
                 {/* Date of Anniversary */}
-{/* Date of Anniversary */}
-            <TextField
-  label="Date of Anniversary"
-  type="date"
-  name="dateofanniversary"
-  value={formData.dateofanniversary}
-  onChange={handleChange}
-  InputLabelProps={{ shrink: true }}
-  fullWidth
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      '&.Mui-focused fieldset': {
-        borderColor: '#A020F0', // Blue-purple color
-      },
-      '&:hover fieldset': {
-        borderColor: '#A020F0', // Blue-purple color
-      }
-    }
-  }}
-/>
+                {/* Date of Anniversary */}
+                <TextField
+                  label="Date of Anniversary"
+                  type="date"
+                  name="dateofanniversary"
+                  value={formData.dateofanniversary}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#A020F0', // Blue-purple color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#A020F0', // Blue-purple color
+                      }
+                    }
+                  }}
+                />
 
                 {/* Company Name */}
                 <TextField
@@ -643,47 +643,26 @@ export default function BookingForm() {
                 />
 
                 {/* Check-in */}
-{/* Check-in */}
-<TextField
-  label="Check-in"
-  type="date"
-  name="checkIn"
-  value={formData.checkIn}
-  onChange={handleChange}
-  InputLabelProps={{ shrink: true }}
-  fullWidth
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      '&.Mui-focused fieldset': {
-        borderColor: '#f97316', // Orange color
-      },
-      '&:hover fieldset': {
-        borderColor: '#f97316', // Orange color
-      }
-    }
-  }}
-/>
-
-{/* Check-out */}
-<TextField
-  label="Check-out"
-  type="date"
-  name="checkOut"
-  value={formData.checkOut}
-  onChange={handleChange}
-  InputLabelProps={{ shrink: true }}
-  fullWidth
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      '&.Mui-focused fieldset': {
-        borderColor: '#f97316', // Orange color
-      },
-      '&:hover fieldset': {
-        borderColor: '#f97316', // Orange color
-      }
-    }
-  }}
-/>
+                {/* Check-in */}
+                <TextField
+                  label="Check-in"
+                  type="date"
+                  name="checkIn"
+                  value={formData.checkIn}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      }
+                    }
+                  }}
+                />
 
                 {/* Check-out */}
                 <TextField
@@ -694,6 +673,16 @@ export default function BookingForm() {
                   onChange={handleChange}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      }
+                    }
+                  }}
                 />
 
                 {/* Expected Arrival */}
@@ -799,18 +788,18 @@ export default function BookingForm() {
       </main>
       <Footer />
       {/* Modal for Room Selection */}
-      
-      <Dialog 
-        open={modalOpen} 
+
+      <Dialog
+        open={modalOpen}
         onClose={handleCloseModal} // Updated to use new close handler
         className="relative z-50"
       >
-        <div 
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm" 
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
           aria-hidden="true"
           onClick={handleCloseModal} // Close on backdrop click
         />
-        
+
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <motion.div
             initial="hidden"
@@ -828,7 +817,7 @@ export default function BookingForm() {
 
             <DialogContent className="p-6">
               {/* Category Filters */}
-              <motion.div 
+              <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={filterAnimation}
@@ -871,19 +860,19 @@ export default function BookingForm() {
                       transition={{ delay: index * 0.05 }}
                       className={`
                         relative rounded-xl overflow-hidden transform-gpu
-                        ${selectedRooms.includes(room.number) 
-                          ? 'ring-2 ring-blue-500 shadow-lg' 
+                        ${selectedRooms.includes(room.number)
+                          ? 'ring-2 ring-blue-500 shadow-lg'
                           : 'ring-1 ring-gray-200'}
                       `}
                     >
-                      <motion.div 
+                      <motion.div
                         onClick={() => handleRoomSelection(room.number)}
                         className="cursor-pointer p-4 bg-white transition-colors duration-300"
                         whileHover={{
                           backgroundColor: "rgba(249, 250, 251, 1)",
                         }}
                       >
-                        <motion.div 
+                        <motion.div
                           className="flex justify-between items-start mb-3"
                           whileHover={{ scale: 1.02 }}
                           transition={{ duration: 0.2 }}
@@ -911,7 +900,7 @@ export default function BookingForm() {
                           </motion.div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="space-y-2"
                           whileHover={{ x: 5 }}
                           transition={{ duration: 0.2 }}
@@ -931,7 +920,7 @@ export default function BookingForm() {
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0, opacity: 0 }}
-                            transition={{ 
+                            transition={{
                               type: "spring",
                               stiffness: 500,
                               damping: 30
@@ -949,7 +938,7 @@ export default function BookingForm() {
             </DialogContent>
 
             <div className="p-4 bg-gray-50 border-t flex justify-between items-center">
-              <motion.div 
+              <motion.div
                 className="flex items-center space-x-2 text-gray-600"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
@@ -957,16 +946,16 @@ export default function BookingForm() {
                 <Users className="w-5 h-5" />
                 <span>{selectedRooms.length} rooms selected</span>
               </motion.div>
-              
+
               <div className="space-x-3">
-                <Button 
+                <Button
                   variant="outline"
                   onClick={handleCloseModal} // Updated to use new close handler
                   className="transition-all duration-300 ease-in-out hover:bg-gray-100 hover:scale-105"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   disabled={selectedRooms.length === 0}
                   onClick={handleSubmit}
                   sx={{ fontWeight: 'bold', color: 'white' }}
