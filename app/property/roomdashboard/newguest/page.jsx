@@ -367,17 +367,26 @@ export default function BookingForm() {
     hidden: { 
       opacity: 0,
       scale: 0.95,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
     },
     visible: { 
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.3, ease: "easeOut" }
+      transition: { 
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1]
+      }
     },
     exit: {
       opacity: 0,
       scale: 0.95,
-      transition: { duration: 0.2, ease: "easeIn" }
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
     }
   };
 
@@ -385,17 +394,34 @@ export default function BookingForm() {
     hidden: { 
       opacity: 0,
       y: 20,
-      transition: { duration: 0.2 }
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
     },
     visible: { 
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3 }
+      transition: { 
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1]
+      }
     },
     exit: {
       opacity: 0,
       y: -20,
-      transition: { duration: 0.2 }
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    hover: {
+      y: -8,
+      scale: 1.02,
+      transition: {
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
     }
   };
 
@@ -403,14 +429,27 @@ export default function BookingForm() {
     hidden: { 
       opacity: 0,
       x: -20,
-      transition: { duration: 0.2 }
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
     },
     visible: { 
       opacity: 1,
       x: 0,
-      transition: { duration: 0.3 }
+      transition: { 
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1]
+      }
     }
   };
+
+    // Function to handle modal close
+    const handleCloseModal = () => {
+      setSelectedRooms([]); // Reset selected rooms
+      setSelectedCategory('all'); // Reset category filter
+      setModalOpen(false); // Close the modal
+    };
 
   return (
     <div className="min-h-screen bg-amber-50">
@@ -717,12 +756,17 @@ export default function BookingForm() {
       </main>
       <Footer />
       {/* Modal for Room Selection */}
+      
       <Dialog 
         open={modalOpen} 
-        onClose={() => setModalOpen(false)}
+        onClose={handleCloseModal} // Updated to use new close handler
         className="relative z-50"
       >
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+        <div 
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm" 
+          aria-hidden="true"
+          onClick={handleCloseModal} // Close on backdrop click
+        />
         
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <motion.div
@@ -750,9 +794,9 @@ export default function BookingForm() {
                 <Button
                   variant={selectedCategory === 'all' ? 'default' : 'outline'}
                   onClick={() => handleCategoryFilter('all')}
-                  className="group transition-all duration-300 ease-in-out"
+                  className="group transition-all duration-500 ease-in-out hover:shadow-lg"
                 >
-                  <Building className="w-4 h-4 mr-2 transition-transform duration-300 ease-in-out group-hover:scale-110" />
+                  <Building className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
                   All Rooms
                 </Button>
 
@@ -761,15 +805,15 @@ export default function BookingForm() {
                     key={category._id}
                     variant={selectedCategory === category._id ? 'default' : 'outline'}
                     onClick={() => handleCategoryFilter(category._id)}
-                    className="group transition-all duration-300 ease-in-out"
+                    className="group transition-all duration-500 ease-in-out hover:shadow-lg"
                   >
-                    <Tag className="w-4 h-4 mr-2 transition-transform duration-300 ease-in-out group-hover:scale-110" />
+                    <Tag className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
                     {category.category}
                   </Button>
                 ))}
               </motion.div>
 
-              {/* Room Grid - Increased columns for wider layout */}
+              {/* Room Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <AnimatePresence mode="popLayout">
                   {filteredRooms.map((room, index) => (
@@ -779,22 +823,35 @@ export default function BookingForm() {
                       initial="hidden"
                       animate="visible"
                       exit="exit"
+                      whileHover="hover"
                       variants={cardAnimation}
                       transition={{ delay: index * 0.05 }}
                       className={`
-                        relative rounded-xl overflow-hidden
+                        relative rounded-xl overflow-hidden transform-gpu
                         ${selectedRooms.includes(room.number) 
                           ? 'ring-2 ring-blue-500 shadow-lg' 
                           : 'ring-1 ring-gray-200'}
                       `}
                     >
-                      <div 
+                      <motion.div 
                         onClick={() => handleRoomSelection(room.number)}
-                        className="cursor-pointer p-4 bg-white hover:bg-gray-50 transition-all duration-300 ease-in-out"
+                        className="cursor-pointer p-4 bg-white transition-colors duration-300"
+                        whileHover={{
+                          backgroundColor: "rgba(249, 250, 251, 1)",
+                        }}
                       >
-                        <div className="flex justify-between items-start mb-3">
+                        <motion.div 
+                          className="flex justify-between items-start mb-3"
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ duration: 0.2 }}
+                        >
                           <div className="flex items-center space-x-2">
-                            <Bed className="w-5 h-5 text-blue-500" />
+                            <motion.div
+                              whileHover={{ rotate: 360 }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <Bed className="w-5 h-5 text-blue-500" />
+                            </motion.div>
                             <span className="text-lg font-semibold">
                               Room {room.number}
                             </span>
@@ -802,38 +859,46 @@ export default function BookingForm() {
                           <motion.div
                             initial={{ scale: 0.5, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.2 }}
+                            transition={{ duration: 0.3 }}
                           >
                             {/* <Checkbox 
                               checked={selectedRooms.includes(room.number)}
                               className="h-5 w-5"
                             /> */}
                           </motion.div>
-                        </div>
+                        </motion.div>
 
-                        <div className="space-y-2">
-                          {/* <div className="flex items-center text-gray-600">
-                            <Building className="w-4 h-4 mr-2" />
+                        <motion.div 
+                          className="space-y-2"
+                          whileHover={{ x: 5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {/* <div className="flex items-center text-gray-600 group">
+                            <Building className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
                             <span>{room.category.category}</span>
                           </div> */}
-                          <div className="flex items-center text-gray-600">
-                            <ArrowRight className="w-4 h-4 mr-2" />
+                          <div className="flex items-center text-gray-600 group">
+                            <ArrowRight className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:translate-x-1" />
                             <span>Floor {room.floor}</span>
                           </div>
-                        </div>
+                        </motion.div>
 
                         {selectedRooms.includes(room.number) && (
                           <motion.div
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
+                            transition={{ 
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 30
+                            }}
                             className="absolute top-2 right-2"
                           >
                             <CheckCircle className="w-5 h-5 text-green-500" />
                           </motion.div>
                         )}
-                      </div>
+                      </motion.div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -841,24 +906,29 @@ export default function BookingForm() {
             </DialogContent>
 
             <div className="p-4 bg-gray-50 border-t flex justify-between items-center">
-              <div className="flex items-center space-x-2 text-gray-600">
+              <motion.div 
+                className="flex items-center space-x-2 text-gray-600"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
                 <Users className="w-5 h-5" />
                 <span>{selectedRooms.length} rooms selected</span>
-              </div>
+              </motion.div>
               
               <div className="space-x-3">
                 <Button 
                   variant="outline"
-                  onClick={() => setModalOpen(false)}
-                  className="transition-all duration-300 ease-in-out hover:bg-gray-100"
+                  onClick={handleCloseModal} // Updated to use new close handler
+                  className="transition-all duration-300 ease-in-out hover:bg-gray-100 hover:scale-105"
                 >
                   Cancel
                 </Button>
                 <Button 
                   disabled={selectedRooms.length === 0}
                   onClick={handleSubmit}
-                  sx={{ fontWeight: 'bold', color: 'white' }}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 transition-all duration-300 ease-in-out hover:opacity-90"
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white 
+                           transition-all duration-300 ease-in-out 
+                           hover:opacity-90 hover:scale-105 hover:shadow-lg"
                 >
                   Confirm Selection
                 </Button>
