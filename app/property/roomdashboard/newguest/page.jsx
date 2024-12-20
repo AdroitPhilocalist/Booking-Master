@@ -560,15 +560,26 @@ export default function BookingForm() {
                 />
 
                 {/* Date of Anniversary */}
-                <TextField
-                  label="Date of Anniversary"
-                  type="date"
-                  name="dateofanniversary"
-                  value={formData.dateofanniversary}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                />
+{/* Date of Anniversary */}
+            <TextField
+  label="Date of Anniversary"
+  type="date"
+  name="dateofanniversary"
+  value={formData.dateofanniversary}
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  fullWidth
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      '&.Mui-focused fieldset': {
+        borderColor: '#A020F0', // Blue-purple color
+      },
+      '&:hover fieldset': {
+        borderColor: '#A020F0', // Blue-purple color
+      }
+    }
+  }}
+/>
 
                 {/* Company Name */}
                 <TextField
@@ -632,15 +643,47 @@ export default function BookingForm() {
                 />
 
                 {/* Check-in */}
-                <TextField
-                  label="Check-in"
-                  type="date"
-                  name="checkIn"
-                  value={formData.checkIn}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                />
+{/* Check-in */}
+<TextField
+  label="Check-in"
+  type="date"
+  name="checkIn"
+  value={formData.checkIn}
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  fullWidth
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      '&.Mui-focused fieldset': {
+        borderColor: '#f97316', // Orange color
+      },
+      '&:hover fieldset': {
+        borderColor: '#f97316', // Orange color
+      }
+    }
+  }}
+/>
+
+{/* Check-out */}
+<TextField
+  label="Check-out"
+  type="date"
+  name="checkOut"
+  value={formData.checkOut}
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  fullWidth
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      '&.Mui-focused fieldset': {
+        borderColor: '#f97316', // Orange color
+      },
+      '&:hover fieldset': {
+        borderColor: '#f97316', // Orange color
+      }
+    }
+  }}
+/>
 
                 {/* Check-out */}
                 <TextField
