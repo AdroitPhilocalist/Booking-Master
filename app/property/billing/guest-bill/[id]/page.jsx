@@ -278,6 +278,8 @@ const BookingDashboard = () => {
         taxList: [parseFloat(selectedFoodItem.gst)]
       });
 
+      console.log(response.data);
+
       // Update local state
       setServices([
         ...services,

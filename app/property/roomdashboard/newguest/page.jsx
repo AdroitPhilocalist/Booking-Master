@@ -1,8 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Calendar, Clock } from 'lucide-react'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardContent, Checkbox, Typography, Box } from '@mui/material';
+import { 
+  Bed, Users, Calendar, Clock, Building, Tag, 
+  ArrowRight, CheckCircle, Home, Hotel, Coffee
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardContent, Checkbox, Typography, Box, Chip } from '@mui/material';
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 import TextField from '@mui/material/TextField';
@@ -14,8 +18,11 @@ import Select from '@mui/material/Select';
 import { Input } from '@mui/material';
 import { OutlinedInput } from '@mui/material';
 
-
 export default function BookingForm() {
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filteredRooms, setFilteredRooms] = useState([]);
+
   const [focusedInput, setFocusedInput] = useState(null);
   const [formData, setFormData] = useState({
     bookingType: 'FIT',
@@ -82,6 +89,35 @@ export default function BookingForm() {
     setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
   }, []);
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/roomCategories');
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      const result = await response.json();
+      if (result.success && result.data) {
+        setCategories(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      setFilteredRooms(rooms);
+    } else {
+      const filtered = rooms.filter(room => room.category._id === selectedCategory);
+      setFilteredRooms(filtered);
+    }
+  }, [selectedCategory, rooms]);
+
+  const handleCategoryFilter = (categoryId) => {
+    setSelectedCategory(categoryId);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -254,69 +290,69 @@ export default function BookingForm() {
           throw new Error(`Failed to create billing for room ${selectedRoomNumber}`);
         }
 
-       // Prepare new dates and lists
-    const newCheckInDateList = [...(matchedRoom.checkInDateList || []), formData.checkIn];
-    const newCheckOutDateList = [...(matchedRoom.checkOutDateList || []), formData.checkOut];
-    const newBillWaitlist = [...(matchedRoom.billWaitlist || []), billingData.data._id];
-    const newGuestWaitlist = [...(matchedRoom.guestWaitlist || []), guestId];
+        // Prepare new dates and lists
+        const newCheckInDateList = [...(matchedRoom.checkInDateList || []), formData.checkIn];
+        const newCheckOutDateList = [...(matchedRoom.checkOutDateList || []), formData.checkOut];
+        const newBillWaitlist = [...(matchedRoom.billWaitlist || []), billingData.data._id];
+        const newGuestWaitlist = [...(matchedRoom.guestWaitlist || []), guestId];
 
-    // Sort all arrays based on proximity to current date
-    const currentDate = new Date();
-    const [sortedCheckInDates, sortedCheckOutDates, sortedBillWaitlist, sortedGuestWaitlist] = 
-      sortDatesWithCorrespondingArrays(
-        newCheckInDateList,
-        newCheckOutDateList,
-        newBillWaitlist,
-        newGuestWaitlist
-      );
+        // Sort all arrays based on proximity to current date
+        const currentDate = new Date();
+        const [sortedCheckInDates, sortedCheckOutDates, sortedBillWaitlist, sortedGuestWaitlist] =
+          sortDatesWithCorrespondingArrays(
+            newCheckInDateList,
+            newCheckOutDateList,
+            newBillWaitlist,
+            newGuestWaitlist
+          );
 
-    // Initialize room update object
-    const roomUpdate = {
-      checkInDateList: sortedCheckInDates,
-      checkOutDateList: sortedCheckOutDates,
-      billWaitlist: sortedBillWaitlist,
-      guestWaitlist: sortedGuestWaitlist
-    };
+        // Initialize room update object
+        const roomUpdate = {
+          checkInDateList: sortedCheckInDates,
+          checkOutDateList: sortedCheckOutDates,
+          billWaitlist: sortedBillWaitlist,
+          guestWaitlist: sortedGuestWaitlist
+        };
 
-    if (matchedRoom.billingStarted === 'No') {
-      // If room is not currently booked, simply assign new booking as current
-      roomUpdate.currentBillingId = billingData.data._id;
-      roomUpdate.currentGuestId = guestId;
-      roomUpdate.billingStarted = 'Yes';
-    } else {
-      // Fetch current guest's booking details
-      console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
-      const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
-      const currentGuestData = await currentGuestResponse.json();
-      const currentGuestCheckIn = new Date(currentGuestData.data.checkIn);
+        if (matchedRoom.billingStarted === 'No') {
+          // If room is not currently booked, simply assign new booking as current
+          roomUpdate.currentBillingId = billingData.data._id;
+          roomUpdate.currentGuestId = guestId;
+          roomUpdate.billingStarted = 'Yes';
+        } else {
+          // Fetch current guest's booking details
+          console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
+          const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
+          const currentGuestData = await currentGuestResponse.json();
+          const currentGuestCheckIn = new Date(currentGuestData.data.checkIn);
 
-      // Fetch first waitlisted guest's booking details
-      const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]}`);
-      const firstWaitlistedGuestData = await firstWaitlistedGuestResponse.json();
-      const firstWaitlistedCheckIn = new Date(firstWaitlistedGuestData.data.checkIn);
+          // Fetch first waitlisted guest's booking details
+          const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]}`);
+          const firstWaitlistedGuestData = await firstWaitlistedGuestResponse.json();
+          const firstWaitlistedCheckIn = new Date(firstWaitlistedGuestData.data.checkIn);
 
-      // Compare dates to determine which should be current
-      const currentDateDiff = Math.abs(currentDate - currentGuestCheckIn);
-      const waitlistedDateDiff = Math.abs(currentDate - firstWaitlistedCheckIn);
+          // Compare dates to determine which should be current
+          const currentDateDiff = Math.abs(currentDate - currentGuestCheckIn);
+          const waitlistedDateDiff = Math.abs(currentDate - firstWaitlistedCheckIn);
 
-      if (waitlistedDateDiff < currentDateDiff) {
-        // If waitlisted guest's check-in is closer to current date
-        roomUpdate.currentGuestId = sortedGuestWaitlist[0];
-        roomUpdate.currentBillingId = sortedBillWaitlist[0];
+          if (waitlistedDateDiff < currentDateDiff) {
+            // If waitlisted guest's check-in is closer to current date
+            roomUpdate.currentGuestId = sortedGuestWaitlist[0];
+            roomUpdate.currentBillingId = sortedBillWaitlist[0];
+          }
+        }
+
+        // Update room with new data
+        const roomUpdateResponse = await fetch(`/api/rooms/${matchedRoom._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(roomUpdate)
+        });
+
+        if (!roomUpdateResponse.ok) {
+          throw new Error(`Failed to update room ${selectedRoomNumber}`);
+        }
       }
-    }
-
-    // Update room with new data
-    const roomUpdateResponse = await fetch(`/api/rooms/${matchedRoom._id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(roomUpdate)
-    });
-
-    if (!roomUpdateResponse.ok) {
-      throw new Error(`Failed to update room ${selectedRoomNumber}`);
-    }
-  }
 
       alert('Booking created successfully!');
       setModalOpen(false);
@@ -326,6 +362,95 @@ export default function BookingForm() {
       alert(`Failed to create booking: ${error.message}`);
     }
   };
+
+  const modalAnimation = {
+    hidden: { 
+      opacity: 0,
+      scale: 0.95,
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    visible: { 
+      opacity: 1,
+      scale: 1,
+      transition: { 
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.95,
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
+  };
+
+  const cardAnimation = {
+    hidden: { 
+      opacity: 0,
+      y: 20,
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    visible: { 
+      opacity: 1,
+      y: 0,
+      transition: { 
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    hover: {
+      y: -8,
+      scale: 1.02,
+      transition: {
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
+  };
+
+  const filterAnimation = {
+    hidden: { 
+      opacity: 0,
+      x: -20,
+      transition: { 
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    visible: { 
+      opacity: 1,
+      x: 0,
+      transition: { 
+        duration: 0.4,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    }
+  };
+
+    // Function to handle modal close
+    const handleCloseModal = () => {
+      setSelectedRooms([]); // Reset selected rooms
+      setSelectedCategory('all'); // Reset category filter
+      setModalOpen(false); // Close the modal
+    };
+
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
@@ -674,79 +799,186 @@ export default function BookingForm() {
       </main>
       <Footer />
       {/* Modal for Room Selection */}
-      <Dialog
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        maxWidth="lg"
-        fullWidth
-        PaperProps={{
-          style: { minWidth: '50vw', padding: '1rem' }, // Modal size
-        }}
+      
+      <Dialog 
+        open={modalOpen} 
+        onClose={handleCloseModal} // Updated to use new close handler
+        className="relative z-50"
       >
-        <DialogTitle style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '1.5rem' }}>
-          Select Rooms
-        </DialogTitle>
-        <DialogContent>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: 2,
-            }}
+        <div 
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm" 
+          aria-hidden="true"
+          onClick={handleCloseModal} // Close on backdrop click
+        />
+        
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={modalAnimation}
+            className="bg-white rounded-xl shadow-xl w-[95vw] max-w-[1400px]"
           >
-            {rooms.map((room) => (
-              <Card
-                key={room.number}
-                variant="outlined"
-                sx={{
-                  border: selectedRooms.includes(room.number)
-                    ? '2px solid #1976d2'
-                    : '1px solid #ccc',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
-                }}
-                onClick={() => handleRoomSelection(room.number)}
+            <DialogTitle className="p-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+              <div className="flex items-center space-x-2">
+                <Hotel className="w-6 h-6" />
+                <span className="text-2xl font-bold">Select Your Room</span>
+              </div>
+            </DialogTitle>
+
+            <DialogContent className="p-6">
+              {/* Category Filters */}
+              <motion.div 
+                initial="hidden"
+                animate="visible"
+                variants={filterAnimation}
+                className="flex flex-wrap gap-3 mb-6"
               >
-                <CardContent>
-                  <Typography variant="h6" fontWeight="bold">
-                    Room {room.number}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Category: {room.category.category}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Floor: {room.floor}
-                  </Typography>
-                  <Checkbox
-                    checked={selectedRooms.includes(room.number)}
-                    onChange={() => handleRoomSelection(room.number)}
-                    color="primary"
-                  />
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </DialogContent>
-        <DialogActions style={{ justifyContent: 'space-between', padding: '1rem' }}>
-          <Button
-            onClick={() => setModalOpen(false)}
-            color="secondary"
-            variant="outlined"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            color="primary"
-            variant="contained"
-            disabled={selectedRooms.length === 0}
-          >
-            Submit
-          </Button>
-        </DialogActions>
+                <Button
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  onClick={() => handleCategoryFilter('all')}
+                  className="group transition-all duration-500 ease-in-out hover:shadow-lg"
+                >
+                  <Building className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
+                  All Rooms
+                </Button>
+
+                {categories.map((category) => (
+                  <Button
+                    key={category._id}
+                    variant={selectedCategory === category._id ? 'default' : 'outline'}
+                    onClick={() => handleCategoryFilter(category._id)}
+                    className="group transition-all duration-500 ease-in-out hover:shadow-lg"
+                  >
+                    <Tag className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
+                    {category.category}
+                  </Button>
+                ))}
+              </motion.div>
+
+              {/* Room Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <AnimatePresence mode="popLayout">
+                  {filteredRooms.map((room, index) => (
+                    <motion.div
+                      key={room.number}
+                      layout
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      whileHover="hover"
+                      variants={cardAnimation}
+                      transition={{ delay: index * 0.05 }}
+                      className={`
+                        relative rounded-xl overflow-hidden transform-gpu
+                        ${selectedRooms.includes(room.number) 
+                          ? 'ring-2 ring-blue-500 shadow-lg' 
+                          : 'ring-1 ring-gray-200'}
+                      `}
+                    >
+                      <motion.div 
+                        onClick={() => handleRoomSelection(room.number)}
+                        className="cursor-pointer p-4 bg-white transition-colors duration-300"
+                        whileHover={{
+                          backgroundColor: "rgba(249, 250, 251, 1)",
+                        }}
+                      >
+                        <motion.div 
+                          className="flex justify-between items-start mb-3"
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <motion.div
+                              whileHover={{ rotate: 360 }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <Bed className="w-5 h-5 text-blue-500" />
+                            </motion.div>
+                            <span className="text-lg font-semibold">
+                              Room {room.number}
+                            </span>
+                          </div>
+                          <motion.div
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {/* <Checkbox 
+                              checked={selectedRooms.includes(room.number)}
+                              className="h-5 w-5"
+                            /> */}
+                          </motion.div>
+                        </motion.div>
+
+                        <motion.div 
+                          className="space-y-2"
+                          whileHover={{ x: 5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {/* <div className="flex items-center text-gray-600 group">
+                            <Building className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
+                            <span>{room.category.category}</span>
+                          </div> */}
+                          <div className="flex items-center text-gray-600 group">
+                            <ArrowRight className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:translate-x-1" />
+                            <span>Floor {room.floor}</span>
+                          </div>
+                        </motion.div>
+
+                        {selectedRooms.includes(room.number) && (
+                          <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ 
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 30
+                            }}
+                            className="absolute top-2 right-2"
+                          >
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </DialogContent>
+
+            <div className="p-4 bg-gray-50 border-t flex justify-between items-center">
+              <motion.div 
+                className="flex items-center space-x-2 text-gray-600"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Users className="w-5 h-5" />
+                <span>{selectedRooms.length} rooms selected</span>
+              </motion.div>
+              
+              <div className="space-x-3">
+                <Button 
+                  variant="outline"
+                  onClick={handleCloseModal} // Updated to use new close handler
+                  className="transition-all duration-300 ease-in-out hover:bg-gray-100 hover:scale-105"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  disabled={selectedRooms.length === 0}
+                  onClick={handleSubmit}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white 
+                           transition-all duration-300 ease-in-out 
+                           hover:opacity-90 hover:scale-105 hover:shadow-lg"
+                >
+                  Confirm Selection
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </Dialog>
     </div>
   )
