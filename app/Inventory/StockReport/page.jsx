@@ -195,8 +195,8 @@ const StockReportPage = () => {
             Download/Export
           </Button>
         </div>
-
-        <TableContainer component={Paper}style={{ maxWidth: '80%', margin: '0 auto' }}>
+        {startDate && endDate && (
+          <TableContainer component={Paper}style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table  ref={tableRef}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
@@ -270,6 +270,7 @@ const StockReportPage = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        )}
       </div>
       <Footer />
     </div>
