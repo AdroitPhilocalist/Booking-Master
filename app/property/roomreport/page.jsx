@@ -107,8 +107,11 @@ export default function Billing() {
           </div>
         </div>
       )}
-
-      <Box className="container mx-auto py-4 px-4" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        
+        <h1 className="text-3xl font-bold text-cyan-900 mb-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
+          Room Report
+        </h1>
+         <Box className="container mx-auto py-4 px-4" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <Box className="flex justify-center space-x-4 mb-2" sx={{ width: '100%', maxWidth: '800px' }}>
           <TextField
             type="date"
