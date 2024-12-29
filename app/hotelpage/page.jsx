@@ -48,7 +48,7 @@ export default function HotelPage() {
                             <li>Driver&apos;s Room</li>
 
                         </ul>
-                        <button  onClick={() => router.push("/dashboard")} className="bg-cyan-900 text-white p-2 border border-transparent shadow-sm text-sm font-medium rounded-full hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">Go to Dashboard</button>
+                        <button  onClick={() => router.push("/property/roomdashboard")} className="bg-cyan-900 text-white p-2 border border-transparent shadow-sm text-sm font-medium rounded-full hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">Go to Dashboard</button>
 
                         {/* Small Images */}
                         <div className="grid grid-cols-2 gap-2">

@@ -83,7 +83,7 @@ export default function BookingForm() {
 
   useEffect(() => {
     const generateBookingId = () => {
-      return "BMX-" + Math.random().toString(36).substring(2, 12).toUpperCase();
+      return "SOLV-" + Math.random().toString(36).substring(2, 12).toUpperCase();
     };
 
     setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
@@ -471,19 +471,31 @@ export default function BookingForm() {
                   disabled
                 />
 
-                {/* Booking Type */}
-                <FormControl fullWidth>
-                  <InputLabel>Booking Type</InputLabel>
-                  <Select
-                    name="bookingType"
-                    value={formData.bookingType}
-                    onChange={handleChange}
-                  >
-                    {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
-                      <MenuItem key={type} value={type}>{type}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+{/* Booking Type */}
+<FormControl fullWidth style={{ marginBottom: '1rem' }}>
+  <InputLabel>Booking Type</InputLabel>
+  <Select
+    name="bookingType"
+    value={formData.bookingType}
+    onChange={handleChange}
+    MenuProps={{
+      PaperProps: {
+        style: {
+          maxHeight: 300, // Adjust the maximum height for the dropdown
+          overflowY: 'auto', // Add scroll if needed
+        },
+      },
+    }}
+  >
+    {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events','Others'].map((type) => (
+      <MenuItem key={type} value={type}>
+        {type}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
+
+
 
                 {/* Booking Reference */}
                 <TextField
@@ -515,8 +527,9 @@ export default function BookingForm() {
                   >
                     {['Confirmed', 'Blocked'].map((status) => (
                       <MenuItem key={status} value={status}>{status}</MenuItem>
-                    ))}
+                    ))}required
                   </Select>
+                  
                 </FormControl>
 
                 {/* Guest Name */}
@@ -645,7 +658,7 @@ export default function BookingForm() {
                 {/* Check-in */}
                 {/* Check-in */}
                 <TextField
-                  label="Check-in"
+                  label="Check-in Date"
                   type="date"
                   name="checkIn"
                   value={formData.checkIn}
@@ -662,11 +675,12 @@ export default function BookingForm() {
                       }
                     }
                   }}
+                  required
                 />
 
                 {/* Check-out */}
                 <TextField
-                  label="Check-out"
+                  label="Check-out Date"
                   type="date"
                   name="checkOut"
                   value={formData.checkOut}
@@ -683,11 +697,12 @@ export default function BookingForm() {
                       }
                     }
                   }}
+                  required
                 />
 
                 {/* Expected Arrival */}
                 <TextField
-                  label="Expected Arrival"
+                  label="Check-in Time"
                   type="date"
                   name="expectedArrival"
                   value={formData.expectedArrival}
@@ -698,7 +713,7 @@ export default function BookingForm() {
 
                 {/* Expected Departure */}
                 <TextField
-                  label="Expected Departure"
+                  label="Check-out Time"
                   type="date"
                   name="expectedDeparture"
                   value={formData.expectedDeparture}
@@ -724,7 +739,7 @@ export default function BookingForm() {
                     value={formData.mealPlan}
                     onChange={handleChange}
                   >
-                    {['EP', 'AP', 'CP', 'MAP'].map((plan) => (
+                    {['EP', 'CP', 'AP', 'MAP'].map((plan) => (
                       <MenuItem key={plan} value={plan}>{plan}</MenuItem>
                     ))}
                   </Select>
