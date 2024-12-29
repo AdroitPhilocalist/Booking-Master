@@ -44,7 +44,7 @@ const newBookingSchema = new mongoose.Schema({
   },
   guestid:{
     type: String,
-    enum:['adhaar','driving license'],
+    enum:['adhaar','driving license','passport','voter id card','others'],
     required:true
   },
   guestidno:{    
@@ -83,11 +83,11 @@ const newBookingSchema = new mongoose.Schema({
   },
   expectedArrival: {
     type: time,
-    required: true
+    
   },
   expectedDeparture: {
     type: time,
-    required: true
+    
   },
   bookingStatus: {
     type: String,
