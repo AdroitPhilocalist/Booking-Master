@@ -82,11 +82,11 @@ const newBookingSchema = new mongoose.Schema({
     required: true
   },
   expectedArrival: {
-    type: Time,
+    type: time,
     required: true
   },
   expectedDeparture: {
-    type: Time,
+    type: time,
     required: true
   },
   bookingStatus: {

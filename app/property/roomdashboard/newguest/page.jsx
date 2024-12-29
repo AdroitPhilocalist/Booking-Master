@@ -622,7 +622,7 @@ export default function BookingForm() {
                     value={formData.guestid}
                     onChange={handleChange}
                   >
-                    {['adhaar', 'driving license'].map((idType) => (
+                    {['adhaar', 'driving license','voter id card','passport','others'].map((idType) => (
                       <MenuItem key={idType} value={idType}>{idType}</MenuItem>
                     ))}
                   </Select>
