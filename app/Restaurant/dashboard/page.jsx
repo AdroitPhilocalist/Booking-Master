@@ -117,12 +117,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-cyan-900">Restaurant Dashboard</h1>
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-              $ Debtor Payments
-            </button>
-            <button className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
-              Debtor Statement
-            </button>
+            
           </div>
         </div>
       </header>
