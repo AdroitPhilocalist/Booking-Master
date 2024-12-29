@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, TextField, Box } from "@mui/material";
-import Typography from '@mui/material/Typography';
+
 export default function Billing() {
   const router = useRouter();
   const [billingData, setBillingData] = useState([]);
@@ -151,9 +151,8 @@ export default function Billing() {
         </Box>
       </Box>
 
-      <Box sx={{ maxWidth: "80%", margin: "0 auto", overflowX: "auto" }}>
-        {startDate && endDate ? (
-        <TableContainer component={Paper} >
+      <div className="container mx-auto py-4 px-4">
+        <TableContainer component={Paper} sx={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
@@ -195,12 +194,7 @@ export default function Billing() {
             </TableBody>
           </Table>
         </TableContainer>
-         ) : (
-            <Typography variant="h6" sx={{ textAlign: "center", color: "gray", mt: 4 }}>
-              Please select both start and end dates to view the invoice data.
-            </Typography>
-          )}
-      </Box>
+      </div>
       <Footer />
     </div>
   );
