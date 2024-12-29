@@ -520,10 +520,12 @@ export default function BookingForm() {
                 {/* Booking Status */}
                 <FormControl fullWidth>
                   <InputLabel>Booking Status</InputLabel>
+                  
                   <Select
                     name="bookingStatus"
                     value={formData.bookingStatus}
                     onChange={handleChange}
+                    
                   >
                     {['Confirmed', 'Blocked'].map((status) => (
                       <MenuItem key={status} value={status}>{status}</MenuItem>
@@ -703,7 +705,7 @@ export default function BookingForm() {
                 {/* Expected Arrival */}
                 <TextField
                   label="Check-in Time"
-                  type="date"
+                  type="time"
                   name="expectedArrival"
                   value={formData.expectedArrival}
                   onChange={handleChange}
@@ -714,7 +716,7 @@ export default function BookingForm() {
                 {/* Expected Departure */}
                 <TextField
                   label="Check-out Time"
-                  type="date"
+                  type="time"
                   name="expectedDeparture"
                   value={formData.expectedDeparture}
                   onChange={handleChange}
