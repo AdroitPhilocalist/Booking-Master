@@ -457,7 +457,7 @@ export default function BookingForm() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow rounded-lg p-6">
-            <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Booking Master Control Panel</h1>
+            <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Guest Reservation Form</h1>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Booking ID */}
