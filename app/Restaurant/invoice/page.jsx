@@ -287,7 +287,7 @@ const InvoicePage = () => {
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
-                    Invoice No.
+                    UUID
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                     Date
