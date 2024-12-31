@@ -21,6 +21,7 @@ export default function InventoryList() {
   const [endDate, setEndDate] = useState('');
   const [showTable, setShowTable] = useState(false);
   const [filteredItems, setFilteredItems] = useState([]);
+  const [stockQuantities, setStockQuantities] = useState({});
   const tableRef = useRef(null);
 
   // Fetch items, categories, and stock report data
@@ -33,22 +34,47 @@ export default function InventoryList() {
           fetch("/api/InventoryCategory"),
           fetch("/api/stockreport")
         ]);
+
         const itemsData = await itemsResponse.json();
         const categoriesData = await categoriesResponse.json();
         const stockReportData = await stockReportResponse.json();
 
-        // Process stock report data to get last purchase dates
+        // Process stock report data for dates and quantities
         const purchaseDates = {};
+        const stockData = {};
+
         stockReportData.stockReports.forEach(report => {
-          if (report.purorsell === 'purchase' || report.purorsell === 'sell' && report.name) {
+          if (!report.name) return;
+          
+          const itemId = report.name._id;
+          const quantity = Number(report.quantityAmount) || 0;
+
+          // Initialize stock data if not exists
+          if (!stockData[itemId]) {
+            stockData[itemId] = {
+              instock: 0,
+              outstock: 0
+            };
+          }
+
+          // Update last purchase date
+          if (report.purorsell === 'purchase' || report.purorsell === 'sell') {
             const currentDate = new Date(report.purchasedate);
-            const itemId = report.name._id;
             if (!purchaseDates[itemId] || new Date(purchaseDates[itemId]) < currentDate) {
               purchaseDates[itemId] = report.purchasedate;
             }
           }
+
+          // Update quantities
+          if (report.purorsell === 'purchase') {
+            stockData[itemId].instock += quantity;
+          } else if (report.purorsell === 'sell') {
+            stockData[itemId].outstock += quantity;
+          }
         });
+
         setLastPurchaseDates(purchaseDates);
+        setStockQuantities(stockData);
         setItems(itemsData.items || []);
         setCategories(categoriesData.products || []);
       } catch (error) {
@@ -57,6 +83,7 @@ export default function InventoryList() {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -100,7 +127,6 @@ export default function InventoryList() {
     if (!tableRef.current) return;
     const tableHTML = tableRef.current.outerHTML;
     const originalContent = document.body.innerHTML;
-    
     document.body.innerHTML = `
       <html>
         <head>
@@ -116,7 +142,6 @@ export default function InventoryList() {
         </body>
       </html>
     `;
-    
     window.print();
     document.body.innerHTML = originalContent;
     window.location.reload();
@@ -139,26 +164,26 @@ export default function InventoryList() {
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4 text-cyan-900" style={{ maxWidth: '80%', margin: '0 auto' }}>Stock Reports</h1>
         <div className="flex space-x-2 mb-4 justify-center mt-4">
-          <TextField 
-            type="date" 
-            label="Start Date" 
-            value={startDate} 
-            onChange={(e) => setStartDate(e.target.value)} 
-            InputLabelProps={{ shrink: true }} 
+          <TextField
+            type="date"
+            label="Start Date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
             className="w-1/4"
             size="small"
           />
-          <TextField 
-            type="date" 
-            label="End Date" 
-            value={endDate} 
-            onChange={(e) => setEndDate(e.target.value)} 
-            InputLabelProps={{ shrink: true }} 
+          <TextField
+            type="date"
+            label="End Date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
             className="w-1/4"
             size="small"
           />
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleFilter}
             color="primary"
             size="small"
@@ -166,8 +191,8 @@ export default function InventoryList() {
           >
             Filter
           </Button>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             onClick={handleReset}
             size="small"
             color="secondary"
@@ -175,8 +200,8 @@ export default function InventoryList() {
           >
             Reset
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={printTable}
             size="small"
             sx={{
@@ -189,6 +214,7 @@ export default function InventoryList() {
             Download/Export
           </Button>
         </div>
+
         {showTable && (
           <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
             <Table ref={tableRef}>
@@ -199,6 +225,8 @@ export default function InventoryList() {
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Group</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Category</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tax</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Instock</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Outstock</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Available Quantity</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Unit</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Last Order Date</TableCell>
@@ -212,6 +240,12 @@ export default function InventoryList() {
                     <TableCell sx={{ textAlign: "center" }}>{item.group}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{item.segment?.itemName}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{item.tax}%</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {stockQuantities[item._id]?.instock || 'N/A'}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {stockQuantities[item._id]?.outstock || 'N/A'}
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{item.stock}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{item.quantityUnit}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>

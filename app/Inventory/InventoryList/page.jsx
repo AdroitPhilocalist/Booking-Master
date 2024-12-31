@@ -246,9 +246,11 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
           <label className="mb-2">Initial Stock</label>
           <input
             type="number"
+            readOnly
+            disabled
             placeholder="Initial Stock"
             value={formData.stock}
-            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, stock: 0 })}
             className="w-full border p-2 rounded mt-2"
           />
 

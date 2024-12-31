@@ -31,13 +31,18 @@ const SalesReportPage = () => {
   const [quantityAmount, setQuantityAmount] = useState("");
   const [rate, setRate] = useState("");
   const [total, setTotal] = useState("");
-
+  // Add new state for tracking button disabled status
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [duplicateError, setDuplicateError] = useState({
+    purchaseorderno: false,
+    Invoiceno: false
+  });
   // Filters
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-   // Ref to access the table
-   const tableRef = useRef(null);
+  // Ref to access the table
+  const tableRef = useRef(null);
 
 
   useEffect(() => {
@@ -62,22 +67,69 @@ const SalesReportPage = () => {
       } catch (error) {
         console.error("Failed to fetch data", error);
         setError("Failed to fetch data");
-      }finally {
+      } finally {
         setIsLoading(false);
       }
     };
     fetchData();
   }, []);
 
+  // Function to check for duplicates
+  const checkForDuplicates = (field, value) => {
+    return purchaseReports.some(report => {
+      if (field === 'purchaseorderno') {
+        return report.purchaseorderno.toLowerCase() === value.toLowerCase();
+      } else if (field === 'invoiceno') {
+        return report.Invoiceno.toLowerCase() === value.toLowerCase();
+      }
+      return false;
+    });
+  };
+  // Modify useEffect to include duplicate checks
   useEffect(() => {
     if (quantityAmount && rate && selectedItem) {
       const taxMultiplier = 1 + (selectedItem.tax / 100);
       const calculatedTotal = parseFloat(quantityAmount) * parseFloat(rate) * taxMultiplier;
       setTotal(calculatedTotal.toFixed(2));
+
+      // Check if purchase amount exceeds current stock
+      const isValidQuantity = parseFloat(quantityAmount) <= selectedItem.stock;
+
+      // Check for validation conditions
+      const isDisabled = !isValidQuantity ||
+        !purchaseorderno ||
+        !purchasedate ||
+        !Invoiceno ||
+        duplicateError.purchaseorderno ||
+        duplicateError.Invoiceno;
+
+      setIsSaveDisabled(isDisabled);
     } else {
       setTotal("");
+      setIsSaveDisabled(true);
     }
-  }, [quantityAmount, rate, selectedItem]);
+  }, [quantityAmount, rate, selectedItem, purchaseorderno, purchasedate, Invoiceno, duplicateError]);
+
+  // Update the handlers for purchaseorderno and invoiceno
+  const handlePurchaseOrderChange = (e) => {
+    const value = e.target.value;
+    setPurchaseorderno(value);
+    const isDuplicate = checkForDuplicates('purchaseorderno', value);
+    setDuplicateError(prev => ({
+      ...prev,
+      purchaseorderno: isDuplicate
+    }));
+  };
+
+  const handleInvoiceNoChange = (e) => {
+    const value = e.target.value;
+    setInvoiceno(value);
+    const isDuplicate = checkForDuplicates('invoiceno', value);
+    setDuplicateError(prev => ({
+      ...prev,
+      invoiceno: isDuplicate
+    }));
+  };
 
   const handleOpenModal = () => setIsModalOpen(true);
 
@@ -90,6 +142,10 @@ const SalesReportPage = () => {
     setRate("");
     setTotal("");
     setIsModalOpen(false);
+    setDuplicateError({
+      purchaseorderno: false,
+      invoiceno: false
+    });
   };
 
   const handleItemChange = (itemId) => {
@@ -223,10 +279,10 @@ const SalesReportPage = () => {
 
   const printTable = () => {
     if (!tableRef.current) return;
-  
+
     const tableHTML = tableRef.current.outerHTML;
     const originalContent = document.body.innerHTML;
-  
+
     // Replace body content with table HTML
     document.body.innerHTML = `
       <html>
@@ -251,13 +307,13 @@ const SalesReportPage = () => {
         </body>
       </html>
     `;
-  
+
     // Trigger print
     window.print();
-  
+
     // Restore original content
     document.body.innerHTML = originalContent;
-  
+
     // Reattach React event listeners after restoring DOM
     window.location.reload();
   };
@@ -284,19 +340,19 @@ const SalesReportPage = () => {
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-            <svg 
-              aria-hidden="true" 
-              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" 
-              viewBox="0 0 100 101" 
-              fill="none" 
+            <svg
+              aria-hidden="true"
+              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+              viewBox="0 0 100 101"
+              fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path 
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" 
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
                 fill="currentColor"
               />
-              <path 
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" 
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
                 fill="currentFill"
               />
             </svg>
@@ -306,7 +362,7 @@ const SalesReportPage = () => {
       )}
       <div className="container mx-auto p-6 ">
         <div className="mb-4">
-          <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Sales Report</h1>        
+          <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Sales Report</h1>
         </div>
 
         <div className="flex space-x-2 mb-4 justify-center">
@@ -334,7 +390,7 @@ const SalesReportPage = () => {
             onClick={filterByDate}
             className="ml-2 flex justify-center"
             size="small"
-            
+
           >
             Filter
           </Button>
@@ -375,7 +431,7 @@ const SalesReportPage = () => {
           </Button>
         </div>
 
-        <TableContainer component={Paper}style={{ maxWidth: '80%', margin: '0 auto' }}>
+        <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table ref={tableRef}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
@@ -445,10 +501,7 @@ const SalesReportPage = () => {
 
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
-        <Box
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 w-1/2 shadow-md max-h-[90%] overflow-y-auto"
-          sx={{ borderRadius: 2 }}
-        >
+        <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 w-1/2 shadow-md max-h-[90%] overflow-y-auto" sx={{ borderRadius: 2 }}>
           <h2 className="text-xl font-bold mb-4">New Sales</h2>
           <form className="space-y-4">
             <TextField
@@ -457,8 +510,10 @@ const SalesReportPage = () => {
               label="Sales Order No"
               variant="outlined"
               value={purchaseorderno}
-              onChange={(e) => setPurchaseorderno(e.target.value)}
+              onChange={handlePurchaseOrderChange}
               className="w-full"
+              error={duplicateError.purchaseorderno}
+              helperText={duplicateError.purchaseorderno ? "This Sales Order No already exists" : ""}
             />
             <TextField
               required
@@ -477,9 +532,12 @@ const SalesReportPage = () => {
               label="Invoice No"
               variant="outlined"
               value={Invoiceno}
-              onChange={(e) => setInvoiceno(e.target.value)}
+              onChange={handleInvoiceNoChange}
               className="w-full"
+              error={duplicateError.invoiceno}
+              helperText={duplicateError.invoiceno ? "This Invoice No already exists" : ""}
             />
+
             <TextField
               required
               select
@@ -513,7 +571,7 @@ const SalesReportPage = () => {
               id="stock"
               label="Current Stock"
               variant="outlined"
-              value={selectedItem?.stock || ''}
+              value={selectedItem?.stock || '0'}
               disabled
               className="w-full"
             />
@@ -524,8 +582,20 @@ const SalesReportPage = () => {
               variant="outlined"
               type="number"
               value={quantityAmount}
-              onChange={(e) => setQuantityAmount(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setQuantityAmount(value);
+                // Add error helper text if quantity exceeds stock
+                if (selectedItem && parseFloat(value) > selectedItem.stock) {
+                  e.target.setCustomValidity(`Cannot sell more than available stock (${selectedItem.stock})`);
+                } else {
+                  e.target.setCustomValidity('');
+                }
+              }}
               className="w-full"
+              helperText={selectedItem && parseFloat(quantityAmount) > selectedItem.stock ?
+                `Cannot sell more than available stock (${selectedItem.stock})` : ''}
+              error={selectedItem && parseFloat(quantityAmount) > selectedItem.stock}
             />
             <TextField
               required
@@ -558,8 +628,13 @@ const SalesReportPage = () => {
             <div className="flex justify-end">
               <Button
                 variant="contained"
-                sx={{ backgroundColor: 'green', '&:hover': { backgroundColor: 'darkgreen' } }}
+                sx={{
+                  backgroundColor: 'green',
+                  '&:hover': { backgroundColor: 'darkgreen' },
+                  '&:disabled': { backgroundColor: 'gray' }
+                }}
                 onClick={handlePurchase}
+                disabled={isSaveDisabled}
               >
                 Save
               </Button>
@@ -572,10 +647,9 @@ const SalesReportPage = () => {
                     borderColor: 'darkred',
                     backgroundColor: 'rgba(255, 0, 0, 0.1)',
                   },
-                  ml:2
+                  ml: 2
                 }}
                 onClick={handleCloseModal}
-                
               >
                 Cancel
               </Button>
