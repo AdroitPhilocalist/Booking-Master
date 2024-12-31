@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const restaurantInvoiceSchema = new mongoose.Schema(
   {
     invoiceno: {
-      type: Number,
+      type: String,
       required: true,
     },
     date: {
