@@ -16,6 +16,10 @@ import {
   Button,
   Typography,
   Modal,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -25,7 +29,28 @@ const RestaurantBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [EditOpen, setEditOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [availableTables, setAvailableTables] = useState([]);
+
+  useEffect(() => {
+    const fetchAvailableTables = async () => {
+      try {
+        const response = await fetch("/api/tables");
+        const data = await response.json();
+        if (data.success) {
+          setAvailableTables(data.data); // Store available table numbers
+        } else {
+          console.error("Failed to fetch available tables:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching tables:", error);
+      }
+    };
+
+    fetchAvailableTables();
+  }, []);
 
   // Fetch bookings from the API
   useEffect(() => {
@@ -52,6 +77,15 @@ const RestaurantBooking = () => {
   // Open/Close Modal
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const handleEditOpen = (booking) => {
+    setSelectedBooking(booking); // Set the selected booking to edit
+    setEditOpen(true); // Open the modal
+  };
+
+  const handleEditClose = () => {
+    setSelectedBooking(null); // Clear the selected booking
+    setEditOpen(false); // Close the modal
+  };
 
   // Add a new booking
   const addBooking = async (newBooking) => {
@@ -78,8 +112,36 @@ const RestaurantBooking = () => {
   };
 
   // Handle Edit Booking (Dummy Function)
-  const handleEdit = (id) => {
-    alert(`Edit booking with ID: ${id}`);
+  const handleEditBooking = async (updatedBooking) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/RestaurantBooking/${updatedBooking._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedBooking),
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        setBookings((prevBookings) =>
+          prevBookings.map((booking) =>
+            booking._id === updatedBooking._id ? updatedBooking : booking
+          )
+        );
+        handleEditClose();
+      } else {
+        console.error("Failed to update booking:", data.error);
+      }
+    } catch (error) {
+      console.error("Error updating booking:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle Delete Booking
@@ -127,23 +189,30 @@ const RestaurantBooking = () => {
                 fill="currentFill"
               />
             </svg>
-            <span className="mt-4 text-gray-700">Loading Restaurant Bookings...</span>
+            <span className="mt-4 text-gray-700">
+              Loading Restaurant Bookings...
+            </span>
           </div>
         </div>
       )}
       <Box sx={{ p: 3 }}>
-        <Box sx={{ maxWidth: '80%', margin: '0 auto', mb: 3 }}>
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
+        <Box sx={{ maxWidth: "80%", margin: "0 auto", mb: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             {/* Header */}
-            <Typography variant="h4" sx={{
-              color: "#064c61",
-              fontWeight: "bold",
-              flex: 1
-            }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: "#064c61",
+                fontWeight: "bold",
+                flex: 1,
+              }}
+            >
               Restaurant Booking
             </Typography>
 
@@ -152,7 +221,7 @@ const RestaurantBooking = () => {
               placeholder="Search By Guest Name"
               variant="outlined"
               size="small"
-              sx={{ minWidth: '300px', mx: 2 }}
+              sx={{ minWidth: "300px", mx: 2 }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -166,7 +235,7 @@ const RestaurantBooking = () => {
                 fontWeight: "bold",
                 color: "white",
                 "&:hover": { bgcolor: "#173b1a" },
-                minWidth: '150px'
+                minWidth: "150px",
               }}
             >
               Add New Booking
@@ -174,15 +243,58 @@ const RestaurantBooking = () => {
           </Box>
         </Box>
 
-        <TableContainer component={Paper} sx={{ maxWidth: "80%", margin: "0 auto" }}>
+        <TableContainer
+          component={Paper}
+          sx={{ maxWidth: "80%", margin: "0 auto" }}
+        >
           <Table size="small">
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Table No.</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Time</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Guest Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#28bfdb",
+                    textAlign: "center",
+                  }}
+                >
+                  Table No.
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#28bfdb",
+                    textAlign: "center",
+                  }}
+                >
+                  Date
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#28bfdb",
+                    textAlign: "center",
+                  }}
+                >
+                  Time
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#28bfdb",
+                    textAlign: "center",
+                  }}
+                >
+                  Guest Name
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#28bfdb",
+                    textAlign: "center",
+                  }}
+                >
+                  Action
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -192,20 +304,32 @@ const RestaurantBooking = () => {
                 )
                 .map((booking) => (
                   <TableRow key={booking._id} hover>
-                    <TableCell sx={{ textAlign: "center" }}>{booking.tableNo}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {booking.tableNo}
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {(() => {
                         const date = new Date(booking.date);
                         const day = String(date.getDate()).padStart(2, "0");
-                        const month = String(date.getMonth() + 1).padStart(2, "0");
+                        const month = String(date.getMonth() + 1).padStart(
+                          2,
+                          "0"
+                        );
                         const year = date.getFullYear();
                         return `${day}/${month}/${year}`;
                       })()}
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{booking.time}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{booking.guestName}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton onClick={() => handleEdit(booking._id)} sx={{ color: "#388E3C" }}>
+                      {booking.time}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {booking.guestName}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <IconButton
+                        onClick={() => handleEditOpen(booking)}
+                        sx={{ color: "#388E3C" }}
+                      >
                         <EditIcon />
                       </IconButton>
                       <IconButton
@@ -219,7 +343,11 @@ const RestaurantBooking = () => {
                 ))}
               {bookings.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ fontStyle: "italic", color: "#616161" }}>
+                  <TableCell
+                    colSpan={5}
+                    align="center"
+                    sx={{ fontStyle: "italic", color: "#616161" }}
+                  >
                     No bookings available.
                   </TableCell>
                 </TableRow>
@@ -227,6 +355,127 @@ const RestaurantBooking = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Modal for Editing Booking */}
+        <Modal open={EditOpen} onClose={handleEditClose}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "white",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              minWidth: 400,
+              maxWidth: "80%",
+            }}
+          >
+            {selectedBooking && (
+              <Box
+                component="form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleEditBooking(selectedBooking);
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Edit Booking
+                </Typography>
+                {/* <TextField
+                  fullWidth
+                  label="Table No."
+                  value={selectedBooking.tableNo}
+                  onChange={(e) =>
+                    setSelectedBooking({
+                      ...selectedBooking,
+                      tableNo: e.target.value,
+                    })
+                  }
+                  sx={{ mb: 2 }}
+                /> */}
+                <FormControl required>
+                  <InputLabel>Table No.</InputLabel>
+                  <Select
+                    label="Table No."
+                    name="tableNo"
+                    value={selectedBooking.tableNo}
+                    onChange={(e) =>
+                      setSelectedBooking({
+                        ...selectedBooking,
+                        tableNo: e.target.value,
+                      })
+                    }
+                    sx={{ mb: 2 }}
+                    fullWidth
+                  >
+                    <MenuItem value="">Select a table</MenuItem>
+                    {availableTables.map((table) => (
+                      <MenuItem key={table._id} value={table.tableNo}>
+                        Table {table.tableNo}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <TextField
+                  fullWidth
+                  label="Date"
+                  type="date"
+                  value={
+                    new Date(selectedBooking.date).toISOString().split("T")[0]
+                  }
+                  onChange={(e) =>
+                    setSelectedBooking({
+                      ...selectedBooking,
+                      date: e.target.value,
+                    })
+                  }
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Time"
+        name="time"
+        type="time"
+                  value={selectedBooking.time}
+                  onChange={(e) =>
+                    setSelectedBooking({
+                      ...selectedBooking,
+                      time: e.target.value,
+                    })
+                  }
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Guest Name"
+                  value={selectedBooking.guestName}
+                  onChange={(e) =>
+                    setSelectedBooking({
+                      ...selectedBooking,
+                      guestName: e.target.value,
+                    })
+                  }
+                  sx={{ mb: 2 }}
+                />
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    sx={{
+                      bgcolor: "#3b8242",
+                      fontWeight: "bold",
+                      color: "white",
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </Box>
+        </Modal>
 
         {/* Modal for Adding New Booking */}
         <Modal open={open} onClose={handleClose}>

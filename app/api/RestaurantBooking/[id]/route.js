@@ -30,3 +30,41 @@ export async function DELETE(req, { params }) {
       );
     }
   }
+
+
+  export async function PUT(req, { params }) {
+    try {
+        // Connect to the database
+        await mongoose.connect(connectSTR);
+
+        // Extract the booking ID from the URL params
+        const { id } = params;
+
+        // Parse the request body to get the updated booking data
+        const data = await req.json();
+
+        // Find and update the booking by ID
+        const updatedBooking = await RestaurantBooking.findByIdAndUpdate(
+            id,
+            { $set: data },
+            { new: true, runValidators: true }
+        );
+
+        // If no booking is found with the given ID, return an error
+        if (!updatedBooking) {
+            return NextResponse.json(
+                { success: false, error: 'Booking not found' },
+                { status: 404 }
+            );
+        }
+
+        // Return the updated booking data
+        return NextResponse.json({ success: true, data: updatedBooking });
+    } catch (error) {
+        console.error('Error updating booking:', error);
+        return NextResponse.json(
+            { success: false, error: 'Failed to update booking' },
+            { status: 400 }
+        );
+    }
+}
