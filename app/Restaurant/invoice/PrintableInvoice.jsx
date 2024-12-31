@@ -46,17 +46,28 @@ const printStyles = `
 const PrintableInvoice = ({ invoiceId }) => {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchInvoiceDetails = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/restaurantinvoice/${invoiceId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch invoice details');
+        const [invoiceResponse, profileResponse] = await Promise.all([
+          fetch(`/api/restaurantinvoice/${invoiceId}`),
+          fetch('/api/Profile')
+        ]);
+        console.log(profileResponse);
+        if (!invoiceResponse.ok || !profileResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
-        const data = await response.json();
-        setInvoice(data);
+
+        const [invoiceData, profileData] = await Promise.all([
+          invoiceResponse.json(),
+          profileResponse.json()
+        ]);
+        console.log(profileData.data);
+        setInvoice(invoiceData);
+        setProfile(profileData.data[0]);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -65,10 +76,9 @@ const PrintableInvoice = ({ invoiceId }) => {
     };
 
     if (invoiceId) {
-      fetchInvoiceDetails();
+      fetchData();
     }
   }, [invoiceId]);
-
   const handlePrint = () => {
     window.print();
   };
@@ -127,27 +137,36 @@ const PrintableInvoice = ({ invoiceId }) => {
   return (
     <>
       <style>{printStyles}</style>
-
-      <Box
-        id="printable-invoice"
-        sx={{
-          p: 4,
-          maxWidth: '800px',
-          margin: 'auto',
-          bgcolor: '#f5f5f5',
-          borderRadius: 2,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-        }}
-      >
+      <Box id="printable-invoice" sx={{ p: 4, maxWidth: '800px', margin: 'auto', bgcolor: '#f5f5f5', borderRadius: 2, maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden' }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          <Grid container spacing={2} sx={{ mb: 4 }}>
-            <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
-              <RestaurantIcon sx={{ fontSize: 40, mr: 2, color: '#00bcd4' }} />
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#00bcd4' }}>
-                Restaurant Name
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <RestaurantIcon sx={{ fontSize: 40, mr: 2, color: '#00bcd4' }} />
+                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#00bcd4' }}>
+                  {profile.hotelName}
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                {profile.addressLine1}
               </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                {profile.addressLine2}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                {profile.district}, {profile.country} - {profile.pincode}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                Phone: {profile.mobileNo}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                Email: {profile.email}
+              </Typography>
+              {profile.website && (
+                <Typography variant="body2" color="textSecondary">
+                  Website: {profile.website}
+                </Typography>
+              )}
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#00bcd4' }}>
@@ -230,10 +249,7 @@ const PrintableInvoice = ({ invoiceId }) => {
               variant="contained"
               startIcon={<PrintIcon />}
               onClick={handlePrint}
-              sx={{
-                bgcolor: '#00bcd4',
-                '&:hover': { bgcolor: '#00acc1' },
-              }}
+              sx={{ bgcolor: '#00bcd4', '&:hover': { bgcolor: '#00acc1' } }}
             >
               Print Invoice
             </Button>

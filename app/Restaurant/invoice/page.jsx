@@ -61,8 +61,12 @@ const InvoicePage = () => {
       try {
         const response = await fetch("/api/restaurantinvoice");
         const data = await response.json();
-        setInvoices(data.invoices);
-        setFilteredInvoices(data.invoices);
+        // Sort invoices by date in descending order (newest first)
+        const sortedInvoices = data.invoices.sort((a, b) => 
+          new Date(b.date) - new Date(a.date)
+        );
+        setInvoices(sortedInvoices);
+        setFilteredInvoices(sortedInvoices);
       } catch (error) {
         console.error(error);
       }
@@ -70,21 +74,21 @@ const InvoicePage = () => {
     fetchInvoices();
   }, []);
 
-  // Filter Function
-  const filterByDate = () => {
-    if (startDate && endDate) {
-      const filtered = invoices.filter((invoice) => {
-        const invoiceDate = new Date(invoice.date);
-        return (
-          invoiceDate >= new Date(startDate) &&
-          invoiceDate <= new Date(endDate)
-        );
-      });
-      setFilteredInvoices(filtered);
-    } else {
-      setFilteredInvoices(invoices); // Show all invoices if no dates are selected
-    }
-  };
+ // Modify the filter function to maintain the sort order
+ const filterByDate = () => {
+  if (startDate && endDate) {
+    const filtered = invoices.filter((invoice) => {
+      const invoiceDate = new Date(invoice.date);
+      return (
+        invoiceDate >= new Date(startDate) && 
+        invoiceDate <= new Date(endDate)
+      );
+    }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Keep newest first
+    setFilteredInvoices(filtered);
+  } else {
+    setFilteredInvoices([...invoices]); // Show all invoices sorted
+  }
+};
 
   const handleDelete = async (id) => {
     try {
@@ -125,13 +129,16 @@ const InvoicePage = () => {
           },
           body: JSON.stringify(updatedInvoice),
         });
-
         if (response.ok) {
           const updatedInvoices = invoices.map((invoice) =>
             invoice._id === currentInvoice._id ? updatedInvoice : invoice
           );
-          setInvoices(updatedInvoices);
-          setFilteredInvoices(updatedInvoices);
+          // Sort after updating
+          const sortedInvoices = updatedInvoices.sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+          );
+          setInvoices(sortedInvoices);
+          setFilteredInvoices(sortedInvoices);
           setCurrentInvoice(null);
           setShowModal(false);
         } else {
@@ -142,7 +149,7 @@ const InvoicePage = () => {
       }
     } else {
       // Add new invoice
-      const newInvoices = [...invoices, updatedInvoice];
+      const newInvoices = [updatedInvoice, ...invoices]; // Add new invoice at the beginning
       setInvoices(newInvoices);
       setFilteredInvoices(newInvoices);
       setShowModal(false);
@@ -287,7 +294,7 @@ const InvoicePage = () => {
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
-                    Invoice No.
+                    Invoice ID.
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
                     Date

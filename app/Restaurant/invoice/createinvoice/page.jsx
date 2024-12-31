@@ -1,25 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { 
-  Box, 
-  Button, 
-  Container, 
-  FormControl, 
-  InputLabel, 
-  MenuItem, 
-  Select, 
-  TextField, 
-  Typography, 
-  Paper, 
-  Grid, 
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow
-} from "@mui/material";
+import { Box, Button, Container, FormControl, InputLabel, MenuItem, Select, TextField, Typography, Paper, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -28,22 +9,22 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
-  const [menu, setMenu] = useState([]); 
-  const [selectedItems, setSelectedItems] = useState([]); 
-  const [formData, setFormData] = useState({ 
-    invoiceno: "", 
-    date: "", 
-    time: "", 
-    custname: "", 
-    custphone: "", 
-    gstin: "", 
-    menuitem: [], 
-    quantity: [], 
-    price: [], 
-    totalamt: 0, 
-    gst: 0, 
-    payableamt: 0, 
-  }); 
+  const [menu, setMenu] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [formData, setFormData] = useState({
+    invoiceno: "",
+    date: "",
+    time: "",
+    custname: "",
+    custphone: "",
+    gstin: "",
+    menuitem: [],
+    quantity: [],
+    price: [],
+    totalamt: 0,
+    gst: 0,
+    payableamt: 0,
+  });
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -58,35 +39,67 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     fetchMenu();
   }, []);
 
-  useEffect(() => { 
-    if (existingInvoice) { 
-      setFormData({ 
-        invoiceno: existingInvoice.invoiceno || "", 
-        date: existingInvoice.date 
-          ? new Date(existingInvoice.date).toISOString().split("T")[0] 
-          : "", 
-        time: existingInvoice.time || "", 
-        custname: existingInvoice.custname || "", 
-        custphone: existingInvoice.custphone || "", 
-        gstin: existingInvoice.gstin || "", 
-        menuitem: existingInvoice.menuitem || [], 
-        quantity: existingInvoice.quantity || [], 
-        price: existingInvoice.price || [], 
-        totalamt: existingInvoice.totalamt || 0, 
-        gst: existingInvoice.gst || calculateGST(existingInvoice.totalamt || 0), 
-        payableamt: 
-          existingInvoice.payableamt || 
-          calculatePayableAmount(existingInvoice.totalamt || 0), 
-      }); 
-      setSelectedItems( 
-        existingInvoice.menuitem?.map((item, index) => ({ 
-          name: item, 
-          price: existingInvoice.price[index], 
-          quantity: existingInvoice.quantity[index] || 1, 
-        })) || [] 
-      ); 
-    } 
-  }, [existingInvoice]);
+    // Function to generate random alphanumeric string
+    const generateRandomString = (length) => {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    };
+  
+    // Function to generate invoice number
+    const generateInvoiceNumber = () => {
+      return `INV-${generateRandomString(6)}`;
+    };
+  
+    useEffect(() => {
+      const fetchMenu = async () => {
+        try {
+          const menuResponse = await fetch("/api/menuItem");
+          const menuData = await menuResponse.json();
+          setMenu(menuData.data);
+        } catch (error) {
+          console.error("Failed to fetch menu data", error);
+        }
+      };
+      fetchMenu();
+  
+      // Generate invoice number only if there's no existing invoice
+      if (!existingInvoice) {
+        setFormData(prev => ({
+          ...prev,
+          invoiceno: generateInvoiceNumber()
+        }));
+      }
+    }, []);
+
+    useEffect(() => {
+      if (existingInvoice) {
+        setFormData({
+          invoiceno: existingInvoice.invoiceno || "",
+          date: existingInvoice.date ? new Date(existingInvoice.date).toISOString().split("T")[0] : "",
+          time: existingInvoice.time || "",
+          custname: existingInvoice.custname || "",
+          custphone: existingInvoice.custphone || "",
+          gstin: existingInvoice.gstin || "",
+          menuitem: existingInvoice.menuitem || [],
+          quantity: existingInvoice.quantity || [],
+          price: existingInvoice.price || [],
+          totalamt: existingInvoice.totalamt || 0,
+          gst: existingInvoice.gst || calculateGST(existingInvoice.totalamt || 0),
+          payableamt: existingInvoice.payableamt || calculatePayableAmount(existingInvoice.totalamt || 0),
+        });
+        setSelectedItems(
+          existingInvoice.menuitem?.map((item, index) => ({
+            name: item,
+            price: existingInvoice.price[index],
+            quantity: existingInvoice.quantity[index] || 1,
+          })) || []
+        );
+      }
+    }, [existingInvoice]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -232,7 +245,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
   const resetForm = () => {
     setFormData({
-      invoiceno: "",
+      invoiceno: generateInvoiceNumber(),
       date: "",
       time: "",
       custname: "",
@@ -276,8 +289,21 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
             spacing={2} 
             sx={{ maxHeight: '70vh', overflowY: 'auto' }} 
           > 
+          <Grid item xs={6}>
+              <TextField
+                fullWidth
+                disabled
+                label="Invoice ID."
+                name="invoiceno"
+                value={formData.invoiceno}
+                variant="outlined"
+                InputProps={{
+                  readOnly: true,
+                }}
+                required
+              />
+            </Grid>
             {[ 
-              { label: "Invoice No.", name: "invoiceno", type: "text" }, 
               { label: "Date", name: "date", type: "date" }
             ].map(({ label, name, type }) => ( 
               <Grid item xs={6} key={name}> 
