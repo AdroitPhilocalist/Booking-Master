@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from '@/app/_components/Navbar'
 import { Footer } from '@/app/_components/Footer'
 import TextField from '@mui/material/TextField';
@@ -22,6 +22,7 @@ const InvoicePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const tableRef = useRef(null);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -53,6 +54,32 @@ const InvoicePage = () => {
     } else {
       setFilteredInvoices(invoices);
     }
+  };
+
+  const printTable = () => {
+    if (!tableRef.current) return;
+    const tableHTML = tableRef.current.outerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    document.body.innerHTML = `
+      <html>
+        <head>
+          <title>Stock Report</title>
+          <style>
+            table { width: 100%; border-collapse: collapse; }
+            table, th, td { border: 1px solid black; }
+            th, td { padding: 8px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          ${tableHTML}
+        </body>
+      </html>
+    `;
+    
+    window.print();
+    document.body.innerHTML = originalContent;
+    window.location.reload();
   };
 
   return (
@@ -150,13 +177,26 @@ const InvoicePage = () => {
             >
               Reset
             </Button>
+             <Button 
+            variant="contained" 
+            onClick={printTable}
+            size="small"
+            sx={{
+              backgroundColor: 'orange',
+              '&:hover': {
+                backgroundColor: 'darkorange',
+              },
+            }}
+          >
+            Download/Export
+          </Button>
           </Box>
         </Box>
 
         <Box sx={{ maxWidth: "80%", margin: "0 auto", overflowX: "auto" }}>
           {startDate && endDate ? (
             <TableContainer component={Paper}>
-              <Table>
+              <Table ref={tableRef}>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
