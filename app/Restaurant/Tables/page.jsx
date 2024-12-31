@@ -5,7 +5,16 @@ import {
   PencilIcon,
   BoltIcon,
 } from "lucide-react";
-import { Modal, TextField, Grid, Typography,FormControl,InputLabel,Select,MenuItem } from "@mui/material";
+import {
+  Modal,
+  TextField,
+  Grid,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/app/_components/Footer";
 import Navbar from "@/app/_components/Navbar";
@@ -20,7 +29,7 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { IconButton } from "@mui/material";
-
+import DeleteIcon from "@mui/icons-material/Delete";
 export default function BookingMasterControlPanel() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
@@ -77,6 +86,27 @@ export default function BookingMasterControlPanel() {
       setSortDirection("asc");
     }
   };
+
+  const handleDelete = async (id) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/tables/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setTableData((prevTables) => prevTables.filter((table) => table._id !== id));
+      } else {
+        console.error("Failed to delete table:", data.error);
+      }
+    } catch (error) {
+      console.error("Error deleting table:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const EditTableModal = ({ open, onClose, tableData, onSave }) => {
     const [formData, setFormData] = useState(tableData || {});
 
@@ -111,21 +141,21 @@ export default function BookingMasterControlPanel() {
                 />
               </Grid>
               <Grid item xs={14}>
-              <FormControl fullWidth margin="normal">
-                    <InputLabel id="pos-select-label">POS</InputLabel>
-                    <Select
-                        labelId="pos-select-label"
-                        name="pos"
-                        value={formData.pos || ''}
-                        onChange={handleChange}
-                    >
-                        <MenuItem value="pos1">POS 1</MenuItem>
-                        <MenuItem value="pos2">POS 2</MenuItem>
-                        <MenuItem value="pos3">POS 3</MenuItem>
-                    </Select>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="pos-select-label">POS</InputLabel>
+                  <Select
+                    labelId="pos-select-label"
+                    name="pos"
+                    value={formData.pos || ""}
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="pos1">POS 1</MenuItem>
+                    <MenuItem value="pos2">POS 2</MenuItem>
+                    <MenuItem value="pos3">POS 3</MenuItem>
+                  </Select>
                 </FormControl>
-                </Grid>
-                {/* <FormControl fullWidth margin="normal">
+              </Grid>
+              {/* <FormControl fullWidth margin="normal">
                     <InputLabel id="status-select-label">Active Status</InputLabel>
                     <Select
                         labelId="status-select-label"
@@ -317,6 +347,12 @@ export default function BookingMasterControlPanel() {
                                 style={{ width: "16px", height: "16px" }}
                               />
                             </IconButton>
+                            <IconButton
+                              onClick={() => handleDelete(item._id)}
+                              sx={{ color: "#D32F2F" }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
                           </TableCell>
                         </TableRow>
                       ))
@@ -339,27 +375,28 @@ export default function BookingMasterControlPanel() {
               </TableContainer>
             </div>
             <EditTableModal
-  open={isModalOpen}
-  onClose={() => setIsModalOpen(false)}
-  tableData={selectedTable}
-  onSave={(updatedTable) => {
-    // Update the table data
-    const updatedData = tableData.map((table) =>
-      table._id === updatedTable._id ? updatedTable : table
-    );
-    setTableData(updatedData);
+              open={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              tableData={selectedTable}
+              onSave={(updatedTable) => {
+                // Update the table data
+                const updatedData = tableData.map((table) =>
+                  table._id === updatedTable._id ? updatedTable : table
+                );
+                setTableData(updatedData);
 
-    // Optionally, send the updated data to the backend
-    fetch(`/api/tables/${updatedTable._id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedTable),
-    }).catch((error) => console.error('Error updating table:', error));
-  }}
-/>
-
+                // Optionally, send the updated data to the backend
+                fetch(`/api/tables/${updatedTable._id}`, {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(updatedTable),
+                }).catch((error) =>
+                  console.error("Error updating table:", error)
+                );
+              }}
+            />
           </div>
         </div>
       </main>
