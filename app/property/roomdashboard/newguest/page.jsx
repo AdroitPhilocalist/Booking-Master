@@ -324,7 +324,8 @@ export default function BookingForm() {
           console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
           const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
           const currentGuestData = await currentGuestResponse.json();
-          const currentGuestCheckIn = new Date(currentGuestData.data.checkIn);
+          console.log('currentGuestData:', currentGuestData.data);
+          const currentGuestCheckIn = new Date(currentGuestData.checkIn);
 
           // Fetch first waitlisted guest's booking details
           const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]}`);
@@ -471,29 +472,29 @@ export default function BookingForm() {
                   disabled
                 />
 
-{/* Booking Type */}
-<FormControl fullWidth style={{ marginBottom: '1rem' }}>
-  <InputLabel>Booking Type</InputLabel>
-  <Select
-    name="bookingType"
-    value={formData.bookingType}
-    onChange={handleChange}
-    MenuProps={{
-      PaperProps: {
-        style: {
-          maxHeight: 300, // Adjust the maximum height for the dropdown
-          overflowY: 'auto', // Add scroll if needed
-        },
-      },
-    }}
-  >
-    {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events','Others'].map((type) => (
-      <MenuItem key={type} value={type}>
-        {type}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+                {/* Booking Type */}
+                <FormControl fullWidth style={{ marginBottom: '1rem' }}>
+                  <InputLabel>Booking Type</InputLabel>
+                  <Select
+                    name="bookingType"
+                    value={formData.bookingType}
+                    onChange={handleChange}
+                    MenuProps={{
+                      PaperProps: {
+                        style: {
+                          maxHeight: 300, // Adjust the maximum height for the dropdown
+                          overflowY: 'auto', // Add scroll if needed
+                        },
+                      },
+                    }}
+                  >
+                    {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events', 'Others'].map((type) => (
+                      <MenuItem key={type} value={type}>
+                        {type}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
 
 
@@ -520,18 +521,18 @@ export default function BookingForm() {
                 {/* Booking Status */}
                 <FormControl fullWidth>
                   <InputLabel>Booking Status</InputLabel>
-                  
+
                   <Select
                     name="bookingStatus"
                     value={formData.bookingStatus}
                     onChange={handleChange}
-                    
+
                   >
                     {['Confirmed', 'Blocked'].map((status) => (
                       <MenuItem key={status} value={status}>{status}</MenuItem>
                     ))}required
                   </Select>
-                  
+
                 </FormControl>
 
                 {/* Guest Name */}
@@ -622,7 +623,7 @@ export default function BookingForm() {
                     value={formData.guestid}
                     onChange={handleChange}
                   >
-                    {['adhaar', 'driving license','voter id card','passport','others'].map((idType) => (
+                    {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
                       <MenuItem key={idType} value={idType}>{idType}</MenuItem>
                     ))}
                   </Select>
