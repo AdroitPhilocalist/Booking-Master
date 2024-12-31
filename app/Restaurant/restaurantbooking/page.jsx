@@ -35,7 +35,13 @@ const RestaurantBooking = () => {
         const response = await fetch("/api/RestaurantBooking");
         const data = await response.json();
         if (data.success) {
-          setBookings(data.data);
+          // Sort bookings by date and time in descending order (newest first)
+          const sortedBookings = data.data.sort((a, b) => {
+            const dateA = new Date(`${a.date} ${a.time}`);
+            const dateB = new Date(`${b.date} ${b.time}`);
+            return dateB - dateA;
+          });
+          setBookings(sortedBookings);
         } else {
           console.error("Failed to fetch bookings:", data.error);
         }
@@ -45,7 +51,6 @@ const RestaurantBooking = () => {
         setIsLoading(false);
       }
     };
-
     fetchBookings();
   }, []);
 
@@ -59,13 +64,15 @@ const RestaurantBooking = () => {
       setIsLoading(true);
       const response = await fetch("/api/RestaurantBooking", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(newBooking),
       });
-
       const data = await response.json();
       if (data.success) {
-        setBookings((prevBookings) => [...prevBookings, data.data]);
+        // Add the new booking at the beginning of the array
+        setBookings((prevBookings) => [data.data, ...prevBookings]);
         handleClose();
       } else {
         console.error("Failed to add booking:", data.error);
@@ -89,7 +96,6 @@ const RestaurantBooking = () => {
       const response = await fetch(`/api/RestaurantBooking/${id}`, {
         method: "DELETE",
       });
-
       const data = await response.json();
       if (data.success) {
         setBookings((prevBookings) =>
@@ -133,21 +139,19 @@ const RestaurantBooking = () => {
       )}
       <Box sx={{ p: 3 }}>
         <Box sx={{ maxWidth: '80%', margin: '0 auto', mb: 3 }}>
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            {/* Header */}
-            <Typography variant="h4" sx={{
-              color: "#064c61",
-              fontWeight: "bold",
-              flex: 1
-            }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{ color: "#064c61", fontWeight: "bold", flex: 1 }}
+            >
               Restaurant Booking
             </Typography>
-
-            {/* Search field */}
             <TextField
               placeholder="Search By Guest Name"
               variant="outlined"
@@ -156,8 +160,6 @@ const RestaurantBooking = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-
-            {/* Add New Booking button */}
             <Button
               variant="contained"
               onClick={handleOpen}
@@ -173,16 +175,25 @@ const RestaurantBooking = () => {
             </Button>
           </Box>
         </Box>
-
         <TableContainer component={Paper} sx={{ maxWidth: "80%", margin: "0 auto" }}>
           <Table size="small">
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Table No.</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Time</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Guest Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
+                  Table No.
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
+                  Date
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
+                  Time
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
+                  Guest Name
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>
+                  Action
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -205,7 +216,10 @@ const RestaurantBooking = () => {
                     <TableCell sx={{ textAlign: "center" }}>{booking.time}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{booking.guestName}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton onClick={() => handleEdit(booking._id)} sx={{ color: "#388E3C" }}>
+                      <IconButton
+                        onClick={() => handleEdit(booking._id)}
+                        sx={{ color: "#388E3C" }}
+                      >
                         <EditIcon />
                       </IconButton>
                       <IconButton
@@ -219,7 +233,11 @@ const RestaurantBooking = () => {
                 ))}
               {bookings.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ fontStyle: "italic", color: "#616161" }}>
+                  <TableCell
+                    colSpan={5}
+                    align="center"
+                    sx={{ fontStyle: "italic", color: "#616161" }}
+                  >
                     No bookings available.
                   </TableCell>
                 </TableRow>
@@ -227,8 +245,6 @@ const RestaurantBooking = () => {
             </TableBody>
           </Table>
         </TableContainer>
-
-        {/* Modal for Adding New Booking */}
         <Modal open={open} onClose={handleClose}>
           <Box
             sx={{
