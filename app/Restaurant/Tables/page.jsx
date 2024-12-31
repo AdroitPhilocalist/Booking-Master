@@ -1,42 +1,50 @@
-'use client'
-import { ChevronUpIcon, ChevronDownIcon, PencilIcon, BoltIcon } from 'lucide-react'
+"use client";
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  PencilIcon,
+  BoltIcon,
+} from "lucide-react";
+import { Modal, TextField, Grid, Typography,FormControl,InputLabel,Select,MenuItem } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Footer } from '@/app/_components/Footer'
-import Navbar from '@/app/_components/Navbar'
-import { useState, useEffect } from 'react'
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import { IconButton } from '@mui/material';
+import { Footer } from "@/app/_components/Footer";
+import Navbar from "@/app/_components/Navbar";
+import { useState, useEffect } from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
+import { styled } from "@mui/material/styles";
+import { IconButton } from "@mui/material";
 
 export default function BookingMasterControlPanel() {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [displayCount, setDisplayCount] = useState(15);
-  const [sortColumn, setSortColumn] = useState('');
-  const [sortDirection, setSortDirection] = useState('asc');
-  const [tableData, setTableData] = useState([]);  // Use state to store fetched data
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
+  const [tableData, setTableData] = useState([]); // Use state to store fetched data
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTable, setSelectedTable] = useState(null); // Track the selected table for editing
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch table data from the API when component mounts
   useEffect(() => {
     const fetchTableData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/tables');  // Fetch data from the API route
+        const response = await fetch("/api/tables"); // Fetch data from the API route
 
         const data = await response.json();
         if (data.success) {
-          setTableData(data.data);  // Set the fetched table data
+          setTableData(data.data); // Set the fetched table data
         }
       } catch (error) {
-        console.error('Error fetching table data:', error);
+        console.error("Error fetching table data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -45,27 +53,107 @@ export default function BookingMasterControlPanel() {
     fetchTableData();
   }, []);
 
-  const filteredData = tableData.filter(item =>
-    Object.values(item).some(value =>
+  const filteredData = tableData.filter((item) =>
+    Object.values(item).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
   const sortedData = [...filteredData].sort((a, b) => {
     if (sortColumn) {
-      if (a[sortColumn] < b[sortColumn]) return sortDirection === 'asc' ? -1 : 1;
-      if (a[sortColumn] > b[sortColumn]) return sortDirection === 'asc' ? 1 : -1;
+      if (a[sortColumn] < b[sortColumn])
+        return sortDirection === "asc" ? -1 : 1;
+      if (a[sortColumn] > b[sortColumn])
+        return sortDirection === "asc" ? 1 : -1;
     }
     return 0;
   });
 
   const handleSort = (column) => {
     if (column === sortColumn) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
+  };
+  const EditTableModal = ({ open, onClose, tableData, onSave }) => {
+    const [formData, setFormData] = useState(tableData || {});
+
+    useEffect(() => {
+      setFormData(tableData || {}); // Update form data when tableData changes
+    }, [tableData]);
+
+    const handleChange = (e) => {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSave = () => {
+      onSave(formData);
+      onClose();
+    };
+
+    return (
+      <Modal open={open} onClose={onClose}>
+        <div className="flex items-center justify-center h-screen">
+          <Paper sx={{ width: 400, padding: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Edit Table
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={14}>
+                <TextField
+                  fullWidth
+                  label="Table No."
+                  name="tableNo"
+                  value={formData.tableNo || ""}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={14}>
+              <FormControl fullWidth margin="normal">
+                    <InputLabel id="pos-select-label">POS</InputLabel>
+                    <Select
+                        labelId="pos-select-label"
+                        name="pos"
+                        value={formData.pos || ''}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="pos1">POS 1</MenuItem>
+                        <MenuItem value="pos2">POS 2</MenuItem>
+                        <MenuItem value="pos3">POS 3</MenuItem>
+                    </Select>
+                </FormControl>
+                </Grid>
+                {/* <FormControl fullWidth margin="normal">
+                    <InputLabel id="status-select-label">Active Status</InputLabel>
+                    <Select
+                        labelId="status-select-label"
+                        name="activeStatus"
+                        value={formData.activeStatus || ''}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                    </Select>
+                </FormControl> */}
+              <Grid item xs={12} className="flex justify-end gap-2">
+                <Button onClick={onClose} color="secondary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  color="primary"
+                  variant="contained"
+                >
+                  Save
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        </div>
+      </Modal>
+    );
   };
 
   return (
@@ -95,18 +183,27 @@ export default function BookingMasterControlPanel() {
         </div>
       )}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="  rounded-lg" >
-          <div className="px-4 py-5 sm:p-6" >
-            <div className=" flex justify-between mb-3" style={{ maxWidth: '80%', margin: '0 auto' }}>
+        <div className="  rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <div
+              className=" flex justify-between mb-3"
+              style={{ maxWidth: "80%", margin: "0 auto" }}
+            >
               <h2 className="text-3xl font-semibold text-cyan-900 ">
                 {/* <BoltIcon className="h-6 w-6 mr-2 text-yellow-500" /> */}
                 Table List
               </h2>
-              <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4" onClick={() => router.push("/Restaurant/Tables/add")} >
+              <button
+                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4"
+                onClick={() => router.push("/Restaurant/Tables/add")}
+              >
                 Add New +
               </button>
             </div>
-            <div className="flex justify-between mb-4 " style={{ maxWidth: '80%', margin: '0 auto' }}>
+            <div
+              className="flex justify-between mb-4 "
+              style={{ maxWidth: "80%", margin: "0 auto" }}
+            >
               <div className="flex items-center">
                 <span className="mr-2">Display</span>
                 <select
@@ -131,30 +228,50 @@ export default function BookingMasterControlPanel() {
               </div>
             </div>
             <div className="overflow-x-auto">
-              <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
+              <TableContainer
+                component={Paper}
+                style={{ maxWidth: "80%", margin: "0 auto" }}
+              >
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      {['Table No.', 'POS', 'Action'].map((header) => (
+                    <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                      {["Table No.", "POS", "Action"].map((header) => (
                         <TableCell
                           key={header}
                           sx={{
-                            fontWeight: 'bold',
-                            color: '#28bfdb',
-                            textAlign: 'center',
-                            cursor: 'pointer',
+                            fontWeight: "bold",
+                            color: "#28bfdb",
+                            textAlign: "center",
+                            cursor: "pointer",
                           }}
                           onClick={() => handleSort(header.toLowerCase())}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
                             {header}
-                            {sortColumn === header.toLowerCase() && (
-                              sortDirection === 'asc' ? (
-                                <ChevronUpIcon style={{ marginLeft: '5px', width: '16px', height: '16px' }} />
+                            {sortColumn === header.toLowerCase() &&
+                              (sortDirection === "asc" ? (
+                                <ChevronUpIcon
+                                  style={{
+                                    marginLeft: "5px",
+                                    width: "16px",
+                                    height: "16px",
+                                  }}
+                                />
                               ) : (
-                                <ChevronDownIcon style={{ marginLeft: '5px', width: '16px', height: '16px' }} />
-                              )
-                            )}
+                                <ChevronDownIcon
+                                  style={{
+                                    marginLeft: "5px",
+                                    width: "16px",
+                                    height: "16px",
+                                  }}
+                                />
+                              ))}
                           </div>
                         </TableCell>
                       ))}
@@ -163,32 +280,56 @@ export default function BookingMasterControlPanel() {
                   <TableBody>
                     {sortedData.slice(0, displayCount).length > 0 ? (
                       sortedData.slice(0, displayCount).map((item) => (
-                        <TableRow key={item._id} sx={{ borderBottom: '1px solid #e5e5e5' }}>
-                          <TableCell sx={{ textAlign: 'center' }}>{item.tableNo}</TableCell>
-                          <TableCell sx={{ textAlign: 'center' }}>{item.pos}</TableCell>
-                          <TableCell sx={{ textAlign: 'center' }}>
-                            <span
+                        <TableRow
+                          key={item._id}
+                          sx={{ borderBottom: "1px solid #e5e5e5" }}
+                        >
+                          <TableCell sx={{ textAlign: "center" }}>
+                            {item.tableNo}
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>
+                            {item.pos}
+                          </TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>
+                            {/* <span
                               style={{
-                                display: 'inline-block',
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                fontSize: '12px',
-                                fontWeight: 'bold',
-                                color: item.active === 'yes' ? '#1c7c1c' : '#a83232',
-                                backgroundColor: item.active === 'yes' ? '#dff7df' : '#fddede',
+                                display: "inline-block",
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                color:
+                                  item.active === "yes" ? "#1c7c1c" : "#a83232",
+                                backgroundColor:
+                                  item.active === "yes" ? "#dff7df" : "#fddede",
                               }}
                             >
-                              {item.active === 'yes' ? 'Active' : 'Inactive'}
-                            </span>
-                            <IconButton style={{ marginLeft: '10px', color: '#2563eb' }}>
-                              <PencilIcon style={{ width: '16px', height: '16px' }} />
+                              {item.active === "yes" ? "Active" : "Inactive"}
+                            </span> */}
+                            <IconButton
+                              style={{ marginLeft: "10px", color: "#2563eb" }}
+                              onClick={() => {
+                                setSelectedTable(item); // Set the selected table data
+                                setIsModalOpen(true); // Open the modal
+                              }}
+                            >
+                              <PencilIcon
+                                style={{ width: "16px", height: "16px" }}
+                              />
                             </IconButton>
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={3} sx={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                        <TableCell
+                          colSpan={3}
+                          sx={{
+                            textAlign: "center",
+                            padding: "20px",
+                            color: "#666",
+                          }}
+                        >
                           No data available.
                         </TableCell>
                       </TableRow>
@@ -196,8 +337,29 @@ export default function BookingMasterControlPanel() {
                   </TableBody>
                 </Table>
               </TableContainer>
-
             </div>
+            <EditTableModal
+  open={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+  tableData={selectedTable}
+  onSave={(updatedTable) => {
+    // Update the table data
+    const updatedData = tableData.map((table) =>
+      table._id === updatedTable._id ? updatedTable : table
+    );
+    setTableData(updatedData);
+
+    // Optionally, send the updated data to the backend
+    fetch(`/api/tables/${updatedTable._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedTable),
+    }).catch((error) => console.error('Error updating table:', error));
+  }}
+/>
+
           </div>
         </div>
       </main>
