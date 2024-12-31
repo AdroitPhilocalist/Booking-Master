@@ -64,8 +64,8 @@ const RestaurantBooking = () => {
         if (data.success) {
           // Sort bookings by date and time in descending order (newest first)
           const sortedBookings = data.data.sort((a, b) => {
-            const dateA = new Date(`${a.date} ${a.time}`);
-            const dateB = new Date(`${b.date} ${b.time}`);
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
             return dateB - dateA;
           });
           setBookings(sortedBookings);
