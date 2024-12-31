@@ -77,8 +77,8 @@ export default function Dashboard() {
     return bookings.filter((booking) => booking.date.split("T")[0] === selectedDate);
   };
 
-  const handleBookingDetails = (booking) => {
-    setSelectedBooking(booking);
+  const handleBookingDetails = (bookings) => {
+    setSelectedBooking(bookings);
     setModalOpen(true);
   };
 
@@ -147,13 +147,13 @@ export default function Dashboard() {
           {tables.length > 0 ? (
             tables.map((table) => {
               const todayBookings = getBookingsForSelectedDay();
-              const booking = todayBookings.find((b) => b.tableNo === table.tableNo);
-
+              const bookingsForTable = todayBookings.filter((b) => b.tableNo === table.tableNo);
+            
               return (
                 <Card
                   key={table._id}
                   sx={{
-                    backgroundColor: booking ? "#E3FCEF" : "#FFFFFF",
+                    backgroundColor: bookingsForTable.length > 0 ? "#E3FCEF" : "#FFFFFF",
                     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
                     borderRadius: "16px",
                     overflow: "hidden",
@@ -171,22 +171,22 @@ export default function Dashboard() {
                       fontWeight: "bold",
                       color: "#007BFF",
                     }}
-                    sx={{ 
-                      backgroundColor: "#F0F4FF", 
+                    sx={{
+                      backgroundColor: "#F0F4FF",
                       padding: "16px",
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 2
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
                     }}
                   />
                   <CardContent sx={{ padding: "16px" }}>
-                    {booking ? (
+                    {bookingsForTable.length > 0 ? (
                       <Button
                         variant="contained"
                         color="primary"
                         fullWidth
                         startIcon={<BookmarkAddedIcon />}
-                        onClick={() => handleBookingDetails(booking)}
+                        onClick={() => handleBookingDetails(bookingsForTable)}
                         sx={{
                           textTransform: "capitalize",
                           borderRadius: "8px",
@@ -199,13 +199,13 @@ export default function Dashboard() {
                         Booking Details
                       </Button>
                     ) : (
-                      <Typography 
-                        variant="body2" 
+                      <Typography
+                        variant="body2"
                         color="textSecondary"
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
                         }}
                       >
                         <TableRestaurantIcon fontSize="small" /> No bookings for this table.
@@ -215,6 +215,7 @@ export default function Dashboard() {
                 </Card>
               );
             })
+            
           ) : (
             <p>No tables available.</p>
           )}
@@ -224,60 +225,71 @@ export default function Dashboard() {
       <Footer />
 
       {selectedBooking && (
-        <Modal open={modalOpen} onClose={closeModal}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 450,
-              background: "linear-gradient(135deg, #9B6FCE, #4E92D6)",
-              boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)",
-              borderRadius: 3,
-              p: 3,
-              overflow: "hidden",
-            }}
-          >
-            <Card
-              sx={{
-                bgcolor: "#f9f9f9",
-                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-                borderRadius: 2,
-                padding: 3,
-              }}
-            >
-              <Typography
-                variant="h5"
-                sx={{ 
-                  fontWeight: "bold", 
-                  color: "#007BFF", 
-                  textAlign: "center", 
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 2
-                }}
-              >
-                <BookmarkAddedIcon fontSize="large" /> Booking Details
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TableRestaurantIcon /> <strong>Table:</strong> {selectedBooking.tableNo}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EventIcon /> <strong>Date:</strong> {new Date(selectedBooking.date).toDateString()}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AccessTimeIcon /> <strong>Time:</strong> {selectedBooking.time}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PersonIcon /> <strong>Guest Name:</strong> {selectedBooking.guestName}
-              </Typography>
-            </Card>
+  <Modal open={modalOpen} onClose={closeModal}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 450,
+        background: "linear-gradient(135deg, #9B6FCE, #4E92D6)",
+        boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)",
+        borderRadius: 3,
+        p: 3,
+        overflow: "hidden",
+      }}
+    >
+      <Card
+        sx={{
+          bgcolor: "#f9f9f9",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+          borderRadius: 2,
+          padding: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            color: "#007BFF",
+            textAlign: "center",
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+          }}
+        >
+          <BookmarkAddedIcon fontSize="large" /> Booking Details
+        </Typography>
+        {selectedBooking.map((booking, index) => (
+          <Box key={index}
+          sx={{
+            mb: 3, // Add spacing between booking details
+             // Optional: Add padding for better aesthetics
+            
+          }}>
+            <Typography variant="body1" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+              <TableRestaurantIcon /> <strong>Table:</strong> {booking.tableNo}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+              <EventIcon /> <strong>Date:</strong> {new Date(booking.date).toDateString()}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+              <AccessTimeIcon /> <strong>Time:</strong> {booking.time}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+              <PersonIcon /> <strong>Guest Name:</strong> {booking.guestName}
+            </Typography>
+            {index < selectedBooking.length - 1 && <hr />}
           </Box>
-        </Modal>
-      )}
+        ))}
+      </Card>
+    </Box>
+  </Modal>
+)}
+
     </div>
   );
 }
