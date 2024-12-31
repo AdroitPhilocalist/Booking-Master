@@ -1,8 +1,10 @@
 "use client"
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { BoltIcon } from 'lucide-react'
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import Navbar from '@/app/_components/Navbar';
 import { Footer } from '@/app/_components/Footer'
 
@@ -10,9 +12,44 @@ export default function AddTable() {
     const router=useRouter();
   const [tableNo, setTableNo] = useState('');
   const [pos, setPos] = useState('');
+  const [existingTables, setExistingTables] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        const response = await fetch("/api/tables"); // Fetch all table data
+        if (response.ok) {
+          const { data } = await response.json(); // Extract the `data` field
+          console.log("Fetched table data:", data); // Debug: Log the full table data
+          // Extract the `tableNo` field from the fetched data
+          const tableNumbers = data.map((table) => table.tableNo);
+          setExistingTables(tableNumbers);
+        } else {
+          console.error("Error fetching existing table numbers");
+          setExistingTables([]);
+        }
+      } catch (error) {
+        console.error("Error fetching tables:", error);
+        setExistingTables([]);
+      }
+    };
+    fetchTables();
+  }, []);
+  
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (existingTables.includes(tableNo)) {
+      setError("Table number already exists! Please choose a different number.");
+      return;
+    }
+    if(!pos)
+    {
+      setError("POS not provided!");
+      return;
+    }
 
     const response = await fetch('/api/tables', {
 
@@ -35,6 +72,9 @@ export default function AddTable() {
     } else {
       console.error('Error adding table');
     }
+  };
+  const handleClose = () => {
+    setError("");
   };
 
   return (
@@ -101,6 +141,11 @@ export default function AddTable() {
         </div>
       </main>
       <Footer />
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleClose}>
+        <MuiAlert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
+          {error}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 }
