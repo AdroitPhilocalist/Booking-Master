@@ -31,7 +31,10 @@ export default function RoomCategories() {
       setIsLoading(true);
       const res = await fetch("/api/roomCategories");
       const data = await res.json();
-      if (data.success && data.data) setCategories(data.data);
+      if (data.success && data.data) {
+        setCategories(data.data);
+        console.log("Room categories:", data.data);
+      }
       else setCategories([]);
     } catch (error) {
       console.error("Error fetching room categories:", error);
@@ -43,7 +46,6 @@ export default function RoomCategories() {
 
   const deleteCategory = async (id) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
-
     try {
       setIsLoading(true);
       const res = await fetch(`/api/roomCategories/${id}`, { method: "DELETE" });
@@ -121,7 +123,7 @@ export default function RoomCategories() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              
+
               <Button
                 variant="contained"
                 color="success"
@@ -169,13 +171,13 @@ export default function RoomCategories() {
                       <div className="flex justify-center items-center space-x-2">
                         <IconButton
                           color="primary"
-                          onClick={() => router.push(`/property/roomcategories/updateRoomCategory/${room.id}`)}
+                          onClick={() => router.push(`/property/roomcategories/editRoomCategory/${room._id}`)}
                         >
                           <Edit />
                         </IconButton>
                         <IconButton
                           color="secondary"
-                          onClick={() => deleteCategory(room.id)}
+                          onClick={() => deleteCategory(room._id)}
                         >
                           <Delete />
                         </IconButton>
