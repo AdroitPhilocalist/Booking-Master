@@ -22,10 +22,6 @@ const restaurantInvoiceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    gstin: {
-      type: String,
-      required: true,
-    },
     quantity: {
       type: [Number],
       required: true,

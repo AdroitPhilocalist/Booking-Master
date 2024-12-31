@@ -17,7 +17,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     time: "",
     custname: "",
     custphone: "",
-    gstin: "",
     menuitem: [],
     quantity: [],
     price: [],
@@ -83,7 +82,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           time: existingInvoice.time || "",
           custname: existingInvoice.custname || "",
           custphone: existingInvoice.custphone || "",
-          gstin: existingInvoice.gstin || "",
           menuitem: existingInvoice.menuitem || [],
           quantity: existingInvoice.quantity || [],
           price: existingInvoice.price || [],
@@ -250,7 +248,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       time: "",
       custname: "",
       custphone: "",
-      gstin: "",
       menuitem: [],
       quantity: [],
       price: [],
@@ -352,7 +349,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
             {[ 
               { label: "Customer Phone", name: "custphone", type: "tel" }, 
-              { label: "GSTIN", name: "gstin", type: "text" }
             ].map(({ label, name, type }) => ( 
               <Grid item xs={6} key={name}> 
                 <TextField 
