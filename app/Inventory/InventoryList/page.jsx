@@ -179,6 +179,22 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
     stock: 0,
     quantityUnit: 'pieces'
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isFormValid = () => {
+    return (
+      formData.itemCode.trim() !== '' &&
+      formData.name.trim() !== '' &&
+      formData.group.trim() !== '' &&
+      formData.segment !== '' &&
+      formData.tax !== ''
+    );
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    await onSubmit(formData);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -186,30 +202,35 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
         <h2 className="text-xl font-bold mb-4">{initialData ? 'Edit' : 'Add'} Item</h2>
 
         <div className="space-y-4">
-          <TextField id="Item Code" label="Item Code" variant="outlined"
+          <TextField 
+            id="Item Code" 
+            label="Item Code" 
+            variant="outlined"
             type="text"
-
             value={formData.itemCode}
             onChange={(e) => setFormData({ ...formData, itemCode: e.target.value })}
             className="w-full border p-2 rounded"
           />
 
-          <TextField id="Name" label="Name" variant="outlined"
+          <TextField 
+            id="Name" 
+            label="Name" 
+            variant="outlined"
             type="text"
-
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           />
 
-          <TextField id="Group" label="Group" variant="outlined"
+          <TextField 
+            id="Group" 
+            label="Group" 
+            variant="outlined"
             type="text"
-
             value={formData.group}
             onChange={(e) => setFormData({ ...formData, group: e.target.value })}
             className="w-full border p-2 rounded mt-2"
           />
-
 
           <select
             value={formData.segment}
@@ -274,8 +295,9 @@ const ItemModal = ({ onClose, onSubmit, initialData, categories }) => {
               Cancel
             </button>
             <button
-              onClick={() => onSubmit(formData)}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              onClick={handleSubmit}
+              disabled={!isFormValid() || isSubmitting}
+              className={`bg-blue-500 text-white px-4 py-2 rounded ${(!isFormValid() || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {initialData ? 'Update' : 'Add'} Item
             </button>
