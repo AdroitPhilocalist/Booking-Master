@@ -288,7 +288,8 @@ export default function Page() {
 
       {/* Edit User Modal */}
       {/* Edit User Modal */}
-<Dialog open={open} onClose={handleClose}>
+<Dialog open={open} onClose={handleClose}  maxWidth="md" // Increased width to 'md' for a wider layout
+  fullWidth>
   <DialogTitle>Edit User</DialogTitle>
   <DialogContent>
     <form onSubmit={handleSubmit}>
