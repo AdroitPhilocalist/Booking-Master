@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify'; //impo
+import 'react-toastify/dist/ReactToastify.css'; //impo
 import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
@@ -154,7 +154,7 @@ const PurchaseReportPage = () => {
     setSelectedItem(item || null);
   };
 
-  const handlePurchase = async () => {
+  const handlePurchase = async () => {    //warning toaster
     if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem ||
       !quantityAmount || !rate) {
       toast.warn('🥲 Please fill in all fields!', {
@@ -162,7 +162,7 @@ const PurchaseReportPage = () => {
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,
+        pauseOnHover: true,      
         draggable: true,
         progress: undefined,
         theme: "dark",
@@ -210,7 +210,7 @@ const PurchaseReportPage = () => {
         handleCloseModal();
 
         // Show success toast with onClose callback to reload the page
-        toast.success('👍 Item Purchased Successfully!', {
+        toast.success('👍 Item Purchased Successfully!', {  //success toaster
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -222,16 +222,16 @@ const PurchaseReportPage = () => {
           onClose: () => window.location.reload()
         });
       } else {
-        setError(result.error || "Failed to save purchase report");
-        toast.error('👎 Failed to save purchase report', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
+        setError(result.error || "Failed to save purchase report"); //
+        toast.error('👎 Failed to save purchase report', {   //error toaster
+          position: "top-right", //
+          autoClose: 5000, //
+          hideProgressBar: false, //
+          closeOnClick: true, //
+          pauseOnHover: true, //
+          draggable: true, //
+          progress: undefined, //
+          theme: "dark", //
         });
       }
     } catch (error) {
@@ -327,7 +327,7 @@ const PurchaseReportPage = () => {
   return (
     <div className="bg-amber-50 min-h-screen">
       <Navbar />
-      <ToastContainer
+      <ToastContainer    //position
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
