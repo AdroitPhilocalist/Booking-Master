@@ -96,6 +96,26 @@ export default function InventoryCategory() {
       console.error("Error toggling status:", error);
     }
   };
+  const handleDeleteProduct = async (id) => {
+    try {
+      const response = await fetch(`/api/InventoryCategory/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to delete: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log(data.message);
+  
+      // Remove the deleted product from the state
+      setProducts((prev) => prev.filter((product) => product._id !== id));
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+  
 
   return (
     <div className="bg-amber-50 min-h-screen">
@@ -169,6 +189,12 @@ export default function InventoryCategory() {
                       }}
                     >
                       <Edit />
+                    </IconButton>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => handleDeleteProduct(product._id)}
+                    >
+                      <Delete />
                     </IconButton>
                   </TableCell>
                 </TableRow>
