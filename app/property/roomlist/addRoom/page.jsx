@@ -8,6 +8,8 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function NewRoomForm() {
   const [roomNumber, setRoomNumber] = useState("");
@@ -54,18 +56,34 @@ export default function NewRoomForm() {
       // Handle response
       if (res.ok) {
         // Redirect to the room dashboard if the room creation is successful
-        router.back();
+        toast.success('New room added successfully!')
+       //router.back();
       } else {
         console.error("Failed to create new room", res.statusText);
+        toast.error('Failed to add new room!');
       }
     } catch (error) {
       // Handle any fetch errors
       console.error("An error occurred while creating the room:", error);
+      toast.error('Failed to add new room!')
     }
   };
 
   return (
+    
     <div className="container mx-auto p-4">
+      <ToastContainer 
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                    />
       <h1 className="text-2xl mb-4">Add New Room</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -135,6 +153,7 @@ export default function NewRoomForm() {
         <button
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+          onClick={() => router.push('/property/roomlist')}
         >
           Add Room
         </button>
