@@ -133,7 +133,7 @@ export default function BookingForm() {
     const checkInDate = new Date(formData.checkIn);
     const checkOutDate = new Date(formData.checkOut);
 
-    if (checkInDate <= currentDate) {
+    if (checkInDate < currentDate) {
       newErrors.checkIn = 'Check-in date cannot be in the past';
       dateErrors = true;
     }
