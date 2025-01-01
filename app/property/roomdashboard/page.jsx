@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {Bed,Home,PlaneLanding,PlaneTakeoff,UserCheck,UserPlus,Edit2,Trash2,CheckCircle2,XCircle,User,Key,Building,Tags,Info,Calendar} from "lucide-react";
+import { Bed, Home, PlaneLanding, PlaneTakeoff, UserCheck, UserPlus, Edit2, Trash2, CheckCircle2, XCircle, User, Key, Building, Tags, Info, Calendar } from "lucide-react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 
@@ -27,19 +27,19 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-  
-  // Special handling for 'clean' to convert string to boolean
-  if (name === 'clean') {
-    setUpdatedRoom({ 
-      ...updatedRoom, 
-      [name]: value === 'true' // This will convert 'true' to true, and 'false' to false
-    });
-  } else {
-    setUpdatedRoom({ 
-      ...updatedRoom, 
-      [name]: value 
-    });
-  }
+
+    // Special handling for 'clean' to convert string to boolean
+    if (name === 'clean') {
+      setUpdatedRoom({
+        ...updatedRoom,
+        [name]: value === 'true' // This will convert 'true' to true, and 'false' to false
+      });
+    } else {
+      setUpdatedRoom({
+        ...updatedRoom,
+        [name]: value
+      });
+    }
 
     // Fetch guests when status changes to "Occupied"
     if (e.target.name === "occupied" && e.target.value === "Occupied") {
@@ -251,16 +251,16 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <Info size={20} />
                 </button>
               )}
-              {currentGuest &&(<div className="flex items-center space-x-2">
-                  {React.createElement(categoryInfo.icon || Calendar, {
-                    className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
-                      }`,
-                    size: 20,
-                  })}
-                  <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-{new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}</span>
-                  
-                </div>)}
-                
+              {currentGuest && (<div className="flex items-center space-x-2">
+                {React.createElement(categoryInfo.icon || Calendar, {
+                  className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                    }`,
+                  size: 20,
+                })}
+                <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-{new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}</span>
+
+              </div>)}
+
             </h3>
           </div>
 
@@ -280,7 +280,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Edit2 size={20} />
-            </button> 
+            </button>
             <button
               onClick={() => onDelete(room._id)}
               className="
@@ -317,9 +317,9 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                     size: 20,
                   })}
                   <span className="text-sm text-gray-600">{categoryInfo.category}</span>
-                  
+
                 </div>
-                
+
 
               </div>
             </div>
@@ -367,66 +367,66 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
       {showGuestModal && currentGuest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
-          <button
-            onClick={()=> {setShowGuestModal(false)}}
-            className="text-gray-500 hover:text-red-500 transition-colors"
-          >
-            <XCircle size={28} />
-          </button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <User className="text-amber-600" size={24} />
-            <div>
-              <p className="font-semibold text-gray-800">{currentGuest.guestName}</p>
-              <p className="text-sm text-gray-500">{currentGuest.guestType || "Guest"}</p>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-amber-700">Guest Details</h2>
+              <button
+                onClick={() => { setShowGuestModal(false) }}
+                className="text-gray-500 hover:text-red-500 transition-colors"
+              >
+                <XCircle size={28} />
+              </button>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
-            <div>
-              <p className="text-xs text-gray-500">Mobile</p>
-              <p className="font-medium">{currentGuest.mobileNo}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
-            <div>
-              <p className="text-xs text-gray-500">Email</p>
-              <p className="font-medium">{currentGuest.guestEmail || "N/A"}</p>
-            </div>
-          </div>
-          <div className="bg-amber-50 p-3 rounded-lg">
-            <div className="flex justify-between mb-2">
-              <div>
-                <p className="text-xs text-gray-500">Check-In</p>
-                <p className="font-medium">
-                  {new Date(currentGuest.checkIn).toLocaleDateString()}
-                </p>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <User className="text-amber-600" size={24} />
+                <div>
+                  <p className="font-semibold text-gray-800">{currentGuest.guestName}</p>
+                  <p className="text-sm text-gray-500">{currentGuest.guestType || "Guest"}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500">Check-Out</p>
-                <p className="font-medium">
-                  {new Date(currentGuest.checkOut).toLocaleDateString()}
-                </p>
+              <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
+                <div>
+                  <p className="text-xs text-gray-500">Mobile</p>
+                  <p className="font-medium">{currentGuest.mobileNo}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-2 mt-2">
-              <User size={16} className="text-gray-500" />
-              <p className="text-sm text-gray-600">
-                {currentGuest.adults} Adults, {currentGuest.children} Children
-              </p>
+              <div className="grid grid-cols-2 gap-3 bg-amber-50 p-3 rounded-lg">
+                <div>
+                  <p className="text-xs text-gray-500">Email</p>
+                  <p className="font-medium">{currentGuest.guestEmail || "N/A"}</p>
+                </div>
+              </div>
+              <div className="bg-amber-50 p-3 rounded-lg">
+                <div className="flex justify-between mb-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Check-In</p>
+                    <p className="font-medium">
+                      {new Date(currentGuest.checkIn).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Check-Out</p>
+                    <p className="font-medium">
+                      {new Date(currentGuest.checkOut).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <User size={16} className="text-gray-500" />
+                  <p className="text-sm text-gray-600">
+                    {currentGuest.adults} Adults, {currentGuest.children} Children
+                  </p>
+                </div>
+              </div>
+              {currentGuest.remarks && (
+                <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
+                  <p className="text-xs text-gray-500">Remarks</p>
+                  <p className="text-sm">{currentGuest.remarks}</p>
+                </div>
+              )}
             </div>
           </div>
-          {currentGuest.remarks && (
-            <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
-              <p className="text-xs text-gray-500">Remarks</p>
-              <p className="text-sm">{currentGuest.remarks}</p>
-            </div>
-          )}
         </div>
-      </div>
-    </div>
       )}
       {/* Edit Modal (Centered and Animated) */}
       {isEditing && (
@@ -642,50 +642,50 @@ export default function RoomDashboard() {
     return updatedRooms;
   };
 
- // Modified useEffect to include room status updates
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const [roomsResponse, categoriesResponse] = await Promise.all([
-        fetch("/api/rooms"),
-        fetch("/api/roomCategories"),
-      ]);
+  // Modified useEffect to include room status updates
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [roomsResponse, categoriesResponse] = await Promise.all([
+          fetch("/api/rooms"),
+          fetch("/api/roomCategories"),
+        ]);
 
-      const roomsData = await roomsResponse.json();
-      const categoriesData = await categoriesResponse.json();
+        const roomsData = await roomsResponse.json();
+        const categoriesData = await categoriesResponse.json();
 
-      if (roomsData.success && Array.isArray(roomsData.data)) {
-        // Update room statuses based on check-in dates
-        const updatedRooms = await updateRoomStatusBasedOnDate(roomsData.data);
-        setRooms(updatedRooms);
-      } else {
-        console.error("Failed to fetch rooms or rooms is not an array");
+        if (roomsData.success && Array.isArray(roomsData.data)) {
+          // Update room statuses based on check-in dates
+          const updatedRooms = await updateRoomStatusBasedOnDate(roomsData.data);
+          setRooms(updatedRooms);
+        } else {
+          console.error("Failed to fetch rooms or rooms is not an array");
+        }
+
+        if (categoriesData.success && Array.isArray(categoriesData.data)) {
+          setCategories(categoriesData.data);
+        } else {
+          console.error("Failed to fetch categories or categories is not an array");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      if (categoriesData.success && Array.isArray(categoriesData.data)) {
-        setCategories(categoriesData.data);
-      } else {
-        console.error("Failed to fetch categories or categories is not an array");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    fetchData();
 
-  fetchData();
+    // Set up an interval to check and update room status every hour
+    const intervalId = setInterval(async () => {
+      const updatedRooms = await updateRoomStatusBasedOnDate(rooms);
+      setRooms(updatedRooms);
+    }, 3600000); // 1 hour in milliseconds
 
-  // Set up an interval to check and update room status every hour
-  const intervalId = setInterval(async () => {
-    const updatedRooms = await updateRoomStatusBasedOnDate(rooms);
-    setRooms(updatedRooms);
-  }, 3600000); // 1 hour in milliseconds
-
-  // Cleanup interval on component unmount
-  return () => clearInterval(intervalId);
-}, []);
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Filter rooms based on search term and selected filter
   const filteredRooms = rooms.filter((room) => {
@@ -729,63 +729,64 @@ export default function RoomDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-amber-50">
-      {/* Navigation */}
-      <Navbar />
-      {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-            <svg
-              aria-hidden="true"
-              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
-              viewBox="0 0 100 101"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                fill="currentColor"
-              />
-              <path
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                fill="currentFill"
-              />
-            </svg>
-            <span className="mt-4 text-gray-700">Loading Rooms...</span>
+    <div>
+      <div className="min-h-screen bg-amber-50">
+        {/* Navigation */}
+        <Navbar />
+        {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+              <svg
+                aria-hidden="true"
+                className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
+              </svg>
+              <span className="mt-4 text-gray-700">Loading Rooms...</span>
+            </div>
           </div>
-        </div>
-      )}
-      {/* Main Content */}
-      <div className="container mx-auto p-4">
-        {/* Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          {summaryItems.map((item, index) => (
-            <SummaryItem key={index} {...item} />
-          ))}
-        </div>
+        )}
+        {/* Main Content */}
+        <div className="container mx-auto p-4">
+          {/* Summary */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            {summaryItems.map((item, index) => (
+              <SummaryItem key={index} {...item} />
+            ))}
+          </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap justify-between items-center mb-6">
-          <div className="flex space-x-2 mb-4">
-            <button
-              onClick={() => setFilter("all")}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              All Rooms
-            </button>
-            <button
-              onClick={() => setFilter("occupied")}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Occupied
-            </button>
-            <button
-              onClick={() => setFilter("vacant")}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Vacant
-            </button>
-            {/* <button
+          {/* Filters */}
+          <div className="flex flex-wrap justify-between items-center mb-6">
+            <div className="flex space-x-2 mb-4">
+              <button
+                onClick={() => setFilter("all")}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                All Rooms
+              </button>
+              <button
+                onClick={() => setFilter("occupied")}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Occupied
+              </button>
+              <button
+                onClick={() => setFilter("vacant")}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Vacant
+              </button>
+              {/* <button
               onClick={() => setFilter("clean")}
               className="bg-yellow-500 text-white px-4 py-2 rounded"
             >
@@ -797,45 +798,47 @@ export default function RoomDashboard() {
             >
               Dirty
             </button> */}
-          </div>
-          <div className="flex space-x-2">
-            {/* <Link
+            </div>
+            <div className="flex space-x-2">
+              {/* <Link
               href="roomdashboard/addRoom"
               className="bg-green-600 text-white px-4 py-2 rounded"
             >
               Add Room
             </Link> */}
-            <Link
-              href="roomdashboard/newguest"
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              New Guest +
-            </Link>
+              <Link
+                href="roomdashboard/newguest"
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                New Guest +
+              </Link>
+            </div>
           </div>
+
+          {/* Rooms List */}
+          {(
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRooms.map((room) => (
+                <RoomCard
+                  key={room._id}
+                  room={room}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                  handleEdit={handleEdit}
+                  categories={categories}
+                  setRooms={setRooms}
+                />
+              ))}
+              {filteredRooms.length === 0 && (
+                <div className="text-center">No rooms found.</div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Rooms List */}
-        {(
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRooms.map((room) => (
-              <RoomCard
-                key={room._id}
-                room={room}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-                handleEdit={handleEdit}
-                categories={categories}
-                setRooms={setRooms}
-              />
-            ))}
-            {filteredRooms.length === 0 && (
-              <div className="text-center">No rooms found.</div>
-            )}
-          </div>
-        )}
+        {/* Footer */}
+        
       </div>
-
-      {/* Footer */}
       <Footer />
     </div>
   );

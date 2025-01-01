@@ -10,11 +10,12 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardCo
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 import TextField from '@mui/material/TextField';
-
+import {Grid} from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { Autocomplete } from '@mui/material';
 import { Input } from '@mui/material';
 import { OutlinedInput } from '@mui/material';
 
@@ -22,7 +23,8 @@ export default function BookingForm() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredRooms, setFilteredRooms] = useState([]);
-
+  const [mobileNumbers, setMobileNumbers] = useState([]); // For storing all mobile numbers
+  const [filteredMobileNumbers, setFilteredMobileNumbers] = useState([]); // For filtered mobile numbers
   const [focusedInput, setFocusedInput] = useState(null);
   const [formData, setFormData] = useState({
     bookingType: 'FIT',
@@ -88,6 +90,35 @@ export default function BookingForm() {
 
     setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
   }, []);
+
+ // Function to format date to YYYY-MM-DD
+ const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return ''; // Return empty string if invalid date
+  return date.toISOString().split('T')[0];
+};
+
+  // Add this useEffect to fetch all mobile numbers when component mounts
+  useEffect(() => {
+    const fetchMobileNumbers = async () => {
+      try {
+        const response = await fetch('/api/NewBooking');
+        if (!response.ok) throw new Error('Failed to fetch bookings');
+        const result = await response.json();
+        if (result.success && result.data) {
+          // Extract unique mobile numbers
+          const uniqueMobileNumbers = [...new Set(result.data.map(booking => booking.mobileNo))];
+          setMobileNumbers(uniqueMobileNumbers);
+        }
+      } catch (error) {
+        console.error('Error fetching mobile numbers:', error);
+      }
+    };
+
+    fetchMobileNumbers();
+  }, []);
+
 
   const fetchCategories = async () => {
     try {
@@ -452,6 +483,74 @@ export default function BookingForm() {
     setModalOpen(false); // Close the modal
   };
 
+   // Add this function to handle mobile number input changes
+   const handleMobileNumberChange = async (event, newValue) => {
+    const inputValue = newValue || event.target.value;
+    setFormData(prev => ({ ...prev, mobileNo: inputValue }));
+
+    if (newValue && mobileNumbers.includes(newValue)) {
+      // If a mobile number is selected from the dropdown, fetch and auto-fill guest details
+      try {
+        const response = await fetch('/api/NewBooking');
+        if (!response.ok) throw new Error('Failed to fetch bookings');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const guestBooking = result.data.find(booking => booking.mobileNo === newValue);
+          if (guestBooking) {
+            setFormData(prev => ({
+              ...prev,
+              guestName: guestBooking.guestName || '',
+              dateofbirth: formatDate(guestBooking.dateofbirth) || '',
+              dateofanniversary: formatDate(guestBooking.dateofanniversary) || '',
+              guestEmail: guestBooking.guestEmail || '',
+              guestid: guestBooking.guestid || '',
+              guestidno: guestBooking.guestidno || ''
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching guest details:', error);
+      }
+    }
+
+    // Filter mobile numbers based on input
+    if (inputValue) {
+      const filtered = mobileNumbers.filter(number => 
+        number.startsWith(inputValue)
+      );
+      setFilteredMobileNumbers(filtered);
+    } else {
+      setFilteredMobileNumbers([]);
+    }
+  };
+
+  // Replace the mobile number TextField with Autocomplete
+  const mobileNumberField = (
+    <Autocomplete
+      freeSolo
+      options={filteredMobileNumbers}
+      value={formData.mobileNo}
+      onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+      onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Mobile Number"
+          required
+          fullWidth
+          variant="outlined"
+        />
+      )}
+      filterOptions={(options, { inputValue }) => 
+        options.filter(option => 
+          option.startsWith(inputValue)
+        )
+      }
+    />
+  );
+
+
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
@@ -473,12 +572,14 @@ export default function BookingForm() {
                 />
 
                 {/* Booking Type */}
-                <FormControl fullWidth style={{ marginBottom: '1rem' }}>
-                  <InputLabel>Booking Type</InputLabel>
-                  <Select
+                <Grid item xs={12}>
+                  <TextField
+                    label="Booking Type"
                     name="bookingType"
                     value={formData.bookingType}
                     onChange={handleChange}
+                    fullWidth
+                    select
                     MenuProps={{
                       PaperProps: {
                         style: {
@@ -493,8 +594,8 @@ export default function BookingForm() {
                         {type}
                       </MenuItem>
                     ))}
-                  </Select>
-                </FormControl>
+                  </TextField>
+                </Grid>
 
 
 
@@ -519,11 +620,12 @@ export default function BookingForm() {
                 />
 
                 {/* Booking Status */}
-                <FormControl fullWidth>
-                  <InputLabel>Booking Status</InputLabel>
-
-                  <Select
+                <Grid item xs={12}>
+                  <TextField
+                    label="Booking Status"
                     name="bookingStatus"
+                    select
+                    fullWidth
                     value={formData.bookingStatus}
                     onChange={handleChange}
 
@@ -531,9 +633,9 @@ export default function BookingForm() {
                     {['Confirmed', 'Blocked'].map((status) => (
                       <MenuItem key={status} value={status}>{status}</MenuItem>
                     ))}required
-                  </Select>
+                  </TextField>
 
-                </FormControl>
+                </Grid>
 
                 {/* Guest Name */}
                 <TextField
@@ -546,14 +648,15 @@ export default function BookingForm() {
                 />
 
                 {/* Mobile Number */}
-                <TextField
+                {/* <TextField
                   label="Mobile Number"
                   name="mobileNo"
                   value={formData.mobileNo}
                   onChange={handleChange}
                   fullWidth
                   required
-                />
+                /> */}
+                {mobileNumberField}
 
                 {/* Mail ID */}
                 <TextField
@@ -735,18 +838,20 @@ export default function BookingForm() {
                 />
 
                 {/* Meal Plan */}
-                <FormControl fullWidth>
-                  <InputLabel>Meal Plan</InputLabel>
-                  <Select
+                <Grid item xs={12}>
+                  <TextField
+                    label="Meal Plan"
                     name="mealPlan"
+                    select
+                    fullWidth
                     value={formData.mealPlan}
                     onChange={handleChange}
                   >
                     {['EP', 'CP', 'AP', 'MAP'].map((plan) => (
                       <MenuItem key={plan} value={plan}>{plan}</MenuItem>
                     ))}
-                  </Select>
-                </FormControl>
+                  </TextField>
+                </Grid>
 
                 {/* Address */}
                 <TextField
