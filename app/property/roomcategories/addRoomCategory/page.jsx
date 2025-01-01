@@ -2,7 +2,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Navbar from "@/app/_components/Navbar";
+import { Footer } from "@/app/_components/Footer";
 
 const RoomCategoryForm = () => {
   const [formData, setFormData] = useState({
@@ -143,20 +146,35 @@ const RoomCategoryForm = () => {
 
       let result = await response.json();
       if (response.ok) {
-        console.log("Room category created successfully:", result);
-        alert("Room category created successfully.");
+        console.log("Category added successfully:", result);
+        toast.success("Category created successfully.");
       } else {
-        console.error("Error creating room category:", result);
-        alert("Error creating room category: " + result.error);
+        console.error("Error creating category:", result);
+        toast.error("Error creating category: " + result.error);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error: " + error.message);
+      toast.error("Error: " + error.message);
     }
   };
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div>
+      <Navbar/>
+      <div className="min-h-screen bg-amber-50 py-12 px-4 sm:px-6 lg:px-8">
+       
+      <ToastContainer
+               position="top-right"
+               autoClose={5000}
+               hideProgressBar={false}
+               newestOnTop={false}
+               closeOnClick
+               rtl={false}
+               pauseOnFocusLoss
+               draggable
+               pauseOnHover
+               theme="dark"
+            />
       <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
         <div className="px-4 py-5 sm:p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -510,6 +528,9 @@ const RoomCategoryForm = () => {
         </div>
       </div>
     </div>
+    <Footer/>
+    </div>
+    
   );
 };
 

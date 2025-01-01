@@ -1,6 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Navbar from '@/app/_components/Navbar';
+import { Footer } from '@/app/_components/Footer';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const EditRoomCategory = () => {
   const router = useRouter();
@@ -131,21 +135,36 @@ const EditRoomCategory = () => {
 
       const result = await response.json();
       if (response.ok) {
-        console.log("Room category updated successfully:", result);
-        alert("Room category updated successfully.");
-        router.push("/property/roomcategories");
+        console.log("Category updated successfully:", result);
+        toast.success("Category updated successfully.");
+        // router.push("/property/roomcategories");
       } else {
-        console.error("Error updating room category:", result);
-        alert("Error updating room category: " + result.error);
+        console.error("Error updating category:", result);
+        toast.error("Error updating category: " + result.error);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error: " + error.message);
+      toast.error("Error: " + error.message);
     }
   };
 
   return (
+    <div>
+      <Navbar/>
     <div className="p-4">
+      
+      <ToastContainer 
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+            />
       <button onClick={() => router.back()} className="bg-gray-500 text-white px-4 py-2 rounded mb-4">
         Back
       </button>
@@ -506,13 +525,19 @@ const EditRoomCategory = () => {
               <button
                 type="submit"
                 className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                onClick={() => router.push('/property/roomcategories')}
               >
+
                 Submit
               </button>
               
             </div>
           </form>
+         
     </div>
+    <Footer/>
+    </div>
+    
   );
 };
 
