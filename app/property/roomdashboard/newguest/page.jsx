@@ -1013,6 +1013,16 @@ export default function BookingForm() {
                   helperText={errors.expectedArrival}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      }
+                    }
+                  }}
                 />
 
                 {/* Expected Departure */}
@@ -1026,6 +1036,16 @@ export default function BookingForm() {
                   helperText={errors.expectedDeparture}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      }
+                    }
+                  }}
                 />
 
                 {/* State */}
