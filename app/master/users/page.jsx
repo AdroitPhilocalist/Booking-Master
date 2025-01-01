@@ -3,34 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/app/_components/Navbar';
 import { Footer } from '@/app/_components/Footer';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  InputLabel,
+} from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { IconButton } from '@mui/material';
-import { Delete, Edit } from '@mui/icons-material';
-import InputLabel from '@mui/material/InputLabel';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Page() {
   const [openDialog, setOpenDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null); // Store selected user data
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -44,10 +47,10 @@ export default function Page() {
         if (data.success) {
           setUsers(data.data);
         } else {
-          console.error('Failed to fetch users');
+          toast.error('Failed to fetch users.');
         }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        toast.error('Error fetching users.');
       } finally {
         setIsLoading(false);
       }
@@ -61,54 +64,73 @@ export default function Page() {
       value.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
   const handleOpenDialog = (userId) => {
     setSelectedUser(userId);
     setOpenDialog(true);
   };
 
-  // Function to close the confirmation dialog
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedUser(null);
   };
 
-  // Handle deletion of the user after confirmation
   const handleDeleteUser = async () => {
     try {
       setIsLoading(true);
       const response = await axios.delete(`/api/User/${selectedUser}`);
       if (response.data.success) {
-        // Remove the user from the state after deletion
-        setUsers((prevUsers) => prevUsers.filter(user => user._id !== selectedUser));
-        setOpenDialog(false); // Close the dialog
+        setUsers((prevUsers) => prevUsers.filter((user) => user._id !== selectedUser));
+        setOpenDialog(false);
+        toast.success('User deleted successfully!',
+          {  //success toaster
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+
+          });
+
       } else {
-        console.error('Failed to delete user');
+        toast.error('Failed to delete user.'
+          , {   //error toaster
+            position: "top-right", //
+            autoClose: 5000, //
+            hideProgressBar: false, //
+            closeOnClick: true, //
+            pauseOnHover: true, //
+            draggable: true, //
+            progress: undefined, //
+            theme: "dark", //
+          });
+
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      toast.error('Error deleting user.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Add New button
   const handleAddNew = () => {
     router.push('users/addUser');
+    toast.success('Redirecting to add new user page!');
   };
 
-  // Open the edit modal
   const handleOpenEdit = (user) => {
     setSelectedUser(user);
     setOpen(true);
   };
 
-  // Close the modal
   const handleClose = () => {
     setOpen(false);
     setSelectedUser(null);
   };
 
-  // Handle form input changes
   const handleChange = (e) => {
     setSelectedUser({
       ...selectedUser,
@@ -116,10 +138,8 @@ export default function Page() {
     });
   };
 
-  // Handle PUT request to update user details
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log(selectedUser._id)
     try {
       setIsLoading(true);
       const response = await fetch(`/api/User/${selectedUser._id}`, {
@@ -132,18 +152,18 @@ export default function Page() {
       const data = await response.json();
 
       if (data.success) {
-        // Update the users state after successful update
         setUsers((prevUsers) =>
           prevUsers.map((user) =>
             user._id === selectedUser._id ? selectedUser : user
           )
         );
-        handleClose(); // Close the modal after submission
+        handleClose();
+        toast.success('User updated successfully!');
       } else {
-        console.error('Failed to update user');
+        toast.error('Failed to update user.');
       }
     } catch (error) {
-      console.error('Error updating user:', error);
+      toast.error('Error updating user.');
     } finally {
       setIsLoading(false);
     }
@@ -152,6 +172,7 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-amber-50">
       <Navbar />
+      <ToastContainer />
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -175,9 +196,9 @@ export default function Page() {
           </div>
         </div>
       )}
-      <main className="flex-grow p-8" >
+      <main className="flex-grow p-8">
         <h1 className="text-3xl font-semibold mb-4 text-cyan-900 ml-4">Booking Master Control Panel</h1>
-        <div className= "rounded-lg">
+        <div className="rounded-lg">
           <div className="p-4 rounded-t-lg text-2xl">
             <h2 className="text-2xl font-semibold text-cyan-900">Users</h2>
           </div>
@@ -288,98 +309,98 @@ export default function Page() {
 
       {/* Edit User Modal */}
       {/* Edit User Modal */}
-<Dialog open={open} onClose={handleClose}  maxWidth="md" // Increased width to 'md' for a wider layout
-  fullWidth>
-  <DialogTitle>Edit User</DialogTitle>
-  <DialogContent>
-    <form onSubmit={handleSubmit}>
-      <div className="mb-4">
-        <TextField
-          label="Name"
-          name="name"
-          value={selectedUser?.name || ''}
-          onChange={handleChange}
-          fullWidth
-          required
-          margin="dense"
-          variant="outlined"
-        />
-      </div>
-      <div className="mb-4">
-        <TextField
-          label="Property"
-          name="property"
-          value={selectedUser?.property || ''}
-          onChange={handleChange}
-          fullWidth
-          required
-          margin="dense"
-          variant="outlined"
-        />
-      </div>
-      <div className="mb-4">
-        <TextField
-          label="Email"
-          name="email"
-          value={selectedUser?.email || ''}
-          onChange={handleChange}
-          fullWidth
-          required
-          margin="dense"
-          variant="outlined"
-        />
-      </div>
-      <div className="mb-4">
-        <TextField
-          label="Phone"
-          name="phone"
-          value={selectedUser?.phone || ''}
-          onChange={handleChange}
-          fullWidth
-          required
-          margin="dense"
-          variant="outlined"
-        />
-      </div>
-      <div className="mb-4">
-        <InputLabel id="UserTypeLabel" className="mb-2">
-          User Type
-        </InputLabel>
-        <Select
-          label="User Type"
-          name="userType"
-          id="UserType"
-          value={selectedUser?.userType || ''}
-          onChange={handleChange}
-          fullWidth
-          required
-          variant="outlined"
-        >
-          <MenuItem value="Online">Online</MenuItem>
-          <MenuItem value="Offline">Offline</MenuItem>
-        </Select>
-      </div>
-      <DialogActions className="mt-4">
-        <Button
-          onClick={handleClose}
-          color="error"
-          variant="contained"
-          size="large"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          color="success"
-          variant="contained"
-          size="large"
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </form>
-  </DialogContent>
-</Dialog>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" // Increased width to 'md' for a wider layout
+        fullWidth>
+        <DialogTitle>Edit User</DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <TextField
+                label="Name"
+                name="name"
+                value={selectedUser?.name || ''}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="dense"
+                variant="outlined"
+              />
+            </div>
+            <div className="mb-4">
+              <TextField
+                label="Property"
+                name="property"
+                value={selectedUser?.property || ''}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="dense"
+                variant="outlined"
+              />
+            </div>
+            <div className="mb-4">
+              <TextField
+                label="Email"
+                name="email"
+                value={selectedUser?.email || ''}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="dense"
+                variant="outlined"
+              />
+            </div>
+            <div className="mb-4">
+              <TextField
+                label="Phone"
+                name="phone"
+                value={selectedUser?.phone || ''}
+                onChange={handleChange}
+                fullWidth
+                required
+                margin="dense"
+                variant="outlined"
+              />
+            </div>
+            <div className="mb-4">
+              <InputLabel id="UserTypeLabel" className="mb-2">
+                User Type
+              </InputLabel>
+              <Select
+                label="User Type"
+                name="userType"
+                id="UserType"
+                value={selectedUser?.userType || ''}
+                onChange={handleChange}
+                fullWidth
+                required
+                variant="outlined"
+              >
+                <MenuItem value="Online">Online</MenuItem>
+                <MenuItem value="Offline">Offline</MenuItem>
+              </Select>
+            </div>
+            <DialogActions className="mt-4">
+              <Button
+                onClick={handleClose}
+                color="error"
+                variant="contained"
+                size="large"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                color="success"
+                variant="contained"
+                size="large"
+              >
+                Save
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
 
 
       <Footer />
