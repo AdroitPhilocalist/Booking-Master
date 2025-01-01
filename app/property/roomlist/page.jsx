@@ -115,9 +115,11 @@ export default function BookingManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50">
-      {/* Navigation */}
+    <div>
       <Navbar />
+      <div className="min-h-screen bg-amber-50">
+      {/* Navigation */}
+      
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -364,7 +366,9 @@ export default function BookingManagement() {
       </div>
 
       {/* Footer */}
-      <Footer />
+      
+    </div>
+    <Footer />
     </div>
   );
 }

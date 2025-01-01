@@ -162,8 +162,10 @@ const InvoicePage = () => {
   };
 
   return (
-    <div className="bg-amber-50 min-h-screen">
-      <Navbar />
+   <div>
+    <Navbar />
+     <div className="bg-amber-50 min-h-screen">
+      
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -439,8 +441,10 @@ const InvoicePage = () => {
           </div>
         )}
       </div>
-      <Footer />
+      
     </div>
+    <Footer />
+   </div>
   );
 };
 
