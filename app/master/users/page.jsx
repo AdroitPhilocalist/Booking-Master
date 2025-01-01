@@ -287,68 +287,99 @@ export default function Page() {
       </main>
 
       {/* Edit User Modal */}
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Edit User</DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label="Name"
-              name="name"
-              className="border rounded w-full py-4 mb-2"
-              value={selectedUser?.name || ''}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Property"
-              name="property"
-              className="border rounded w-full py-4 mb-2 "
-              value={selectedUser?.property || ''}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Email"
-              name="email"
-              className="border rounded w-full py-4 mb-2"
-              value={selectedUser?.email || ''}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Phone"
-              name="phone"
-              className="border rounded w-full py-4 mb-2 "
-              value={selectedUser?.phone || ''}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-            <InputLabel id="User Type">User Type</InputLabel>
-            <Select
-              label="User Type"
-              name="userType"
-              id="UserType"
-              variant="outlined"
-              className="border rounded w-full  mb-2"
-              value={selectedUser?.userType || ''}
-              onChange={handleChange}
-              fullWidth
-              required
-            >
-              <MenuItem value="Online">Online</MenuItem>
-              <MenuItem value="Offline">Offline</MenuItem>
-            </Select>
-            <DialogActions>
-              <Button onClick={handleClose} color="error" variant="contained">Cancel</Button>
-              <Button type="submit" color="success" variant="contained">Save</Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Edit User Modal */}
+<Dialog open={open} onClose={handleClose}>
+  <DialogTitle>Edit User</DialogTitle>
+  <DialogContent>
+    <form onSubmit={handleSubmit}>
+      <div className="mb-4">
+        <TextField
+          label="Name"
+          name="name"
+          value={selectedUser?.name || ''}
+          onChange={handleChange}
+          fullWidth
+          required
+          margin="dense"
+          variant="outlined"
+        />
+      </div>
+      <div className="mb-4">
+        <TextField
+          label="Property"
+          name="property"
+          value={selectedUser?.property || ''}
+          onChange={handleChange}
+          fullWidth
+          required
+          margin="dense"
+          variant="outlined"
+        />
+      </div>
+      <div className="mb-4">
+        <TextField
+          label="Email"
+          name="email"
+          value={selectedUser?.email || ''}
+          onChange={handleChange}
+          fullWidth
+          required
+          margin="dense"
+          variant="outlined"
+        />
+      </div>
+      <div className="mb-4">
+        <TextField
+          label="Phone"
+          name="phone"
+          value={selectedUser?.phone || ''}
+          onChange={handleChange}
+          fullWidth
+          required
+          margin="dense"
+          variant="outlined"
+        />
+      </div>
+      <div className="mb-4">
+        <InputLabel id="UserTypeLabel" className="mb-2">
+          User Type
+        </InputLabel>
+        <Select
+          label="User Type"
+          name="userType"
+          id="UserType"
+          value={selectedUser?.userType || ''}
+          onChange={handleChange}
+          fullWidth
+          required
+          variant="outlined"
+        >
+          <MenuItem value="Online">Online</MenuItem>
+          <MenuItem value="Offline">Offline</MenuItem>
+        </Select>
+      </div>
+      <DialogActions className="mt-4">
+        <Button
+          onClick={handleClose}
+          color="error"
+          variant="contained"
+          size="large"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          color="success"
+          variant="contained"
+          size="large"
+        >
+          Save
+        </Button>
+      </DialogActions>
+    </form>
+  </DialogContent>
+</Dialog>
+
 
       <Footer />
     </div>
