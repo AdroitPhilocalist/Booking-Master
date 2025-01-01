@@ -17,6 +17,9 @@ const FormContainer = styled(Paper)({
   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
   background: '#f9f9f9',
 });
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function AddUser() {
   const [loading, setLoading] = useState(false);
@@ -40,11 +43,11 @@ export default function AddUser() {
       if (result.success) {
         router.back(); // Navigate back to the user list page
       } else {
-        alert('Failed to create user');
+        toast.error('Failed to create user');
       }
     } catch (error) {
       console.error(error);
-      alert('Error occurred while creating user');
+      toast.error('Error occurred while creating user');
     } finally {
       setLoading(false);
     }
@@ -53,6 +56,18 @@ export default function AddUser() {
   return (
     <div className='bg-amber-50 min-h-screen'>
       <Navbar />
+        <ToastContainer 
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+              />
       <Container maxWidth="sm" sx={{ py: 4 }}>
       <FormContainer>
         <Typography variant="h4" gutterBottom align="center">
