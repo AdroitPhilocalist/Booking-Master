@@ -41,7 +41,8 @@ export default function AddUser() {
       const result = await response.json();
       
       if (result.success) {
-        router.back(); // Navigate back to the user list page
+        toast.success('User added successfully!')
+        //router.back(); // Navigate back to the user list page
       } else {
         toast.error('Failed to create user');
       }
@@ -150,6 +151,7 @@ export default function AddUser() {
                   type="submit"
                   disabled={loading}
                   size="large"
+                  onClick={() => router.push('/master/users')}
                 >
                   {loading ? 'Submitting...' : 'Add User'}
                 </Button>

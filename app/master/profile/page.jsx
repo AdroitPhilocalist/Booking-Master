@@ -10,6 +10,10 @@ import {
 } from "@mui/material";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const ProfilePage = () => {
     // State to store form data
@@ -43,6 +47,7 @@ const ProfilePage = () => {
             }
         } catch (error) {
             console.error("Error fetching profile data:", error);
+            
         } finally {
             setIsLoading(false);
         }
@@ -78,13 +83,13 @@ const ProfilePage = () => {
             const result = await response.json();
 
             if (result.success) {
-                alert(profileExists ? "Profile updated successfully!" : "Profile created successfully!");
+                toast.success(profileExists ? "Profile updated successfully!" : "Profile created successfully!");
             } else {
-                alert("Error creating/updating profile: " + result.error);
+                toast.error("Error creating/updating profile: " + result.error);
             }
         } catch (error) {
             console.error("Error posting data:", error);
-            alert("Error creating/updating profile");
+            toast.error("Error creating/updating profile");
         } finally {
             setIsLoading(false);
         }
@@ -93,6 +98,18 @@ const ProfilePage = () => {
     return (
         <div className="min-h-screen bg-amber-50">
             <Navbar />
+            <ToastContainer 
+                        position="top-right"
+                        autoClose={5000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="dark"
+                        />
             {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
