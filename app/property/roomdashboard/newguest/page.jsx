@@ -10,7 +10,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardCo
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 import TextField from '@mui/material/TextField';
-import {Grid} from '@mui/material';
+import { Grid } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -26,6 +26,9 @@ export default function BookingForm() {
   const [mobileNumbers, setMobileNumbers] = useState([]); // For storing all mobile numbers
   const [filteredMobileNumbers, setFilteredMobileNumbers] = useState([]); // For filtered mobile numbers
   const [focusedInput, setFocusedInput] = useState(null);
+  // Add form validation state
+  const [errors, setErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
   const [formData, setFormData] = useState({
     bookingType: 'FIT',
     bookingId: '',
@@ -77,6 +80,127 @@ export default function BookingForm() {
     internalNotes: 'Enter Internal Notes',
     remarks: 'Enter Remarks'
   };
+
+  // Validation rules
+  const validateForm = () => {
+    const newErrors = {};
+
+    const requiredFields = [
+      'guestName',
+      'guestEmail',
+      'companyName',
+      'gstin',
+      'address',
+      'remarks',
+      'bookingReference',
+      'expectedArrival',
+      'expectedDeparture',
+      'mobileNo',
+      'guestid',
+      'guestidno',
+      'referenceno',
+      'state',
+      'checkIn',
+      'checkOut',
+      'dateofbirth',
+      'dateofanniversary'
+    ];
+
+    // Required fields validation
+    // if (!formData.guestName) newErrors.guestName = 'Guest name is required';
+    // if (!formData.guestEmail) newErrors.guestEmail = 'Guest email is required';
+    // if (!formData.companyName) newErrors.companyName = 'Company name is required';
+    // if (!formData.gstin) newErrors.gstin = 'GSTIN is required';
+    // if (!formData.address) newErrors.address = 'Address is required';
+    // if (!formData.remarks) newErrors.remarks = 'Remarks is required';
+    // if (!formData.bookingReference) newErrors.bookingReference = 'Booking Reference is required';
+    // if (!formData.expectedArrival) newErrors.expectedArrival = 'Expected Arrival is required';
+    // if (!formData.expectedDeparture) newErrors.expectedDeparture = 'Expected Departure is required';
+    // if (!formData.mobileNo) newErrors.mobileNo = 'Mobile number is required';
+    // if (!formData.guestid) newErrors.guestid = 'Guest ID type is required';
+    // if (!formData.guestidno) newErrors.guestidno = 'Guest ID number is required';
+    // if (!formData.referenceno) newErrors.referenceno = 'Reference number is required';
+    // if (!formData.state) newErrors.state = 'State is required';
+    // if (!formData.checkIn) newErrors.checkIn = 'Check-in date is required';
+    // if (!formData.checkOut) newErrors.checkOut = 'Check-out date is required';
+    // if (!formData.dateofbirth) newErrors.dateofbirth = 'Date of birth is required';
+    // if (!formData.dateofanniversary) newErrors.dateofanniversary = 'Date of anniversary is required';
+    // Check if any required field is empty
+    const hasEmptyFields = requiredFields.some(field => !formData[field]);
+    // Date validations
+    let dateErrors = false;
+    const currentDate = new Date();
+    const checkInDate = new Date(formData.checkIn);
+    const checkOutDate = new Date(formData.checkOut);
+
+    if (checkInDate < currentDate) {
+      newErrors.checkIn = 'Check-in date cannot be in the past';
+      dateErrors = true;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      newErrors.checkOut = 'Check-out date must be after check-in date';
+      dateErrors = true;
+    }
+
+    // Mobile number format validation (10 digits)
+    let mobileError = false;
+    if (formData.mobileNo && !/^\d{10}$/.test(formData.mobileNo)) {
+      newErrors.mobileNo = 'Mobile number must be 10 digits';
+      mobileError = true;
+    }
+
+    // Email format validation
+    let emailError = false;
+    if (formData.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)) {
+      newErrors.guestEmail = 'Invalid email format';
+      emailError = true;
+    }
+
+    // GSTIN format validation (if provided)
+    let gstinError = false;
+    if (formData.gstin && !/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}$/.test(formData.gstin)) {
+      newErrors.gstin = 'Invalid GSTIN format';
+      gstinError = true;
+    }
+
+    // Reference number validation
+    let referenceError = false;
+    if (formData.referenceno && (isNaN(formData.referenceno) || formData.referenceno < 0)) {
+      newErrors.referenceno = 'Reference number must be a positive number';
+      referenceError = true;
+    }
+
+    // Adults validation
+    let adultsError = false;
+    if (formData.adults < 1) {
+      newErrors.adults = 'At least 1 adult is required';
+      adultsError = true;
+    }
+
+    // Children validation
+    let childrenError = false;
+    if (formData.children < 0) {
+      newErrors.children = 'Number of children cannot be negative';
+      childrenError = true;
+    }
+
+    setErrors(newErrors);
+    setIsFormValid(Object.keys(newErrors).length === 0);
+    const isValid = !hasEmptyFields &&
+      !dateErrors &&
+      !mobileError &&
+      !emailError &&
+      !gstinError &&
+      !adultsError &&
+      !childrenError;
+
+    setIsFormValid(isValid);
+    return isValid && Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0;
+
+  };
+
   const [rooms, setRooms] = useState([]); // Store available rooms
   const [selectedRooms, setSelectedRooms] = useState([]); // Store selected rooms
   const [modalOpen, setModalOpen] = useState(false); // Modal state
@@ -91,13 +215,13 @@ export default function BookingForm() {
     setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
   }, []);
 
- // Function to format date to YYYY-MM-DD
- const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return ''; // Return empty string if invalid date
-  return date.toISOString().split('T')[0];
-};
+  // Function to format date to YYYY-MM-DD
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return ''; // Return empty string if invalid date
+    return date.toISOString().split('T')[0];
+  };
 
   // Add this useEffect to fetch all mobile numbers when component mounts
   useEffect(() => {
@@ -150,11 +274,20 @@ export default function BookingForm() {
     setSelectedCategory(categoryId);
   };
 
+  // Update handleChange to include validation
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
+    const newValue = type === 'checkbox' ? checked : value;
+
+    setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: newValue
+    }));
+
+    // Clear error for the changed field
+    setErrors(prev => ({
+      ...prev,
+      [name]: undefined
     }));
   };
 
@@ -165,6 +298,10 @@ export default function BookingForm() {
     return defaultLabel;
   };
   const handleCheckAvailability = async () => {
+    if (!validateForm()) {
+      alert('Please fill in all required fields correctly before checking room availability');
+      return;
+    }
     try {
       if (!formData.checkIn || !formData.checkOut) {
         alert('Please select both Check-in and Check-out dates first');
@@ -483,18 +620,26 @@ export default function BookingForm() {
     setModalOpen(false); // Close the modal
   };
 
-   // Add this function to handle mobile number input changes
-   const handleMobileNumberChange = async (event, newValue) => {
+  // Update handleMobileNumberChange to include validation
+  const handleMobileNumberChange = async (event, newValue) => {
     const inputValue = newValue || event.target.value;
-    setFormData(prev => ({ ...prev, mobileNo: inputValue }));
+
+    setFormData(prev => ({
+      ...prev,
+      mobileNo: inputValue
+    }));
+
+    // Clear mobile number error
+    setErrors(prev => ({
+      ...prev,
+      mobileNo: undefined
+    }));
 
     if (newValue && mobileNumbers.includes(newValue)) {
-      // If a mobile number is selected from the dropdown, fetch and auto-fill guest details
       try {
         const response = await fetch('/api/NewBooking');
         if (!response.ok) throw new Error('Failed to fetch bookings');
         const result = await response.json();
-        
         if (result.success && result.data) {
           const guestBooking = result.data.find(booking => booking.mobileNo === newValue);
           if (guestBooking) {
@@ -514,11 +659,8 @@ export default function BookingForm() {
       }
     }
 
-    // Filter mobile numbers based on input
     if (inputValue) {
-      const filtered = mobileNumbers.filter(number => 
-        number.startsWith(inputValue)
-      );
+      const filtered = mobileNumbers.filter(number => number.startsWith(inputValue));
       setFilteredMobileNumbers(filtered);
     } else {
       setFilteredMobileNumbers([]);
@@ -542,14 +684,19 @@ export default function BookingForm() {
           variant="outlined"
         />
       )}
-      filterOptions={(options, { inputValue }) => 
-        options.filter(option => 
+      filterOptions={(options, { inputValue }) =>
+        options.filter(option =>
           option.startsWith(inputValue)
         )
       }
     />
   );
 
+
+  // Add useEffect for continuous form validation
+  useEffect(() => {
+    validateForm();
+  }, [formData]);
 
   return (
     <div className="min-h-screen bg-amber-50">
@@ -566,6 +713,8 @@ export default function BookingForm() {
                   name="bookingId"
                   value={formData.bookingId}
                   InputProps={{ readOnly: true }}
+                  error={!!errors.bookingId}
+                  helperText={errors.bookingId}
                   variant="outlined"
                   fullWidth
                   disabled
@@ -578,6 +727,8 @@ export default function BookingForm() {
                     name="bookingType"
                     value={formData.bookingType}
                     onChange={handleChange}
+                    error={!!errors.bookingType}
+                    helperText={errors.bookingType}
                     fullWidth
                     select
                     MenuProps={{
@@ -605,6 +756,8 @@ export default function BookingForm() {
                   name="bookingReference"
                   value={formData.bookingReference}
                   onChange={handleChange}
+                  error={!!errors.bookingReference}
+                  helperText={errors.bookingReference}
                   fullWidth
                   variant="outlined"
                 />
@@ -615,6 +768,8 @@ export default function BookingForm() {
                   name="referenceno"
                   value={formData.referenceno}
                   onChange={handleChange}
+                  error={!!errors.referenceno}
+                  helperText={errors.referenceno}
                   fullWidth
                   variant="outlined"
                 />
@@ -628,7 +783,8 @@ export default function BookingForm() {
                     fullWidth
                     value={formData.bookingStatus}
                     onChange={handleChange}
-
+                    error={!!errors.bookingStatus}
+                    helperText={errors.bookingStatus}
                   >
                     {['Confirmed', 'Blocked'].map((status) => (
                       <MenuItem key={status} value={status}>{status}</MenuItem>
@@ -643,6 +799,8 @@ export default function BookingForm() {
                   name="guestName"
                   value={formData.guestName}
                   onChange={handleChange}
+                  error={!!errors.guestName}
+                  helperText={errors.guestName}
                   fullWidth
                   required
                 />
@@ -656,13 +814,31 @@ export default function BookingForm() {
                   fullWidth
                   required
                 /> */}
-                {mobileNumberField}
+                <Autocomplete
+                  freeSolo
+                  options={filteredMobileNumbers}
+                  value={formData.mobileNo}
+                  onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+                  onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Mobile Number"
+                      required
+                      fullWidth
+                      error={!!errors.mobileNo}
+                      helperText={errors.mobileNo}
+                    />
+                  )}
+                />
 
                 {/* Mail ID */}
                 <TextField
                   label="Email ID"
                   name="guestEmail"
                   value={formData.guestEmail}
+                  error={!!errors.guestEmail}
+                  helperText={errors.guestEmail}
                   onChange={handleChange}
                   fullWidth
                 />
@@ -674,6 +850,8 @@ export default function BookingForm() {
                   name="dateofbirth"
                   value={formData.dateofbirth}
                   onChange={handleChange}
+                  error={!!errors.dateofbirth}
+                  helperText={errors.dateofbirth}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                 />
@@ -686,6 +864,8 @@ export default function BookingForm() {
                   name="dateofanniversary"
                   value={formData.dateofanniversary}
                   onChange={handleChange}
+                  error={!!errors.dateofanniversary}
+                  helperText={errors.dateofanniversary}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                   sx={{
@@ -706,6 +886,8 @@ export default function BookingForm() {
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleChange}
+                  error={!!errors.companyName}
+                  helperText={errors.companyName}
                   fullWidth
                 />
 
@@ -715,6 +897,8 @@ export default function BookingForm() {
                   name="gstin"
                   value={formData.gstin}
                   onChange={handleChange}
+                  error={!!errors.gstin}
+                  helperText={errors.gstin}
                   fullWidth
                 />
 
@@ -725,6 +909,8 @@ export default function BookingForm() {
                     name="guestid"
                     value={formData.guestid}
                     onChange={handleChange}
+                    error={!!errors.guestid}
+                    helperText={errors.guestid}
                   >
                     {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
                       <MenuItem key={idType} value={idType}>{idType}</MenuItem>
@@ -738,6 +924,8 @@ export default function BookingForm() {
                   name="guestidno"
                   value={formData.guestidno}
                   onChange={handleChange}
+                  error={!!errors.guestidno}
+                  helperText={errors.guestidno}
                   fullWidth
                 />
 
@@ -748,6 +936,8 @@ export default function BookingForm() {
                   name="adults"
                   value={formData.adults}
                   onChange={handleChange}
+                  error={!!errors.adults}
+                  helperText={errors.adults}
                   fullWidth
                 />
 
@@ -758,6 +948,8 @@ export default function BookingForm() {
                   name="children"
                   value={formData.children}
                   onChange={handleChange}
+                  error={!!errors.children}
+                  helperText={errors.children}
                   fullWidth
                 />
 
@@ -769,6 +961,8 @@ export default function BookingForm() {
                   name="checkIn"
                   value={formData.checkIn}
                   onChange={handleChange}
+                  error={!!errors.checkIn}
+                  helperText={errors.checkIn}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                   sx={{
@@ -791,6 +985,8 @@ export default function BookingForm() {
                   name="checkOut"
                   value={formData.checkOut}
                   onChange={handleChange}
+                  error={!!errors.checkOut}
+                  helperText={errors.checkOut}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
                   sx={{
@@ -813,8 +1009,20 @@ export default function BookingForm() {
                   name="expectedArrival"
                   value={formData.expectedArrival}
                   onChange={handleChange}
+                  error={!!errors.expectedArrival}
+                  helperText={errors.expectedArrival}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      }
+                    }
+                  }}
                 />
 
                 {/* Expected Departure */}
@@ -824,8 +1032,20 @@ export default function BookingForm() {
                   name="expectedDeparture"
                   value={formData.expectedDeparture}
                   onChange={handleChange}
+                  error={!!errors.expectedDeparture}
+                  helperText={errors.expectedDeparture}
                   InputLabelProps={{ shrink: true }}
                   fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#f97316', // Orange color
+                      }
+                    }
+                  }}
                 />
 
                 {/* State */}
@@ -834,6 +1054,8 @@ export default function BookingForm() {
                   name="state"
                   value={formData.state}
                   onChange={handleChange}
+                  error={!!errors.state}
+                  helperText={errors.state}
                   fullWidth
                 />
 
@@ -846,6 +1068,8 @@ export default function BookingForm() {
                     fullWidth
                     value={formData.mealPlan}
                     onChange={handleChange}
+                    error={!!errors.mealPlan}
+                    helperText={errors.mealPlan}
                   >
                     {['EP', 'CP', 'AP', 'MAP'].map((plan) => (
                       <MenuItem key={plan} value={plan}>{plan}</MenuItem>
@@ -859,6 +1083,8 @@ export default function BookingForm() {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
+                  error={!!errors.address}
+                  helperText={errors.address}
                   fullWidth
                   multiline
                 />
@@ -869,6 +1095,8 @@ export default function BookingForm() {
                   name="remarks"
                   value={formData.remarks}
                   onChange={handleChange}
+                  error={!!errors.remarks}
+                  helperText={errors.remarks}
                   fullWidth
                   multiline
                 />
@@ -877,12 +1105,10 @@ export default function BookingForm() {
                 <Button
                   variant="contained"
                   color="primary"
-
                   onClick={handleCheckAvailability}
+                  disabled={!isFormValid}
                   sx={{
-                    '&:hover': {
-                      backgroundColor: '#3b82f6', // Blue shade for hover effect
-                    },
+                    '&:hover': { backgroundColor: '#3b82f6' },
                     fontWeight: 'bold',
                   }}
                 >

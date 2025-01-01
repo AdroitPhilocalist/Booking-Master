@@ -20,7 +20,6 @@ export default function InventoryCategory() {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch products from the API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -37,7 +36,6 @@ export default function InventoryCategory() {
     fetchProducts();
   }, []);
 
-  // Add or edit a product
   const handleAddProduct = async (productName) => {
     try {
       const method = currentProduct ? "PUT" : "POST";
@@ -70,7 +68,6 @@ export default function InventoryCategory() {
     }
   };
 
-  // Toggle product status
   const toggleActiveStatus = async (id) => {
     try {
       const product = products.find((p) => p._id === id);
@@ -99,6 +96,26 @@ export default function InventoryCategory() {
       console.error("Error toggling status:", error);
     }
   };
+  const handleDeleteProduct = async (id) => {
+    try {
+      const response = await fetch(`/api/InventoryCategory/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to delete: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log(data.message);
+  
+      // Remove the deleted product from the state
+      setProducts((prev) => prev.filter((product) => product._id !== id));
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+  
 
   return (
     <div className="bg-amber-50 min-h-screen">
@@ -129,16 +146,16 @@ export default function InventoryCategory() {
       <div className="container mx-auto p-4 ">
         <h1 className="text-3xl font-bold mb-4 text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Inventory Category</h1>
         <div className="flex justify-end" style={{ maxWidth: '80%', margin: '0 auto' }}>
-    <button
-      onClick={() => {
-        setShowModal(true);
-        setCurrentProduct(null); // Add new product
-      }}
-      className="bg-green-500 text-white px-4 py-2 rounded mb-4"
-    >
-      Add New +
-    </button>
-  </div>
+          <button
+            onClick={() => {
+              setShowModal(true);
+              setCurrentProduct(null);
+            }}
+            className="bg-green-500 text-white px-4 py-2 rounded mb-4"
+          >
+            Add New +
+          </button>
+        </div>
 
         <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
           <Table>
@@ -164,17 +181,6 @@ export default function InventoryCategory() {
                     </Button>
                   </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    {/* <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setShowModal(true);
-                        setCurrentProduct(product);
-                      }}
-                    >
-                      Edit
-                    </Button> */}
                     <IconButton
                       color="primary"
                       onClick={() => {
@@ -183,6 +189,12 @@ export default function InventoryCategory() {
                       }}
                     >
                       <Edit />
+                    </IconButton>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => handleDeleteProduct(product._id)}
+                    >
+                      <Delete />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -203,25 +215,32 @@ export default function InventoryCategory() {
   );
 }
 
-// Modal Component
 const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
   const [productName, setProductName] = useState(initialValue);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    await onSubmit(productName);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-6 rounded shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">Add/Edit Product</h2>
-        <TextField
-          id="Product name"
-          label="Product Name"
-          variant="outlined"
-          type="text"
-          value={productName}
-          onChange={(e) => setProductName(e.target.value)}
-          className="w-full mb-4"
-          fullWidth
-        />
-        <div className="flex justify-end space-x-2">
+        <div className="mb-8">
+          <TextField
+            id="Product name"
+            label="Product Name"
+            variant="outlined"
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            className="w-full"
+            fullWidth
+          />
+        </div>
+        <div className="flex justify-end space-x-2 mt-6">
           <button
             onClick={onClose}
             className="bg-gray-500 text-white px-4 py-2 rounded"
@@ -229,8 +248,9 @@ const AddProductModal = ({ onClose, onSubmit, initialValue }) => {
             Cancel
           </button>
           <button
-            onClick={() => onSubmit(productName)}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={handleSubmit}
+            disabled={!productName || isSubmitting}
+            className={`bg-blue-500 text-white px-4 py-2 rounded ${(!productName || isSubmitting) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {initialValue ? 'Update' : 'Add'} Product
           </button>

@@ -53,7 +53,32 @@ export async function PUT(request, { params }) {
     }
   }
 
-
+  export async function DELETE(request, { params }) {
+    try {
+      const { id } = params; // Extract ID from route params
+  
+      if (!id) {
+        return NextResponse.json({ error: "ID is required" }, { status: 400 });
+      }
+  
+      await connectToDatabase();
+  
+      // Find and delete the product
+      const product = await Inventory.findByIdAndDelete(id);
+  
+      if (!product) {
+        return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      }
+  
+      return NextResponse.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      return NextResponse.json(
+        { error: "Error deleting product" },
+        { status: 500 }
+      );
+    }
+  }
   
   
   
