@@ -271,7 +271,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
             `}
           >
-            <button
+            {!currentGuest && (<button
               onClick={() => setIsEditing(true)}
               className="
                 text-blue-500 hover:bg-blue-100 p-2 rounded-full 
@@ -280,8 +280,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Edit2 size={20} />
-            </button>
-            <button
+            </button>)}
+            {!currentGuest && (<button
               onClick={() => onDelete(room._id)}
               className="
                 text-red-500 hover:bg-red-100 p-2 rounded-full 
@@ -290,7 +290,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Trash2 size={20} />
-            </button>
+            </button>)}
           </div>
         </div>
 
@@ -429,7 +429,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         </div>
       )}
       {/* Edit Modal (Centered and Animated) */}
-      {isEditing && (
+      {isEditing &&  (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up">
             <h3 className="text-lg font-bold">Edit Room</h3>
@@ -469,7 +469,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   ))}
                 </select>
               </label>
-              <label className="block mt-2">
+              {/* <label className="block mt-2">
                 Occupancy:
                 <select
                   name="occupied"
@@ -480,8 +480,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <option value="Vacant">Vacant</option>
                   <option value="Occupied">Occupied</option>
                 </select>
-              </label>
-              {/* // Guest Selection (conditionally rendered) */}
+              </label> */}
+              {/* // Guest Selection (conditionally rendered)
               {updatedRoom.occupied === "Occupied" && (
                 <label className="block mt-2">
                   Guest:
@@ -501,7 +501,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                     ))}
                   </select>
                 </label>
-              )}
+              )} */}
               <label className="block mt-2">
                 Clean:
                 <select
