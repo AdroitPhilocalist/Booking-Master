@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Button, TextField } from '@mui/material';
 import { IconButton } from '@mui/material';
@@ -7,102 +6,137 @@ import { Delete, Edit } from '@mui/icons-material';
 import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
-// import { Edit, Delete } from '@mui/icons-material';
 
 export default function GuestList() {
-    const [guests, setGuests] = useState([]);
-    const [error, setError] = useState(null);
-    const [deleteGuestId, setDeleteGuestId] = useState(null);
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-    const [openEditModal, setOpenEditModal] = useState(false);
-    const [editGuest, setEditGuest] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+  const [guests, setGuests] = useState([]);
+  const [error, setError] = useState(null);
+  const [deleteGuestId, setDeleteGuestId] = useState(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editGuest, setEditGuest] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch guest data
-    useEffect(() => {
-        const fetchGuests = async () => {
-            try {
-                setIsLoading(true);
-                const response = await fetch('/api/NewBooking');
-                const data = await response.json();
-
-                if (data.success) {
-                    setGuests(data.data);
-                } else {
-                    setError('Failed to load guest data');
-                }
-            } catch (err) {
-                setError('Error fetching guests');
-            } finally {
-                setIsLoading(false);
+  // Fetch guest data and filter for most recent entries per mobile number
+  useEffect(() => {
+    const fetchGuests = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/NewBooking');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Create a map to store the most recent guest for each mobile number
+          const guestMap = new Map();
+          
+          // Sort guests by creation date (assuming there's a createdAt field)
+          // If there's no createdAt field, you might need to modify this logic
+          const sortedGuests = [...data.data].sort((a, b) => {
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          });
+          
+          // Keep only the most recent guest for each mobile number
+          sortedGuests.forEach(guest => {
+            if (!guestMap.has(guest.mobileNo)) {
+              guestMap.set(guest.mobileNo, guest);
             }
-        };
-
-        fetchGuests();
-    }, []);
-
-    // Handle delete button click
-    const handleDeleteClick = (id) => {
-        setDeleteGuestId(id);
-        setOpenDeleteDialog(true);
-    };
-
-    // Confirm delete
-    const handleConfirmDelete = async () => {
-        try {
-            setIsLoading(true);
-            await fetch(`/api/NewBooking/${deleteGuestId}`, { method: 'DELETE' });
-            setGuests(guests.filter((guest) => guest._id !== deleteGuestId));
-            setOpenDeleteDialog(false);
-        } catch (error) {
-            console.error('Error deleting guest:', error);
-        } finally {
-            setIsLoading(false);
+          });
+          
+          // Convert map values back to array
+          const filteredGuests = Array.from(guestMap.values());
+          setGuests(filteredGuests);
+        } else {
+          setError('Failed to load guest data');
         }
+      } catch (err) {
+        setError('Error fetching guests');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    // Handle edit button click
-    const handleEditClick = (guest) => {
-        setEditGuest(guest);
-        setOpenEditModal(true);
-    };
+    fetchGuests();
+  }, []);
 
-    // Handle saving edited guest details
-    const handleSaveEdit = async () => {
-        try {
-            setIsLoading(true);
-            const response = await fetch(`/api/NewBooking/${editGuest._id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editGuest),
-            });
+  // Handle delete button click
+  const handleDeleteClick = (id) => {
+    setDeleteGuestId(id);
+    setOpenDeleteDialog(true);
+  };
 
-            if (response.ok) {
-                const data = await response.json();
-                alert('Guest details updated successfully!');
-                setOpenEditModal(false);
-                window.location.reload();
-                // Refresh the guest list here
-            } else {
-                console.error('Failed to update guest');
+  // Confirm delete
+  const handleConfirmDelete = async () => {
+    try {
+      setIsLoading(true);
+      await fetch(`/api/NewBooking/${deleteGuestId}`, { method: 'DELETE' });
+      setGuests(guests.filter((guest) => guest._id !== deleteGuestId));
+      setOpenDeleteDialog(false);
+    } catch (error) {
+      console.error('Error deleting guest:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle edit button click
+  const handleEditClick = (guest) => {
+    setEditGuest(guest);
+    setOpenEditModal(true);
+  };
+
+  // Handle saving edited guest details
+  const handleSaveEdit = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/NewBooking/${editGuest._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editGuest),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert('Guest details updated successfully!');
+        setOpenEditModal(false);
+        
+        // Refresh the guest list with filtered data
+        const updatedResponse = await fetch('/api/NewBooking');
+        const updatedData = await updatedResponse.json();
+        
+        if (updatedData.success) {
+          const guestMap = new Map();
+          const sortedGuests = [...updatedData.data].sort((a, b) => {
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          });
+          
+          sortedGuests.forEach(guest => {
+            if (!guestMap.has(guest.mobileNo)) {
+              guestMap.set(guest.mobileNo, guest);
             }
-        } catch (error) {
-            console.error('Error saving edit:', error);
-        } finally {
-            setIsLoading(false);
+          });
+          
+          setGuests(Array.from(guestMap.values()));
         }
-    };
+      } else {
+        console.error('Failed to update guest');
+      }
+    } catch (error) {
+      console.error('Error saving edit:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Rest of your component remains the same...
+  const handleEditChange = (field, value) => {
+    setEditGuest((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-    // Handle modal input changes
-    const handleEditChange = (field, value) => {
-        setEditGuest((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    if (error) return <p>{error}</p>;
+  if (error) return <p>{error}</p>;
 
     return (
         <div>
