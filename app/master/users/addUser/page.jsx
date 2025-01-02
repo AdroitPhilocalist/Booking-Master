@@ -55,8 +55,9 @@ export default function AddUser() {
   };
 
   return (
-    <div className='bg-amber-50 min-h-screen'>
+    <div>
       <Navbar />
+      <div className='bg-amber-50 min-h-screen'>
         <ToastContainer 
               position="top-right"
               autoClose={5000}
@@ -160,6 +161,7 @@ export default function AddUser() {
         </form>
       </FormContainer>
     </Container>
+    </div>
     <Footer />
     </div>
   );

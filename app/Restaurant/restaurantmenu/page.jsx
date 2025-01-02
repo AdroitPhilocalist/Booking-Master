@@ -122,9 +122,11 @@ export default function RestaurantList() {
     if (error) return <Typography>Error: {error}</Typography>;
 
     return (
-        <div className="bg-amber-50 min-h-screen">
+        <div>
+            <Navbar />
+            <div className="bg-amber-50 min-h-screen">
             <Box>
-                <Navbar />
+                
                 {isLoading && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
                         <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -202,7 +204,7 @@ export default function RestaurantList() {
                         </Table>
                     </TableContainer>
                 </Box>
-                <Footer />
+                
 
                 {/* Edit Modal */}
                 <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
@@ -357,6 +359,8 @@ export default function RestaurantList() {
                     </DialogActions>
                 </Dialog>
             </Box>
+        </div>
+        <Footer />
         </div>
     );
 }

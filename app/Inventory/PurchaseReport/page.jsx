@@ -325,8 +325,10 @@ const PurchaseReportPage = () => {
   }
 
   return (
-    <div className="bg-amber-50 min-h-screen">
+    <div>
       <Navbar />
+      <div className="bg-amber-50 min-h-screen">
+      
       <ToastContainer    //position
         position="top-right"
         autoClose={5000}
@@ -647,7 +649,9 @@ const PurchaseReportPage = () => {
         </Box>
       </Modal>
 
-      <Footer />
+      
+    </div>
+    <Footer />
     </div>
   );
 };

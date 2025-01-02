@@ -55,18 +55,19 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
       console.error("Error fetching guests:", error);
     }
   };
-  // Fetch guest details when room becomes occupied
+  // Modified fetchGuestDetails to always try to fetch guest info
   const fetchGuestDetails = async () => {
-    if (room.occupied === "Occupied" && room.currentGuestId) {
+    if (room.currentGuestId) {
       try {
         const response = await fetch("/api/NewBooking");
         const data = await response.json();
-        // Find the guest matching the currentGuestId
         const guest = data.data.find(g => g._id === room.currentGuestId);
         setCurrentGuest(guest);
       } catch (error) {
         console.error("Error fetching guest details:", error);
       }
+    } else {
+      setCurrentGuest(null);
     }
   };
   useEffect(() => {
@@ -251,15 +252,21 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <Info size={20} />
                 </button>
               )}
-              {currentGuest && (<div className="flex items-center space-x-2">
+              { <div className="flex items-center space-x-2">
                 {React.createElement(categoryInfo.icon || Calendar, {
-                  className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
-                    }`,
+                  className: `text-gray-500 transition-transform duration-300 ${
+                    isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                  }`,
                   size: 20,
                 })}
-                <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-{new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}</span>
-
-              </div>)}
+                <span className="text-sm text-gray-600">
+                  {currentGuest ? ('Next Booking: '+
+                    `${new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-${new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}`
+                  ) : (
+                    "No New Bookings"
+                  )}
+                </span>
+              </div>}
 
             </h3>
           </div>
@@ -271,7 +278,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
             `}
           >
-            <button
+            {!currentGuest && (<button
               onClick={() => setIsEditing(true)}
               className="
                 text-blue-500 hover:bg-blue-100 p-2 rounded-full 
@@ -280,8 +287,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Edit2 size={20} />
-            </button>
-            <button
+            </button>)}
+            {!currentGuest && (<button
               onClick={() => onDelete(room._id)}
               className="
                 text-red-500 hover:bg-red-100 p-2 rounded-full 
@@ -290,7 +297,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               "
             >
               <Trash2 size={20} />
-            </button>
+            </button>)}
           </div>
         </div>
 
@@ -429,7 +436,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         </div>
       )}
       {/* Edit Modal (Centered and Animated) */}
-      {isEditing && (
+      {isEditing &&  (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up">
             <h3 className="text-lg font-bold">Edit Room</h3>
@@ -469,7 +476,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   ))}
                 </select>
               </label>
-              <label className="block mt-2">
+              {/* <label className="block mt-2">
                 Occupancy:
                 <select
                   name="occupied"
@@ -480,8 +487,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <option value="Vacant">Vacant</option>
                   <option value="Occupied">Occupied</option>
                 </select>
-              </label>
-              {/* // Guest Selection (conditionally rendered) */}
+              </label> */}
+              {/* // Guest Selection (conditionally rendered)
               {updatedRoom.occupied === "Occupied" && (
                 <label className="block mt-2">
                   Guest:
@@ -501,7 +508,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                     ))}
                   </select>
                 </label>
-              )}
+              )} */}
               <label className="block mt-2">
                 Clean:
                 <select

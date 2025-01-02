@@ -179,8 +179,10 @@ const RestaurantBooking = () => {
   };
 
   return (
-    <div className="bg-amber-50 min-h-screen">
+    <div>
       <Navbar />
+      <div className="bg-amber-50 min-h-screen">
+      
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -453,7 +455,9 @@ const RestaurantBooking = () => {
           </Box>
         </Modal>
       </Box>
-      <Footer />
+      
+    </div>
+    <Footer />
     </div>
   );
 };

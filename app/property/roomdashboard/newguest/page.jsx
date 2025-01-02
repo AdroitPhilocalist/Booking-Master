@@ -700,8 +700,9 @@ export default function BookingForm() {
   }, [formData]);
 
   return (
-    <div className="min-h-screen bg-amber-50">
+    <div>
       <Navbar />
+      <div className="min-h-screen bg-amber-50">
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow rounded-lg p-6">
@@ -1136,7 +1137,7 @@ export default function BookingForm() {
           </div>
         </div>
       </main>
-      <Footer />
+
       {/* Modal for Room Selection */}
 
       <Dialog
@@ -1320,6 +1321,8 @@ export default function BookingForm() {
           </motion.div>
         </div>
       </Dialog>
+    </div>
+    <Footer />
     </div>
   )
 }
