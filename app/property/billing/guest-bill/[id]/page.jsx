@@ -6,6 +6,7 @@ import { Footer } from "../../../../_components/Footer";
 import axios from "axios";
 import PrintableRoomInvoice from "./printRoomInvoice";
 import PrintableServiceInvoice from "./printServiceInvoice";
+import PrintableFoodInvoice from "./printFoodInvoice";
 import {
   Modal,
   Box,
@@ -44,6 +45,9 @@ const BookingDashboard = () => {
   const [foodTax, setFoodTax] = useState("");
 
   const [foods, setFoods] = useState([]);
+  // Add new state for separating food and service items
+  const [foodItems, setFoodItems] = useState([]);
+  const [serviceItems, setServiceItems] = useState([]);
 
   // New state for bill payment modal
   const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
@@ -58,6 +62,11 @@ const BookingDashboard = () => {
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
+
+        // Fetch menu items first to compare
+        const menuResponse = await axios.get("/api/menuItem");
+        const menuItemsList = menuResponse.data.data;
+
         // 1. First fetch billing details
         const billingResponse = await axios.get(`/api/Billing/${id}`);
         const billingData = billingResponse.data.data;
@@ -66,15 +75,45 @@ const BookingDashboard = () => {
         const existingServices = billingData.itemList || [];
         const existingPrices = billingData.priceList || [];
         const existingTaxes = billingData.taxList || [];
+        const existingQuantities = billingData.quantityList || [];
 
-        setServices(
-          existingServices.map((item, index) => ({
+        const foodItemsArray = [];
+        const serviceItemsArray = [];
+
+        // setServices(
+        //   existingServices.map((item, index) => ({
+        //     name: item,
+        //     price: existingPrices[index] || 0,
+        //     quantity: billingData.quantityList[index] || 1,
+        //     tax: existingTaxes[index] || 0,
+        //   }))
+        // );
+
+        existingServices.forEach((item, index) => {
+          const menuItem = menuItemsList.find(
+            menuItem => menuItem.itemName === item
+          );
+
+          const itemDetails = {
             name: item,
             price: existingPrices[index] || 0,
-            quantity: billingData.quantityList[index] || 1,
+            quantity: existingQuantities[index] || 1,
             tax: existingTaxes[index] || 0,
-          }))
-        );
+          };
+
+          if (menuItem) {
+            foodItemsArray.push(itemDetails);
+          } else if (item !== 'Room Charge') {
+            serviceItemsArray.push(itemDetails);
+          }
+        });
+
+        setFoodItems(foodItemsArray);
+        setServiceItems(serviceItemsArray);
+        setServices([
+          ...serviceItemsArray,
+          ...foodItemsArray
+        ]);
 
         // 3. Fetch and find matched room
         const roomsResponse = await axios.get("/api/rooms");
@@ -201,6 +240,18 @@ const BookingDashboard = () => {
   const handleCloseServiceInvoiceModal = () => {
     setOpenServiceInvoiceModal(false);
   };
+
+  // Add new function for printing food invoice
+  const [openFoodInvoiceModal, setOpenFoodInvoiceModal] = useState(false);
+
+  const handleOpenFoodInvoiceModal = () => {
+    setOpenFoodInvoiceModal(true);
+  };
+
+  const handleCloseFoodInvoiceModal = () => {
+    setOpenFoodInvoiceModal(false);
+  };
+
   // Handle adding service
   const handleAddService = async () => {
     if (!serviceName || !servicePrice || !serviceTax) {
@@ -421,22 +472,22 @@ const BookingDashboard = () => {
         Bill_Paid: "yes",
         dueAmount: 0,
       });
-  
+
       // Step 2: Get current room data
       const roomNo = room._id;
       const currentRoomResponse = await axios.get(`/api/rooms/${roomNo}`);
       const currentRoomData = currentRoomResponse.data.data;
-  
+
       // Find the position of current IDs in the arrays
       const currentPosition = currentRoomData.billWaitlist.findIndex(
         billId => billId._id.toString() === billing._id.toString()
       );
-  
+
       let updateData = {};
-  
+
       // Check if there's a next guest/bill in the waitlists
       const hasNextBooking = currentPosition < currentRoomData.billWaitlist.length - 1;
-  
+
       if (hasNextBooking) {
         // If there's a next booking, set it as current
         updateData = {
@@ -456,7 +507,7 @@ const BookingDashboard = () => {
           billingStarted: "No"
         };
       }
-  
+
       // Maintain all waitlists as they are
       updateData = {
         ...updateData,
@@ -465,12 +516,12 @@ const BookingDashboard = () => {
         checkInDateList: currentRoomData.checkInDateList,
         checkOutDateList: currentRoomData.checkOutDateList
       };
-  
+
       console.log("Update Data:", updateData);
-  
+
       // Update room with new data
       const roomUpdateResponse = await axios.put(`/api/rooms/${roomNo}`, updateData);
-  
+
       // Set payment complete state
       setRemainingDueAmount(0);
       alert("Payment completed successfully!");
@@ -707,7 +758,7 @@ const BookingDashboard = () => {
           {/* Payments and Room Tokens */}
           <div className="mt-6">
             <h3 className="font-semibold text-gray-800 text-center ml-16">
-              Payments (1)
+              Payments ({billing.DateOfPayment.length})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
@@ -805,8 +856,9 @@ const BookingDashboard = () => {
                 />
               </Box>
             </Modal>
+            {/* Services Table */}
             <h3 className="font-semibold text-gray-800 text-center ml-16">
-              Services ({services.length - 1})
+              Services ({serviceItems.length})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
@@ -818,18 +870,16 @@ const BookingDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {services
-                  .filter(service => service.name !== `Room Charge`) // Exclude room charges
-                  .map((service, index) => (
-                    <tr key={index}>
-                      <td className="p-2 text-left">{service.name}</td>
-                      <td className="p-2 text-center">{service.quantity}</td>
-                      <td className="p-2 text-center">{service.tax}%</td>
-                      <td className="p-2 text-right">
-                        {service.price.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
+                {serviceItems.map((service, index) => (
+                  <tr key={index}>
+                    <td className="p-2 text-left">{service.name}</td>
+                    <td className="p-2 text-center">{service.quantity}</td>
+                    <td className="p-2 text-center">{service.tax}%</td>
+                    <td className="p-2 text-right">
+                      {service.price.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             {/* Add Services Modal */}
@@ -1057,6 +1107,70 @@ const BookingDashboard = () => {
             >
               Print Service Invoice
             </Button>
+            {/* Food Items Table */}
+            <h3 className="font-semibold text-gray-800 text-center ml-16">
+              Food Items ({foodItems.length})
+            </h3>
+            <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2 text-left">Item</th>
+                  <th className="p-2 text-center">Item Quantity</th>
+                  <th className="p-2 text-center">Item Tax</th>
+                  <th className="p-2 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {foodItems.map((food, index) => (
+                  <tr key={index}>
+                    <td className="p-2 text-left">{food.name}</td>
+                    <td className="p-2 text-center">{food.quantity}</td>
+                    <td className="p-2 text-center">{food.tax}%</td>
+                    <td className="p-2 text-right">
+                      {food.price.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Button
+              variant="contained"
+              color="info"
+              className="mt-4 mb-4"
+              onClick={handleOpenFoodInvoiceModal}
+            >
+              Print Food Invoice
+            </Button>
+            {/* Food Invoice Modal */}
+            <Modal
+              open={openFoodInvoiceModal}
+              onClose={handleCloseFoodInvoiceModal}
+              aria-labelledby="food-invoice-modal"
+            >
+              <Box sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "90%",
+                maxWidth: "900px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+              }}>
+                <PrintableFoodInvoice
+                  bookingDetails={{
+                    ...bookingData,
+                    foodItems: foodItems
+                  }}
+                />
+              </Box>
+            </Modal>
+
             {/* Similar modification for Service Invoice Modal */}
             <Modal
               open={openServiceInvoiceModal}
