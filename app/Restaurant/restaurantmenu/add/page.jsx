@@ -36,13 +36,13 @@ export default function AddRestaurant() {
       if (name === "gst" || name === "price") {
         // Calculate total when gst or tariff changes
         const price = parseInt(updatedData.price) || 0;
-        updatedData.total = Math.ceil(((100 + gst) / 100) * price);
+        updatedData.total = (((100 + gst) / 100) * price);
       }
 
       if (name === "total") {
         // Calculate tariff when total is changed
         const total = parseInt(updatedData.total) || 0;
-        updatedData.price = Math.ceil(total / ((100 + gst) / 100));
+        updatedData.price = (total / ((100 + gst) / 100));
       }
 
       return updatedData;

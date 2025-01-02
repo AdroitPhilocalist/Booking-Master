@@ -20,6 +20,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     menuitem: [],
     quantity: [],
     price: [],
+    gstArray: [], // New GST array
+    amountWithGstArray: [],
     totalamt: 0,
     gst: 0,
     payableamt: 0,
@@ -76,6 +78,15 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
     useEffect(() => {
       if (existingInvoice) {
+        const gstArray = existingInvoice.menuitem?.map((item, index) => {
+          const gstRate = menu.find(menuItem => menuItem.itemName === item)?.gst || 0;
+          return gstRate * existingInvoice.price[index] / 100;
+        }) || [];
+    
+        const amountWithGstArray = existingInvoice.menuitem?.map((item, index) => {
+          return existingInvoice.price[index] * existingInvoice.quantity[index] + (gstArray[index] || 0);
+        }) || [];
+    
         setFormData({
           invoiceno: existingInvoice.invoiceno || "",
           date: existingInvoice.date ? new Date(existingInvoice.date).toISOString().split("T")[0] : "",
@@ -86,9 +97,12 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           quantity: existingInvoice.quantity || [],
           price: existingInvoice.price || [],
           totalamt: existingInvoice.totalamt || 0,
-          gst: existingInvoice.gst || calculateGST(existingInvoice.totalamt || 0),
-          payableamt: existingInvoice.payableamt || calculatePayableAmount(existingInvoice.totalamt || 0),
+          gst: existingInvoice.gst || (amountWithGstArray.reduce((sum, val) => sum + val, 0) - existingInvoice.totalamt),
+          payableamt: existingInvoice.payableamt || amountWithGstArray.reduce((sum, val) => sum + val, 0),
+          gstArray,
+          amountWithGstArray,
         });
+    
         setSelectedItems(
           existingInvoice.menuitem?.map((item, index) => ({
             name: item,
@@ -97,7 +111,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           })) || []
         );
       }
-    }, [existingInvoice]);
+    }, [existingInvoice, menu]);
+    
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -109,12 +124,16 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
     // Find the selected menu item
     const selectedMenuItem = menu.find(item => item.itemName === selectedItemName);
+    const gstAmount = selectedMenuItem.price * (selectedMenuItem.gst / 100);
+    const totalWithGst = selectedMenuItem.price + gstAmount;
 
     // Create a new selected item object
     const newItem = {
       name: selectedItemName,
       price: selectedMenuItem.price,
-      quantity: 1
+      quantity: 1,
+      gst: gstAmount,
+      totalWithGst: totalWithGst,
     };
 
     // Update selected items
@@ -122,15 +141,22 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     setSelectedItems(updatedSelectedItems);
 
     // Update form data
+    const updatedGstArray = [...formData.gstArray, gstAmount];
+    const updatedAmountWithGstArray = [...formData.amountWithGstArray, totalWithGst];
+
     const totalAmount = calculateTotal(updatedSelectedItems);
-    setFormData(prev => ({
+    const payableAmount = calculatePayableAmount(updatedAmountWithGstArray);
+
+    setFormData((prev) => ({
       ...prev,
-      menuitem: updatedSelectedItems.map(item => item.name),
-      price: updatedSelectedItems.map(item => item.price),
-      quantity: updatedSelectedItems.map(item => item.quantity),
+      menuitem: updatedSelectedItems.map((item) => item.name),
+      price: updatedSelectedItems.map((item) => item.price),
+      quantity: updatedSelectedItems.map((item) => item.quantity),
+      gstArray: updatedGstArray,
+      amountWithGstArray: updatedAmountWithGstArray,
       totalamt: totalAmount,
-      gst: calculateGST(totalAmount),
-      payableamt: calculatePayableAmount(totalAmount)
+      gst: payableAmount - totalAmount,
+      payableamt: payableAmount,
     }));
   };
 
@@ -138,51 +164,56 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     const updatedItems = [...selectedItems];
     updatedItems[index].quantity = newQuantity || 1;
 
+    const updatedGstArray = updatedItems.map(
+      (item) => item.price * item.quantity * (item.gst / 100)
+    );
+    const updatedAmountWithGstArray = updatedItems.map(
+      (item) => item.price * item.quantity + item.price * item.quantity * (item.gst / 100)
+    );
+
     setSelectedItems(updatedItems);
 
-    // Recalculate totals
     const totalAmount = calculateTotal(updatedItems);
-    setFormData(prev => ({
+    const payableAmount = calculatePayableAmount(updatedAmountWithGstArray);
+
+    setFormData((prev) => ({
       ...prev,
-      quantity: updatedItems.map(item => item.quantity),
+      quantity: updatedItems.map((item) => item.quantity),
+      gstArray: updatedGstArray,
+      amountWithGstArray: updatedAmountWithGstArray,
       totalamt: totalAmount,
-      gst: calculateGST(totalAmount),
-      payableamt: calculatePayableAmount(totalAmount)
+      gst: payableAmount - totalAmount,
+      payableamt: payableAmount,
     }));
   };
 
   const removeMenuItem = (index) => {
     const updatedItems = selectedItems.filter((_, i) => i !== index);
-    
+
+    const updatedGstArray = formData.gstArray.filter((_, i) => i !== index);
+    const updatedAmountWithGstArray = formData.amountWithGstArray.filter((_, i) => i !== index);
+
     setSelectedItems(updatedItems);
 
-    // Recalculate totals
     const totalAmount = calculateTotal(updatedItems);
-    // Update form data
-    setFormData(prev => ({
+    const payableAmount = calculatePayableAmount(updatedAmountWithGstArray);
+
+    setFormData((prev) => ({
       ...prev,
-      menuitem: updatedItems.map(item => item.name),
-      price: updatedItems.map(item => item.price),
-      quantity: updatedItems.map(item => item.quantity),
+      menuitem: updatedItems.map((item) => item.name),
+      price: updatedItems.map((item) => item.price),
+      quantity: updatedItems.map((item) => item.quantity),
+      gstArray: updatedGstArray,
+      amountWithGstArray: updatedAmountWithGstArray,
       totalamt: totalAmount,
-      gst: calculateGST(totalAmount),
-      payableamt: calculatePayableAmount(totalAmount)
+      gst: payableAmount - totalAmount,
+      payableamt: payableAmount,
     }));
   };
 
-  const calculateTotal = (items) => {
-    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
+  const calculateTotal = (items) => items.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  const calculateGST = (totalAmount) => {
-    const gstRate = 0.18; // 18% GST
-    return totalAmount * gstRate;
-  };
-
-  const calculatePayableAmount = (totalAmount) => {
-    const gstAmount = calculateGST(totalAmount);
-    return totalAmount + gstAmount;
-  };
+  const calculatePayableAmount = (amountWithGstArray) => amountWithGstArray.reduce((total, amt) => total + amt, 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -195,9 +226,10 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       // Ensure gst is calculated correctly
       const submissionData = {
         ...formData,
-        gst: calculateGST(formData.totalamt),
-        payableamt: calculatePayableAmount(formData.totalamt)
+        gst: formData.payableamt - formData.totalamt,
+        payableamt: calculatePayableAmount(formData.amountWithGstArray),
       };
+      console.log(submissionData)
 
       const response = await fetch(url, {
         method,
@@ -251,6 +283,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       menuitem: [],
       quantity: [],
       price: [],
+      gstArray: [],
+      amountWithGstArray: [],
       totalamt: 0,
       gst: 0,
       payableamt: 0,
@@ -466,7 +500,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
               }}>
                 <Box>
                   <Typography variant="h6">Total Amount: ₹{formData.totalamt}</Typography>
-                  <Typography variant="h6">GST (18%): ₹{formData.gst.toFixed(2)}</Typography>
+                  <Typography variant="h6">GST ₹{formData.gst.toFixed(2)} ({((formData.gst*100)/formData.totalamt)||0}%)</Typography>
                   <Typography variant="h6">Payable Amount: ₹{formData.payableamt.toFixed(2)}</Typography>
                 </Box>
 
