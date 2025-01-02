@@ -55,18 +55,19 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
       console.error("Error fetching guests:", error);
     }
   };
-  // Fetch guest details when room becomes occupied
+  // Modified fetchGuestDetails to always try to fetch guest info
   const fetchGuestDetails = async () => {
-    if (room.occupied === "Occupied" && room.currentGuestId) {
+    if (room.currentGuestId) {
       try {
         const response = await fetch("/api/NewBooking");
         const data = await response.json();
-        // Find the guest matching the currentGuestId
         const guest = data.data.find(g => g._id === room.currentGuestId);
         setCurrentGuest(guest);
       } catch (error) {
         console.error("Error fetching guest details:", error);
       }
+    } else {
+      setCurrentGuest(null);
     }
   };
   useEffect(() => {
@@ -251,15 +252,21 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <Info size={20} />
                 </button>
               )}
-              {currentGuest && (<div className="flex items-center space-x-2">
+              { <div className="flex items-center space-x-2">
                 {React.createElement(categoryInfo.icon || Calendar, {
-                  className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
-                    }`,
+                  className: `text-gray-500 transition-transform duration-300 ${
+                    isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                  }`,
                   size: 20,
                 })}
-                <span className="text-sm text-gray-600">{new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-{new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}</span>
-
-              </div>)}
+                <span className="text-sm text-gray-600">
+                  {currentGuest ? ('Next Booking: '+
+                    `${new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-${new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}`
+                  ) : (
+                    "No New Bookings"
+                  )}
+                </span>
+              </div>}
 
             </h3>
           </div>
