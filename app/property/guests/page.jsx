@@ -8,141 +8,141 @@ import { Footer } from "@/app/_components/Footer";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 export default function GuestList() {
-  const [guests, setGuests] = useState([]);
-  const [error, setError] = useState(null);
-  const [deleteGuestId, setDeleteGuestId] = useState(null);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(false);
-  const [editGuest, setEditGuest] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+    const [guests, setGuests] = useState([]);
+    const [error, setError] = useState(null);
+    const [deleteGuestId, setDeleteGuestId] = useState(null);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [editGuest, setEditGuest] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch guest data and filter for most recent entries per mobile number
-  useEffect(() => {
-    const fetchGuests = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/NewBooking');
-        const data = await response.json();
-        
-        if (data.success) {
-          // Create a map to store the most recent guest for each mobile number
-          const guestMap = new Map();
-          
-          // Sort guests by creation date (assuming there's a createdAt field)
-          // If there's no createdAt field, you might need to modify this logic
-          const sortedGuests = [...data.data].sort((a, b) => {
-            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-          });
-          
-          // Keep only the most recent guest for each mobile number
-          sortedGuests.forEach(guest => {
-            if (!guestMap.has(guest.mobileNo)) {
-              guestMap.set(guest.mobileNo, guest);
+    // Fetch guest data and filter for most recent entries per mobile number
+    useEffect(() => {
+        const fetchGuests = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch('/api/NewBooking');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Create a map to store the most recent guest for each mobile number
+                    const guestMap = new Map();
+
+                    // Sort guests by creation date (assuming there's a createdAt field)
+                    // If there's no createdAt field, you might need to modify this logic
+                    const sortedGuests = [...data.data].sort((a, b) => {
+                        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    });
+
+                    // Keep only the most recent guest for each mobile number
+                    sortedGuests.forEach(guest => {
+                        if (!guestMap.has(guest.mobileNo)) {
+                            guestMap.set(guest.mobileNo, guest);
+                        }
+                    });
+
+                    // Convert map values back to array
+                    const filteredGuests = Array.from(guestMap.values());
+                    setGuests(filteredGuests);
+                } else {
+                    setError('Failed to load guest data');
+                }
+            } catch (err) {
+                setError('Error fetching guests');
+            } finally {
+                setIsLoading(false);
             }
-          });
-          
-          // Convert map values back to array
-          const filteredGuests = Array.from(guestMap.values());
-          setGuests(filteredGuests);
-        } else {
-          setError('Failed to load guest data');
-        }
-      } catch (err) {
-        setError('Error fetching guests');
-      } finally {
-        setIsLoading(false);
-      }
+        };
+
+        fetchGuests();
+    }, []);
+
+    // Handle delete button click
+    const handleDeleteClick = (id) => {
+        setDeleteGuestId(id);
+        setOpenDeleteDialog(true);
     };
 
-    fetchGuests();
-  }, []);
-
-  // Handle delete button click
-  const handleDeleteClick = (id) => {
-    setDeleteGuestId(id);
-    setOpenDeleteDialog(true);
-  };
-
-  // Confirm delete
-  const handleConfirmDelete = async () => {
-    try {
-      setIsLoading(true);
-      await fetch(`/api/NewBooking/${deleteGuestId}`, { method: 'DELETE' });
-      setGuests(guests.filter((guest) => guest._id !== deleteGuestId));
-      setOpenDeleteDialog(false);
-    } catch (error) {
-      console.error('Error deleting guest:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle edit button click
-  const handleEditClick = (guest) => {
-    setEditGuest(guest);
-    setOpenEditModal(true);
-  };
-
-  // Handle saving edited guest details
-  const handleSaveEdit = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/NewBooking/${editGuest._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(editGuest),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert('Guest details updated successfully!');
-        setOpenEditModal(false);
-        
-        // Refresh the guest list with filtered data
-        const updatedResponse = await fetch('/api/NewBooking');
-        const updatedData = await updatedResponse.json();
-        
-        if (updatedData.success) {
-          const guestMap = new Map();
-          const sortedGuests = [...updatedData.data].sort((a, b) => {
-            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-          });
-          
-          sortedGuests.forEach(guest => {
-            if (!guestMap.has(guest.mobileNo)) {
-              guestMap.set(guest.mobileNo, guest);
-            }
-          });
-          
-          setGuests(Array.from(guestMap.values()));
+    // Confirm delete
+    const handleConfirmDelete = async () => {
+        try {
+            setIsLoading(true);
+            await fetch(`/api/NewBooking/${deleteGuestId}`, { method: 'DELETE' });
+            setGuests(guests.filter((guest) => guest._id !== deleteGuestId));
+            setOpenDeleteDialog(false);
+        } catch (error) {
+            console.error('Error deleting guest:', error);
+        } finally {
+            setIsLoading(false);
         }
-      } else {
-        console.error('Failed to update guest');
-      }
-    } catch (error) {
-      console.error('Error saving edit:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  // Rest of your component remains the same...
-  const handleEditChange = (field, value) => {
-    setEditGuest((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    // Handle edit button click
+    const handleEditClick = (guest) => {
+        setEditGuest(guest);
+        setOpenEditModal(true);
+    };
 
-  if (error) return <p>{error}</p>;
+    // Handle saving edited guest details
+    const handleSaveEdit = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/api/NewBooking/${editGuest._id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(editGuest),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                alert('Guest details updated successfully!');
+                setOpenEditModal(false);
+
+                // Refresh the guest list with filtered data
+                const updatedResponse = await fetch('/api/NewBooking');
+                const updatedData = await updatedResponse.json();
+
+                if (updatedData.success) {
+                    const guestMap = new Map();
+                    const sortedGuests = [...updatedData.data].sort((a, b) => {
+                        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    });
+
+                    sortedGuests.forEach(guest => {
+                        if (!guestMap.has(guest.mobileNo)) {
+                            guestMap.set(guest.mobileNo, guest);
+                        }
+                    });
+
+                    setGuests(Array.from(guestMap.values()));
+                }
+            } else {
+                console.error('Failed to update guest');
+            }
+        } catch (error) {
+            console.error('Error saving edit:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Rest of your component remains the same...
+    const handleEditChange = (field, value) => {
+        setEditGuest((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    if (error) return <p>{error}</p>;
 
     return (
         <div>
             <Navbar />
             <div className="min-h-screen bg-amber-50">
-                
+
                 {isLoading && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
                         <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -233,7 +233,7 @@ export default function GuestList() {
                     >
                         <DialogTitle>Edit Guest Details</DialogTitle>
                         <DialogContent>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-4 mt-2">
                                 {/* Booking Type */}
                                 <TextField
                                     select
@@ -265,20 +265,20 @@ export default function GuestList() {
                                 </TextField>
 
                                 {/* Booking Point */}
-                                <TextField
+                                {/* <TextField
                                     label="Booking Point"
                                     fullWidth
                                     value={editGuest.bookingPoint}
                                     onChange={(e) => handleEditChange('bookingPoint', e.target.value)}
-                                />
+                                /> */}
 
                                 {/* Pin Code */}
-                                <TextField
+                                {/* <TextField
                                     label="Pin Code"
                                     fullWidth
                                     value={editGuest.pinCode}
                                     onChange={(e) => handleEditChange('pinCode', e.target.value)}
-                                />
+                                /> */}
 
                                 {/* Mobile Number */}
                                 <TextField
@@ -361,16 +361,6 @@ export default function GuestList() {
                                     onChange={(e) => handleEditChange('address', e.target.value)}
                                 />
 
-                                {/* Remarks */}
-                                <TextField
-                                    label="Remarks"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    value={editGuest.remarks}
-                                    onChange={(e) => handleEditChange('remarks', e.target.value)}
-                                />
-
                                 {/* State */}
                                 <TextField
                                     label="State"
@@ -416,26 +406,34 @@ export default function GuestList() {
                                         </MenuItem>
                                     ))}
                                 </TextField>
-
-                                {/* Guest Notes */}
+                                {/* Remarks */}
                                 <TextField
+                                    label="Remarks"
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    value={editGuest.remarks}
+                                    onChange={(e) => handleEditChange('remarks', e.target.value)}
+                                />
+                                {/* Guest Notes */}
+                                {/* <TextField
                                     label="Guest Notes"
                                     fullWidth
                                     multiline
                                     rows={3}
                                     value={editGuest.guestNotes}
                                     onChange={(e) => handleEditChange('guestNotes', e.target.value)}
-                                />
+                                /> */}
 
                                 {/* Internal Notes */}
-                                <TextField
+                                {/* <TextField
                                     label="Internal Notes"
                                     fullWidth
                                     multiline
                                     rows={3}
                                     value={editGuest.internalNotes}
                                     onChange={(e) => handleEditChange('internalNotes', e.target.value)}
-                                />
+                                /> */}
                             </div>
                         </DialogContent>
                         <DialogActions>
