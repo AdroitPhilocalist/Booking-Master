@@ -18,6 +18,7 @@ export default function Navbar() {
     <nav className="bg-cyan-600 p-4">
       <div className="max-w-7xl flex justify-between items-center">
         {/* Logo */}
+        <Link href="/property/roomdashboard">
         <Image
           src="/Hotel-Logo.png"
           alt="BookingMaster.in"
@@ -26,6 +27,7 @@ export default function Navbar() {
           priority
           className="pr-4"
         />
+        </Link>
         {/* Navbar Links */}
         <ul className="flex space-x-6 text-white">
           {/* Master Dropdown */}
