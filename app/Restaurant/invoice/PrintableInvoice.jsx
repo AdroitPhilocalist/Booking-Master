@@ -228,7 +228,7 @@ const PrintableInvoice = ({ invoiceId }) => {
                   <Typography variant="body1">Subtotal:</Typography>
                   <Typography variant="body1">IGST:</Typography>
                   <Typography variant="body1">CGST:</Typography>
-                  <Typography variant="body1">SGST:</Typography>
+                  <Typography variant="body12">SGST:</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
