@@ -17,6 +17,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     time: "",
     custname: "",
     custphone: "",
+    custgst: "",
+    custaddress: "",
     menuitem: [],
     quantity: [],
     price: [],
@@ -93,6 +95,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           time: existingInvoice.time || "",
           custname: existingInvoice.custname || "",
           custphone: existingInvoice.custphone || "",
+          custaddress:existingInvoice.custaddress || "",
+          custgst:existingInvoice.custgst || "",
           menuitem: existingInvoice.menuitem || [],
           quantity: existingInvoice.quantity || [],
           price: existingInvoice.price || [],
@@ -280,6 +284,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       time: "",
       custname: "",
       custphone: "",
+      custgst: "",
+      custaddress: "",
       menuitem: [],
       quantity: [],
       price: [],
@@ -385,6 +391,39 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
               { label: "Customer Phone", name: "custphone", type: "tel" }, 
             ].map(({ label, name, type }) => ( 
               <Grid item xs={6} key={name}> 
+                <TextField 
+                  fullWidth 
+                  label={label} 
+                  name={name} 
+                  type={type} 
+                  value={formData[name]} 
+                  onChange={handleChange} 
+                  variant="outlined" 
+                  required 
+                /> 
+              </Grid> 
+            ))}
+
+{[ 
+              { label: "Customer GST No.", name: "custgst", type: "text" }, 
+            ].map(({ label, name, type }) => ( 
+              <Grid item xs={6} key={name}> 
+                <TextField 
+                  fullWidth 
+                  label={label} 
+                  name={name} 
+                  type={type} 
+                  value={formData[name]} 
+                  onChange={handleChange} 
+                  variant="outlined" 
+                  required 
+                /> 
+              </Grid> 
+            ))}
+            {[ 
+              { label: "Customer Address", name: "custaddress", type: "text" }, 
+            ].map(({ label, name, type }) => ( 
+              <Grid item xs={12} key={name}> 
                 <TextField 
                   fullWidth 
                   label={label} 

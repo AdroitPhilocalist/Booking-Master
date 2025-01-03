@@ -22,6 +22,14 @@ const restaurantInvoiceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    custaddress: {
+      type: String, // Optional customer address
+      required: false,
+    },
+    custgst: {
+      type: String, // Optional customer GST number
+      required: false,
+    },
     quantity: {
       type: [Number],
       required: true,
