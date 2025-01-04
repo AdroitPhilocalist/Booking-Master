@@ -30,6 +30,9 @@ import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 export default function BookingMasterControlPanel() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,11 +100,14 @@ export default function BookingMasterControlPanel() {
       const data = await response.json();
       if (data.success) {
         setTableData((prevTables) => prevTables.filter((table) => table._id !== id));
+        toast.success("Table deleted successfully");
       } else {
         console.error("Failed to delete table:", data.error);
+        toast.error("Failed to delete table:");
       }
     } catch (error) {
       console.error("Error deleting table:", error);
+      toast.error("Error deleting table:");
     } finally {
       setIsLoading(false);
     }
@@ -111,15 +117,18 @@ export default function BookingMasterControlPanel() {
     const [formData, setFormData] = useState(tableData || {});
 
     useEffect(() => {
-      setFormData(tableData || {}); // Update form data when tableData changes
+      setFormData(tableData || {});
+      //toast.success("Table updated successfully"); // Update form data when tableData changes
     }, [tableData]);
 
     const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value });
+      //toast.success("Table updated successfully");
     };
 
     const handleSave = () => {
       onSave(formData);
+      toast.success("Table updated successfully");
       onClose();
     };
 
@@ -189,6 +198,18 @@ export default function BookingMasterControlPanel() {
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
