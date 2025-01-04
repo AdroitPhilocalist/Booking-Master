@@ -197,6 +197,16 @@ export default function AddRestaurant() {
             style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
             readOnly
           />
+          <label htmlFor="gst">CGST (%)</label>
+          <input
+            type="number"
+            id="gst"
+            name="gst"
+            value={((formData.gst)/2).toFixed(2)}
+            onChange={handleInputChange}
+            style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
+            readOnly
+          />
           
 
           <label htmlFor="total">Total (incl. GST)</label>
