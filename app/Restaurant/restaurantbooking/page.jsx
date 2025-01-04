@@ -24,6 +24,10 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddNewBookingForm from "./addnewbooking/page";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const RestaurantBooking = () => {
   const [bookings, setBookings] = useState([]);
@@ -68,6 +72,7 @@ const RestaurantBooking = () => {
             const dateB = new Date(b.date);
             return dateB - dateA;
           });
+          //toast.success("");
           setBookings(sortedBookings);
         } else {
           console.error("Failed to fetch bookings:", data.error);
@@ -110,11 +115,14 @@ const RestaurantBooking = () => {
         // Add the new booking at the beginning of the array
         setBookings((prevBookings) => [data.data, ...prevBookings]);
         handleClose();
+        toast.success("Booking added successfully");
       } else {
         console.error("Failed to add booking:", data.error);
+        toast.error("Failed to add booking");
       }
     } catch (error) {
       console.error("Error adding booking:", error);
+      toast.error("Failed to add booking");
     } finally {
       setIsLoading(false);
     }
@@ -143,12 +151,15 @@ const RestaurantBooking = () => {
               booking._id === updatedBooking._id ? updatedBooking : booking
             )
           );
+          toast.success("Booking updated sucessfully");
           handleEditClose();
         } else {
           console.error("Failed to update booking:", data.error);
+          toast.error("Failed to update booking");
         }
       } catch (error) {
         console.error("Error updating booking:", error);
+        toast.error("Failed to update booking");
       } finally {
         setIsLoading(false);
       }
@@ -168,11 +179,14 @@ const RestaurantBooking = () => {
         setBookings((prevBookings) =>
           prevBookings.filter((booking) => booking._id !== id)
         );
+        toast.success("Booking deleted successfully");
       } else {
         console.error("Failed to delete booking:", data.error);
+        toast.error("Failed to delete booking");
       }
     } catch (error) {
       console.error("Error deleting booking:", error);
+      toast.error("Failed to delete booking");
     } finally {
       setIsLoading(false);
     }
@@ -181,6 +195,19 @@ const RestaurantBooking = () => {
   return (
     <div>
       <Navbar />
+      <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+
       <div className="bg-amber-50 min-h-screen">
       
       {isLoading && (
