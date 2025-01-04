@@ -30,9 +30,9 @@ export default function BookingForm() {
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [formData, setFormData] = useState({
-    bookingType: 'FIT',
+    bookingType: '',
     bookingId: '',
-    bookingSource: 'Walk In',
+    bookingSource: '',
     bookingPoint: '',
 
     dateofbirth: '',
@@ -51,14 +51,14 @@ export default function BookingForm() {
     checkOut: '',
     expectedArrival: '',
     expectedDeparture: '',
-    bookingStatus: 'Confirmed',
+    bookingStatus: '',
     address: '',
     remarks: '',
     state: '',
-    mealPlan: 'EP',
+    mealPlan: '',
     bookingReference: '',
     stopPosting: false,
-    guestType: 'General',
+    guestType: '',
     guestNotes: '',
     internalNotes: '',
   });
@@ -792,7 +792,24 @@ export default function BookingForm() {
                       <MenuItem key={status} value={status}>{status}</MenuItem>
                     ))}required
                   </TextField>
+                </Grid>
 
+                {/* Guest ID */}
+                <Grid item xs={12}>
+                  <TextField
+                    name="guestid"
+                    label="Guest ID"
+                    value={formData.guestid}
+                    onChange={handleChange}
+                    error={!!errors.guestid}
+                    helperText={errors.guestid}
+                    fullWidth
+                    select
+                  >
+                    {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
+                      <MenuItem key={idType} value={idType}>{idType}</MenuItem>
+                    ))}
+                  </TextField>
                 </Grid>
 
                 {/* Guest Name */}
@@ -859,7 +876,6 @@ export default function BookingForm() {
                 />
 
                 {/* Date of Anniversary */}
-                {/* Date of Anniversary */}
                 <TextField
                   label="Date of Anniversary"
                   type="date"
@@ -905,20 +921,22 @@ export default function BookingForm() {
                 />
 
                 {/* Guest ID */}
-                <FormControl fullWidth>
-                  <InputLabel>Guest ID</InputLabel>
-                  <Select
+                <Grid item xs={12}>
+                  <TextField
                     name="guestid"
+                    label="Guest ID"
                     value={formData.guestid}
                     onChange={handleChange}
                     error={!!errors.guestid}
                     helperText={errors.guestid}
+                    fullWidth
+                    select
                   >
                     {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
                       <MenuItem key={idType} value={idType}>{idType}</MenuItem>
                     ))}
-                  </Select>
-                </FormControl>
+                  </TextField>
+                </Grid>
 
                 {/* Guest ID Number */}
                 <TextField
