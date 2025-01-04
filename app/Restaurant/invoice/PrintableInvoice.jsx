@@ -168,7 +168,7 @@ const PrintableInvoice = ({ invoiceId }) => {
                 </Typography>
               )}
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                GSTIN: {profile.gstNo}
+                Customer GST No: {profile.gstNo}
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
