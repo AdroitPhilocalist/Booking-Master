@@ -168,7 +168,7 @@ const PrintableInvoice = ({ invoiceId }) => {
                 </Typography>
               )}
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                GSTIN: {profile.gstNo}
+                Customer GST No: {profile.gstNo}
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
@@ -226,12 +226,16 @@ const PrintableInvoice = ({ invoiceId }) => {
               <Grid container spacing={1}>
                 <Grid item xs={6}>
                   <Typography variant="body1">Subtotal:</Typography>
-                  <Typography variant="body1">GST:</Typography>
+                  <Typography variant="body1">IGST:</Typography>
+                  <Typography variant="body1">CGST:</Typography>
+                  <Typography variant="body1">SGST:</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
                   <Typography variant="body1">₹{subtotal.toFixed(2)}</Typography>
                   <Typography variant="body1">₹{invoice.gst.toFixed(2)}</Typography>
+                  <Typography variant="body1">₹{((invoice.gst)/2).toFixed(2)}</Typography>
+                  <Typography variant="body1">₹{((invoice.gst)/2).toFixed(2)}</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>₹{invoice.payableamt.toFixed(2)}</Typography>
                 </Grid>
               </Grid>

@@ -22,6 +22,14 @@ const restaurantInvoiceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    custaddress: {
+      type: String, // Optional customer address
+      required: false,
+    },
+    custgst: {
+      type: String, // Optional customer GST number
+      required: false,
+    },
     quantity: {
       type: [Number],
       required: true,
@@ -46,11 +54,31 @@ const restaurantInvoiceSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    gstArray: {
+      type: [Number], // Array of GST percentages for individual items
+      required: true,
+      validate: {
+        validator: function (v) {
+          return v.length === this.menuitem.length; // Ensure it matches the number of menu items
+        },
+        message: "GST array length must match menu items length.",
+      },
+    },
+    amountWithGstArray: {
+      type: [Number], // Array of amounts including GST for individual items
+      required: true,
+      validate: {
+        validator: function (v) {
+          return v.length === this.menuitem.length; // Ensure it matches the number of menu items
+        },
+        message: "Amount with GST array length must match menu items length.",
+      },
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.models.restaurantinvoice || 
+export default mongoose.models.restaurantinvoice ||
   mongoose.model("restaurantinvoice", restaurantInvoiceSchema);
