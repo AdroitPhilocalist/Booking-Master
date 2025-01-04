@@ -178,7 +178,7 @@ export default function AddRestaurant() {
             style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
           />
 
-          <label htmlFor="gst">GST (%)</label>
+          <label htmlFor="gst">IGST (%)</label>
           <input
             type="number"
             id="gst"
