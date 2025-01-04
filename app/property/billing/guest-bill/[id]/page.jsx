@@ -58,6 +58,10 @@ const BookingDashboard = () => {
   const [selectedFoodItems, setSelectedFoodItems] = useState([]); // Array to store multiple food items
   const [foodQuantity, setFoodQuantity] = useState(1);
 
+  // Add new state variables for remarks
+  const [foodRemarks, setFoodRemarks] = useState("");
+  const [serviceRemarks, setServiceRemarks] = useState("");
+  const [roomRemarks, setRoomRemarks] = useState("");
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -252,34 +256,38 @@ const BookingDashboard = () => {
     setOpenFoodInvoiceModal(false);
   };
 
-  // Handle adding service
+  // Update handleAddService to properly handle remarks array
   const handleAddService = async () => {
     if (!serviceName || !servicePrice || !serviceTax) {
       alert("Please enter service name, price, and tax");
       return;
     }
-    console.log(serviceName, servicePrice, serviceTax);
-    console.log(id);
-    try {
-      // Prepare the data to update
-      const response = await axios.put(`/api/Billing/${id}`, {
-        itemList: [serviceName],
-        priceList: [parseFloat(serviceTotal)],
-        quantityList: [1], // Send quantity as 1
-        taxList: [parseFloat(serviceTax)], // Send tax to taxList
-      });
-      console.log(response.data);
-      // Update local state
-      setServices([
-        ...services,
-        {
-          name: serviceName,
-          price: parseFloat(serviceTotal),
-          tax: parseFloat(serviceTax)
-        }
-      ]);
 
-      // Close modal and reset fields
+    try {
+      // First get current billing data to preserve existing remarks
+      const currentBillingResponse = await axios.get(`/api/Billing/${id}`);
+      const currentBilling = currentBillingResponse.data.data;
+      console.log("Current Service Remarks:", currentBilling.ServiceRemarks);
+      // Prepare the new remarks array
+      const updatedServiceRemarks = [
+        ...(currentBilling.ServiceRemarks || []),
+        serviceRemarks || "" // Add empty string if no remarks
+      ];
+
+      console.log("Updated Service Remarks:", updatedServiceRemarks);
+
+      // Prepare the complete update payload
+      const updatePayload = {
+        ...currentBilling,
+        itemList: [...currentBilling.itemList, serviceName],
+        priceList: [...currentBilling.priceList, parseFloat(serviceTotal)],
+        quantityList: [...currentBilling.quantityList, 1],
+        taxList: [...currentBilling.taxList, parseFloat(serviceTax)],
+        ServiceRemarks: updatedServiceRemarks
+      };
+
+      const response = await axios.put(`/api/Billing/${id}`, updatePayload);
+      console.log("Service update response:", response.data);
       handleCloseServicesModal();
       window.location.reload();
     } catch (error) {
@@ -368,7 +376,7 @@ const BookingDashboard = () => {
     setSelectedFoodItems(updatedItems);
   };
 
-  // Update handleAddFood function to handle multiple items
+  // Update handleAddFood to properly handle remarks array
   const handleAddFood = async () => {
     if (selectedFoodItems.length === 0) {
       alert("Please add at least one food item");
@@ -376,25 +384,25 @@ const BookingDashboard = () => {
     }
 
     try {
+      // First get current billing data to preserve existing remarks
+      const currentBillingResponse = await axios.get(`/api/Billing/${id}`);
+      const currentBilling = currentBillingResponse.data.data;
+
+      // Prepare the new remarks array
+      const updatedFoodRemarks = [
+        ...(currentBilling.FoodRemarks || []),
+        foodRemarks || "" // Add empty string if no remarks
+      ];
+
       const response = await axios.put(`/api/Billing/${id}`, {
         itemList: selectedFoodItems.map(item => item.itemName),
         priceList: selectedFoodItems.map(item => item.totalPrice),
         quantityList: selectedFoodItems.map(item => item.quantity),
-        taxList: selectedFoodItems.map(item => parseFloat(item.gst))
+        taxList: selectedFoodItems.map(item => parseFloat(item.gst)),
+        FoodRemarks: updatedFoodRemarks // Send the updated array
       });
 
-      console.log(response.data);
-
-      // Update local state
-      setServices([
-        ...services,
-        ...selectedFoodItems.map(item => ({
-          name: item.itemName,
-          price: item.totalPrice,
-          tax: parseFloat(item.gst)
-        }))
-      ]);
-
+      console.log("Food remarks updated:", response.data);
       handleCloseFoodModal();
       window.location.reload();
     } catch (error) {
@@ -402,6 +410,7 @@ const BookingDashboard = () => {
       alert("Failed to add food");
     }
   };
+
   // Handle opening bill payment modal
   const handleOpenBillPaymentModal = () => {
     setOpenBillPaymentModal(true);
@@ -413,19 +422,15 @@ const BookingDashboard = () => {
     setPaymentAmount("");
   };
 
-  // Handle adding payment
+  // Update handleAddPayment to properly handle remarks array
   const handleAddPayment = async () => {
     const paymentAmountNum = Number(paymentAmount);
-
     if (!paymentAmount || paymentAmountNum <= 0) {
       alert("Please enter a valid payment amount");
       return;
     }
-
     if (paymentAmountNum > remainingDueAmount) {
-      alert(
-        `Payment amount cannot exceed remaining due amount of ${remainingDueAmount}`
-      );
+      alert(`Payment amount cannot exceed remaining due amount of ${remainingDueAmount}`);
       return;
     }
     if (!modeOfPayment) {
@@ -434,30 +439,34 @@ const BookingDashboard = () => {
     }
 
     try {
+      // First get current billing data to preserve existing remarks
+      const currentBillingResponse = await axios.get(`/api/Billing/${id}`);
+      const currentBilling = currentBillingResponse.data.data;
+
+      // Prepare the new remarks array
+      const updatedRoomRemarks = [
+        ...(currentBilling.RoomRemarks || []),
+        roomRemarks || "" // Add empty string if no remarks
+      ];
+
       const currentDate = new Date().toISOString();
-      // Prepare the data to update - note the conversion to number
       const response = await axios.put(`/api/Billing/${id}`, {
         amountAdvanced: paymentAmountNum + billing.amountAdvanced,
         DateOfPayment: [currentDate],
         ModeOfPayment: [modeOfPayment],
         AmountOfPayment: [paymentAmountNum],
+        RoomRemarks: updatedRoomRemarks // Send the updated array
       });
 
-      // Update local state based on the server response
-      const updatedBillingData = response.data.data;
-
       // Update booking data and remaining due amount from server response
+      const updatedBillingData = response.data.data;
       const updatedBookingData = { ...bookingData };
       updatedBookingData.billing = updatedBillingData;
       setBookingData(updatedBookingData);
-
-      // Set remaining due amount from server response
       setRemainingDueAmount(updatedBillingData.dueAmount);
 
-      // Close modal and reset fields
+      console.log("Room remarks updated:", response.data);
       handleCloseBillPaymentModal();
-      setPaymentAmount("");
-      setModeOfPayment("");
       window.location.reload();
     } catch (error) {
       console.error("Error adding payment:", error);
@@ -705,6 +714,15 @@ const BookingDashboard = () => {
                 <option value="Net Banking">Net Banking</option>
                 <option value="Other">Other</option>
               </TextField>
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Room Remarks (Optional)"
+                multiline
+                rows={3}
+                value={roomRemarks}
+                onChange={(e) => setRoomRemarks(e.target.value)}
+              />
               <Box
                 sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
               >
@@ -842,7 +860,7 @@ const BookingDashboard = () => {
                   left: "50%",
                   transform: "translate(-50%, -50%)",
                   width: "90%",
-                  maxWidth: "900px",
+                  maxWidth: "700px",
                   maxHeight: "90vh",
                   overflowY: "auto",
                   bgcolor: "background.paper",
@@ -926,6 +944,15 @@ const BookingDashboard = () => {
                   InputProps={{
                     readOnly: true,
                   }}
+                />
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Remarks (Optional)"
+                  multiline
+                  rows={3}
+                  value={serviceRemarks}
+                  onChange={(e) => setServiceRemarks(e.target.value)}
                 />
                 <Box
                   sx={{
@@ -1015,7 +1042,15 @@ const BookingDashboard = () => {
                     onChange={handleQuantityChange}
                     inputProps={{ min: 1 }}
                   />
-
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Food Remarks (Optional)"
+                    multiline
+                    rows={3}
+                    value={foodRemarks}
+                    onChange={(e) => setFoodRemarks(e.target.value)}
+                  />
                   <Button
                     variant="contained"
                     color="secondary"
