@@ -23,6 +23,8 @@ import { Delete, Edit } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 
+
+
 const InvoicePage = () => {
   const [menu, setMenu] = useState();
   const [invoices, setInvoices] = useState([]);
@@ -100,8 +102,10 @@ const InvoicePage = () => {
         const updatedInvoices = invoices.filter((invoice) => invoice._id !== id);
         setInvoices(updatedInvoices);
         setFilteredInvoices(updatedInvoices);
+        toast.success("Invoice deleted successfully");
       } else {
         console.error("Failed to delete invoice");
+        toast.success("Failed to delete invoice");
       }
     } catch (error) {
       console.error(error);
@@ -141,8 +145,10 @@ const InvoicePage = () => {
           setFilteredInvoices(sortedInvoices);
           setCurrentInvoice(null);
           setShowModal(false);
+          toast.success("Invoice updated successfully");
         } else {
           console.error("Failed to update invoice");
+          toast.error("Failed to update invoice");
         }
       } catch (error) {
         console.error(error);
@@ -154,6 +160,7 @@ const InvoicePage = () => {
       setFilteredInvoices(newInvoices);
       setShowModal(false);
     }
+    
   };
 
   const handleCancelModal = () => {

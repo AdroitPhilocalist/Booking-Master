@@ -127,7 +127,8 @@ export default function InventoryList() {
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Group</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Segment</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Auditable</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tax</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>SGST</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>CGST</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
@@ -139,7 +140,8 @@ export default function InventoryList() {
                     <TableCell sx={{ textAlign: "center" }}>{item.group}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{item.segment?.itemName}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{item.auditable}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{item.tax}%</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{(item.tax)/2}%</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{(item.tax)/2}%</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
                         color="primary"
