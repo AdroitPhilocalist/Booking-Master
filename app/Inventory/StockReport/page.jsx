@@ -226,7 +226,8 @@ export default function InventoryList() {
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Group</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Category</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tax</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>CGST</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>SGST</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Instock</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Outstock</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Available Quantity</TableCell>
@@ -241,7 +242,8 @@ export default function InventoryList() {
                       <TableCell sx={{ textAlign: "center" }}>{item.name}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{item.group}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{item.segment?.itemName}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{item.tax}%</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{(item.tax)/2}%</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{(item.tax)/2}%</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
                         {stockQuantities[item._id]?.instock || 'N/A'}
                       </TableCell>
