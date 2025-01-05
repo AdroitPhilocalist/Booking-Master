@@ -85,10 +85,10 @@ export default function BookingForm() {
   const validateForm = () => {
     const newErrors = {};
     const requiredFields = [
-        'guestName', 'guestEmail', 'companyName', 'gstin', 'address', 'remarks',
-        'bookingReference', 'expectedArrival', 'expectedDeparture', 'mobileNo',
-        'guestid', 'guestidno', 'referenceno', 'state', 'checkIn', 'checkOut',
-        'dateofbirth', 'dateofanniversary'
+      'guestName', 'gstin',
+      'bookingReference', 'expectedArrival', 'expectedDeparture', 'mobileNo',
+      'guestid', 'guestidno', 'referenceno', 'checkIn', 'checkOut',
+      'dateofbirth', 'bookingStatus'
     ];
 
     // Initialize all error flags at the start
@@ -103,6 +103,40 @@ export default function BookingForm() {
     let visaError = false;
     let passportIssueError = false;
     let visaIssueError = false;
+    let dobError = false;
+    let anniversaryError = false;
+
+    // Date of Birth validation (18 years or above)
+    if (formData.dateofbirth) {
+        const dobDate = new Date(formData.dateofbirth);
+        const today = new Date();
+        const age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        
+        // Adjust age if birthday hasn't occurred this year
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+            const adjustedAge = age - 1;
+            if (adjustedAge < 18) {
+                newErrors.dateofbirth = 'Guest must be 18 years or older';
+                dobError = true;
+            }
+        } else if (age < 18) {
+            newErrors.dateofbirth = 'Guest must be 18 years or older';
+            dobError = true;
+        }
+    }
+
+    // Anniversary date validation (not in future)
+    if (formData.dateofanniversary) {
+        const anniversaryDate = new Date(formData.dateofanniversary);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+        
+        if (anniversaryDate > today) {
+            newErrors.dateofanniversary = 'Anniversary date cannot be in the future';
+            anniversaryError = true;
+        }
+    }
 
     // Check if any required field is empty
     const hasEmptyFields = requiredFields.some(field => !formData[field]);
@@ -113,98 +147,100 @@ export default function BookingForm() {
     const checkOutDate = new Date(formData.checkOut);
 
     if (new Date(checkInDate).setHours(0, 0, 0, 0) < new Date(currentDate).setHours(0, 0, 0, 0)) {
-        newErrors.checkIn = 'Check-in date cannot be in the past';
-        dateErrors = true;
+      newErrors.checkIn = 'Check-in date cannot be in the past';
+      dateErrors = true;
     }
-    
+
     if (checkOutDate <= checkInDate) {
-        newErrors.checkOut = 'Check-out date must be after check-in date';
-        dateErrors = true;
+      newErrors.checkOut = 'Check-out date must be after check-in date';
+      dateErrors = true;
     }
 
     // Mobile number validation
     if (formData.mobileNo && !/^\d{10}$/.test(formData.mobileNo)) {
-        newErrors.mobileNo = 'Mobile number must be 10 digits';
-        mobileError = true;
+      newErrors.mobileNo = 'Mobile number must be 10 digits';
+      mobileError = true;
     }
 
     // Email validation
     if (formData.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)) {
-        newErrors.guestEmail = 'Invalid email format';
-        emailError = true;
+      newErrors.guestEmail = 'Invalid email format';
+      emailError = true;
     }
 
     // GSTIN validation
     if (formData.gstin && !/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}$/.test(formData.gstin)) {
-        newErrors.gstin = 'Invalid GSTIN format';
-        gstinError = true;
+      newErrors.gstin = 'Invalid GSTIN format';
+      gstinError = true;
     }
 
     // Reference number validation
     if (formData.referenceno && (isNaN(formData.referenceno) || formData.referenceno < 0)) {
-        newErrors.referenceno = 'Reference number must be a positive number';
-        referenceError = true;
+      newErrors.referenceno = 'Reference number must be a positive number';
+      referenceError = true;
     }
 
     // Adults validation
     if (formData.adults < 1) {
-        newErrors.adults = 'At least 1 adult is required';
-        adultsError = true;
+      newErrors.adults = 'At least 1 adult is required';
+      adultsError = true;
     }
 
     // Children validation
     if (formData.children < 0) {
-        newErrors.children = 'Number of children cannot be negative';
-        childrenError = true;
+      newErrors.children = 'Number of children cannot be negative';
+      childrenError = true;
     }
 
     // Passport-related validations
     if (formData.guestid === 'passport') {
-        const today = new Date();
-        const passportIssue = new Date(formData.passportIssueDate);
-        const visaIssue = new Date(formData.visaIssueDate);
-        const passportExpiry = new Date(formData.passportExpireDate);
-        const visaExpiry = new Date(formData.visaExpireDate);
+      const today = new Date();
+      const passportIssue = new Date(formData.passportIssueDate);
+      const visaIssue = new Date(formData.visaIssueDate);
+      const passportExpiry = new Date(formData.passportExpireDate);
+      const visaExpiry = new Date(formData.visaExpireDate);
 
-        if (passportIssue > today) {
-            newErrors.passportIssueDate = 'Passport issue date cannot be in future';
-            passportIssueError = true;
-        }
+      if (passportIssue > today) {
+        newErrors.passportIssueDate = 'Passport issue date cannot be in future';
+        passportIssueError = true;
+      }
 
-        if (visaIssue > today) {
-            newErrors.visaIssueDate = 'Visa issue date cannot be in future';
-            visaIssueError = true;
-        }
+      if (visaIssue > today) {
+        newErrors.visaIssueDate = 'Visa issue date cannot be in future';
+        visaIssueError = true;
+      }
 
-        if (passportExpiry < today) {
-            newErrors.passportExpireDate = 'Passport has expired';
-            passportError = true;
-        }
+      if (passportExpiry < today) {
+        newErrors.passportExpireDate = 'Passport has expired';
+        passportError = true;
+      }
 
-        if (visaExpiry < today) {
-            newErrors.visaExpireDate = 'Visa has expired';
-            visaError = true;
-        }
+      if (visaExpiry < today) {
+        newErrors.visaExpireDate = 'Visa has expired';
+        visaError = true;
+      }
     }
 
     setErrors(newErrors);
 
     const isValid = !hasEmptyFields &&
-        !dateErrors &&
-        !mobileError &&
-        !emailError &&
-        !gstinError &&
-        !referenceError &&
-        !adultsError &&
-        !childrenError &&
-        !passportError &&
-        !visaError &&
-        !passportIssueError &&
-        !visaIssueError;
+      !dateErrors &&
+      !mobileError &&
+      !emailError &&
+      !gstinError &&
+      !referenceError &&
+      !adultsError &&
+      !childrenError &&
+      !passportError &&
+      !visaError &&
+      !passportIssueError &&
+      !visaIssueError &&
+      !dobError &&
+      !anniversaryError;
 
     setIsFormValid(isValid);
     return isValid && Object.keys(newErrors).length === 0;
-};
+  };
 
   const [rooms, setRooms] = useState([]); // Store available rooms
   const [selectedRooms, setSelectedRooms] = useState([]); // Store selected rooms
@@ -897,7 +933,7 @@ export default function BookingForm() {
                       fullWidth
                       select
                     >
-                      {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
+                      {['Adhaar', 'Driving License', 'Voter ID Card', 'Passport', 'Others'].map((idType) => (
                         <MenuItem key={idType} value={idType}>{idType}</MenuItem>
                       ))}
                     </TextField>

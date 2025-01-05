@@ -17,13 +17,13 @@ const newBookingSchema = new mongoose.Schema({
   },
   dateofanniversary: { 
     type: Date, 
-    required: true 
   },
   pinCode: { 
     type: String 
   },
   mobileNo: { 
-    type: String 
+    type: String,
+    required: true 
   },
   guestName: { 
     type: String, 
@@ -31,7 +31,7 @@ const newBookingSchema = new mongoose.Schema({
   },
   guestid: { 
     type: String, 
-    enum: ['adhaar','driving license','passport','voter id card','others'], 
+    enum: ['Adhaar','Driving License','Passport','Voter ID Card','Others'], 
     required: true 
   },
   guestidno: { 
@@ -80,7 +80,7 @@ const newBookingSchema = new mongoose.Schema({
     type: String 
   },
   guestEmail: { 
-    type: String 
+    type: String,
   },
   adults: { 
     type: Number, 
@@ -117,7 +117,6 @@ const newBookingSchema = new mongoose.Schema({
   },
   state: { 
     type: String, 
-    required: true 
   },
   mealPlan: { 
     type: String, 
