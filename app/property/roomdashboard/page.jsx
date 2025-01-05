@@ -548,6 +548,7 @@ export default function RoomDashboard() {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all"); // New state for filter
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
 
   const handleDelete = async (roomId) => {
@@ -696,22 +697,31 @@ export default function RoomDashboard() {
 
   // Filter rooms based on search term and selected filter
   const filteredRooms = rooms.filter((room) => {
-    const matchesSearch =
-      room.number.toString().includes(searchTerm) ||
-      categories
-        .find((cat) => cat._id === room.category)
+    const matchesSearch = room.number.toString().includes(searchTerm) || 
+      categories.find((cat) => cat._id === room.category)
         ?.category.toLowerCase()
         .includes(searchTerm.toLowerCase());
-
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "occupied" && room.occupied === "Occupied") ||
-      (filter === "vacant" && room.occupied === "Vacant") ||
-      (filter === "clean" && room.clean) ||
+    
+    const matchesStatusFilter = 
+      filter === "all" || 
+      (filter === "occupied" && room.occupied === "Occupied") || 
+      (filter === "vacant" && room.occupied === "Vacant") || 
+      (filter === "clean" && room.clean) || 
       (filter === "dirty" && !room.clean);
 
-    return matchesSearch && matchesFilter;
+    const matchesCategoryFilter = 
+      categoryFilter === "all" || 
+      room.category._id === categoryFilter;
+
+    return matchesSearch && matchesStatusFilter && matchesCategoryFilter;
   });
+
+  // Reset all filters function
+  const handleReset = () => {
+    setFilter("all");
+    setCategoryFilter("all");
+    setSearchTerm("");
+  };
 
   // Summary Data
   const summaryItems = [
@@ -774,38 +784,62 @@ export default function RoomDashboard() {
 
           {/* Filters */}
           <div className="flex flex-wrap justify-between items-center mb-6">
-            <div className="flex space-x-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              {/* Status Filters */}
               <button
                 onClick={() => setFilter("all")}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                className={`px-4 py-2 rounded transition-colors ${
+                  filter === "all" 
+                    ? "bg-blue-500 text-white" 
+                    : "bg-gray-200 text-gray-700 hover:bg-blue-100"
+                }`}
               >
                 All Rooms
               </button>
               <button
                 onClick={() => setFilter("occupied")}
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className={`px-4 py-2 rounded transition-colors ${
+                  filter === "occupied" 
+                    ? "bg-red-500 text-white" 
+                    : "bg-gray-200 text-gray-700 hover:bg-red-100"
+                }`}
               >
                 Occupied
               </button>
               <button
                 onClick={() => setFilter("vacant")}
-                className="bg-green-500 text-white px-4 py-2 rounded"
+                className={`px-4 py-2 rounded transition-colors ${
+                  filter === "vacant" 
+                    ? "bg-green-500 text-white" 
+                    : "bg-gray-200 text-gray-700 hover:bg-green-100"
+                }`}
               >
                 Vacant
               </button>
-              {/* <button
-              onClick={() => setFilter("clean")}
-              className="bg-yellow-500 text-white px-4 py-2 rounded"
-            >
-              Clean
-            </button>
-            <button
-              onClick={() => setFilter("dirty")}
-              className="bg-purple-500 text-white px-4 py-2 rounded"
-            >
-              Dirty
-            </button> */}
+
+              {/* Category Filter Select */}
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="px-4 py-2 rounded border border-gray-300 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.category}
+                  </option>
+                ))}
+              </select>
+
+              {/* Reset Button */}
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 rounded bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+              >
+                Reset Filters
+              </button>
             </div>
+
             <div className="flex space-x-2">
               {/* <Link
               href="roomdashboard/addRoom"
