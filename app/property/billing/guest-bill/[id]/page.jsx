@@ -1,9 +1,10 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import axios from "axios";
 import Navbar from "../../../../_components/Navbar";
 import { Footer } from "../../../../_components/Footer";
-import axios from "axios";
 import PrintableRoomInvoice from "./printRoomInvoice";
 import PrintableServiceInvoice from "./printServiceInvoice";
 import PrintableFoodInvoice from "./printFoodInvoice";
@@ -16,88 +17,117 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
+  InputLabel
 } from "@mui/material";
 
 const BookingDashboard = () => {
-  const { id } = useParams(); // Get the ID from the URL
-  const [modeOfPayment, setModeOfPayment] = useState("");
+  const { id } = useParams();
+
+  // State Management
   const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [remainingDueAmount, setRemainingDueAmount] = useState(0);
+
+  // Modal States
   const [openRoomInvoiceModal, setOpenRoomInvoiceModal] = useState(false);
   const [openServiceInvoiceModal, setOpenServiceInvoiceModal] = useState(false);
-
-  // New state for services modal
   const [openServicesModal, setOpenServicesModal] = useState(false);
+  const [openFoodModal, setOpenFoodModal] = useState(false);
+  const [openFoodInvoiceModal, setOpenFoodInvoiceModal] = useState(false);
+  const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
+
+  // Service Form States
   const [serviceName, setServiceName] = useState("");
   const [serviceTax, setServiceTax] = useState("");
   const [servicePrice, setServicePrice] = useState("");
   const [serviceTotal, setServiceTotal] = useState("");
   const [services, setServices] = useState([]);
 
-  // New state for food modal
+  // Food Form States
   const [menuItems, setMenuItems] = useState([]);
-  const [openFoodModal, setOpenFoodModal] = useState(false);
   const [selectedFoodItem, setSelectedFoodItem] = useState(null);
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
   const [foodTax, setFoodTax] = useState("");
+  const [foodQuantity, setFoodQuantity] = useState(1);
+  const [selectedFoodItems, setSelectedFoodItems] = useState([]);
 
-  const [foods, setFoods] = useState([]);
-  // Add new state for separating food and service items
+  // Payment Form States
+  const [modeOfPayment, setModeOfPayment] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState("");
+
+  // Separated Items Lists
   const [foodItems, setFoodItems] = useState([]);
   const [serviceItems, setServiceItems] = useState([]);
-
-  // New state for bill payment modal
-  const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [remainingDueAmount, setRemainingDueAmount] = useState(0);
-
-  // Add new state variables for managing food items
-  const [selectedFoodItems, setSelectedFoodItems] = useState([]); // Array to store multiple food items
-  const [foodQuantity, setFoodQuantity] = useState(1);
 
   // Add new state variables for remarks
   const [foodRemarks, setFoodRemarks] = useState("");
   const [serviceRemarks, setServiceRemarks] = useState("");
   const [roomRemarks, setRoomRemarks] = useState("");
 
+  // Modal Styles
+  const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+  };
+
+  // Calculate service total when price or tax changes
+  useEffect(() => {
+    if (servicePrice && serviceTax) {
+      const price = parseFloat(servicePrice);
+      const taxRate = parseFloat(serviceTax);
+      const total = price + (price * taxRate / 100);
+      setServiceTotal(total.toFixed(2));
+    } else {
+      setServiceTotal("");
+    }
+  }, [servicePrice, serviceTax]);
+
+  // Fetch menu items
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const menuResponse = await axios.get("/api/menuItem");
+        setMenuItems(menuResponse.data.data);
+      } catch (err) {
+        console.error("Error fetching menu items:", err);
+      }
+    };
+    fetchMenuItems();
+  }, []);
+
+  // Fetch booking details
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
-
-        // Fetch menu items first to compare
+        // Fetch menu items for comparison
         const menuResponse = await axios.get("/api/menuItem");
         const menuItemsList = menuResponse.data.data;
 
-        // 1. First fetch billing details
+        // Fetch billing details
         const billingResponse = await axios.get(`/api/Billing/${id}`);
         const billingData = billingResponse.data.data;
 
-        // 2. Fetch existing services if any
+        // Process existing items
         const existingServices = billingData.itemList || [];
         const existingPrices = billingData.priceList || [];
         const existingTaxes = billingData.taxList || [];
         const existingQuantities = billingData.quantityList || [];
 
+        // Separate food and service items
         const foodItemsArray = [];
         const serviceItemsArray = [];
 
-        // setServices(
-        //   existingServices.map((item, index) => ({
-        //     name: item,
-        //     price: existingPrices[index] || 0,
-        //     quantity: billingData.quantityList[index] || 1,
-        //     tax: existingTaxes[index] || 0,
-        //   }))
-        // );
-
         existingServices.forEach((item, index) => {
-          const menuItem = menuItemsList.find(
-            menuItem => menuItem.itemName === item
-          );
-
+          const menuItem = menuItemsList.find(menuItem => menuItem.itemName === item);
           const itemDetails = {
             name: item,
             price: existingPrices[index] || 0,
@@ -114,12 +144,9 @@ const BookingDashboard = () => {
 
         setFoodItems(foodItemsArray);
         setServiceItems(serviceItemsArray);
-        setServices([
-          ...serviceItemsArray,
-          ...foodItemsArray
-        ]);
+        setServices([...serviceItemsArray, ...foodItemsArray]);
 
-        // 3. Fetch and find matched room
+        // Fetch room and booking details
         const roomsResponse = await axios.get("/api/rooms");
         const matchedRoom = roomsResponse.data.data.find(
           (room) => room.number === billingData.roomNo
@@ -129,7 +156,6 @@ const BookingDashboard = () => {
           throw new Error("No matching room found");
         }
 
-        // 4. Fetch bookings and match using currentGuestId
         const newBookingsResponse = await axios.get("/api/NewBooking");
         const matchedBooking = newBookingsResponse.data.data.find(
           (booking) => booking._id === matchedRoom.currentGuestId
@@ -139,23 +165,20 @@ const BookingDashboard = () => {
           throw new Error("No matching booking found");
         }
 
-        // 5. Fetch room category details
         const roomCategoriesResponse = await axios.get("/api/roomCategories");
         const matchedCategory = roomCategoriesResponse.data.data.find(
           (category) => category._id === matchedRoom.category._id
         );
 
-        // Calculate due amount
-        const dueAmount = billingData.dueAmount;
-        setRemainingDueAmount(dueAmount);
+        setRemainingDueAmount(billingData.dueAmount);
 
-        // Combine all fetched data
         setBookingData({
           billing: billingData,
           booking: matchedBooking,
           room: matchedRoom,
           category: matchedCategory,
         });
+
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -167,47 +190,7 @@ const BookingDashboard = () => {
     fetchBookingDetails();
   }, [id]);
 
-  useEffect(() => {
-    if (servicePrice && serviceTax) {
-      const price = parseFloat(servicePrice);
-      const taxRate = parseFloat(serviceTax);
-      const total = price + (price * taxRate / 100);
-      setServiceTotal(total.toFixed(2));
-    } else {
-      setServiceTotal("");
-    }
-  }, [servicePrice, serviceTax]);
-
-  useEffect(() => {
-    // Fetch menu items
-    const fetchMenuItems = async () => {
-      try {
-        const menuResponse = await axios.get("/api/menuItem");
-        setMenuItems(menuResponse.data.data);
-        console.log(menuResponse.data.data);
-      } catch (err) {
-        console.error("Error fetching menu items:", err);
-      }
-    };
-
-    fetchMenuItems();
-  }, []);
-
-
-  // Modal style
-  const modalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
-
-  // Handle opening services modal
+  // Handler functions for modals
   const handleOpenServicesModal = () => {
     setOpenServicesModal(true);
     setServiceName("");
@@ -216,7 +199,6 @@ const BookingDashboard = () => {
     setServiceTotal("");
   };
 
-  // Handle closing services modal
   const handleCloseServicesModal = () => {
     setOpenServicesModal(false);
     setServiceName("");
@@ -225,78 +207,13 @@ const BookingDashboard = () => {
     setServiceTotal("");
   };
 
-  // Handle opening room invoice modal
-  const handleOpenRoomInvoiceModal = () => {
-    setOpenRoomInvoiceModal(true);
-  };
+  const handleOpenRoomInvoiceModal = () => setOpenRoomInvoiceModal(true);
+  const handleCloseRoomInvoiceModal = () => setOpenRoomInvoiceModal(false);
+  const handleOpenServiceInvoiceModal = () => setOpenServiceInvoiceModal(true);
+  const handleCloseServiceInvoiceModal = () => setOpenServiceInvoiceModal(false);
+  const handleOpenFoodInvoiceModal = () => setOpenFoodInvoiceModal(true);
+  const handleCloseFoodInvoiceModal = () => setOpenFoodInvoiceModal(false);
 
-  // Handle closing room invoice modal
-  const handleCloseRoomInvoiceModal = () => {
-    setOpenRoomInvoiceModal(false);
-  };
-
-  // Handle opening service invoice modal
-  const handleOpenServiceInvoiceModal = () => {
-    setOpenServiceInvoiceModal(true);
-  };
-
-  // Handle closing service invoice modal
-  const handleCloseServiceInvoiceModal = () => {
-    setOpenServiceInvoiceModal(false);
-  };
-
-  // Add new function for printing food invoice
-  const [openFoodInvoiceModal, setOpenFoodInvoiceModal] = useState(false);
-
-  const handleOpenFoodInvoiceModal = () => {
-    setOpenFoodInvoiceModal(true);
-  };
-
-  const handleCloseFoodInvoiceModal = () => {
-    setOpenFoodInvoiceModal(false);
-  };
-
-  // Update handleAddService to properly handle remarks array
-  const handleAddService = async () => {
-    if (!serviceName || !servicePrice || !serviceTax) {
-      alert("Please enter service name, price, and tax");
-      return;
-    }
-
-    try {
-      // First get current billing data to preserve existing remarks
-      const currentBillingResponse = await axios.get(`/api/Billing/${id}`);
-      const currentBilling = currentBillingResponse.data.data;
-      console.log("Current Service Remarks:", currentBilling.ServiceRemarks);
-      // Prepare the new remarks array
-      const updatedServiceRemarks = [
-        ...(currentBilling.ServiceRemarks || []),
-        serviceRemarks || "" // Add empty string if no remarks
-      ];
-
-      console.log("Updated Service Remarks:", updatedServiceRemarks);
-
-      // Prepare the complete update payload
-      const updatePayload = {
-        ...currentBilling,
-        itemList: [...currentBilling.itemList, serviceName],
-        priceList: [...currentBilling.priceList, parseFloat(serviceTotal)],
-        quantityList: [...currentBilling.quantityList, 1],
-        taxList: [...currentBilling.taxList, parseFloat(serviceTax)],
-        ServiceRemarks: updatedServiceRemarks
-      };
-
-      const response = await axios.put(`/api/Billing/${id}`, updatePayload);
-      console.log("Service update response:", response.data);
-      handleCloseServicesModal();
-      window.location.reload();
-    } catch (error) {
-      console.error("Error adding service:", error);
-      alert("Failed to add service");
-    }
-  };
-
-  // Handle opening food modal
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
     setSelectedFoodItem(null);
@@ -305,10 +222,46 @@ const BookingDashboard = () => {
     setFoodTax("");
   };
 
+  const handleCloseFoodModal = () => setOpenFoodModal(false);
 
-  // Handle closing food modal
-  const handleCloseFoodModal = () => {
-    setOpenFoodModal(false);
+  const handleOpenBillPaymentModal = () => setOpenBillPaymentModal(true);
+  const handleCloseBillPaymentModal = () => {
+    setOpenBillPaymentModal(false);
+    setPaymentAmount("");
+  };
+
+  // Handler functions for form submissions
+  const handleAddService = async () => {
+    if (!serviceName || !servicePrice || !serviceTax) {
+      alert("Please enter service name, price, and tax");
+      return;
+    }
+
+    try {
+      const response = await axios.put(`/api/Billing/${id}`, {
+        itemList: [serviceName],
+        priceList: [parseFloat(serviceTotal)],
+        quantityList: [1],
+        taxList: [parseFloat(serviceTax)],
+        ServiceRemarks: [serviceRemarks] // Add service remarks
+      });
+
+      setServices([
+        ...services,
+        {
+          name: serviceName,
+          price: parseFloat(serviceTotal),
+          tax: parseFloat(serviceTax),
+          remarks: serviceRemarks
+        }
+      ]);
+
+      handleCloseServicesModal();
+      window.location.reload();
+    } catch (error) {
+      console.error("Error adding service:", error);
+      alert("Failed to add service");
+    }
   };
 
   const handleFoodItemChange = (event) => {
@@ -318,11 +271,10 @@ const BookingDashboard = () => {
       setFoodName(selectedItem.itemName);
       setFoodPrice(selectedItem.price);
       setFoodTax(selectedItem.gst);
-      setFoodQuantity(1); // Reset quantity when new item selected
+      setFoodQuantity(1);
     }
   };
 
-  // Add function to handle quantity change
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
     if (value > 0) {
@@ -330,7 +282,6 @@ const BookingDashboard = () => {
     }
   };
 
-  // Add function to add item to selected items list
   const handleAddToList = () => {
     if (!selectedFoodItem) {
       alert("Please select a food item");
@@ -344,8 +295,6 @@ const BookingDashboard = () => {
     };
 
     setSelectedFoodItems([...selectedFoodItems, newItem]);
-
-    // Reset selection fields
     setSelectedFoodItem(null);
     setFoodName("");
     setFoodPrice("");
@@ -353,13 +302,11 @@ const BookingDashboard = () => {
     setFoodQuantity(1);
   };
 
-  // Add function to remove item from list
   const handleRemoveItem = (index) => {
     const updatedItems = selectedFoodItems.filter((_, idx) => idx !== index);
     setSelectedFoodItems(updatedItems);
   };
 
-  // Add function to update quantity in the list
   const handleUpdateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
 
@@ -373,10 +320,10 @@ const BookingDashboard = () => {
       }
       return item;
     });
+
     setSelectedFoodItems(updatedItems);
   };
 
-  // Update handleAddFood to properly handle remarks array
   const handleAddFood = async () => {
     if (selectedFoodItems.length === 0) {
       alert("Please add at least one food item");
@@ -384,25 +331,23 @@ const BookingDashboard = () => {
     }
 
     try {
-      // First get current billing data to preserve existing remarks
-      const currentBillingResponse = await axios.get(`/api/Billing/${id}`);
-      const currentBilling = currentBillingResponse.data.data;
-
-      // Prepare the new remarks array
-      const updatedFoodRemarks = [
-        ...(currentBilling.FoodRemarks || []),
-        foodRemarks || "" // Add empty string if no remarks
-      ];
-
       const response = await axios.put(`/api/Billing/${id}`, {
         itemList: selectedFoodItems.map(item => item.itemName),
         priceList: selectedFoodItems.map(item => item.totalPrice),
         quantityList: selectedFoodItems.map(item => item.quantity),
         taxList: selectedFoodItems.map(item => parseFloat(item.gst)),
-        FoodRemarks: updatedFoodRemarks // Send the updated array
+        FoodRemarks: [foodRemarks] // Add food remarks
       });
 
-      console.log("Food remarks updated:", response.data);
+      setServices([
+        ...services,
+        ...selectedFoodItems.map(item => ({
+          name: item.itemName,
+          price: item.totalPrice,
+          tax: parseFloat(item.gst)
+        }))
+      ]);
+
       handleCloseFoodModal();
       window.location.reload();
     } catch (error) {
@@ -411,62 +356,43 @@ const BookingDashboard = () => {
     }
   };
 
-  // Handle opening bill payment modal
-  const handleOpenBillPaymentModal = () => {
-    setOpenBillPaymentModal(true);
-  };
-
-  // Handle closing bill payment modal
-  const handleCloseBillPaymentModal = () => {
-    setOpenBillPaymentModal(false);
-    setPaymentAmount("");
-  };
-
-  // Update handleAddPayment to properly handle remarks array
   const handleAddPayment = async () => {
     const paymentAmountNum = Number(paymentAmount);
+
     if (!paymentAmount || paymentAmountNum <= 0) {
       alert("Please enter a valid payment amount");
       return;
     }
+
     if (paymentAmountNum > remainingDueAmount) {
       alert(`Payment amount cannot exceed remaining due amount of ${remainingDueAmount}`);
       return;
     }
+
     if (!modeOfPayment) {
       alert("Please select a mode of payment");
       return;
     }
 
     try {
-      // First get current billing data to preserve existing remarks
-      const currentBillingResponse = await axios.get(`/api/Billing/${id}`);
-      const currentBilling = currentBillingResponse.data.data;
-
-      // Prepare the new remarks array
-      const updatedRoomRemarks = [
-        ...(currentBilling.RoomRemarks || []),
-        roomRemarks || "" // Add empty string if no remarks
-      ];
-
       const currentDate = new Date().toISOString();
       const response = await axios.put(`/api/Billing/${id}`, {
-        amountAdvanced: paymentAmountNum + billing.amountAdvanced,
+        amountAdvanced: paymentAmountNum + bookingData.billing.amountAdvanced,
         DateOfPayment: [currentDate],
         ModeOfPayment: [modeOfPayment],
         AmountOfPayment: [paymentAmountNum],
-        RoomRemarks: updatedRoomRemarks // Send the updated array
+        RoomRemarks: [roomRemarks] // Add room remarks
       });
 
-      // Update booking data and remaining due amount from server response
       const updatedBillingData = response.data.data;
       const updatedBookingData = { ...bookingData };
       updatedBookingData.billing = updatedBillingData;
       setBookingData(updatedBookingData);
       setRemainingDueAmount(updatedBillingData.dueAmount);
 
-      console.log("Room remarks updated:", response.data);
       handleCloseBillPaymentModal();
+      setPaymentAmount("");
+      setModeOfPayment("");
       window.location.reload();
     } catch (error) {
       console.error("Error adding payment:", error);
@@ -476,30 +402,36 @@ const BookingDashboard = () => {
 
   const handleCompletePayment = async () => {
     try {
-      // Step 1: Update Billing API - Set Bill_Paid to "yes"
-      const billingUpdateResponse = await axios.put(`/api/Billing/${id}`, {
+      // Update Billing API
+      await axios.put(`/api/Billing/${id}`, {
         Bill_Paid: "yes",
         dueAmount: 0,
       });
 
-      // Step 2: Get current room data
-      const roomNo = room._id;
+      // Get current room data
+      const roomNo = bookingData.room._id;
       const currentRoomResponse = await axios.get(`/api/rooms/${roomNo}`);
       const currentRoomData = currentRoomResponse.data.data;
 
-      // Find the position of current IDs in the arrays
+      // Find position of current IDs
       const currentPosition = currentRoomData.billWaitlist.findIndex(
-        billId => billId._id.toString() === billing._id.toString()
+        billId => billId._id.toString() === bookingData.billing._id.toString()
       );
 
-      let updateData = {};
+      // Prepare update data
+      let updateData = {
+        billWaitlist: currentRoomData.billWaitlist,
+        guestWaitlist: currentRoomData.guestWaitlist,
+        checkInDateList: currentRoomData.checkInDateList,
+        checkOutDateList: currentRoomData.checkOutDateList,
+      };
 
-      // Check if there's a next guest/bill in the waitlists
+      // Check if there's a next booking
       const hasNextBooking = currentPosition < currentRoomData.billWaitlist.length - 1;
 
       if (hasNextBooking) {
-        // If there's a next booking, set it as current
         updateData = {
+          ...updateData,
           currentBillingId: currentRoomData.billWaitlist[currentPosition + 1],
           currentGuestId: currentRoomData.guestWaitlist[currentPosition + 1],
           occupied: "Vacant",
@@ -507,8 +439,8 @@ const BookingDashboard = () => {
           billingStarted: "No"
         };
       } else {
-        // If no next booking, reset current IDs
         updateData = {
+          ...updateData,
           currentBillingId: null,
           currentGuestId: null,
           occupied: "Vacant",
@@ -517,21 +449,10 @@ const BookingDashboard = () => {
         };
       }
 
-      // Maintain all waitlists as they are
-      updateData = {
-        ...updateData,
-        billWaitlist: currentRoomData.billWaitlist,
-        guestWaitlist: currentRoomData.guestWaitlist,
-        checkInDateList: currentRoomData.checkInDateList,
-        checkOutDateList: currentRoomData.checkOutDateList
-      };
-
-      console.log("Update Data:", updateData);
-
       // Update room with new data
-      const roomUpdateResponse = await axios.put(`/api/rooms/${roomNo}`, updateData);
+      await axios.put(`/api/rooms/${roomNo}`, updateData);
 
-      // Set payment complete state
+      // Update state
       setRemainingDueAmount(0);
       alert("Payment completed successfully!");
       window.location.reload();
@@ -542,30 +463,18 @@ const BookingDashboard = () => {
   };
 
   if (loading) {
-    return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-        <svg
-          aria-hidden="true"
-          className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
-          viewBox="0 0 100 101"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-            fill="currentColor"
-          />
-          <path
-            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-            fill="currentFill"
-          />
-        </svg>
-        <span className="mt-4 text-gray-700">Loading Booking Data...</span>
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+          <svg aria-hidden="true" className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+          </svg>
+          <span className="mt-4 text-gray-700">Loading Booking Data...</span>
+        </div>
       </div>
-    </div>;
+    );
   }
-
-
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -847,31 +756,27 @@ const BookingDashboard = () => {
             >
               Print Room Invoice
             </Button>
-            {/* Room Invoice Modal - pass isPaymentComplete */}
+            {/* Room Invoice Modal */}
             <Modal
               open={openRoomInvoiceModal}
               onClose={handleCloseRoomInvoiceModal}
               aria-labelledby="room-invoice-modal"
             >
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: "90%",
-                  maxWidth: "700px",
-                  maxHeight: "90vh",
-                  overflowY: "auto",
-                  bgcolor: "background.paper",
-                  boxShadow: 24,
-                  p: 4,
-                  borderRadius: 2,
-                }}
-              >
-                <PrintableRoomInvoice
-                  bookingDetails={{ ...bookingData, services: services }}
-                />
+              <Box sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "90%",
+                maxWidth: "900px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+              }}>
+                <PrintableRoomInvoice billId={id} />
               </Box>
             </Modal>
             {/* Services Table */}
@@ -1197,12 +1102,7 @@ const BookingDashboard = () => {
                 p: 4,
                 borderRadius: 2,
               }}>
-                <PrintableFoodInvoice
-                  bookingDetails={{
-                    ...bookingData,
-                    foodItems: foodItems
-                  }}
-                />
+                <PrintableFoodInvoice billId={id}/>
               </Box>
             </Modal>
 
@@ -1212,25 +1112,21 @@ const BookingDashboard = () => {
               onClose={handleCloseServiceInvoiceModal}
               aria-labelledby="service-invoice-modal"
             >
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: "90%",
-                  maxWidth: "900px",
-                  maxHeight: "90vh",
-                  overflowY: "auto",
-                  bgcolor: "background.paper",
-                  boxShadow: 24,
-                  p: 4,
-                  borderRadius: 2,
-                }}
-              >
-                <PrintableServiceInvoice
-                  bookingDetails={{ ...bookingData, services: services }}
-                />
+              <Box sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "90%",
+                maxWidth: "900px",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+              }}>
+                <PrintableServiceInvoice billId={id} />
               </Box>
             </Modal>
           </div>

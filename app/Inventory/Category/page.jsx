@@ -177,7 +177,7 @@ export default function InventoryCategory() {
                         variant="contained"
                         color={product.isActive ? "success" : "error"}
                         size="small"
-                        onClick={() => toggleActiveStatus(product._id)}
+                        // onClick={() => toggleActiveStatus(product._id)}
                       >
                         {product.isActive ? "Active" : "Inactive"}
                       </Button>
