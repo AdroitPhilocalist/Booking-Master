@@ -46,28 +46,60 @@ export default function InventoryList() {
     fetchData();
   }, []);
 
+  const updateCategoryStatus = async (segmentId) => {
+    try {
+      const response = await fetch(`/api/InventoryCategory/${segmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isActive: true }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update category status');
+      }
+
+      // Update local categories state
+      setCategories(prevCategories =>
+        prevCategories.map(category =>
+          category._id === segmentId
+            ? { ...category, isActive: true }
+            : category
+        )
+      );
+    } catch (error) {
+      console.error('Error updating category status:', error);
+    }
+  };
+
   const handleSubmit = async (formData) => {
     try {
       const method = currentItem ? "PUT" : "POST";
-      const url = currentItem
-        ? `/api/InventoryList/${currentItem._id}`
-        : "/api/InventoryList";
-
+      const url = currentItem ? `/api/InventoryList/${currentItem._id}` : "/api/InventoryList";
+      
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(formData),
       });
-
+      
       const data = await response.json();
-      if (method === "POST") setItems((prev) => [...prev, data.item]);
-      else
+      
+      if (method === "POST") {
+        setItems((prev) => [...prev, data.item]);
+        // Update category status when new item is added
+        await updateCategoryStatus(formData.segment);
+      } else {
         setItems((prev) =>
           prev.map((item) =>
             item._id === data.item._id ? data.item : item
           )
         );
-
+      }
+      
       setShowModal(false);
       setCurrentItem(null);
     } catch (error) {
@@ -75,13 +107,14 @@ export default function InventoryList() {
     }
   };
 
+
   return (
     <div>
       <Navbar />
       <div className="bg-amber-50 min-h-screen">
 
         {isLoading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
               <svg
                 aria-hidden="true"
