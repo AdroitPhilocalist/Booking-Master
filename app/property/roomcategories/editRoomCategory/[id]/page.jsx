@@ -43,10 +43,10 @@ const EditRoomCategory = () => {
       if (!res.ok) {
         throw new Error("Failed to fetch room category");
       }
-  
+
       const result = await res.json();
       console.log("Response Data:", result);
-  
+
       if (result.success && result.data) {
         setFormData(result.data);
       } else {
@@ -62,9 +62,9 @@ const EditRoomCategory = () => {
       fetchRoomCategory();
     }
   }, [id]);
-  
-  
-  
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -150,27 +150,26 @@ const EditRoomCategory = () => {
 
   return (
     <div>
-      <Navbar/>
-    <div className="p-4">
-      
-      <ToastContainer 
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-            />
-      <button onClick={() => router.back()} className="bg-gray-500 text-white px-4 py-2 rounded mb-4">
-        Back
-      </button>
-      <h2 className="text-2xl mb-4">Edit Room Category</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <Navbar />
+      <div className="min-h-screen bg-amber-50 py-12 px-4 sm:px-6 lg:px-8">
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+        <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Edit Room Category
+            </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
               <div>
                 <label
@@ -521,7 +520,7 @@ const EditRoomCategory = () => {
                 </select>
               </div>
             </div>
-            <div>
+            <div className="space-x-6">
               <button
                 type="submit"
                 className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -530,14 +529,18 @@ const EditRoomCategory = () => {
 
                 Submit
               </button>
-              
+              <button onClick={() => router.back()} className="bg-gray-500 text-white px-4 py-2 rounded mb-4">
+                Back
+              </button>
             </div>
           </form>
-         
+          </div>
+        </div>
+
+      </div>
+      <Footer />
     </div>
-    <Footer/>
-    </div>
-    
+
   );
 };
 
