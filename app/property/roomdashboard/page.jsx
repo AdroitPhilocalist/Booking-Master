@@ -252,15 +252,14 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <Info size={20} />
                 </button>
               )}
-              { <div className="flex items-center space-x-2">
+              {<div className="flex items-center space-x-2">
                 {React.createElement(categoryInfo.icon || Calendar, {
-                  className: `text-gray-500 transition-transform duration-300 ${
-                    isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
-                  }`,
+                  className: `text-gray-500 transition-transform duration-300 ${isHovered ? "rotate-12 scale-110" : "rotate-0 scale-100"
+                    }`,
                   size: 20,
                 })}
                 <span className="text-sm text-gray-600">
-                  {currentGuest ? ('Next Booking: '+
+                  {currentGuest ? ('Next Booking: ' +
                     `${new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}-${new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}`
                   ) : (
                     "No New Bookings"
@@ -436,7 +435,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         </div>
       )}
       {/* Edit Modal (Centered and Animated) */}
-      {isEditing &&  (
+      {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up">
             <h3 className="text-lg font-bold">Edit Room</h3>
@@ -697,24 +696,30 @@ export default function RoomDashboard() {
 
   // Filter rooms based on search term and selected filter
   const filteredRooms = rooms.filter((room) => {
-    const matchesSearch = room.number.toString().includes(searchTerm) || 
+    const matchesSearch = room.number.toString().includes(searchTerm) ||
       categories.find((cat) => cat._id === room.category)
         ?.category.toLowerCase()
         .includes(searchTerm.toLowerCase());
-    
-    const matchesStatusFilter = 
-      filter === "all" || 
-      (filter === "occupied" && room.occupied === "Occupied") || 
-      (filter === "vacant" && room.occupied === "Vacant") || 
-      (filter === "clean" && room.clean) || 
+
+    const matchesStatusFilter =
+      filter === "all" ||
+      (filter === "occupied" && room.occupied === "Occupied") ||
+      (filter === "vacant" && room.occupied === "Vacant") ||
+      (filter === "clean" && room.clean) ||
       (filter === "dirty" && !room.clean);
 
-    const matchesCategoryFilter = 
-      categoryFilter === "all" || 
+    const matchesCategoryFilter =
+      categoryFilter === "all" ||
       room.category._id === categoryFilter;
 
     return matchesSearch && matchesStatusFilter && matchesCategoryFilter;
+  }).sort((a, b) => {
+    // Convert room numbers to integers for proper numerical sorting
+    const roomNumA = parseInt(a.number);
+    const roomNumB = parseInt(b.number);
+    return roomNumA - roomNumB;
   });
+
 
   // Reset all filters function
   const handleReset = () => {
@@ -751,7 +756,7 @@ export default function RoomDashboard() {
         {/* Navigation */}
         <Navbar />
         {isLoading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
               <svg
                 aria-hidden="true"
@@ -788,31 +793,28 @@ export default function RoomDashboard() {
               {/* Status Filters */}
               <button
                 onClick={() => setFilter("all")}
-                className={`px-4 py-2 rounded transition-colors ${
-                  filter === "all" 
-                    ? "bg-blue-500 text-white" 
+                className={`px-4 py-2 rounded transition-colors ${filter === "all"
+                    ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-blue-100"
-                }`}
+                  }`}
               >
                 All Rooms
               </button>
               <button
                 onClick={() => setFilter("occupied")}
-                className={`px-4 py-2 rounded transition-colors ${
-                  filter === "occupied" 
-                    ? "bg-red-500 text-white" 
-                    : "bg-gray-200 text-gray-700 hover:bg-red-100"
-                }`}
+                className={`px-4 py-2 rounded transition-colors ${filter === "occupied"
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-red-200"
+                  }`}
               >
                 Occupied
               </button>
               <button
                 onClick={() => setFilter("vacant")}
-                className={`px-4 py-2 rounded transition-colors ${
-                  filter === "vacant" 
-                    ? "bg-green-500 text-white" 
+                className={`px-4 py-2 rounded transition-colors ${filter === "vacant"
+                    ? "bg-green-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-green-100"
-                }`}
+                  }`}
               >
                 Vacant
               </button>
@@ -841,12 +843,13 @@ export default function RoomDashboard() {
             </div>
 
             <div className="flex space-x-2">
-              {/* <Link
-              href="roomdashboard/addRoom"
-              className="bg-green-600 text-white px-4 py-2 rounded"
-            >
-              Add Room
-            </Link> */}
+              <Link
+                href="roomdashboard/classiclayout"
+                className="bg-orange-600 text-white px-4 py-2 rounded"
+              >
+                Classic Layout
+              </Link>
+
               <Link
                 href="roomdashboard/newguest"
                 className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -857,30 +860,25 @@ export default function RoomDashboard() {
           </div>
 
           {/* Rooms List */}
-          {(
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredRooms.map((room) => (
-                <RoomCard
-                  key={room._id}
-                  room={room}
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                  handleEdit={handleEdit}
-                  categories={categories}
-                  setRooms={setRooms}
-                />
-              ))}
-              {filteredRooms.length === 0 && (
-                <div className="text-center">No rooms found.</div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        
-      </div>
-      <Footer />
-    </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+             {filteredRooms.map((room) => (
+               <RoomCard
+                 key={room._id}
+                 room={room}
+                 onDelete={handleDelete}
+                 onEdit={handleEdit}
+                 handleEdit={handleEdit}
+                 categories={categories}
+                 setRooms={setRooms}
+               />
+             ))}
+             {filteredRooms.length === 0 && (
+               <div className="text-center">No rooms found.</div>
+             )}
+           </div>
+         </div>
+       </div>
+       <Footer />
+     </div>
   );
 }
