@@ -3,29 +3,6 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import PrintIcon from '@mui/icons-material/Print';
 import HotelIcon from '@mui/icons-material/Hotel';
 
-// Add print-specific styles - Fixed to match the working restaurant component
-const printStyles = `
-  @media print {
-    body * {
-      visibility: hidden;
-    }
-    #printable-invoice, #printable-invoice * {
-      visibility: visible;
-    }
-    #printable-invoice {
-      position: absolute;
-      left: 0;
-      top: 0;
-      background: white !important;
-      print-color-adjust: exact;
-      -webkit-print-color-adjust: exact;
-    }
-    body {
-      background: white !important;
-    }
-  }
-`;
-
 const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
   const handlePrint = () => {
     window.print();
@@ -55,11 +32,11 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
 
   return (
     <>
-      <style>{printStyles}</style>
       <Box
         id="printable-invoice"
         sx={{
-          p: 4,
+          '@media print': {
+            p: 4,
           maxWidth: '800px',
           margin: 'auto',
           bgcolor: '#f5f5f5',
@@ -67,6 +44,7 @@ const PrintableRoomInvoice = ({ bookingDetails, isPaymentComplete }) => {
           maxHeight: '90vh',
           overflowY: 'auto',
           overflowX: 'hidden',
+          }
         }}
       >
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
