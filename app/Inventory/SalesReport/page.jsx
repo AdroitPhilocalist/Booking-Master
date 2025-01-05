@@ -612,9 +612,27 @@ const SalesReportPage = () => {
             <TextField
               required
               id="taxpercent"
-              label="Tax Percent"
+              label="IGST Tax Percent"
               variant="outlined"
               value={selectedItem?.tax || ''}
+              disabled
+              className="w-full"
+            />
+            <TextField
+              required
+              id="taxpercent"
+              label="SGST Tax Percent"
+              variant="outlined"
+              value={((selectedItem?.tax)/2).toFixed(2) || ''}
+              disabled
+              className="w-full"
+            />
+            <TextField
+              required
+              id="taxpercent"
+              label="CGST Tax Percent"
+              variant="outlined"
+              value={((selectedItem?.tax)/2).toFixed(2) || ''}
               disabled
               className="w-full"
             />
