@@ -111,21 +111,20 @@ const BookingDashboard = () => {
         // Fetch menu items for comparison
         const menuResponse = await axios.get("/api/menuItem");
         const menuItemsList = menuResponse.data.data;
-
+    
         // Fetch billing details
         const billingResponse = await axios.get(`/api/Billing/${id}`);
         const billingData = billingResponse.data.data;
-
+    
         // Process existing items
         const existingServices = billingData.itemList || [];
         const existingPrices = billingData.priceList || [];
         const existingTaxes = billingData.taxList || [];
         const existingQuantities = billingData.quantityList || [];
-
+    
         // Separate food and service items
         const foodItemsArray = [];
         const serviceItemsArray = [];
-
         existingServices.forEach((item, index) => {
           const menuItem = menuItemsList.find(menuItem => menuItem.itemName === item);
           const itemDetails = {
@@ -134,51 +133,72 @@ const BookingDashboard = () => {
             quantity: existingQuantities[index] || 1,
             tax: existingTaxes[index] || 0,
           };
-
           if (menuItem) {
             foodItemsArray.push(itemDetails);
           } else if (item !== 'Room Charge') {
             serviceItemsArray.push(itemDetails);
           }
         });
-
+    
         setFoodItems(foodItemsArray);
         setServiceItems(serviceItemsArray);
         setServices([...serviceItemsArray, ...foodItemsArray]);
-
-        // Fetch room and booking details
+    
+        // Fetch room details
         const roomsResponse = await axios.get("/api/rooms");
         const matchedRoom = roomsResponse.data.data.find(
           (room) => room.number === billingData.roomNo
         );
-
+    
         if (!matchedRoom) {
           throw new Error("No matching room found");
         }
-
-        const newBookingsResponse = await axios.get("/api/NewBooking");
-        const matchedBooking = newBookingsResponse.data.data.find(
-          (booking) => booking._id === matchedRoom.currentGuestId
-        );
-
-        if (!matchedBooking) {
-          throw new Error("No matching booking found");
-        }
-
+    
+        // Fetch room categories
         const roomCategoriesResponse = await axios.get("/api/roomCategories");
         const matchedCategory = roomCategoriesResponse.data.data.find(
           (category) => category._id === matchedRoom.category._id
         );
-
+    
+        // Fetch bookings
+        const newBookingsResponse = await axios.get("/api/NewBooking");
+        let matchedBooking;
+    
+        if (billingData.Bill_Paid === "yes") {
+          // Find the position of the current billing ID in the room's billWaitlist
+          const currentBillIndex = matchedRoom.billWaitlist.findIndex(
+            billId => billId.toString() === billingData._id.toString()
+          );
+          console.log("currentBillIndex", currentBillIndex);
+          if (currentBillIndex === -1) {
+            throw new Error("Billing ID not found in room's billWaitlist");
+          }
+    
+          // Get the corresponding guest ID from the guestWaitlist array
+          const correspondingGuestId = matchedRoom.guestWaitlist[currentBillIndex];
+          console.log("correspondingGuestId", correspondingGuestId);
+          // Find the booking that matches this guest ID
+          matchedBooking = newBookingsResponse.data.data.find(
+            (booking) => booking._id === correspondingGuestId.toString()
+          );
+        } else {
+          // Use the current logic for unpaid bills
+          matchedBooking = newBookingsResponse.data.data.find(
+            (booking) => booking._id === matchedRoom.currentGuestId
+          );
+        }
+    
+        if (!matchedBooking) {
+          throw new Error("No matching booking found");
+        }
+    
         setRemainingDueAmount(billingData.dueAmount);
-
         setBookingData({
           billing: billingData,
           booking: matchedBooking,
           room: matchedRoom,
           category: matchedCategory,
         });
-
         setLoading(false);
       } catch (err) {
         setError(err.message);

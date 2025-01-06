@@ -12,6 +12,7 @@ const PrintableRoomInvoice = ({ billId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
     const fetchInvoiceData = async () => {
@@ -29,6 +30,8 @@ const PrintableRoomInvoice = ({ billId }) => {
           profileResponse.json()
         ]);
         const billingData = billing.data;
+        // Set payment status
+        setIsPaid(billingData.Bill_Paid?.toLowerCase() === 'yes');
         // 2. Fetch and find matched room
         const roomsResponse = await axios.get("/api/rooms");
         const matchedRoom = roomsResponse.data.data.find(
@@ -40,10 +43,32 @@ const PrintableRoomInvoice = ({ billId }) => {
         }
 
         // 3. Fetch bookings and match using currentGuestId
-        const bookingsResponse = await axios.get("/api/NewBooking");
-        const matchedBooking = bookingsResponse.data.data.find(
-          (booking) => booking._id === matchedRoom.currentGuestId
-        );
+        const bookingsResponse = await fetch('/api/NewBooking');
+        const bookingsData = await bookingsResponse.json()
+        console.log('bookingsData', bookingsData.data);
+        let matchedBooking;
+
+                if (billingData.Bill_Paid?.toLowerCase() === 'yes') {
+                    // For paid bills, find the booking using billWaitlist
+                    const billIndex = matchedRoom.billWaitlist.findIndex(
+                        billId => billId.toString() === billingData._id.toString()
+                    );
+                    console.log('billIndex', billIndex);
+                    if (billIndex === -1) {
+                        throw new Error('Billing ID not found in room\'s billWaitlist');
+                    }
+
+                    // Get the corresponding guest ID from guestWaitlist
+                    const guestId = matchedRoom.guestWaitlist[billIndex];
+
+                    // Find the booking that matches this guest ID
+                    matchedBooking = bookingsData.data.find(b => b._id === guestId);
+                    console.log('booking', matchedBooking);
+                } else {
+                    // For unpaid bills, use currentGuestId
+                    matchedBooking = bookingsData.data.find(b => b._id === matchedRoom.currentGuestId);
+                }
+
 
         if (!matchedBooking) {
           throw new Error("No matching booking found");
@@ -232,6 +257,22 @@ const PrintableRoomInvoice = ({ billId }) => {
               </Grid>
             </Box>
           </Box>
+
+          {/* Paid Image */}
+          {isPaid && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+              <img
+                src="/paid.png"
+                alt="Paid"
+                style={{
+                  width: '250px',
+                  height: 'auto',
+                  opacity: 0.8
+                }}
+              />
+            </Box>
+          )}
+
 
           <Divider sx={{ my: 3 }} />
 
