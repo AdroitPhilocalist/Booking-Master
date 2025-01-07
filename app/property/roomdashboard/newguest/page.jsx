@@ -951,7 +951,7 @@ export default function BookingForm() {
                   />
 
                   {/* Conditional Passport Fields */}
-                  {formData.guestid === 'passport' && (
+                  {formData.guestid === 'Passport' && (
                     <>
                       <TextField
                         label="Passport Issue Date"
