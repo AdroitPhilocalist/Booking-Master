@@ -97,7 +97,7 @@ const PurchaseReportPage = () => {
       setTotal(calculatedTotal.toFixed(2));
 
       // Check for validation conditions
-      const isDisabled = 
+      const isDisabled =
         !purchaseorderno ||
         !purchasedate ||
         !Invoiceno ||
@@ -162,7 +162,7 @@ const PurchaseReportPage = () => {
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
-        pauseOnHover: true,      
+        pauseOnHover: true,
         draggable: true,
         progress: undefined,
         theme: "dark",
@@ -328,330 +328,350 @@ const PurchaseReportPage = () => {
     <div>
       <Navbar />
       <div className="bg-amber-50 min-h-screen">
-      
-      <ToastContainer    //position
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
-      {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-            <svg
-              aria-hidden="true"
-              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
-              viewBox="0 0 100 101"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                fill="currentColor"
-              />
-              <path
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                fill="currentFill"
-              />
-            </svg>
-            <span className="mt-4 text-gray-700">Loading Purchase Reports...</span>
+
+        <ToastContainer    //position
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+        {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+              <svg
+                aria-hidden="true"
+                className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
+              </svg>
+              <span className="mt-4 text-gray-700">Loading Purchase Reports...</span>
+            </div>
           </div>
-        </div>
-      )}
-      <div className="container mx-auto p-4">
-        <div className="   bg-amber-50 mb-4 ">
-          <div className=" bg-amber-50 p-4  mb-4 ">
-            <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Purchase Report</h1>
+        )}
+        <div className="container mx-auto p-4">
+          <div className="   bg-amber-50 mb-4 ">
+            <div className=" bg-amber-50 p-4  mb-4 ">
+              <h1 className="text-3xl font-bold text-cyan-900 " style={{ maxWidth: '80%', margin: '0 auto' }}>Purchase Report</h1>
+            </div>
+
+            <div className=" space-x-3  justify-center " style={{ maxWidth: '80%', margin: '0 auto' }}>
+              <TextField
+                label="Start Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-1/4 "
+                size="small"
+              />
+              <TextField
+                label="End Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-1/4"
+                size="small"
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={filterByDate}
+                className="ml-2"
+                size="small"
+              >
+                Filter
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                  setFilteredReports(purchaseReports); // Reset to show all reports
+                }}
+                className="ml-2"
+                size="small"
+              >
+                Reset
+              </Button>
+              <Button
+                variant="contained"
+                onClick={printTable}
+                className="ml-2"
+                size="small"
+                sx={{
+                  backgroundColor: 'orange',
+                  '&:hover': {
+                    backgroundColor: 'darkorange',
+                  },
+                }}
+              >
+                Download/Export
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Purchase Stock
+              </Button>
+            </div>
           </div>
 
-          <div className=" space-x-3  justify-center " style={{ maxWidth: '80%', margin: '0 auto' }}>
-            <TextField
-              label="Start Date"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-1/4 "
-              size="small"
-            />
-            <TextField
-              label="End Date"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-1/4"
-              size="small"
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={filterByDate}
-              className="ml-2"
-              size="small"
-            >
-              Filter
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => {
-                setStartDate("");
-                setEndDate("");
-                setFilteredReports(purchaseReports); // Reset to show all reports
-              }}
-              className="ml-2"
-              size="small"
-            >
-              Reset
-            </Button>
-            <Button
-              variant="contained"
-              onClick={printTable}
-              className="ml-2"
-              size="small"
-              sx={{
-                backgroundColor: 'orange',
-                '&:hover': {
-                  backgroundColor: 'darkorange',
-                },
-              }}
-            >
-              Download/Export
-            </Button>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Purchase Stock
-            </Button>
-          </div>
-        </div>
-
-        <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
-          <Table ref={tableRef}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Purchase No</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Purchase Date</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Invoice No</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Available Quantity</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Unit</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Rate</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tax Percent</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredReports.length > 0 ? (
-                filteredReports.map((report) => (
-                  <TableRow
-                    key={report._id}
-                    sx={{
-                      '& > td': {
-                        backgroundColor: 'white',
-                      },
-                    }}
-                  >
-                    <TableCell
+          <TableContainer component={Paper} style={{ maxWidth: '80%', margin: '0 auto' }}>
+            <Table ref={tableRef}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Purchase No</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Name</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Purchase Date</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Invoice No</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Available Quantity</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Unit</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Rate</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>CGST</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>SGST</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredReports.length > 0 ? (
+                  filteredReports.map((report) => (
+                    <TableRow
+                      key={report._id}
                       sx={{
-                        textAlign: 'center',
-                        background: `linear-gradient(
+                        '& > td': {
+                          backgroundColor: 'white',
+                        },
+                      }}
+                    >
+                      <TableCell
+                        sx={{
+                          textAlign: 'center',
+                          background: `linear-gradient(
                                       to right,
                                       ${report.purorsell === 'purchase' ? '#1ebc1e' : '#f24a23'} 5%, 
                                       white 5%
                                       )`,
-                      }}
-                    >{report.purchaseorderno}
+                        }}
+                      >{report.purchaseorderno}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.name?.name}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {(() => {
+                          const date = new Date(report.purchasedate);
+                          const day = String(date.getDate()).padStart(2, "0");
+                          const month = String(date.getMonth() + 1).padStart(2, "0");
+                          const year = date.getFullYear();
+                          return `${day}/${month}/${year}`;
+                        })()}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.Invoiceno}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.quantity?.stock}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.unit?.quantityUnit}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.rate}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{(report.taxpercent?.tax) / 2}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{(report.taxpercent?.tax) / 2}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.total}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={9} align="center">
+                      No Purchase reports available.
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.name?.name}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {(() => {
-                        const date = new Date(report.purchasedate);
-                        const day = String(date.getDate()).padStart(2, "0");
-                        const month = String(date.getMonth() + 1).padStart(2, "0");
-                        const year = date.getFullYear();
-                        return `${day}/${month}/${year}`;
-                      })()}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.Invoiceno}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.quantity?.stock}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.unit?.quantityUnit}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.rate}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.taxpercent?.tax}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{report.total}</TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={9} align="center">
-                    No Purchase reports available.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
 
-        </TableContainer>
-      </div>
+          </TableContainer>
+        </div>
 
 
-      <Modal open={isModalOpen} onClose={handleCloseModal}>
-        <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 w-1/2 shadow-md max-h-[90%] overflow-y-auto" sx={{ borderRadius: 2 }}>
-          <h2 className="text-xl font-bold mb-4">New Sales</h2>
-          <form className="space-y-4">
-            <TextField
-              required
-              id="purchaseorderno"
-              label="Purchase Order No"
-              variant="outlined"
-              value={purchaseorderno}
-              onChange={handlePurchaseOrderChange}
-              className="w-full"
-              error={duplicateError.purchaseorderno}
-              helperText={duplicateError.purchaseorderno ? "This Sales Order No already exists" : ""}
-            />
-            <TextField
-              required
-              id="purchasedate"
-              label="Purchase Date"
-              variant="outlined"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={purchasedate}
-              onChange={(e) => setPurchasedate(e.target.value)}
-              className="w-full"
-            />
-            <TextField
-              required
-              id="Invoiceno"
-              label="Invoice No"
-              variant="outlined"
-              value={Invoiceno}
-              onChange={handleInvoiceNoChange}
-              className="w-full"
-              error={duplicateError.invoiceno}
-              helperText={duplicateError.invoiceno ? "This Invoice No already exists" : ""}
-            />
-            <TextField
-              required
-              select
-              id="itemname"
-              variant="outlined"
-              value={selectedItem?._id || ''}
-              onChange={(e) => handleItemChange(e.target.value)}
-              className="w-full"
-              SelectProps={{
-                native: true,
-              }}
-            >
-              <option value="">Select Item</option>
-              {items.map((item) => (
-                <option key={item._id} value={item._id}>
-                  {item.name}
-                </option>
-              ))}
-            </TextField>
-            <TextField
-              required
-              id="unit"
-              label="Unit"
-              variant="outlined"
-              value={selectedItem?.quantityUnit || ''}
-              disabled
-              className="w-full"
-            />
-            <TextField
-              required
-              id="stock"
-              label="Current Stock"
-              variant="outlined"
-              value={selectedItem?.stock || '0'}
-              disabled
-              className="w-full"
-            />
-            <TextField
-              required
-              id="quantityAmount"
-              label="Purchase Quantity"
-              variant="outlined"
-              type="number"
-              value={quantityAmount}
-              onChange={(e) => setQuantityAmount(e.target.value)}
-              className="w-full"
-            />
-            <TextField
-              required
-              id="rate"
-              label="Rate"
-              variant="outlined"
-              type="number"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              className="w-full"
-            />
-            <TextField
-              required
-              id="taxpercent"
-              label="Tax Percent"
-              variant="outlined"
-              value={selectedItem?.tax || ''}
-              disabled
-              className="w-full"
-            />
-            <TextField
-              required
-              id="total"
-              label="Total"
-              variant="outlined"
-              value={total}
-              disabled
-              className="w-full"
-            />
-            <div className="flex justify-end">
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: 'green',
-                  '&:hover': { backgroundColor: 'darkgreen' },
-                  '&:disabled': { backgroundColor: 'gray' }
-                }}
-                onClick={handlePurchase}
-                disabled={isSaveDisabled}
-              >
-                Save
-              </Button>
-              <Button
+        <Modal open={isModalOpen} onClose={handleCloseModal}>
+          <Box className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 w-1/2 shadow-md max-h-[90%] overflow-y-auto" sx={{ borderRadius: 2 }}>
+            <h2 className="text-xl font-bold mb-4">New Sales</h2>
+            <form className="space-y-4">
+              <TextField
+                required
+                id="purchaseorderno"
+                label="Purchase Order No"
                 variant="outlined"
-                sx={{
-                  color: 'red',
-                  borderColor: 'red',
-                  '&:hover': {
-                    borderColor: 'darkred',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                  },
-                  ml: 2
+                value={purchaseorderno}
+                onChange={handlePurchaseOrderChange}
+                className="w-full"
+                error={duplicateError.purchaseorderno}
+                helperText={duplicateError.purchaseorderno ? "This Sales Order No already exists" : ""}
+              />
+              <TextField
+                required
+                id="purchasedate"
+                label="Purchase Date"
+                variant="outlined"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={purchasedate}
+                onChange={(e) => setPurchasedate(e.target.value)}
+                className="w-full"
+              />
+              <TextField
+                required
+                id="Invoiceno"
+                label="Invoice No"
+                variant="outlined"
+                value={Invoiceno}
+                onChange={handleInvoiceNoChange}
+                className="w-full"
+                error={duplicateError.invoiceno}
+                helperText={duplicateError.invoiceno ? "This Invoice No already exists" : ""}
+              />
+              <TextField
+                required
+                select
+                id="itemname"
+                variant="outlined"
+                value={selectedItem?._id || ''}
+                onChange={(e) => handleItemChange(e.target.value)}
+                className="w-full"
+                SelectProps={{
+                  native: true,
                 }}
-                onClick={handleCloseModal}
               >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </Box>
-      </Modal>
+                <option value="">Select Item</option>
+                {items.map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.name}
+                  </option>
+                ))}
+              </TextField>
+              <TextField
+                required
+                id="unit"
+                label="Unit"
+                variant="outlined"
+                value={selectedItem?.quantityUnit || ''}
+                disabled
+                className="w-full"
+              />
+              <TextField
+                required
+                id="stock"
+                label="Current Stock"
+                variant="outlined"
+                value={selectedItem?.stock || '0'}
+                disabled
+                className="w-full"
+              />
+              <TextField
+                required
+                id="quantityAmount"
+                label="Purchase Quantity"
+                variant="outlined"
+                type="number"
+                value={quantityAmount}
+                onChange={(e) => setQuantityAmount(e.target.value)}
+                className="w-full"
+              />
+              <TextField
+                required
+                id="rate"
+                label="Rate"
+                variant="outlined"
+                type="number"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                className="w-full"
+              />
+              <TextField
+                required
+                id="taxpercent"
+                label="IGST Tax Percent"
+                variant="outlined"
+                value={selectedItem?.tax || ''}
+                disabled
+                className="w-full"
+              />
+              <TextField
+                required
+                id="taxpercent"
+                label="SGST Tax Percent"
+                variant="outlined"
+                value={((selectedItem?.tax) / 2).toFixed(2) || ''}
+                disabled
+                className="w-full"
+              />
+              <TextField
+                required
+                id="taxpercent"
+                label="CGST Tax Percent"
+                variant="outlined"
+                value={((selectedItem?.tax) / 2).toFixed(2) || ''}
+                disabled
+                className="w-full"
+              />
+              <TextField
+                required
+                id="total"
+                label="Total"
+                variant="outlined"
+                value={total}
+                disabled
+                className="w-full"
+              />
+              <div className="flex justify-end">
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: 'green',
+                    '&:hover': { backgroundColor: 'darkgreen' },
+                    '&:disabled': { backgroundColor: 'gray' }
+                  }}
+                  onClick={handlePurchase}
+                  disabled={isSaveDisabled}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    color: 'red',
+                    borderColor: 'red',
+                    '&:hover': {
+                      borderColor: 'darkred',
+                      backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                    },
+                    ml: 2
+                  }}
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Box>
+        </Modal>
 
-      
-    </div>
-    <Footer />
+
+      </div>
+      <Footer />
     </div>
   );
 };
