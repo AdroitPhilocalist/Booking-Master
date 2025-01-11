@@ -16,7 +16,8 @@ export default function AddRestaurant() {
     itemCode: '',
     itemName: '',
     price: '',
-    gst: '',
+    sgst: '',
+    cgst: '',
     total: '',
     showInProfile: 'Yes (Visible)',
     isSpecialItem: 'No (Not Editable)',
@@ -34,18 +35,18 @@ export default function AddRestaurant() {
         [name]: value,
       };
 
-      const gst = parseInt(updatedData.gst) || 0;
+      const gst = (parseFloat(updatedData.sgst || 0)+parseFloat(updatedData.cgst || 0));
 
-      if (name === "gst" || name === "price") {
+      if (name === "cgst" || name === "sgst"||name === "price") {
         // Calculate total when gst or tariff changes
-        const price = parseInt(updatedData.price) || 0;
-        updatedData.total = (((100 + gst) / 100) * price);
+        const price = parseFloat(updatedData.price).toFixed(2) || 0;
+        updatedData.total = (((100 + gst) / 100) * price).toFixed(2);
       }
 
       if (name === "total") {
         // Calculate tariff when total is changed
-        const total = parseInt(updatedData.total) || 0;
-        updatedData.price = (total / ((100 + gst) / 100));
+        const total = parseFloat(updatedData.total).toFixed(2) || 0;
+        updatedData.price = (total / ((100 + gst) / 100)).toFixed(2);
       }
 
       return updatedData;
@@ -201,29 +202,29 @@ export default function AddRestaurant() {
               type="number"
               id="gst"
               name="gst"
-              value={formData.gst}
+              value={parseFloat(formData.sgst||0)+parseFloat(formData.cgst||0)}
               onChange={handleInputChange}
               style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
-            />
+            readOnly/>
             <label htmlFor="gst">SGST (%)</label>
             <input
               type="number"
-              id="gst"
-              name="gst"
-              value={((formData.gst) / 2).toFixed(2)}
+              id="sgst"
+              name="sgst"
+              value={formData.sgst}
               onChange={handleInputChange}
               style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
-              readOnly
+              
             />
             <label htmlFor="gst">CGST (%)</label>
             <input
               type="number"
-              id="gst"
-              name="gst"
-              value={((formData.gst) / 2).toFixed(2)}
+              id="cgst"
+              name="cgst"
+              value={formData.cgst}
               onChange={handleInputChange}
               style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
-              readOnly
+              
             />
 
 
