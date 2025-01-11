@@ -57,7 +57,7 @@ export default function NewRoomForm() {
       if (res.ok) {
         // Redirect to the room dashboard if the room creation is successful
         toast.success('New room added successfully!')
-       //router.back();
+        //router.back();
       } else {
         console.error("Failed to create new room", res.statusText);
         toast.error('Failed to add new room!');
@@ -70,20 +70,20 @@ export default function NewRoomForm() {
   };
 
   return (
-    
+
     <div className="container mx-auto p-4">
-      <ToastContainer 
-                    position="top-right"
-                    autoClose={5000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="dark"
-                    />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <h1 className="text-2xl mb-4">Add New Room</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -131,12 +131,12 @@ export default function NewRoomForm() {
           />
         </div>
 
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}fullWidth >
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }} fullWidth >
           <InputLabel id="demo-clean-select-label ">Clean</InputLabel>
           <Select
             labelId="demo-clean-select-label"
             id="demo-clean-select"
-            
+
             value={clean}
             onChange={(e) => setClean(e.target.value)}
           >

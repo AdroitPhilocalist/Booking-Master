@@ -42,7 +42,7 @@ export async function POST(request) {
 
     const newProduct = new Inventory({
       itemName: data.itemName,
-      isActive: data.isActive !== false, // Default true unless explicitly false
+      isActive: data.isActive !== true, // Default true unless explicitly false
     });
 
     await newProduct.save();

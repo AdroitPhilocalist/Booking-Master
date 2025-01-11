@@ -11,13 +11,9 @@ import Navbar from "@/app/_components/Navbar";
 import { Footer } from "@/app/_components/Footer";
 import TextField from '@mui/material/TextField';
 import { Grid } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
 import { Autocomplete } from '@mui/material';
-import { Input } from '@mui/material';
-import { OutlinedInput } from '@mui/material';
+
 
 export default function BookingForm() {
   const [categories, setCategories] = useState([]);
@@ -34,7 +30,6 @@ export default function BookingForm() {
     bookingId: '',
     bookingSource: '',
     bookingPoint: '',
-
     dateofbirth: '',
     dateofanniversary: '',
     pinCode: '',
@@ -42,6 +37,11 @@ export default function BookingForm() {
     guestName: '',
     guestid: '',
     guestidno: '',
+    passportIssueDate: '',
+    passportExpireDate: '',
+    visaNumber: '',
+    visaIssueDate: '',
+    visaExpireDate: '',
     companyName: '',
     gstin: '',
     guestEmail: '',
@@ -84,51 +84,64 @@ export default function BookingForm() {
   // Validation rules
   const validateForm = () => {
     const newErrors = {};
-
     const requiredFields = [
-      'guestName',
-      'guestEmail',
-      'companyName',
-      'gstin',
-      'address',
-      'remarks',
-      'bookingReference',
-      'expectedArrival',
-      'expectedDeparture',
-      'mobileNo',
-      'guestid',
-      'guestidno',
-      'referenceno',
-      'state',
-      'checkIn',
-      'checkOut',
-      'dateofbirth',
-      'dateofanniversary'
+      'guestName', 'gstin',
+      'bookingReference', 'expectedArrival', 'expectedDeparture', 'mobileNo',
+      'guestid', 'guestidno', 'referenceno', 'checkIn', 'checkOut',
+      'dateofbirth', 'bookingStatus'
     ];
 
-    // Required fields validation
-    // if (!formData.guestName) newErrors.guestName = 'Guest name is required';
-    // if (!formData.guestEmail) newErrors.guestEmail = 'Guest email is required';
-    // if (!formData.companyName) newErrors.companyName = 'Company name is required';
-    // if (!formData.gstin) newErrors.gstin = 'GSTIN is required';
-    // if (!formData.address) newErrors.address = 'Address is required';
-    // if (!formData.remarks) newErrors.remarks = 'Remarks is required';
-    // if (!formData.bookingReference) newErrors.bookingReference = 'Booking Reference is required';
-    // if (!formData.expectedArrival) newErrors.expectedArrival = 'Expected Arrival is required';
-    // if (!formData.expectedDeparture) newErrors.expectedDeparture = 'Expected Departure is required';
-    // if (!formData.mobileNo) newErrors.mobileNo = 'Mobile number is required';
-    // if (!formData.guestid) newErrors.guestid = 'Guest ID type is required';
-    // if (!formData.guestidno) newErrors.guestidno = 'Guest ID number is required';
-    // if (!formData.referenceno) newErrors.referenceno = 'Reference number is required';
-    // if (!formData.state) newErrors.state = 'State is required';
-    // if (!formData.checkIn) newErrors.checkIn = 'Check-in date is required';
-    // if (!formData.checkOut) newErrors.checkOut = 'Check-out date is required';
-    // if (!formData.dateofbirth) newErrors.dateofbirth = 'Date of birth is required';
-    // if (!formData.dateofanniversary) newErrors.dateofanniversary = 'Date of anniversary is required';
+    // Initialize all error flags at the start
+    let dateErrors = false;
+    let mobileError = false;
+    let emailError = false;
+    let gstinError = false;
+    let referenceError = false;
+    let adultsError = false;
+    let childrenError = false;
+    let passportError = false;
+    let visaError = false;
+    let passportIssueError = false;
+    let visaIssueError = false;
+    let dobError = false;
+    let anniversaryError = false;
+
+    // Date of Birth validation (18 years or above)
+    if (formData.dateofbirth) {
+        const dobDate = new Date(formData.dateofbirth);
+        const today = new Date();
+        const age = today.getFullYear() - dobDate.getFullYear();
+        const monthDiff = today.getMonth() - dobDate.getMonth();
+        
+        // Adjust age if birthday hasn't occurred this year
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+            const adjustedAge = age - 1;
+            if (adjustedAge < 18) {
+                newErrors.dateofbirth = 'Guest must be 18 years or older';
+                dobError = true;
+            }
+        } else if (age < 18) {
+            newErrors.dateofbirth = 'Guest must be 18 years or older';
+            dobError = true;
+        }
+    }
+
+    // Anniversary date validation (not in future)
+    if (formData.dateofanniversary) {
+        const anniversaryDate = new Date(formData.dateofanniversary);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+        
+        if (anniversaryDate > today) {
+            newErrors.dateofanniversary = 'Anniversary date cannot be in the future';
+            anniversaryError = true;
+        }
+    }
+
     // Check if any required field is empty
     const hasEmptyFields = requiredFields.some(field => !formData[field]);
+
     // Date validations
-    let dateErrors = false;
     const currentDate = new Date();
     const checkInDate = new Date(formData.checkIn);
     const checkOutDate = new Date(formData.checkOut);
@@ -137,69 +150,96 @@ export default function BookingForm() {
       newErrors.checkIn = 'Check-in date cannot be in the past';
       dateErrors = true;
     }
-    
 
     if (checkOutDate <= checkInDate) {
       newErrors.checkOut = 'Check-out date must be after check-in date';
       dateErrors = true;
     }
 
-    // Mobile number format validation (10 digits)
-    let mobileError = false;
+    // Mobile number validation
     if (formData.mobileNo && !/^\d{10}$/.test(formData.mobileNo)) {
       newErrors.mobileNo = 'Mobile number must be 10 digits';
       mobileError = true;
     }
 
-    // Email format validation
-    let emailError = false;
+    // Email validation
     if (formData.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)) {
       newErrors.guestEmail = 'Invalid email format';
       emailError = true;
     }
 
-    // GSTIN format validation (if provided)
-    let gstinError = false;
+    // GSTIN validation
     if (formData.gstin && !/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}$/.test(formData.gstin)) {
       newErrors.gstin = 'Invalid GSTIN format';
       gstinError = true;
     }
 
     // Reference number validation
-    let referenceError = false;
     if (formData.referenceno && (isNaN(formData.referenceno) || formData.referenceno < 0)) {
       newErrors.referenceno = 'Reference number must be a positive number';
       referenceError = true;
     }
 
     // Adults validation
-    let adultsError = false;
     if (formData.adults < 1) {
       newErrors.adults = 'At least 1 adult is required';
       adultsError = true;
     }
 
     // Children validation
-    let childrenError = false;
     if (formData.children < 0) {
       newErrors.children = 'Number of children cannot be negative';
       childrenError = true;
     }
 
+    // Passport-related validations
+    if (formData.guestid === 'passport') {
+      const today = new Date();
+      const passportIssue = new Date(formData.passportIssueDate);
+      const visaIssue = new Date(formData.visaIssueDate);
+      const passportExpiry = new Date(formData.passportExpireDate);
+      const visaExpiry = new Date(formData.visaExpireDate);
+
+      if (passportIssue > today) {
+        newErrors.passportIssueDate = 'Passport issue date cannot be in future';
+        passportIssueError = true;
+      }
+
+      if (visaIssue > today) {
+        newErrors.visaIssueDate = 'Visa issue date cannot be in future';
+        visaIssueError = true;
+      }
+
+      if (passportExpiry < today) {
+        newErrors.passportExpireDate = 'Passport has expired';
+        passportError = true;
+      }
+
+      if (visaExpiry < today) {
+        newErrors.visaExpireDate = 'Visa has expired';
+        visaError = true;
+      }
+    }
+
     setErrors(newErrors);
-    setIsFormValid(Object.keys(newErrors).length === 0);
+
     const isValid = !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
       !emailError &&
       !gstinError &&
+      !referenceError &&
       !adultsError &&
-      !childrenError;
+      !childrenError &&
+      !passportError &&
+      !visaError &&
+      !passportIssueError &&
+      !visaIssueError &&
+      !dobError &&
+      !anniversaryError;
 
     setIsFormValid(isValid);
     return isValid && Object.keys(newErrors).length === 0;
-    return Object.keys(newErrors).length === 0;
-
   };
 
   const [rooms, setRooms] = useState([]); // Store available rooms
@@ -703,644 +743,632 @@ export default function BookingForm() {
     <div>
       <Navbar />
       <div className="min-h-screen bg-amber-50">
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Guest Reservation Form</h1>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Booking ID */}
-                <TextField
-                  label="Booking ID"
-                  name="bookingId"
-                  value={formData.bookingId}
-                  InputProps={{ readOnly: true }}
-                  error={!!errors.bookingId}
-                  helperText={errors.bookingId}
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                />
-
-                {/* Booking Type */}
-                <Grid item xs={12}>
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="px-4 py-6 sm:px-0">
+            <div className="bg-white shadow rounded-lg p-6">
+              <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Guest Reservation Form</h1>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Booking ID */}
                   <TextField
-                    label="Booking Type"
-                    name="bookingType"
-                    value={formData.bookingType}
-                    onChange={handleChange}
-                    error={!!errors.bookingType}
-                    helperText={errors.bookingType}
+                    label="Booking ID"
+                    name="bookingId"
+                    value={formData.bookingId}
+                    InputProps={{ readOnly: true }}
+                    error={!!errors.bookingId}
+                    helperText={errors.bookingId}
+                    variant="outlined"
                     fullWidth
-                    select
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 300, // Adjust the maximum height for the dropdown
-                          overflowY: 'auto', // Add scroll if needed
+                    disabled
+                  />
+
+                  {/* Booking Type */}
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Booking Type"
+                      name="bookingType"
+                      value={formData.bookingType}
+                      onChange={handleChange}
+                      error={!!errors.bookingType}
+                      helperText={errors.bookingType}
+                      fullWidth
+                      select
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 300, // Adjust the maximum height for the dropdown
+                            overflowY: 'auto', // Add scroll if needed
+                          },
                         },
+                      }}
+                    >
+                      {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events', 'Others'].map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  {/* Booking Reference */}
+                  <TextField
+                    label="Booking Reference"
+                    name="bookingReference"
+                    value={formData.bookingReference}
+                    onChange={handleChange}
+                    error={!!errors.bookingReference}
+                    helperText={errors.bookingReference}
+                    fullWidth
+                    variant="outlined"
+                  />
+
+                  {/* Reference Number */}
+                  <TextField
+                    label="Reference Number"
+                    name="referenceno"
+                    value={formData.referenceno}
+                    onChange={handleChange}
+                    error={!!errors.referenceno}
+                    helperText={errors.referenceno}
+                    fullWidth
+                    variant="outlined"
+                  />
+
+                  {/* Booking Status */}
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Booking Status"
+                      name="bookingStatus"
+                      select
+                      fullWidth
+                      value={formData.bookingStatus}
+                      onChange={handleChange}
+                      error={!!errors.bookingStatus}
+                      helperText={errors.bookingStatus}
+                    >
+                      {['Confirm', 'Block','Pencil'].map((status) => (
+                        <MenuItem key={status} value={status}>{status}</MenuItem>
+                      ))}required
+                    </TextField>
+                  </Grid>
+
+                  {/* Guest Name */}
+                  <TextField
+                    label="Guest Name"
+                    name="guestName"
+                    value={formData.guestName}
+                    onChange={handleChange}
+                    error={!!errors.guestName}
+                    helperText={errors.guestName}
+                    fullWidth
+                    required
+                  />
+
+                  <Autocomplete
+                    freeSolo
+                    options={filteredMobileNumbers}
+                    value={formData.mobileNo}
+                    onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+                    onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Mobile Number"
+                        required
+                        fullWidth
+                        error={!!errors.mobileNo}
+                        helperText={errors.mobileNo}
+                      />
+                    )}
+                  />
+
+                  {/* Mail ID */}
+                  <TextField
+                    label="Email ID"
+                    name="guestEmail"
+                    value={formData.guestEmail}
+                    error={!!errors.guestEmail}
+                    helperText={errors.guestEmail}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+
+                  {/* Date of Birth */}
+                  <TextField
+                    label="Date of Birth"
+                    type="date"
+                    name="dateofbirth"
+                    value={formData.dateofbirth}
+                    onChange={handleChange}
+                    error={!!errors.dateofbirth}
+                    helperText={errors.dateofbirth}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                  />
+
+                  {/* Date of Anniversary */}
+                  <TextField
+                    label="Date of Anniversary"
+                    type="date"
+                    name="dateofanniversary"
+                    value={formData.dateofanniversary}
+                    onChange={handleChange}
+                    error={!!errors.dateofanniversary}
+                    helperText={errors.dateofanniversary}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                  />
+
+                  {/* Company Name */}
+                  <TextField
+                    label="Company Name"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleChange}
+                    error={!!errors.companyName}
+                    helperText={errors.companyName}
+                    fullWidth
+                  />
+
+                  {/* GSTIN */}
+                  <TextField
+                    label="GSTIN"
+                    name="gstin"
+                    value={formData.gstin}
+                    onChange={handleChange}
+                    error={!!errors.gstin}
+                    helperText={errors.gstin}
+                    fullWidth
+                  />
+
+                  {/* Guest ID dropdown */}
+                  <Grid item xs={12}>
+                    <TextField
+                      name="guestid"
+                      label="Guest ID"
+                      value={formData.guestid}
+                      onChange={handleChange}
+                      error={!!errors.guestid}
+                      helperText={errors.guestid}
+                      fullWidth
+                      select
+                    >
+                      {['Adhaar', 'Driving License', 'Voter ID Card', 'Passport', 'Others'].map((idType) => (
+                        <MenuItem key={idType} value={idType}>{idType}</MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  {/* Guest ID Number */}
+                  <TextField
+                    label="Guest ID Number"
+                    name="guestidno"
+                    value={formData.guestidno}
+                    onChange={handleChange}
+                    error={!!errors.guestidno}
+                    helperText={errors.guestidno}
+                    fullWidth
+                  />
+
+                  {/* Conditional Passport Fields */}
+                  {formData.guestid === 'Passport' && (
+                    <>
+                      <TextField
+                        label="Passport Issue Date"
+                        type="date"
+                        name="passportIssueDate"
+                        value={formData.passportIssueDate}
+                        onChange={handleChange}
+                        error={!!errors.passportIssueDate}
+                        helperText={errors.passportIssueDate}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                        required
+                      />
+
+                      <TextField
+                        label="Passport Expiry Date"
+                        type="date"
+                        name="passportExpireDate"
+                        value={formData.passportExpireDate}
+                        onChange={handleChange}
+                        error={!!errors.passportExpireDate}
+                        helperText={errors.passportExpireDate}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                        required
+                      />
+
+                      <TextField
+                        label="Visa Number"
+                        name="visaNumber"
+                        value={formData.visaNumber}
+                        onChange={handleChange}
+                        error={!!errors.visaNumber}
+                        helperText={errors.visaNumber}
+                        fullWidth
+                        required
+                      />
+
+                      <TextField
+                        label="Visa Issue Date"
+                        type="date"
+                        name="visaIssueDate"
+                        value={formData.visaIssueDate}
+                        onChange={handleChange}
+                        error={!!errors.visaIssueDate}
+                        helperText={errors.visaIssueDate}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                        required
+                      />
+
+                      <TextField
+                        label="Visa Expiry Date"
+                        type="date"
+                        name="visaExpireDate"
+                        value={formData.visaExpireDate}
+                        onChange={handleChange}
+                        error={!!errors.visaExpireDate}
+                        helperText={errors.visaExpireDate}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                        required
+                      />
+                    </>
+                  )}
+
+                  {/* Adults */}
+                  <TextField
+                    label="Adults"
+                    type="number"
+                    name="adults"
+                    value={formData.adults}
+                    onChange={handleChange}
+                    error={!!errors.adults}
+                    helperText={errors.adults}
+                    fullWidth
+                  />
+
+                  {/* Children */}
+                  <TextField
+                    label="Children"
+                    type="number"
+                    name="children"
+                    value={formData.children}
+                    onChange={handleChange}
+                    error={!!errors.children}
+                    helperText={errors.children}
+                    fullWidth
+                  />
+
+                  {/* Check-in */}
+                  <TextField
+                    label="Check-in Date"
+                    type="date"
+                    name="checkIn"
+                    value={formData.checkIn}
+                    onChange={handleChange}
+                    error={!!errors.checkIn}
+                    helperText={errors.checkIn}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    required
+                  />
+
+                  {/* Check-out */}
+                  <TextField
+                    label="Check-out Date"
+                    type="date"
+                    name="checkOut"
+                    value={formData.checkOut}
+                    onChange={handleChange}
+                    error={!!errors.checkOut}
+                    helperText={errors.checkOut}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                    required
+                  />
+
+                  {/* Expected Arrival */}
+                  <TextField
+                    label="Check-in Time"
+                    type="time"
+                    name="expectedArrival"
+                    value={formData.expectedArrival}
+                    onChange={handleChange}
+                    error={!!errors.expectedArrival}
+                    helperText={errors.expectedArrival}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                  />
+
+                  {/* Expected Departure */}
+                  <TextField
+                    label="Check-out Time"
+                    type="time"
+                    name="expectedDeparture"
+                    value={formData.expectedDeparture}
+                    onChange={handleChange}
+                    error={!!errors.expectedDeparture}
+                    helperText={errors.expectedDeparture}
+                    InputLabelProps={{ shrink: true }}
+                    fullWidth
+                  />
+
+                  {/* State */}
+                  <TextField
+                    label="State"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    error={!!errors.state}
+                    helperText={errors.state}
+                    fullWidth
+                  />
+
+                  {/* Meal Plan */}
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Meal Plan"
+                      name="mealPlan"
+                      select
+                      fullWidth
+                      value={formData.mealPlan}
+                      onChange={handleChange}
+                      error={!!errors.mealPlan}
+                      helperText={errors.mealPlan}
+                    >
+                      {['EP', 'CP', 'AP', 'MAP'].map((plan) => (
+                        <MenuItem key={plan} value={plan}>{plan}</MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  {/* Address */}
+                  <TextField
+                    label="Address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    error={!!errors.address}
+                    helperText={errors.address}
+                    fullWidth
+                    multiline
+                  />
+
+                  {/* Remarks */}
+                  <TextField
+                    label="Remarks"
+                    name="remarks"
+                    value={formData.remarks}
+                    onChange={handleChange}
+                    error={!!errors.remarks}
+                    helperText={errors.remarks}
+                    fullWidth
+                    multiline
+                  />
+                </div>
+                <div className="flex items-center justify-end">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCheckAvailability}
+                    disabled={!isFormValid}
+                    sx={{
+                      '&:hover': { backgroundColor: '#3b82f6' },
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    Check Room Availability
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => router.push('/property/roomdashboard')}
+                    sx={{
+                      fontWeight: 'bold',
+                      ml: 4, // Margin-left for spacing
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0', // Light gray shade for hover effect
                       },
                     }}
                   >
-                    {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events', 'Others'].map((type) => (
-                      <MenuItem key={type} value={type}>
-                        {type}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
+                    Back
+                  </Button>
 
-
-
-                {/* Booking Reference */}
-                <TextField
-                  label="Booking Reference"
-                  name="bookingReference"
-                  value={formData.bookingReference}
-                  onChange={handleChange}
-                  error={!!errors.bookingReference}
-                  helperText={errors.bookingReference}
-                  fullWidth
-                  variant="outlined"
-                />
-
-                {/* Reference Number */}
-                <TextField
-                  label="Reference Number"
-                  name="referenceno"
-                  value={formData.referenceno}
-                  onChange={handleChange}
-                  error={!!errors.referenceno}
-                  helperText={errors.referenceno}
-                  fullWidth
-                  variant="outlined"
-                />
-
-                {/* Booking Status */}
-                <Grid item xs={12}>
-                  <TextField
-                    label="Booking Status"
-                    name="bookingStatus"
-                    select
-                    fullWidth
-                    value={formData.bookingStatus}
-                    onChange={handleChange}
-                    error={!!errors.bookingStatus}
-                    helperText={errors.bookingStatus}
-                  >
-                    {['Confirmed', 'Blocked'].map((status) => (
-                      <MenuItem key={status} value={status}>{status}</MenuItem>
-                    ))}required
-                  </TextField>
-                </Grid>
-
-                {/* Guest ID */}
-                <Grid item xs={12}>
-                  <TextField
-                    name="guestid"
-                    label="Guest ID"
-                    value={formData.guestid}
-                    onChange={handleChange}
-                    error={!!errors.guestid}
-                    helperText={errors.guestid}
-                    fullWidth
-                    select
-                  >
-                    {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
-                      <MenuItem key={idType} value={idType}>{idType}</MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-
-                {/* Guest Name */}
-                <TextField
-                  label="Guest Name"
-                  name="guestName"
-                  value={formData.guestName}
-                  onChange={handleChange}
-                  error={!!errors.guestName}
-                  helperText={errors.guestName}
-                  fullWidth
-                  required
-                />
-
-                {/* Mobile Number */}
-                {/* <TextField
-                  label="Mobile Number"
-                  name="mobileNo"
-                  value={formData.mobileNo}
-                  onChange={handleChange}
-                  fullWidth
-                  required
-                /> */}
-                <Autocomplete
-                  freeSolo
-                  options={filteredMobileNumbers}
-                  value={formData.mobileNo}
-                  onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
-                  onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Mobile Number"
-                      required
-                      fullWidth
-                      error={!!errors.mobileNo}
-                      helperText={errors.mobileNo}
-                    />
-                  )}
-                />
-
-                {/* Mail ID */}
-                <TextField
-                  label="Email ID"
-                  name="guestEmail"
-                  value={formData.guestEmail}
-                  error={!!errors.guestEmail}
-                  helperText={errors.guestEmail}
-                  onChange={handleChange}
-                  fullWidth
-                />
-
-                {/* Date of Birth */}
-                <TextField
-                  label="Date of Birth"
-                  type="date"
-                  name="dateofbirth"
-                  value={formData.dateofbirth}
-                  onChange={handleChange}
-                  error={!!errors.dateofbirth}
-                  helperText={errors.dateofbirth}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                />
-
-                {/* Date of Anniversary */}
-                <TextField
-                  label="Date of Anniversary"
-                  type="date"
-                  name="dateofanniversary"
-                  value={formData.dateofanniversary}
-                  onChange={handleChange}
-                  error={!!errors.dateofanniversary}
-                  helperText={errors.dateofanniversary}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#A020F0', // Blue-purple color
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#A020F0', // Blue-purple color
-                      }
-                    }
-                  }}
-                />
-
-                {/* Company Name */}
-                <TextField
-                  label="Company Name"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  error={!!errors.companyName}
-                  helperText={errors.companyName}
-                  fullWidth
-                />
-
-                {/* GSTIN */}
-                <TextField
-                  label="GSTIN"
-                  name="gstin"
-                  value={formData.gstin}
-                  onChange={handleChange}
-                  error={!!errors.gstin}
-                  helperText={errors.gstin}
-                  fullWidth
-                />
-
-                {/* Guest ID */}
-                <Grid item xs={12}>
-                  <TextField
-                    name="guestid"
-                    label="Guest ID"
-                    value={formData.guestid}
-                    onChange={handleChange}
-                    error={!!errors.guestid}
-                    helperText={errors.guestid}
-                    fullWidth
-                    select
-                  >
-                    {['adhaar', 'driving license', 'voter id card', 'passport', 'others'].map((idType) => (
-                      <MenuItem key={idType} value={idType}>{idType}</MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-
-                {/* Guest ID Number */}
-                <TextField
-                  label="Guest ID Number"
-                  name="guestidno"
-                  value={formData.guestidno}
-                  onChange={handleChange}
-                  error={!!errors.guestidno}
-                  helperText={errors.guestidno}
-                  fullWidth
-                />
-
-                {/* Adults */}
-                <TextField
-                  label="Adults"
-                  type="number"
-                  name="adults"
-                  value={formData.adults}
-                  onChange={handleChange}
-                  error={!!errors.adults}
-                  helperText={errors.adults}
-                  fullWidth
-                />
-
-                {/* Children */}
-                <TextField
-                  label="Children"
-                  type="number"
-                  name="children"
-                  value={formData.children}
-                  onChange={handleChange}
-                  error={!!errors.children}
-                  helperText={errors.children}
-                  fullWidth
-                />
-
-                {/* Check-in */}
-                {/* Check-in */}
-                <TextField
-                  label="Check-in Date"
-                  type="date"
-                  name="checkIn"
-                  value={formData.checkIn}
-                  onChange={handleChange}
-                  error={!!errors.checkIn}
-                  helperText={errors.checkIn}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      }
-                    }
-                  }}
-                  required
-                />
-
-                {/* Check-out */}
-                <TextField
-                  label="Check-out Date"
-                  type="date"
-                  name="checkOut"
-                  value={formData.checkOut}
-                  onChange={handleChange}
-                  error={!!errors.checkOut}
-                  helperText={errors.checkOut}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      }
-                    }
-                  }}
-                  required
-                />
-
-                {/* Expected Arrival */}
-                <TextField
-                  label="Check-in Time"
-                  type="time"
-                  name="expectedArrival"
-                  value={formData.expectedArrival}
-                  onChange={handleChange}
-                  error={!!errors.expectedArrival}
-                  helperText={errors.expectedArrival}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      }
-                    }
-                  }}
-                />
-
-                {/* Expected Departure */}
-                <TextField
-                  label="Check-out Time"
-                  type="time"
-                  name="expectedDeparture"
-                  value={formData.expectedDeparture}
-                  onChange={handleChange}
-                  error={!!errors.expectedDeparture}
-                  helperText={errors.expectedDeparture}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#f97316', // Orange color
-                      }
-                    }
-                  }}
-                />
-
-                {/* State */}
-                <TextField
-                  label="State"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  error={!!errors.state}
-                  helperText={errors.state}
-                  fullWidth
-                />
-
-                {/* Meal Plan */}
-                <Grid item xs={12}>
-                  <TextField
-                    label="Meal Plan"
-                    name="mealPlan"
-                    select
-                    fullWidth
-                    value={formData.mealPlan}
-                    onChange={handleChange}
-                    error={!!errors.mealPlan}
-                    helperText={errors.mealPlan}
-                  >
-                    {['EP', 'CP', 'AP', 'MAP'].map((plan) => (
-                      <MenuItem key={plan} value={plan}>{plan}</MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-
-                {/* Address */}
-                <TextField
-                  label="Address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  error={!!errors.address}
-                  helperText={errors.address}
-                  fullWidth
-                  multiline
-                />
-
-                {/* Remarks */}
-                <TextField
-                  label="Remarks"
-                  name="remarks"
-                  value={formData.remarks}
-                  onChange={handleChange}
-                  error={!!errors.remarks}
-                  helperText={errors.remarks}
-                  fullWidth
-                  multiline
-                />
-              </div>
-              <div className="flex items-center justify-end">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleCheckAvailability}
-                  disabled={!isFormValid}
-                  sx={{
-                    '&:hover': { backgroundColor: '#3b82f6' },
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Check Room Availability
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => router.push('/property/roomdashboard')}
-                  sx={{
-                    fontWeight: 'bold',
-                    ml: 4, // Margin-left for spacing
-                    '&:hover': {
-                      backgroundColor: '#e0e0e0', // Light gray shade for hover effect
-                    },
-                  }}
-                >
-                  Back
-                </Button>
-
-              </div>
-            </form>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
 
-      {/* Modal for Room Selection */}
+        {/* Modal for Room Selection */}
 
-      <Dialog
-        open={modalOpen}
-        onClose={handleCloseModal} // Updated to use new close handler
-        className="relative z-50"
-      >
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-          aria-hidden="true"
-          onClick={handleCloseModal} // Close on backdrop click
-        />
+        <Dialog
+          open={modalOpen}
+          onClose={handleCloseModal} // Updated to use new close handler
+          className="relative z-50"
+        >
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            aria-hidden="true"
+            onClick={handleCloseModal} // Close on backdrop click
+          />
 
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={modalAnimation}
-            className="bg-white rounded-xl shadow-xl w-[95vw] max-w-[1400px]"
-          >
-            <DialogTitle className="p-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
-              <div className="flex items-center space-x-2">
-                <Hotel className="w-6 h-6" />
-                <span className="text-2xl font-bold">Select Your Room</span>
-              </div>
-            </DialogTitle>
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={modalAnimation}
+              className="bg-white rounded-xl shadow-xl w-[95vw] max-w-[1400px]"
+            >
+              <DialogTitle className="p-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+                <div className="flex items-center space-x-2">
+                  <Hotel className="w-6 h-6" />
+                  <span className="text-2xl font-bold">Select Your Room</span>
+                </div>
+              </DialogTitle>
 
-            <DialogContent className="p-6">
-              {/* Category Filters */}
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={filterAnimation}
-                className="flex flex-wrap gap-3 mb-6"
-              >
-                <Button
-                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                  onClick={() => handleCategoryFilter('all')}
-                  className="group transition-all duration-500 ease-in-out hover:shadow-lg"
+              <DialogContent className="p-6">
+                {/* Category Filters */}
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={filterAnimation}
+                  className="flex flex-wrap gap-3 mb-6"
                 >
-                  <Building className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
-                  All Rooms
-                </Button>
-
-                {categories.map((category) => (
                   <Button
-                    key={category._id}
-                    variant={selectedCategory === category._id ? 'default' : 'outline'}
-                    onClick={() => handleCategoryFilter(category._id)}
+                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                    onClick={() => handleCategoryFilter('all')}
                     className="group transition-all duration-500 ease-in-out hover:shadow-lg"
                   >
-                    <Tag className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
-                    {category.category}
+                    <Building className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
+                    All Rooms
                   </Button>
-                ))}
-              </motion.div>
 
-              {/* Room Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                <AnimatePresence mode="popLayout">
-                  {filteredRooms.map((room, index) => (
-                    <motion.div
-                      key={room.number}
-                      layout
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      whileHover="hover"
-                      variants={cardAnimation}
-                      transition={{ delay: index * 0.05 }}
-                      className={`
+                  {categories.map((category) => (
+                    <Button
+                      key={category._id}
+                      variant={selectedCategory === category._id ? 'default' : 'outline'}
+                      onClick={() => handleCategoryFilter(category._id)}
+                      className="group transition-all duration-500 ease-in-out hover:shadow-lg"
+                    >
+                      <Tag className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
+                      {category.category}
+                    </Button>
+                  ))}
+                </motion.div>
+
+                {/* Room Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  <AnimatePresence mode="popLayout">
+                    {filteredRooms.map((room, index) => (
+                      <motion.div
+                        key={room.number}
+                        layout
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        whileHover="hover"
+                        variants={cardAnimation}
+                        transition={{ delay: index * 0.05 }}
+                        className={`
                         relative rounded-xl overflow-hidden transform-gpu
                         ${selectedRooms.includes(room.number)
-                          ? 'ring-2 ring-blue-500 shadow-lg'
-                          : 'ring-1 ring-gray-200'}
+                            ? 'ring-2 ring-blue-500 shadow-lg'
+                            : 'ring-1 ring-gray-200'}
                       `}
-                    >
-                      <motion.div
-                        onClick={() => handleRoomSelection(room.number)}
-                        className="cursor-pointer p-4 bg-white transition-colors duration-300"
-                        whileHover={{
-                          backgroundColor: "rgba(249, 250, 251, 1)",
-                        }}
                       >
                         <motion.div
-                          className="flex justify-between items-start mb-3"
-                          whileHover={{ scale: 1.02 }}
-                          transition={{ duration: 0.2 }}
+                          onClick={() => handleRoomSelection(room.number)}
+                          className="cursor-pointer p-4 bg-white transition-colors duration-300"
+                          whileHover={{
+                            backgroundColor: "rgba(249, 250, 251, 1)",
+                          }}
                         >
-                          <div className="flex items-center space-x-2">
-                            <motion.div
-                              whileHover={{ rotate: 360 }}
-                              transition={{ duration: 0.5 }}
-                            >
-                              <Bed className="w-5 h-5 text-blue-500" />
-                            </motion.div>
-                            <span className="text-lg font-semibold">
-                              Room {room.number}
-                            </span>
-                          </div>
                           <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.3 }}
+                            className="flex justify-between items-start mb-3"
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            {/* <Checkbox 
+                            <div className="flex items-center space-x-2">
+                              <motion.div
+                                whileHover={{ rotate: 360 }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <Bed className="w-5 h-5 text-blue-500" />
+                              </motion.div>
+                              <span className="text-lg font-semibold">
+                                Room {room.number}
+                              </span>
+                            </div>
+                            <motion.div
+                              initial={{ scale: 0.5, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              {/* <Checkbox 
                               checked={selectedRooms.includes(room.number)}
                               className="h-5 w-5"
                             /> */}
+                            </motion.div>
                           </motion.div>
-                        </motion.div>
 
-                        <motion.div
-                          className="space-y-2"
-                          whileHover={{ x: 5 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {/* <div className="flex items-center text-gray-600 group">
+                          <motion.div
+                            className="space-y-2"
+                            whileHover={{ x: 5 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {/* <div className="flex items-center text-gray-600 group">
                             <Building className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
                             <span>{room.category.category}</span>
                           </div> */}
-                          <div className="flex items-center text-gray-600 group">
-                            <ArrowRight className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:translate-x-1" />
-                            <span>Floor {room.floor}</span>
-                          </div>
-                        </motion.div>
-
-                        {selectedRooms.includes(room.number) && (
-                          <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            transition={{
-                              type: "spring",
-                              stiffness: 500,
-                              damping: 30
-                            }}
-                            className="absolute top-2 right-2"
-                          >
-                            <CheckCircle className="w-5 h-5 text-green-500" />
+                            <div className="flex items-center text-gray-600 group">
+                              <ArrowRight className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:translate-x-1" />
+                              <span>Floor {room.floor}</span>
+                            </div>
                           </motion.div>
-                        )}
+
+                          {selectedRooms.includes(room.number) && (
+                            <motion.div
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 30
+                              }}
+                              className="absolute top-2 right-2"
+                            >
+                              <CheckCircle className="w-5 h-5 text-green-500" />
+                            </motion.div>
+                          )}
+                        </motion.div>
                       </motion.div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            </DialogContent>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </DialogContent>
 
-            <div className="p-4 bg-gray-50 border-t flex justify-between items-center">
-              <motion.div
-                className="flex items-center space-x-2 text-gray-600"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Users className="w-5 h-5" />
-                <span>{selectedRooms.length} rooms selected</span>
-              </motion.div>
-
-              <div className="space-x-3">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseModal} // Updated to use new close handler
-                  className="transition-all duration-300 ease-in-out hover:bg-gray-100 hover:scale-105"
+              <div className="p-4 bg-gray-50 border-t flex justify-between items-center">
+                <motion.div
+                  className="flex items-center space-x-2 text-gray-600"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  disabled={selectedRooms.length === 0}
-                  onClick={handleSubmit}
-                  sx={{ fontWeight: 'bold', color: 'white' }}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600
+                  <Users className="w-5 h-5" />
+                  <span>{selectedRooms.length} rooms selected</span>
+                </motion.div>
+
+                <div className="space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleCloseModal} // Updated to use new close handler
+                    className="transition-all duration-300 ease-in-out hover:bg-gray-100 hover:scale-105"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    disabled={selectedRooms.length === 0}
+                    onClick={handleSubmit}
+                    sx={{ fontWeight: 'bold', color: 'white' }}
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600
                            transition-all duration-300 ease-in-out 
                            hover:opacity-90 hover:scale-105 hover:shadow-lg"
-                >
-                  Confirm Selection
-                </Button>
+                  >
+                    Confirm Selection
+                  </Button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      </Dialog>
-    </div>
-    <Footer />
+            </motion.div>
+          </div>
+        </Dialog>
+      </div>
+      <Footer />
     </div>
   )
 }

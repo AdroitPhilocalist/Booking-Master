@@ -8,7 +8,7 @@ const inventorySchema = new mongoose.Schema(
     },
     isActive: {
       type: Boolean,
-      default: true, // Active by default
+      default: false, // Active by default
     },
   },
   {

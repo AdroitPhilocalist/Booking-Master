@@ -1,141 +1,149 @@
 import mongoose from 'mongoose';
 
 const newBookingSchema = new mongoose.Schema({
-  
-  bookingType: {
+  bookingType: { 
+    type: String, 
+    enum: ['FIT','Group','Corporate','Corporate Group','Office','Social Events'], 
+    default:'FIT' 
+  },
+  bookingId: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  dateofbirth: { 
+    type: Date, 
+    required: true 
+  },
+  dateofanniversary: { 
+    type: Date, 
+  },
+  pinCode: { 
+    type: String 
+  },
+  mobileNo: { 
     type: String,
-    enum: ['FIT','Group','Corporate','Corporate Group','Office','Social Events'],
-    default:'FIT'
+    required: true 
   },
-
-  bookingId: {
-    type: String,
-    required: true,
-    unique: true
+  guestName: { 
+    type: String, 
+    required: true 
   },
-
-  bookingSource: {
-    type: String,
-    enum:['Walk In','Front Office','Agent','Office','Goibibo','Make My Trip','Agoda.com','Booking.com','Cleartrip','Yatra','Expedia','Trivago','Ease My Trip','Hotels.com','Happy Easy Go','TBO','Booking Engine','GO-MMT','Booking Master','Hoichoi','Others'],
-    default:'Walk In'
+  guestid: { 
+    type: String, 
+    enum: ['Adhaar','Driving License','Passport','Voter ID Card','Others'], 
+    required: true 
   },
-  // bookingPoint: {
-  //   type: String,
-  //   required: true
-  // },
-
-  dateofbirth:{
-    type:Date,
-    required:true
+  guestidno: { 
+    type: String, 
+    required: true 
   },
-  dateofanniversary:{
-    type:Date,
-    required:true
-  },
-  pinCode: {
-    type: String
-  },
-  mobileNo: {
-    type: String
-  },
-  guestName: {
-    type: String,
-    required:true
-  },
-  guestid:{
-    type: String,
-    enum:['adhaar','driving license','passport','voter id card','others'],
-    required:true
-  },
-  guestidno:{    
-    type: String,
-    required:true
-  },
-  referenceno:{
-    type:Number,
-    required: true
-
-  },
-  companyName: {
-    type: String
-  },
-  gstin: {
-    type: String
-  },
-  guestEmail: {
-    type: String
-  },
-  adults: {
-    type: Number,
-    default:1
-  },
-  children: {
-    type: Number,
-    default: 0
-  },
-  checkIn: {
+  // New fields with conditional validation
+  passportIssueDate: {
     type: Date,
-    required: true
+    required: function() {
+      return this.guestid === 'passport';
+    }
   },
-  checkOut: {
+  passportExpireDate: {
     type: Date,
-    required: true
+    required: function() {
+      return this.guestid === 'passport';
+    }
   },
-  expectedArrival: {
+  visaNumber: {
     type: String,
-    
+    required: function() {
+      return this.guestid === 'passport';
+    }
   },
-  expectedDeparture: {
+  visaIssueDate: {
+    type: Date,
+    required: function() {
+      return this.guestid === 'passport';
+    }
+  },
+  visaExpireDate: {
+    type: Date,
+    required: function() {
+      return this.guestid === 'passport';
+    }
+  },
+  referenceno: { 
+    type: Number, 
+    required: true 
+  },
+  companyName: { 
+    type: String 
+  },
+  gstin: { 
+    type: String 
+  },
+  guestEmail: { 
     type: String,
-    
   },
-  bookingStatus: {
-    type: String,
-    enum:['Confirmed','Blocked'],
-    required: true
+  adults: { 
+    type: Number, 
+    default: 1 
   },
-  address: {
-    type: String
+  children: { 
+    type: Number, 
+    default: 0 
   },
-  remarks: {
-    type: String
+  checkIn: { 
+    type: Date, 
+    required: true 
   },
-  state: {
-    type: String,
-    required: true
+  checkOut: { 
+    type: Date, 
+    required: true 
   },
-  mealPlan: {
-    type: String,
-    enum:['EP','AP','CP','MAP'],
-    default:'EP'
+  expectedArrival: { 
+    type: String 
   },
-  bookingReference: {
-    type: String
+  expectedDeparture: { 
+    type: String 
   },
-  stopPosting: {
-    type: Boolean,
-    enum:[true,false],
-    default: false
+  bookingStatus: { 
+    type: String, 
+    enum: ['Confirm', 'Block','Pencil'], 
+    required: true 
   },
-  guestType: {
-    type: String,
-    enum:['General','VIP Guest','VVIP Guest','Scanty baggage'],
-    default:'General'
+  address: { 
+    type: String 
   },
-  guestNotes: {
-    type: String
+  remarks: { 
+    type: String 
   },
-  internalNotes: {
-    type: String
+  state: { 
+    type: String, 
   },
-  roomNumbers: {
-    type: [Number], // Array of room numbers
-    required: true // You can set this to false if it's optional
+  mealPlan: { 
+    type: String, 
+    enum: ['EP','AP','CP','MAP'], 
+    default: 'EP' 
+  },
+  bookingReference: { 
+    type: String 
+  },
+  stopPosting: { 
+    type: Boolean, 
+    enum: [true,false], 
+    default: false 
+  },
+  guestNotes: { 
+    type: String 
+  },
+  internalNotes: { 
+    type: String 
+  },
+  roomNumbers: { 
+    type: [Number],
+    required: true 
   }
-}, {
-  timestamps: true
+}, { 
+  timestamps: true 
 });
 
 const NewBooking = mongoose.models.NewBooking || mongoose.model('NewBooking', newBookingSchema);
-
 export default NewBooking;

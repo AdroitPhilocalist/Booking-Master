@@ -144,7 +144,7 @@ export default function GuestList() {
             <div className="min-h-screen bg-amber-50">
 
                 {isLoading && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
                         <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
                             <svg
                                 aria-hidden="true"
@@ -190,7 +190,7 @@ export default function GuestList() {
                                                     {guest.guestName}
                                                 </TableCell>
                                                 <TableCell style={{}}>{guest.mobileNo}</TableCell>
-                                                <TableCell style={{}}>{guest.guestEmail}</TableCell>
+                                                <TableCell style={{}}>{guest.guestEmail || 'N/A'}</TableCell>
                                                 <TableCell style={{}}>{guest.address}</TableCell>
                                                 <TableCell>
                                                     <IconButton color="primary" onClick={() => handleEditClick(guest)}>
@@ -263,22 +263,6 @@ export default function GuestList() {
                                         </MenuItem>
                                     ))}
                                 </TextField>
-
-                                {/* Booking Point */}
-                                {/* <TextField
-                                    label="Booking Point"
-                                    fullWidth
-                                    value={editGuest.bookingPoint}
-                                    onChange={(e) => handleEditChange('bookingPoint', e.target.value)}
-                                /> */}
-
-                                {/* Pin Code */}
-                                {/* <TextField
-                                    label="Pin Code"
-                                    fullWidth
-                                    value={editGuest.pinCode}
-                                    onChange={(e) => handleEditChange('pinCode', e.target.value)}
-                                /> */}
 
                                 {/* Mobile Number */}
                                 <TextField
