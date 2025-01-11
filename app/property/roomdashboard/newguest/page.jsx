@@ -826,7 +826,7 @@ export default function BookingForm() {
                       error={!!errors.bookingStatus}
                       helperText={errors.bookingStatus}
                     >
-                      {['Confirmed', 'Blocked'].map((status) => (
+                      {['Confirm', 'Block','Pencil'].map((status) => (
                         <MenuItem key={status} value={status}>{status}</MenuItem>
                       ))}required
                     </TextField>
