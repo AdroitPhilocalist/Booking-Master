@@ -28,7 +28,7 @@ const profileSchema = new mongoose.Schema({
   },
   addressLine1: {
     type: String,
-    required: true,
+    required: false,
   },
   addressLine2: {
     type: String,
@@ -36,7 +36,7 @@ const profileSchema = new mongoose.Schema({
   },
   district: {
     type: String,
-    required: true,
+    required: false,
   },
   country: {
     type: String,
@@ -44,7 +44,7 @@ const profileSchema = new mongoose.Schema({
   },
   pinCode: {
     type: String,
-    required: true,
+    required: false,
   },
   username: {
     type: String,

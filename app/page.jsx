@@ -11,8 +11,11 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { setCookie } from 'cookies-next';
 
 export default function Home() {
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
 
@@ -26,9 +29,28 @@ export default function Home() {
     event.preventDefault();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent default form submission behavior
-    router.push("/hotelpage"); // Navigate to /hotelpage
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Store the token in a cookie
+        setCookie('authToken', data.token, { path: '/' });
+        router.push("/hotelpage"); // Navigate to /hotelpage
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
+      alert('Failed to log in');
+    }
   };
 
   return (
@@ -47,7 +69,14 @@ export default function Home() {
           <h2 className="text-3xl font-semibold text-center mb-6 text-cyan-900">Login</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <TextField id="username" label="Username" variant="outlined" fullWidth />
+              <TextField 
+                id="username"
+                label="Username" 
+                variant="outlined"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                fullWidth 
+              />
             </div>
             <div>
               <FormControl variant="outlined" fullWidth>
@@ -55,6 +84,8 @@ export default function Home() {
                 <OutlinedInput
                   id="outlined-adornment-password"
                   type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
