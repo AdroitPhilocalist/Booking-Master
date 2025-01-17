@@ -22,7 +22,11 @@ const menuItemSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  gst: {
+  sgst: {
+    type: Number,
+    required: true
+  },
+  cgst: {
     type: Number,
     required: true
   },

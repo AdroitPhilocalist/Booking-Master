@@ -854,7 +854,7 @@ export default function RoomDashboard() {
                 href="roomdashboard/newguest"
                 className="bg-blue-600 text-white px-4 py-2 rounded"
               >
-                New Guest +
+                New Reservation+
               </Link>
             </div>
           </div>

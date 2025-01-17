@@ -22,7 +22,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     menuitem: [],
     quantity: [],
     price: [],
-    gstArray: [], // New GST array
+    cgstArray: [], // New CGST array
+    sgstArray: [], // New SGST array
     amountWithGstArray: [],
     totalamt: 0,
     gst: 0,
@@ -80,13 +81,19 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
     useEffect(() => {
       if (existingInvoice) {
-        const gstArray = existingInvoice.menuitem?.map((item, index) => {
-          const gstRate = menu.find(menuItem => menuItem.itemName === item)?.gst || 0;
-          return gstRate * existingInvoice.price[index] / 100;
+        const cgstArray = existingInvoice.menuitem?.map((item, index) => {
+          const cgstRate = menu.find(menuItem => menuItem.itemName === item)?.cgst || 0;
+          return cgstRate * existingInvoice.price[index] / 100;
+        }) || [];
+
+
+        const sgstArray = existingInvoice.menuitem?.map((item, index) => {
+          const sgstRate = menu.find(menuItem => menuItem.itemName === item)?.sgst || 0;
+          return sgstRate * existingInvoice.price[index] / 100;
         }) || [];
     
         const amountWithGstArray = existingInvoice.menuitem?.map((item, index) => {
-          return existingInvoice.price[index] * existingInvoice.quantity[index] + (gstArray[index] || 0);
+          return existingInvoice.price[index] * existingInvoice.quantity[index] + (cgstArray[index] || 0) + (sgstArray[index] || 0);
         }) || [];
     
         setFormData({
@@ -103,7 +110,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           totalamt: existingInvoice.totalamt || 0,
           gst: existingInvoice.gst || (amountWithGstArray.reduce((sum, val) => sum + val, 0) - existingInvoice.totalamt),
           payableamt: existingInvoice.payableamt || amountWithGstArray.reduce((sum, val) => sum + val, 0),
-          gstArray,
+          cgstArray,
+          sgstArray,
           amountWithGstArray,
         });
     
@@ -128,15 +136,17 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
     // Find the selected menu item
     const selectedMenuItem = menu.find(item => item.itemName === selectedItemName);
-    const gstAmount = selectedMenuItem.price * (selectedMenuItem.gst / 100);
-    const totalWithGst = selectedMenuItem.price + gstAmount;
+    const cgstAmount = selectedMenuItem.price * (selectedMenuItem.cgst / 100);
+    const sgstAmount = selectedMenuItem.price * (selectedMenuItem.sgst / 100);
+    const totalWithGst = selectedMenuItem.price + sgstAmount + cgstAmount;
 
     // Create a new selected item object
     const newItem = {
       name: selectedItemName,
       price: selectedMenuItem.price,
       quantity: 1,
-      gst: gstAmount,
+      cgst: cgstAmount,
+      sgst: sgstAmount,
       totalWithGst: totalWithGst,
     };
 
@@ -145,7 +155,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     setSelectedItems(updatedSelectedItems);
 
     // Update form data
-    const updatedGstArray = [...formData.gstArray, gstAmount];
+    const updatedSgstArray = [...formData.sgstArray, sgstAmount];
+    const updatedCgstArray = [...formData.cgstArray, cgstAmount];
     const updatedAmountWithGstArray = [...formData.amountWithGstArray, totalWithGst];
 
     const totalAmount = calculateTotal(updatedSelectedItems);
@@ -156,7 +167,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       menuitem: updatedSelectedItems.map((item) => item.name),
       price: updatedSelectedItems.map((item) => item.price),
       quantity: updatedSelectedItems.map((item) => item.quantity),
-      gstArray: updatedGstArray,
+      cgstArray: updatedCgstArray,
+      sgstArray: updatedSgstArray,
       amountWithGstArray: updatedAmountWithGstArray,
       totalamt: totalAmount,
       gst: payableAmount - totalAmount,
@@ -168,11 +180,14 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     const updatedItems = [...selectedItems];
     updatedItems[index].quantity = newQuantity || 1;
 
-    const updatedGstArray = updatedItems.map(
-      (item) => item.price * item.quantity * (item.gst / 100)
+    const updatedSgstArray = updatedItems.map(
+      (item) => item.quantity * item.sgst
+    );
+    const updatedCgstArray = updatedItems.map(
+      (item) => item.quantity * item.cgst
     );
     const updatedAmountWithGstArray = updatedItems.map(
-      (item) => item.price * item.quantity + item.price * item.quantity * (item.gst / 100)
+      (item) => item.quantity*(item.cgst +item.sgst)+item.quantity*item.price
     );
 
     setSelectedItems(updatedItems);
@@ -183,7 +198,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     setFormData((prev) => ({
       ...prev,
       quantity: updatedItems.map((item) => item.quantity),
-      gstArray: updatedGstArray,
+      sgstArray: updatedSgstArray,
+      cgstArray: updatedCgstArray,
       amountWithGstArray: updatedAmountWithGstArray,
       totalamt: totalAmount,
       gst: payableAmount - totalAmount,
@@ -194,7 +210,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   const removeMenuItem = (index) => {
     const updatedItems = selectedItems.filter((_, i) => i !== index);
 
-    const updatedGstArray = formData.gstArray.filter((_, i) => i !== index);
+    const updatedSgstArray = formData.sgstArray.filter((_, i) => i !== index);
+    const updatedCgstArray = formData.cgstArray.filter((_, i) => i !== index);
     const updatedAmountWithGstArray = formData.amountWithGstArray.filter((_, i) => i !== index);
 
     setSelectedItems(updatedItems);
@@ -207,7 +224,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       menuitem: updatedItems.map((item) => item.name),
       price: updatedItems.map((item) => item.price),
       quantity: updatedItems.map((item) => item.quantity),
-      gstArray: updatedGstArray,
+      sgstArray: updatedSgstArray,
+      cgstArray: updatedCgstArray,
       amountWithGstArray: updatedAmountWithGstArray,
       totalamt: totalAmount,
       gst: payableAmount - totalAmount,
@@ -289,7 +307,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       menuitem: [],
       quantity: [],
       price: [],
-      gstArray: [],
+      cgstArray: [],
+      sgstArray: [],
       amountWithGstArray: [],
       totalamt: 0,
       gst: 0,
@@ -305,7 +324,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
   return (
     <Container 
-      maxWidth="sm" 
+      maxWidth="md" 
       sx={{ height: '100vh', overflowY: 'auto', paddingY: 2 }} 
     > 
       <Paper 
@@ -487,6 +506,9 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                       <TableCell>Item</TableCell>
                       <TableCell align="right">Price</TableCell>
                       <TableCell align="right">Quantity</TableCell>
+                      <TableCell align="right">SGST</TableCell>
+                      <TableCell align="right">CGST</TableCell>
+                      <TableCell align="right">IGST</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -501,12 +523,42 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                       selectedItems.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell>{item.name}</TableCell>
-                          <TableCell align="right">₹{item.price}</TableCell>
+                          <TableCell align="right">₹{item.price*item.quantity}</TableCell>
                           <TableCell align="right">
                             <TextField
                               type="number"
                               value={item.quantity}
                               onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.sgst*item.quantity}
+                              // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.cgst*item.quantity}
+                              // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.cgst*item.quantity+item.sgst*item.quantity}
+                              // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
                               inputProps={{ min: 1 }}
                               variant="standard"
                               sx={{ width: 60 }}
@@ -532,19 +584,21 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
             <Grid item xs={12}>
               <Box sx={{ 
                 display: 'flex', 
+                flexDirection: 'column',
                 justifyContent: 'space-between', 
-                alignItems: 'center',
+                alignItems: 'left',
                 flexWrap: 'wrap',
                 gap: 2
               }}>
                 <Box>
                   <Typography variant="h6">Total Amount: ₹{formData.totalamt}</Typography>
-                  <Typography variant="h6">IGST ₹{formData.gst.toFixed(2)} ({((formData.gst*100)/formData.totalamt)||0}%)</Typography>
-                  <Typography variant="h7">CGST ₹{((formData.gst)/2).toFixed(2)} ({((formData.gst*100)/formData.totalamt)/2||0}%)</Typography>
-                  <br></br>
-                  <Typography variant="h7">SGST ₹{((formData.gst)/2).toFixed(2)} ({((formData.gst*100)/formData.totalamt)/2||0}%)</Typography>
+                  <Typography variant="h6">SGST: ₹{formData.sgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
+                  
+                  <Typography variant="h6">CGST: ₹{formData.cgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
+                  <Typography variant="h6">IGST: ₹{formData.gst.toFixed(2)} ({((formData.gst*100||0)/formData.totalamt||0).toFixed(2)||0}%)</Typography>
                   <Typography variant="h6">Payable Amount: ₹{formData.payableamt.toFixed(2)}</Typography>
                 </Box>
+  
 
                 <Box sx={{ 
                   display: 'flex', 

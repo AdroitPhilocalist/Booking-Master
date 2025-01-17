@@ -93,6 +93,8 @@ export default function Billing() {
     }), { totalAmount: 0, totalAdvanced: 0, totalDue: 0 });
   }, [filteredBillingData]);
 
+  const shouldShowTable = startDate && endDate;
+
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
@@ -108,10 +110,10 @@ export default function Billing() {
         </div>
       )}
         
-        <h1 className="text-3xl font-bold text-cyan-900 mb-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
-          Room Report
-        </h1>
-         <Box className="container mx-auto py-4 px-4" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+      <h1 className="text-3xl font-bold text-cyan-900 mb-4" style={{ maxWidth: '80%', margin: '0 auto' }}>
+        Room Report
+      </h1>
+      <Box className="container mx-auto py-4 px-4" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <Box className="flex justify-center space-x-4 mb-2" sx={{ width: '100%', maxWidth: '800px' }}>
           <TextField
             type="date"
@@ -154,50 +156,52 @@ export default function Billing() {
         </Box>
       </Box>
 
-      <div className="container mx-auto py-4 px-4">
-        <TableContainer component={Paper} sx={{ maxWidth: '80%', margin: '0 auto' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Room Number</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Guest</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total Amount</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Amount Paid in Advance</TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Due Amount</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredBillingData.length > 0 ? (
-                <>
-                  {filteredBillingData.map((bill, index) => (
-                    <TableRow key={index}>
-                      <TableCell sx={{ textAlign: 'center' }}>{bill.date}</TableCell>
-                      <TableCell sx={{ textAlign: 'center' }}>{bill.roomNo || "N/A"}</TableCell>
-                      <TableCell sx={{ textAlign: 'center' }}>{bill.guestName || "N/A"}</TableCell>
-                      <TableCell sx={{ textAlign: 'center' }}>₹{bill.totalAmount || 0}</TableCell>
-                      <TableCell sx={{ textAlign: 'center' }}>₹{bill.amountAdvanced || 0}</TableCell>
-                      <TableCell sx={{ textAlign: 'center' }}>₹{bill.dueAmount || 0}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow sx={{ backgroundColor: "#f5f5f5", fontWeight: "bold" }}>
-                    <TableCell colSpan={3} sx={{ textAlign: 'right', fontWeight: "bold" }}>Totals:</TableCell>
-                    <TableCell sx={{ textAlign: 'center', fontWeight: "bold" }}>₹{totals.totalAmount}</TableCell>
-                    <TableCell sx={{ textAlign: 'center', fontWeight: "bold" }}>₹{totals.totalAdvanced}</TableCell>
-                    <TableCell sx={{ textAlign: 'center', fontWeight: "bold" }}>₹{totals.totalDue}</TableCell>
-                  </TableRow>
-                </>
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No records available.
-                  </TableCell>
+      {shouldShowTable && (
+        <div className="container mx-auto py-4 px-4">
+          <TableContainer component={Paper} sx={{ maxWidth: '80%', margin: '0 auto' }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Room Number</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Guest</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total Amount</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Amount Paid in Advance</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Due Amount</TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </div>
+              </TableHead>
+              <TableBody>
+                {filteredBillingData.length > 0 ? (
+                  <>
+                    {filteredBillingData.map((bill, index) => (
+                      <TableRow key={index}>
+                        <TableCell sx={{ textAlign: 'center' }}>{bill.date}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>{bill.roomNo || "N/A"}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>{bill.guestName || "N/A"}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>₹{bill.totalAmount || 0}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>₹{bill.amountAdvanced || 0}</TableCell>
+                        <TableCell sx={{ textAlign: 'center' }}>₹{bill.dueAmount || 0}</TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow sx={{ backgroundColor: "#f5f5f5", fontWeight: "bold" }}>
+                      <TableCell colSpan={3} sx={{ textAlign: 'right', fontWeight: "bold" }}>Totals:</TableCell>
+                      <TableCell sx={{ textAlign: 'center', fontWeight: "bold" }}>₹{totals.totalAmount}</TableCell>
+                      <TableCell sx={{ textAlign: 'center', fontWeight: "bold" }}>₹{totals.totalAdvanced}</TableCell>
+                      <TableCell sx={{ textAlign: 'center', fontWeight: "bold" }}>₹{totals.totalDue}</TableCell>
+                    </TableRow>
+                  </>
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      No records available.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
       <Footer />
     </div>
   );
