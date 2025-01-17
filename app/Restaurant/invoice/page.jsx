@@ -114,6 +114,7 @@ const InvoicePage = () => {
 
   const handleEdit = (invoice) => {
     setCurrentInvoice(invoice);
+    console.log(invoice);
     setShowModal(true);
   };
 

@@ -110,9 +110,9 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
           totalamt: existingInvoice.totalamt || 0,
           gst: existingInvoice.gst || (amountWithGstArray.reduce((sum, val) => sum + val, 0) - existingInvoice.totalamt),
           payableamt: existingInvoice.payableamt || amountWithGstArray.reduce((sum, val) => sum + val, 0),
-          cgstArray,
-          sgstArray,
-          amountWithGstArray,
+          cgstArray: existingInvoice.cgstArray||[],
+          sgstArray: existingInvoice.sgstArray||[],
+          amountWithGstArray: existingInvoice.amountWithGstArray||[],
         });
     
         setSelectedItems(
@@ -120,6 +120,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
             name: item,
             price: existingInvoice.price[index],
             quantity: existingInvoice.quantity[index] || 1,
+            sgst: existingInvoice.sgstArray[index]/existingInvoice.quantity[index]||1,
+            cgst: existingInvoice.cgstArray[index]/existingInvoice.quantity[index]||1,
           })) || []
         );
       }
@@ -537,7 +539,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                           <TableCell align="right">
                             <TextField
                               type="number"
-                              value={item.sgst*item.quantity}
+                              value={(item.sgst*item.quantity).toFixed(2)}
                               // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
                               inputProps={{ min: 1 }}
                               variant="standard"
@@ -547,7 +549,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                           <TableCell align="right">
                             <TextField
                               type="number"
-                              value={item.cgst*item.quantity}
+                              value={(item.cgst*item.quantity).toFixed(2)}
                               // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
                               inputProps={{ min: 1 }}
                               variant="standard"
@@ -557,7 +559,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                           <TableCell align="right">
                             <TextField
                               type="number"
-                              value={item.cgst*item.quantity+item.sgst*item.quantity}
+                              value={((item.cgst+item.sgst)*item.quantity).toFixed(2)}
                               // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
                               inputProps={{ min: 1 }}
                               variant="standard"
@@ -592,9 +594,8 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
               }}>
                 <Box>
                   <Typography variant="h6">Total Amount: ₹{formData.totalamt}</Typography>
-                  <Typography variant="h6">SGST: ₹{formData.sgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
-                  
-                  <Typography variant="h6">CGST: ₹{formData.cgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
+                  <Typography variant="h6">SGST: ₹{formData.sgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)} ({(formData.sgstArray?.reduce((sum, value) => sum + value, 0)*100/formData.totalamt||0).toFixed(2)||0}%)</Typography>   
+                  <Typography variant="h6">CGST: ₹{formData.cgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)} ({(formData.cgstArray?.reduce((sum, value) => sum + value, 0)*100/formData.totalamt||0).toFixed(2)||0}%)</Typography>
                   <Typography variant="h6">IGST: ₹{formData.gst.toFixed(2)} ({((formData.gst*100||0)/formData.totalamt||0).toFixed(2)||0}%)</Typography>
                   <Typography variant="h6">Payable Amount: ₹{formData.payableamt.toFixed(2)}</Typography>
                 </Box>

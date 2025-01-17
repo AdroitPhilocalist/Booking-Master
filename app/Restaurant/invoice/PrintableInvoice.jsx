@@ -128,6 +128,8 @@ const PrintableInvoice = ({ invoiceId }) => {
     name: item,
     qty: invoice.quantity[index],
     rate: invoice.price[index],
+    sgst:invoice.sgstArray[index],
+    cgst:invoice.cgstArray[index],
     amount: invoice.quantity[index] * invoice.price[index]
   }));
 
@@ -205,6 +207,9 @@ const PrintableInvoice = ({ invoiceId }) => {
                   <TableCell sx={{ color: 'white' }}>Item</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Quantity</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Rate</TableCell>
+                  <TableCell align="right" sx={{ color: 'white' }}>SGST</TableCell>
+                  <TableCell align="right" sx={{ color: 'white' }}>CGST</TableCell>
+                  <TableCell align="right" sx={{ color: 'white' }}>IGST</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Amount</TableCell>
                 </TableRow>
               </TableHead>
@@ -214,6 +219,9 @@ const PrintableInvoice = ({ invoiceId }) => {
                     <TableCell>{item.name}</TableCell>
                     <TableCell align="right">{item.qty}</TableCell>
                     <TableCell align="right">₹{item.rate.toFixed(2)}</TableCell>
+                    <TableCell align="right">₹{item.sgst.toFixed(2)}</TableCell>
+                    <TableCell align="right">₹{item.cgst.toFixed(2)}</TableCell>
+                    <TableCell align="right">₹{(parseFloat(item.cgst)+parseFloat(item.sgst)).toFixed(2)}</TableCell>
                     <TableCell align="right">₹{item.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
@@ -226,16 +234,16 @@ const PrintableInvoice = ({ invoiceId }) => {
               <Grid container spacing={1}>
                 <Grid item xs={6}>
                   <Typography variant="body1">Subtotal:</Typography>
-                  <Typography variant="body1">IGST:</Typography>
-                  <Typography variant="body1">CGST:</Typography>
                   <Typography variant="body1">SGST:</Typography>
+                  <Typography variant="body1">CGST:</Typography>
+                  <Typography variant="body1">IGST:</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
                   <Typography variant="body1">₹{subtotal.toFixed(2)}</Typography>
-                  <Typography variant="body1">₹{invoice.gst.toFixed(2)}</Typography>
-                  <Typography variant="body1">₹{((invoice.gst)/2).toFixed(2)}</Typography>
-                  <Typography variant="body1">₹{((invoice.gst)/2).toFixed(2)}</Typography>
+                  <Typography variant="body1">₹{invoice.sgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)}</Typography>
+                  <Typography variant="body1">₹{invoice.cgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)}</Typography>
+                  <Typography variant="body1">₹{((invoice.gst)).toFixed(2)}</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>₹{invoice.payableamt.toFixed(2)}</Typography>
                 </Grid>
               </Grid>
