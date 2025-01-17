@@ -181,13 +181,13 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     updatedItems[index].quantity = newQuantity || 1;
 
     const updatedSgstArray = updatedItems.map(
-      (item) => item.price * item.quantity * (item.sgst / 100)
+      (item) => item.quantity * item.sgst
     );
     const updatedCgstArray = updatedItems.map(
-      (item) => item.price * item.quantity * (item.cgst / 100)
+      (item) => item.quantity * item.cgst
     );
     const updatedAmountWithGstArray = updatedItems.map(
-      (item) => item.price * item.quantity + item.price * item.quantity * ((item.cgst +item.sgst)/ 100)
+      (item) => item.quantity*(item.cgst +item.sgst)+item.quantity*item.price
     );
 
     setSelectedItems(updatedItems);
@@ -324,7 +324,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
   return (
     <Container 
-      maxWidth="sm" 
+      maxWidth="md" 
       sx={{ height: '100vh', overflowY: 'auto', paddingY: 2 }} 
     > 
       <Paper 
@@ -506,6 +506,9 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                       <TableCell>Item</TableCell>
                       <TableCell align="right">Price</TableCell>
                       <TableCell align="right">Quantity</TableCell>
+                      <TableCell align="right">SGST</TableCell>
+                      <TableCell align="right">CGST</TableCell>
+                      <TableCell align="right">IGST</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
@@ -520,12 +523,42 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                       selectedItems.map((item, index) => (
                         <TableRow key={index}>
                           <TableCell>{item.name}</TableCell>
-                          <TableCell align="right">₹{item.price}</TableCell>
+                          <TableCell align="right">₹{item.price*item.quantity}</TableCell>
                           <TableCell align="right">
                             <TextField
                               type="number"
                               value={item.quantity}
                               onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.sgst*item.quantity}
+                              // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.cgst*item.quantity}
+                              // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
+                              inputProps={{ min: 1 }}
+                              variant="standard"
+                              sx={{ width: 60 }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <TextField
+                              type="number"
+                              value={item.cgst*item.quantity+item.sgst*item.quantity}
+                              // onChange={(e) => updateQuantity(index, parseInt(e.target.value))}
                               inputProps={{ min: 1 }}
                               variant="standard"
                               sx={{ width: 60 }}
@@ -551,8 +584,9 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
             <Grid item xs={12}>
               <Box sx={{ 
                 display: 'flex', 
+                flexDirection: 'column',
                 justifyContent: 'space-between', 
-                alignItems: 'center',
+                alignItems: 'left',
                 flexWrap: 'wrap',
                 gap: 2
               }}>
@@ -561,9 +595,10 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                   <Typography variant="h6">SGST: ₹{formData.sgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
                   
                   <Typography variant="h6">CGST: ₹{formData.cgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
-                  <Typography variant="h6">IGST: ₹{formData.gst.toFixed(2)} ({((formData.gst*100)/formData.totalamt).toFixed(2)||0}%)</Typography>
+                  <Typography variant="h6">IGST: ₹{formData.gst.toFixed(2)} ({((formData.gst*100||0)/formData.totalamt||0).toFixed(2)||0}%)</Typography>
                   <Typography variant="h6">Payable Amount: ₹{formData.payableamt.toFixed(2)}</Typography>
                 </Box>
+  
 
                 <Box sx={{ 
                   display: 'flex', 
