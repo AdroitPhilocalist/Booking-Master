@@ -558,10 +558,10 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
               }}>
                 <Box>
                   <Typography variant="h6">Total Amount: ₹{formData.totalamt}</Typography>
-                  <Typography variant="h6">SGST ₹{formData.sgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
+                  <Typography variant="h6">SGST: ₹{formData.sgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
                   
-                  <Typography variant="h6">CGST ₹{formData.cgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
-                  <Typography variant="h6">IGST ₹{formData.gst.toFixed(2)} ({((formData.gst*100)/formData.totalamt).toFixed(2)||0}%)</Typography>
+                  <Typography variant="h6">CGST: ₹{formData.cgstArray?.reduce((sum, value) => sum + value, 0)}</Typography>
+                  <Typography variant="h6">IGST: ₹{formData.gst.toFixed(2)} ({((formData.gst*100)/formData.totalamt).toFixed(2)||0}%)</Typography>
                   <Typography variant="h6">Payable Amount: ₹{formData.payableamt.toFixed(2)}</Typography>
                 </Box>
 
