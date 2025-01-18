@@ -12,12 +12,18 @@ import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { setCookie } from 'cookies-next';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
+  const [timestamp, setTimestamp] = useState(null);
+
+  useEffect(() => {
+    setTimestamp(new Date().getFullYear());
+  }, []);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -119,7 +125,7 @@ export default function Home() {
           </div>
         </div>
         <div className="mt-8 text-center text-white text-sm">
-          © {new Date().getFullYear()}, Hotel Booking. All Rights Reserved.
+          © {timestamp}, Hotel Booking. All Rights Reserved.
         </div>
       </div>
     </main>
