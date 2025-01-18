@@ -68,17 +68,17 @@ export async function PUT(req) {
     await connectToDatabase();
     const data = await req.json();
     // Validate required fields
-    if (
-      !data.hotelName ||
-      !data.mobileNo ||
-      !data.email ||
-      !data.username
-    ) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    // if (
+    //   !data.hotelName ||
+    //   !data.mobileNo ||
+    //   !data.email ||
+    //   !data.username
+    // ) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Missing required fields' },
+    //     { status: 400 }
+    //   );
+    // }
     // Check if username already exists for another profile
     const existingProfile = await Profile.findOne({ username: data.username });
     if (existingProfile && existingProfile._id.toString() !== data._id) {

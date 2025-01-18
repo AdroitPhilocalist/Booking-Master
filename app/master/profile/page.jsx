@@ -241,7 +241,6 @@ const ProfilePage = () => {
                 fullWidth
                 label="Address Line 1 *"
                 variant="outlined"
-                required
                 name="addressLine1"
                 value={formData.addressLine1}
                 onChange={handleChange}
@@ -263,7 +262,6 @@ const ProfilePage = () => {
                 label="District *"
                 variant="outlined"
                 select
-                required
                 name="district"
                 value={formData.district}
                 onChange={handleChange}
@@ -287,7 +285,6 @@ const ProfilePage = () => {
                 fullWidth
                 label="Pin Code *"
                 variant="outlined"
-                required
                 name="pinCode"
                 value={formData.pinCode}
                 onChange={handleChange}
