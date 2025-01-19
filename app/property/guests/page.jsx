@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Button, TextField } from '@mui/material';
 import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import Navbar from "@/app/_components/Navbar";
-import { Footer } from "@/app/_components/Footer";
+import Navbar from "../../_components/Navbar";
+import { Footer } from "../../_components/Footer";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 export default function GuestList() {
