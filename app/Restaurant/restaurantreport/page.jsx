@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import Navbar from '../../../components/Navbar';
-import { Footer } from '../../../components/Footer';
+import Navbar from '../../_components/Navbar';
+import { Footer } from '../../_components/Footer';
 import TextField from '@mui/material/TextField';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
