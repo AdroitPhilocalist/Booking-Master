@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/app/_components/Navbar';
-import { Footer } from '@/app/_components/Footer';
+import Navbar from '../../_components/Navbar';
+import { Footer } from '../../_components/Footer';
 import {
   Table,
   TableBody,

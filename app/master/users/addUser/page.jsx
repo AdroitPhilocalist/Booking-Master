@@ -6,8 +6,8 @@ import { Button, TextField, Grid, Typography, Paper, Box, Container } from '@mui
 import { styled } from '@mui/system';
 import { useForm } from 'react-hook-form';
 import MenuItem from '@mui/material/MenuItem';
-import Navbar from '@/app/_components/Navbar';
-import { Footer } from '@/app/_components/Footer';
+import Navbar from '../../../_components/Navbar';
+import { Footer } from '../../../_components/Footer';
 // Custom styling using Material UI's styled API
 const FormContainer = styled(Paper)({
   padding: '30px',
