@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CreateInvoicePage from "./createinvoice/page";
-import Navbar from '@/app/_components/Navbar'
-import { Footer } from '@/app/_components/Footer'
+import Navbar from '../../_components/Navbar';
+import { Footer } from '../../_components/Footer';
 import PrintableInvoice from './PrintableInvoice'; // Import the PrintableInvoice component
 import TextField from '@mui/material/TextField';
 import Table from '@mui/material/Table';

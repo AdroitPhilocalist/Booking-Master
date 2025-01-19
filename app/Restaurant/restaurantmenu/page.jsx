@@ -21,8 +21,8 @@ import {
   Paper,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
-import { Footer } from "@/app/_components/Footer";
-import Navbar from "@/app/_components/Navbar";
+import { Footer } from "../../_components/Footer";
+import Navbar from "../../_components/Navbar";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
