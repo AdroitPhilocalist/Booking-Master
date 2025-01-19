@@ -8,7 +8,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
+export const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   const [menu, setMenu] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [formData, setFormData] = useState({
@@ -625,5 +625,3 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 </Container>
 );
 }
-
-export default CreateInvoicePage;
