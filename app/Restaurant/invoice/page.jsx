@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import CreateInvoicePage from "./createinvoice/page";
+import CreateInvoicePage from "./createinvoice";
 import Navbar from '../../_components/Navbar';
 import { Footer } from '../../_components/Footer';
 import PrintableInvoice from './PrintableInvoice'; // Import the PrintableInvoice component
