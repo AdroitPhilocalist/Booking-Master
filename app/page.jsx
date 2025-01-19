@@ -36,7 +36,7 @@ export default function Home() {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -44,12 +44,13 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }),
+        credentials: 'include', // Important: This ensures cookies are sent with the request
       });
+
       const data = await response.json();
+      
       if (data.success) {
-        // Store the token in a cookie
-        setCookie('authToken', data.token, { path: '/' });
-        router.push("/hotelpage"); // Navigate to /hotelpage
+        router.push("/property/roomdashboard");
       } else {
         alert(data.error);
       }

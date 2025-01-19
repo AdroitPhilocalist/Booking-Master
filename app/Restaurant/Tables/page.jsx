@@ -16,8 +16,8 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Footer } from "@/app/_components/Footer";
-import Navbar from "@/app/_components/Navbar";
+import { Footer } from "../../_components/Footer";
+import Navbar from "../../_components/Navbar";
 import { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Navbar from "@/app/_components/Navbar";
-import { Footer } from "@/app/_components/Footer";
+import Navbar from "../../_components/Navbar";
+import { Footer } from "../../_components/Footer";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';

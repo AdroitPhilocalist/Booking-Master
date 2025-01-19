@@ -5,8 +5,6 @@ import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
 import { NextResponse } from 'next/server';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
-
 const connectToDatabase = async () => {
   if (mongoose.connections[0]?.readyState === 1) return;
   try {
@@ -21,18 +19,20 @@ const connectToDatabase = async () => {
   }
 };
 
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+
 export async function POST(req) {
   try {
     await connectToDatabase();
     const data = await req.json();
-    // Validate required fields
+
     if (!data.username || !data.password) {
       return NextResponse.json(
         { success: false, error: 'Username and password are required' },
         { status: 400 }
       );
     }
-    // Find the profile by username
+
     const profile = await Profile.findOne({ username: data.username });
     if (!profile) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    // Compare passwords
+
     const isMatch = await bcrypt.compare(data.password, profile.password);
     if (!isMatch) {
       return NextResponse.json(
@@ -48,9 +48,34 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    // Generate JWT token
-    const token = jwt.sign({ id: profile._id }, SECRET_KEY, { expiresIn: '1h' });
-    return NextResponse.json({ success: true, token }, { status: 200 });
+
+    const token = jwt.sign({ id: profile._id }, SECRET_KEY, { expiresIn: '2m' });
+
+    // Create the response
+    const response = NextResponse.json(
+      { success: true },
+      { status: 200 }
+    );
+
+    // Set both HTTP-only and client-accessible cookies
+    response.cookies.set('authToken', token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
+      maxAge: 3600,
+      path: '/',
+    });
+
+    // Set a non-HTTP-only cookie for client-side access
+    response.cookies.set('clientToken', token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 3600,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Error logging in:', error);
     return NextResponse.json(

@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
-import { Footer } from "@/app/_components/Footer";
-import Navbar from "@/app/_components/Navbar";
+import { Footer } from "../../_components/Footer";
+import Navbar from "../../_components/Navbar";
 import {
   Modal,
   Box,
@@ -11,8 +11,6 @@ import {
   CardContent,
   CardHeader,
 } from "@mui/material";
-import Loader from "../../_components/Loader";
-// Import Material-UI icons
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';
 import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import EventIcon from '@mui/icons-material/Event';
