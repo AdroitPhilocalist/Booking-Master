@@ -7,8 +7,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardContent, Checkbox, Typography, Box, Chip } from '@mui/material';
-import Navbar from "@/app/_components/Navbar";
-import { Footer } from "@/app/_components/Footer";
+import Navbar from "../../../_components/Navbar";
+import { Footer } from "../../../_components/Footer";
 import TextField from '@mui/material/TextField';
 import { Grid } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
