@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import Navbar from '../../../components/Navbar';
-import { Footer } from '../../../components/Footer';
+import Navbar from '../../../_components/Navbar';
+import { Footer } from '../../../_components/Footer';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
