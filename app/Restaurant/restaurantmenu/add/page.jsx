@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useRouter } from "next/navigation";
 import TextField from '@mui/material/TextField';
-import Navbar from '@/app/_components/Navbar';
-import { Footer } from '@/app/_components/Footer';
+import Navbar from '../../../components/Navbar';
+import { Footer } from '../../../components/Footer';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
