@@ -40,6 +40,7 @@
     "react-toastify": "^10.0.6"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "22.10.7",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
