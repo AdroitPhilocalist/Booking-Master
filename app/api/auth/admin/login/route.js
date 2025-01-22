@@ -54,7 +54,7 @@ export async function POST(req) {
     );
     // Set both HTTP-only and client-accessible cookies
     response.cookies.set('adminauthToken', token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
       maxAge: 3600,

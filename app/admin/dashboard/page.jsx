@@ -28,10 +28,16 @@ import {
 } from "@mui/material";
 import { Edit, Delete, Visibility, Add } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-
+import {
+  Users, UserCircle, Building2, BedDouble, ListChecks, Users2, BookOpen,
+  ClipboardList, UtensilsCrossed, LayoutDashboard, TableProperties, Menu,
+  Receipt, FileText, Package, FolderTree, PackageSearch, ShoppingCart,
+  BarChart3, LogOut
+} from 'lucide-react';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import { useRouter } from 'next/navigation';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -55,6 +61,7 @@ const SuperAdminDashboard = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
   const [openAddProfileDialog, setOpenAddProfileDialog] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [formData, setFormData] = useState({
     hotelName: "",
     mobileNo: "",
@@ -71,7 +78,7 @@ const SuperAdminDashboard = () => {
     Profile_Complete: "no",
   });
   const [isEditing, setIsEditing] = useState(false);
-
+  const router = useRouter();
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
@@ -245,6 +252,26 @@ const SuperAdminDashboard = () => {
     height: 400, // Increased height
   };
 
+  const deleteSpecificCookies = () => {
+    // Delete authtoken
+    document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    // Delete clienttoken
+    document.cookie = "adminclientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+  };
+
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+
+    // Delete specific cookies
+    deleteSpecificCookies();
+
+    // Add a small delay before redirecting
+    setTimeout(() => {
+      setIsLoggingOut(false);
+      router.push('/admin/login');
+    }, 800);
+  };
+
   return (
     <>
       <div className="bg-gradient-to-r from-purple-800 to-indigo-600 min-h-screen mt-6">
@@ -261,7 +288,7 @@ const SuperAdminDashboard = () => {
                       color="primary"
                       onClick={handleOpenAddProfileDialog}
                     >
-                      Add New Profile  <Add className="ml-1"/>
+                      Add New Profile  <Add className="ml-1" />
                     </Button>
                   }
                 />
@@ -292,7 +319,7 @@ const SuperAdminDashboard = () => {
                               <TableCell>{profile.mobileNo}</TableCell>
                               <TableCell>{profile.username || "N/A"}</TableCell>
                               <TableCell>
-                              <IconButton
+                                <IconButton
                                   color="primary"
                                   onClick={() => handleOpenEditProfileDialog(profile)}
                                 >
@@ -406,10 +433,26 @@ const SuperAdminDashboard = () => {
               Cancel
             </Button>
             <Button onClick={handleAddProfile} color="secondary">
-            {isEditing ? "Update Profile" : "Add Profile"}
+              {isEditing ? "Update Profile" : "Add Profile"}
             </Button>
           </DialogActions>
         </StyledDialog>
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`
+                flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 
+                text-white rounded-lg transform transition-all duration-300
+                ${isLoggingOut ? 'scale-95 opacity-80' : 'hover:scale-105'}
+                focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 
+                shadow-md hover:shadow-lg
+              `}
+        >
+          <LogOut className={`w-5 h-5 transform transition-transform duration-500 ${isLoggingOut ? 'rotate-90' : ''}`} />
+          <span className={`transition-opacity duration-300 ${isLoggingOut ? 'opacity-0' : 'opacity-100'}`}>
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
+          </span>
+        </button>
       </div>
     </>
   );
