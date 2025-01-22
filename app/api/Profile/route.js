@@ -46,17 +46,32 @@ export async function POST(req) {
       );
     }
     // Hash the password before saving
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    // const hashedPassword = await bcrypt.hash(data.password, 10);
+    // const newProfile = new Profile({
+    //   ...data,
+    //   password: hashedPassword,
+    // });
     const newProfile = new Profile({
-      ...data,
-      password: hashedPassword,
+      hotelName: data.hotelName,
+      mobileNo: data.mobileNo,
+      altMobile: data.altMobile,
+      email: data.email,
+      gstNo: data.gstNo,
+      website: data.website,
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2,
+      district: data.district,
+      country: data.country,
+      pinCode: data.pinCode,
+      username: data.username,
+      password: data.password,
     });
     const result = await newProfile.save();
     return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error) {
     console.error('Error creating profile:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to create profile' },
+      { success: false, error: error.message ||  'Failed to create profile' },
       { status: 400 }
     );
   }
