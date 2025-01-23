@@ -1,12 +1,15 @@
 import connectSTR from '../../lib/dbConnect';
 import Room from '../../lib/models/Rooms';
 import RoomCategory from '../../lib/models/RoomCategory';
-import Profile from '../../lib/models/Profile'; // Import Profile model
+import Profile from '../../lib/models/Profile';
+import NewBooking from '../../lib/models/NewBooking';
+import Billing from '../../lib/models/Billing' // Import Profile model
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+
 
 // Connect to the database
 const connectToDatabase = async () => {
@@ -52,6 +55,7 @@ export async function POST(req) {
 
     // Extract the token from cookies
     const token = req.cookies.get('authToken')?.value;
+    console.log("Token : ",token);
     if (!token) {
       return NextResponse.json({ 
         success: false, 
@@ -61,7 +65,10 @@ export async function POST(req) {
 
     // Verify the token
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    console.log("Decoded : ",decoded);
+    console.log("SECRET_KEY : ",SECRET_KEY);
     const userId = decoded.payload.id;
+    console.log("userId : ",userId);
 
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
@@ -106,11 +113,19 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     if (!mongoose.models.RoomCategory) {
-      mongoose.model('RoomCategory', RoomCategory.schema);
-    }
+        mongoose.model('RoomCategory', RoomCategory.schema);
+      }
+      if (!mongoose.models.NewBooking) {
+        mongoose.model('NewBooking', NewBooking.schema);
+      }
+      if (!mongoose.models.Billing) {
+        mongoose.model('Billing', Billing.schema);
+      }
+    console.log("Inside Get");
 
     // Extract the token from cookies
     const token = req.cookies.get('authToken')?.value;
+    console.log("Token : ",token);
     if (!token) {
       return NextResponse.json({ 
         success: false, 
@@ -120,22 +135,30 @@ export async function GET(req) {
 
     // Verify the token
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    console.log("Decoded : ",decoded);
+    console.log("SECRET_KEY : ",SECRET_KEY);
     const userId = decoded.payload.id;
+    console.log("userId : ",userId);
 
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
+    console.log("Profile : ",profile);
     if (!profile) {
       return NextResponse.json({ 
         success: false, 
         error: 'Profile not found' 
       }, { status: 404 });
     }
+    
 
     // Fetch all rooms from the database filtered by username
+    console.log("before error");
+    console.log("profile.username", profile.username);
     const rooms = await Room.find({ username: profile.username })
       .populate('category')
       .populate('guestWaitlist')
       .populate('billWaitlist');
+    console.log("rooms",rooms);
 
     return NextResponse.json({ success: true, data: rooms }, { status: 200 });
   } catch (error) {

@@ -25,7 +25,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
 
 export default function BookingManagement() {
-  const [rooms, setRooms] = useState({ data: [] });
+  const [rooms, setRooms] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [categories, setCategories] = useState([]);
   const [roomNumber, setRoomNumber] = useState("");
@@ -53,15 +53,20 @@ export default function BookingManagement() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const roomsResponse = await fetch("/api/rooms");
-        const roomData = await roomsResponse.json();
-        // Sort rooms before setting state
-        const sortedRooms = { ...roomData, data: sortRoomNumbers(roomData.data) };
-        setRooms(sortedRooms);
-
+        // Fetch categories
         const categoriesResponse = await fetch("/api/roomCategories");
         const categoriesData = await categoriesResponse.json();
         setCategories(categoriesData.data);
+
+        // Fetch rooms
+        const roomsResponse = await fetch("/api/rooms");
+        const roomsData = await roomsResponse.json();
+        if (roomsData.success) {
+          const sortedRooms = sortRoomNumbers(roomsData.data);
+          setRooms(sortedRooms);
+        } else {
+          console.error(roomsData.error);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -90,28 +95,40 @@ export default function BookingManagement() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newRoom),
+        credentials: 'include', // Include cookies
       });
 
       if (res.ok) {
-        const updatedRoomsResponse = await fetch("/api/rooms");
-        const updatedRoomsData = await updatedRoomsResponse.json();
-        // Sort rooms after adding new room
-        const sortedRooms = { ...updatedRoomsData, data: sortRoomNumbers(updatedRoomsData.data) };
-        setRooms(sortedRooms);
+        const data = await res.json();
+        console.log("New room added:", data.data);
+        toast.success('New room added successfully!');
 
+        // Fetch updated rooms
+        const roomsResponse = await fetch("/api/rooms");
+        const roomsData = await roomsResponse.json();
+        if (roomsData.success) {
+          const sortedRooms = sortRoomNumbers(roomsData.data);
+          setRooms(sortedRooms);
+        } else {
+          console.log("Failed to fetch updated rooms:", roomsData.error);
+        }
+
+        // Reset form
         setRoomNumber("");
         setCategory("");
         setFloorNumber("");
         setClean("Yes");
         handleCloseModal();
       } else {
-        console.error("Failed to create new room", res.statusText);
+        const errorData = await res.json();
+        console.error("Failed to create new room:", errorData.error);
+        toast.error('Failed to add new room!');
       }
     } catch (error) {
       console.error("An error occurred while creating the room:", error);
+      toast.error('Failed to add new room!');
     }
   };
-
   const modalStyle = {
     position: 'absolute',
     top: '50%',
@@ -179,102 +196,112 @@ export default function BookingManagement() {
                   </TableCell>
                 </TableRow>
               </TableHead>
+              
               <TableBody>
-                {rooms.data.map((room) => (
-                  <TableRow key={room._id}>
-                    <TableCell align="center">{room.number}</TableCell>
-                    <TableCell align="center">{room.category.category}</TableCell>
-                    <TableCell align="center">{room.floor}</TableCell>
-                    <TableCell align="center">
-                      {room.clean ? (
-                        <Typography
-                          sx={{
-                            bgcolor: "#81C784",
-                            color: "white",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            padding: "4px 8px",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          Yes
-                        </Typography>
-                      ) : (
-                        <Typography
-                          sx={{
-                            bgcolor: "#E57373",
-                            color: "white",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            padding: "4px 8px",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          No
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      {room.occupied === "Vacant" ? (
-                        <Typography
-                          sx={{
-                            bgcolor: "#FFD54F",
-                            color: "black",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            padding: "4px 8px",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          Vacant
-                        </Typography>
-                      ) : (
-                        <Typography
-                          sx={{
-                            bgcolor: "#64B5F6",
-                            color: "white",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            padding: "4px 8px",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          Confirmed
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      {room.billingStarted === "Yes" ? (
-                        <Typography
-                          sx={{
-                            bgcolor: "#4CAF50",
-                            color: "white",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            padding: "4px 8px",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          Yes
-                        </Typography>
-                      ) : (
-                        <Typography
-                          sx={{
-                            bgcolor: "#FF7043",
-                            color: "white",
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            padding: "4px 8px",
-                            borderRadius: "8px",
-                          }}
-                        >
-                          No
-                        </Typography>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+  {rooms.length > 0 ? (
+    rooms.map((room) => (
+      <TableRow key={room._id}>
+        <TableCell align="center">{room.number}</TableCell>
+        <TableCell align="center">{room.category?.category || 'Category N/A'}</TableCell>
+        <TableCell align="center">{room.floor}</TableCell>
+        <TableCell align="center">
+          {room.clean ? (
+            <Typography
+              sx={{
+                bgcolor: "#81C784",
+                color: "white",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                padding: "4px 8px",
+                borderRadius: "8px",
+              }}
+            >
+              Yes
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                bgcolor: "#E57373",
+                color: "white",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                padding: "4px 8px",
+                borderRadius: "8px",
+              }}
+            >
+              No
+            </Typography>
+          )}
+        </TableCell>
+        <TableCell align="center">
+          {room.occupied === "Vacant" ? (
+            <Typography
+              sx={{
+                bgcolor: "#FFD54F",
+                color: "black",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                padding: "4px 8px",
+                borderRadius: "8px",
+              }}
+            >
+              Vacant
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                bgcolor: "#64B5F6",
+                color: "white",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                padding: "4px 8px",
+                borderRadius: "8px",
+              }}
+            >
+              Confirmed
+            </Typography>
+          )}
+        </TableCell>
+        <TableCell align="center">
+          {room.billingStarted === "Yes" ? (
+            <Typography
+              sx={{
+                bgcolor: "#4CAF50",
+                color: "white",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                padding: "4px 8px",
+                borderRadius: "8px",
+              }}
+            >
+              Yes
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                bgcolor: "#FF7043",
+                color: "white",
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                padding: "4px 8px",
+                borderRadius: "8px",
+              }}
+            >
+              No
+            </Typography>
+          )}
+        </TableCell>
+        
+      </TableRow>
+    ))
+  ) : (
+    <TableRow>
+      <TableCell colSpan={7} align="center">
+        No rooms available.
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
             </Table>
           </TableContainer>
 
