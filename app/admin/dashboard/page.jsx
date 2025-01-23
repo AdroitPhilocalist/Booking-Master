@@ -38,6 +38,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useRouter } from 'next/navigation';
+import Navbar from "../../_components/admin-navbar";
+import {Footer} from "../../_components/Footer"
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -273,14 +275,16 @@ const SuperAdminDashboard = () => {
   };
 
   return (
-    <>
-      <div className="bg-gradient-to-r from-purple-800 to-indigo-600 min-h-screen mt-6">
+    <div>
+      <Navbar/>
+      <div className="bg-amber-50 min-h-screen mt-6">
         <Container maxWidth="lg" style={{ marginTop: "0rem" }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <StyledCard>
                 <CardHeader
                   title="Super Admin Dashboard"
+                  className=" text-3xl text-center font-bold text-cyan-900"
                   subheader="Manage Hotel Admin Profiles"
                   action={
                     <Button
@@ -437,7 +441,7 @@ const SuperAdminDashboard = () => {
             </Button>
           </DialogActions>
         </StyledDialog>
-        <button
+        {/* <button
           onClick={handleLogout}
           disabled={isLoggingOut}
           className={`
@@ -452,9 +456,11 @@ const SuperAdminDashboard = () => {
           <span className={`transition-opacity duration-300 ${isLoggingOut ? 'opacity-0' : 'opacity-100'}`}>
             {isLoggingOut ? 'Logging out...' : 'Logout'}
           </span>
-        </button>
+        </button> */}
+        
       </div>
-    </>
+      <Footer/>
+    </div>
   );
 };
 
