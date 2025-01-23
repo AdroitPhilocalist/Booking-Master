@@ -56,7 +56,11 @@ const RoomSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Billing',
       default: []
-    }]
+    }],
+    username: {  // New field
+      type: String,
+      required: true,
+    },
 });
 
 export default mongoose.models.Room || mongoose.model('Room', RoomSchema);
