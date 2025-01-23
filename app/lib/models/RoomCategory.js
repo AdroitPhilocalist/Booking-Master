@@ -24,6 +24,10 @@ const RoomCategorySchema = new mongoose.Schema({
   bookingEng: { type: String, enum: ['Yes', 'No'], default: 'Yes' },
   confRoom: { type: String, enum: ['Yes', 'No'], default: 'No' },
   active: { type: String, enum: ['Yes', 'No'], default: 'Yes' },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 });
 
 export default mongoose.models.RoomCategory || mongoose.model('RoomCategory', RoomCategorySchema);
