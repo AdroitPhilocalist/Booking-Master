@@ -37,7 +37,11 @@ const inventoryListSchema = new mongoose.Schema(
       type: String,
       enum: ['pieces', 'kgs', 'grams', 'litres'],
       required: true,
-    }
+    },
+    username: {  // New field
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
