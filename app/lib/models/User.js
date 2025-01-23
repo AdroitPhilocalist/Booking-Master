@@ -22,7 +22,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Online', 'Offline'],
     required: true
-  }
+  },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 }, {
   timestamps: true
 });
