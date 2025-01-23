@@ -1,6 +1,6 @@
 // Dynamic Route (api/billing/[id]/route.js)
 import mongoose from 'mongoose';
-import connectSTR from '../../../lib/dbConnect';
+import connectSTR from '../../../lib/dbConnect'
 import Billing from '../../../lib/models/Billing';
 import { NextResponse } from 'next/server';
 
