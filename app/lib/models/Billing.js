@@ -34,6 +34,7 @@ const BillingSchema = new mongoose.Schema({
       return this.totalAmount - this.amountAdvanced;
     }
   },
+  
   Bill_Paid: { type: String, enum: ['yes', 'no'], default: 'no' },
   DateOfPayment: { type: [Date], default: [] },
   ModeOfPayment: {
