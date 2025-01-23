@@ -51,8 +51,13 @@ const BillingSchema = new mongoose.Schema({
   // New fields for remarks
   FoodRemarks: { type: [String], default: [] },
   ServiceRemarks: { type: [String], default: [] },
-  RoomRemarks: { type: [String], default: [] }
-}, {
+  RoomRemarks: { type: [String], default: [] },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
+}, 
+{
   timestamps: true
 });
 
