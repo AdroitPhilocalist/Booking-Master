@@ -134,7 +134,7 @@ export default function Home() {
                     </InputAdornment>
                   }
                   label="Password"
-                />
+                /> 
               </FormControl>
             </div>
             <div>
