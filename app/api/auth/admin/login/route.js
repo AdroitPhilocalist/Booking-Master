@@ -46,7 +46,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    const token = jwt.sign({ id: admin._id }, SECRET_KEY, { expiresIn: '2m' });
+    const token = jwt.sign({ id: admin._id }, SECRET_KEY, { expiresIn: '24h' });
     // Create the response
     const response = NextResponse.json(
       { success: true },

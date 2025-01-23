@@ -49,7 +49,7 @@ export async function POST(req) {
       );
     }
 
-    const token = jwt.sign({ id: profile._id }, SECRET_KEY, { expiresIn: '2m' });
+    const token = jwt.sign({ id: profile._id }, SECRET_KEY, { expiresIn: '24h' });
 
     // Create the response
     const response = NextResponse.json(
