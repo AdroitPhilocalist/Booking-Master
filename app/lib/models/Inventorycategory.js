@@ -10,6 +10,10 @@ const inventorySchema = new mongoose.Schema(
       type: Boolean,
       default: false, // Active by default
     },
+    username: {  // New field
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt timestamps
