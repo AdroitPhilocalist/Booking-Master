@@ -25,7 +25,15 @@ export default function AddUser() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      name: '',
+      property: '',
+      email: '',
+      phone: '',
+      userType: '',
+    },
+  });
 
   // Handle form submission
   const onSubmit = async (data) => {
@@ -39,10 +47,9 @@ export default function AddUser() {
         body: JSON.stringify(data),
       });
       const result = await response.json();
-
       if (result.success) {
-        toast.success('User added successfully!')
-        //router.back(); // Navigate back to the user list page
+        toast.success('User added successfully!');
+        router.push('/master/users'); // Navigate back to the user list page
       } else {
         toast.error('Failed to create user');
       }
@@ -151,7 +158,6 @@ export default function AddUser() {
                       type="submit"
                       disabled={loading}
                       size="large"
-                      onClick={() => router.push('/master/users')}
                     >
                       {loading ? 'Submitting...' : 'Add User'}
                     </Button>
