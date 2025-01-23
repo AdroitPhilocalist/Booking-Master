@@ -196,7 +196,7 @@ export default function RoomCategories() {
                 </TableHead>
                 <TableBody>
                   {filteredCategories.map((room) => (
-                    <TableRow key={room.id} style={{ backgroundColor: "#f8f9fa" }}>
+                    <TableRow key={room._id} style={{ backgroundColor: "#f8f9fa" }}>
                       <TableCell>
                         <Image
                           src={room.image}
