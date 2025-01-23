@@ -84,6 +84,10 @@ const restaurantInvoiceSchema = new mongoose.Schema(
         message: "Amount with GST array length must match menu items length.",
       },
     },
+    username: {  // New field
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
