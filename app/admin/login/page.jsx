@@ -58,49 +58,82 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">Admin Login</h2>
-        <FormControl fullWidth variant="outlined" className="mb-4">
-          <InputLabel>Username</InputLabel>
-          <OutlinedInput
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+
+    <main>
+
+      <div className="flex items-center flex-col justify-center min-h-screen bg-gradient-to-br from-cyan-700 to-cyan-600">
+        <div className="mb-8">
+          <Image
+            src="/Hotel-Logo.png"
+            alt="BookingMaster.in"
+            width={300}
+            height={60}
+            priority
           />
-        </FormControl>
-        <FormControl fullWidth variant="outlined" className="mb-4">
-          <InputLabel>Password</InputLabel>
-          <OutlinedInput
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  onMouseUp={handleMouseUpPassword}
-                  edge="end"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            }
-            label="Password"
-          />
-        </FormControl>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded mb-4 w-full">
-          SUBMIT
-        </button>
-        <Link href="/admin/login" className="text-blue-500 hover:text-blue-700">
-          Forgot Password?
-        </Link>
-        <p className="text-center mt-4 text-gray-500">
+        </div>
+        {/* <Image
+            src="/Hotel-Logo.png"
+            alt="BookingMaster.in"
+            width={300}
+            height={60}
+            priority
+          /> */}
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+
+          <h2 className="text-3xl font-bold mb-6 text-center text-cyan-900">Admin Login</h2>
+          <FormControl fullWidth variant="outlined" className="mb-4">
+            <InputLabel>Username</InputLabel>
+            <OutlinedInput
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </FormControl>
+          <FormControl fullWidth variant="outlined" className="mb-4">
+            <InputLabel>Password</InputLabel>
+            <OutlinedInput
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              endAdornment={
+                <InputAdornment position="end" >
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    onMouseUp={handleMouseUpPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
+            />
+          </FormControl>
+          <button type="submit" className="bg-cyan-700 text-white px-4 py-2 shadow-sm rounded mb-4 mt-3 w-full">
+            SUBMIT
+          </button>
+          <Link href="/admin/login" className="text-blue-500 hover:text-blue-700">
+            Forgot Password?
+          </Link>
+          {/* <p className="text-center mt-4 text-gray-500">
+            © {timestamp}, Hotel Booking. All Rights Reserved.
+          </p> */}
+        </form>
+
+
+        <div className="mt-8 text-center text-white text-sm">
           © {timestamp}, Hotel Booking. All Rights Reserved.
-        </p>
-      </form>
-    </div>
+        </div>
+      </div>
+
+      {/* <p className="text-center mt-4 text-gray-500">
+            © {timestamp}, Hotel Booking. All Rights Reserved.
+          </p> */}
+    </main >
+
+
+
   );
 }
