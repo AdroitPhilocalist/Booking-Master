@@ -56,6 +56,10 @@ const profileSchema = new mongoose.Schema({
     required: true,
   },
   Profile_Complete: { type: String, enum: ['yes', 'no'], default: 'no' },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 }, {
   timestamps: true, // Automatically manage createdAt and updatedAt fields
 });
