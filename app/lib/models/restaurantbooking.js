@@ -23,6 +23,10 @@ const RestaurantBookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 });
 
 export default mongoose.models.RestaurantBooking ||
