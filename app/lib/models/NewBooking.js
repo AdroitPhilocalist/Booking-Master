@@ -140,7 +140,11 @@ const newBookingSchema = new mongoose.Schema({
   roomNumbers: { 
     type: [Number],
     required: true 
-  }
+  },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 }, { 
   timestamps: true 
 });
