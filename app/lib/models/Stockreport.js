@@ -50,7 +50,11 @@ const stockReportSchema = new mongoose.Schema({
     type: String,
     enum: ['purchase', 'sell'],
     required: true
-  }
+  },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 }, {
   timestamps: true
 });
