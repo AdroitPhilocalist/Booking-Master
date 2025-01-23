@@ -57,6 +57,10 @@ const menuItemSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  username: {  // New field
+    type: String,
+    required: true,
+  },
 }, {
   timestamps: true
 });
