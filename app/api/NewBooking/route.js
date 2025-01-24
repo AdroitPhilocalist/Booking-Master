@@ -1,13 +1,33 @@
 import connectSTR from '../../lib/dbConnect';
 import NewBooking from '../../lib/models/NewBooking';
+import Profile from '../../lib/models/Profile';
 import mongoose from 'mongoose';
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
-
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication token missing'
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({
+        success: false,
+        error: 'Profile not found'
+      }, { status: 404 });
+    }
     // Create a new booking instance with all fields including the new ones
     const newBooking = new NewBooking({
       bookingType: data.bookingType,
@@ -44,7 +64,8 @@ export async function POST(req) {
       passportExpireDate: data.passportExpireDate,
       visaNumber: data.visaNumber,
       visaIssueDate: data.visaIssueDate,
-      visaExpireDate: data.visaExpireDate
+      visaExpireDate: data.visaExpireDate,
+      username: profile.username
     });
 
     await newBooking.save();
@@ -52,7 +73,7 @@ export async function POST(req) {
   } catch (error) {
     console.error('Error creating new booking:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create new booking' }, 
+      { success: false, error: 'Failed to create new booking' },
       { status: 400 }
     );
   }
@@ -61,12 +82,30 @@ export async function POST(req) {
 export async function GET(req) {
   try {
     await mongoose.connect(connectSTR);
-    const bookings = await NewBooking.find();
-    return NextResponse.json({ success: true, data: bookings }, { status: 200 });
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+    const bookings = await NewBooking.find({ username: profile.username });
+    return NextResponse.json({ success: true, data: bookings}, { status: 200 });
   } catch (error) {
     console.error('Error fetching bookings:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch bookings' }, 
+      { success: false, error: 'Failed to fetch bookings' },
       { status: 500 }
     );
   }

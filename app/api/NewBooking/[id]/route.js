@@ -1,11 +1,31 @@
 import connectSTR from '../../../lib/dbConnect';
 import NewBooking from '../../../lib/models/NewBooking';
 import mongoose from 'mongoose';
+import Profile from '../../../lib/models/Profile';
 import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
   try {
     await mongoose.connect(connectSTR);
+    const data = await req.json();
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication token missing'
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({
+        success: false,
+        error: 'Profile not found'
+      }, { status: 404 });
+    }
     const { id } = params;
     const guest = await NewBooking.findById(id);
     
@@ -31,10 +51,25 @@ export async function PUT(req, { params }) {
     await mongoose.connect(connectSTR);
     const { id } = params;
     const data = await req.json();
-
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication token missing' },
+        { status: 401 }
+      );
+    }
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
     const updatedGuest = await NewBooking.findByIdAndUpdate(
       id,
-      { $set: data },
+      { $set: {...data, username: profile.username} },
       { new: true, runValidators: true }
     );
 
@@ -59,6 +94,22 @@ export async function DELETE(req, { params }) {
   try {
     await mongoose.connect(connectSTR);
     const { id } = params;
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication token missing' },
+        { status: 401 }
+      );
+    }
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json(
+        { success: false, error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
     const deletedGuest = await NewBooking.findByIdAndDelete(id);
 
     if (!deletedGuest) {

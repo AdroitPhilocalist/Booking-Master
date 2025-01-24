@@ -2,6 +2,7 @@
 import connectSTR from '../../lib/dbConnect';
 import Billing from '../../lib/models/Billing';
 import mongoose from "mongoose";
+import Profile from '../../lib/models/Profile';
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
