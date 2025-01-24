@@ -11,7 +11,6 @@ const connectToDatabase = async () => {
     useUnifiedTopology: true,
   });
 };
-
 export async function POST(req) {
   try {
     await connectToDatabase();
