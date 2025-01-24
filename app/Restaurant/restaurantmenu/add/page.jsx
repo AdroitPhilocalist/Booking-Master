@@ -24,6 +24,7 @@ export default function AddRestaurant() {
     discountAllowed: 'Yes (Allowed)',
     storeItemCode: '',
     ingredientCode: '',
+    
   });
 
   const handleInputChange = (e) => {

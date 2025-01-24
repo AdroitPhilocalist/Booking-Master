@@ -2,6 +2,7 @@
 import connectSTR from '../../lib/dbConnect';
 import MenuItem from '../../lib/models/MenuItem';
 import mongoose from 'mongoose';
+import Profile from '../../lib/models/Profile';
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
@@ -64,6 +65,8 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     const token = req.cookies.get('authToken')?.value;
+    console.log("barnik ", token);
+
     if (!token) {
       return NextResponse.json({ 
         success: false, 
@@ -73,6 +76,8 @@ export async function GET(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
+    console.log("das",profile);
+
     if (!profile) {
       return NextResponse.json({ 
         success: false, 
@@ -80,6 +85,8 @@ export async function GET(req) {
       }, { status: 404 });
     }
     const menuItems = await MenuItem.find({ username: profile.username });
+    console
+
     return NextResponse.json({ success: true, data: menuItems }, { status: 200 });
   } catch (error) {
     console.error('Error fetching menu items:', error);
