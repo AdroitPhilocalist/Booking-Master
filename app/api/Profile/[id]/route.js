@@ -2,7 +2,9 @@ import mongoose from 'mongoose';
 import connectSTR from '../../../lib/dbConnect';
 import Profile from '../../../lib/models/Profile';
 import bcrypt from 'bcrypt';
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { NextResponse } from 'next/server';
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const connectToDatabase = async () => {
   if (mongoose.connections[0]?.readyState === 1) return;
@@ -22,13 +24,23 @@ const connectToDatabase = async () => {
 export async function GET(req, { params }) {
   try {
     await connectToDatabase();
-    const { id } = params;
-    const profile = await Profile.findById(id);
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication token missing'
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    const profile = await Profile.findById(userId);
+    console.log('Profile:', profile);
     if (!profile) {
-      return NextResponse.json(
-        { success: false, error: 'Profile not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: profile }, { status: 200 });
   } catch (error) {
@@ -44,7 +56,23 @@ export async function GET(req, { params }) {
 export async function PUT(req, { params }) {
   try {
     await connectToDatabase();
-    const { id } = params;
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication token missing'
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
     const data = await req.json();
     // Validate required fields
     if (

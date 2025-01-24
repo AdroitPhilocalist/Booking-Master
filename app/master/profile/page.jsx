@@ -12,6 +12,9 @@ import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+import { useRouter } from 'next/navigation';
 
 const ProfilePage = () => {
   // Initialize form data with empty strings to ensure controlled inputs
@@ -30,17 +33,27 @@ const ProfilePage = () => {
 
   const [profileExists, setProfileExists] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
   // Fetch existing profile data
   const fetchProfileData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/Profile");
+      const token = getCookie('authToken'); // Get the token from cookies
+      if (!token) {
+        router.push('/'); // Redirect to login if no token is found
+        return;
+      }
+      // Verify the token
+      const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+      const userId = decoded.payload.id;
+      const response = await fetch(`/api/Profile/${userId}`);
       const result = await response.json();
-      
-      if (result.success && result.data.length > 0) {
+      console.log('Profile data:', result.data);
+      if (result.success) {
         // Ensure all form fields have at least an empty string
-        const profileData = result.data[0];
+        const profileData = result.data;
         const sanitizedData = {
           hotelName: profileData.hotelName || "",
           mobileNo: profileData.mobileNo || "",
@@ -88,7 +101,7 @@ const ProfilePage = () => {
         body: JSON.stringify(formData),
       });
       const result = await response.json();
-      
+
       if (result.success) {
         toast.success(profileExists ? "Profile updated successfully!" : "Profile created successfully!");
       } else {
