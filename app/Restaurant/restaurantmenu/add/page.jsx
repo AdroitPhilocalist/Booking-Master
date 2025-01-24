@@ -74,7 +74,7 @@ export default function AddRestaurant() {
         toast.success("Menu item added successfully");
         //router.back();
       } else {
-        console.error('Error:', result.error);
+        
         toast.error("Error adding menu item");
       }
     } catch (error) {

@@ -27,17 +27,15 @@ import AddNewBookingForm from "./addnewbooking";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-
 const RestaurantBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [EditOpen, setEditOpen] = useState(false);
-  
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [availableTables, setAvailableTables] = useState([]);
+
   useEffect(() => {
     const fetchAvailableTables = async () => {
       try {
@@ -55,9 +53,6 @@ const RestaurantBooking = () => {
     fetchAvailableTables();
   }, []);
 
-
-
-
   // Fetch bookings from the API
   useEffect(() => {
     const fetchBookings = async () => {
@@ -72,7 +67,6 @@ const RestaurantBooking = () => {
             const dateB = new Date(b.date);
             return dateB - dateA;
           });
-          //toast.success("");
           setBookings(sortedBookings);
         } else {
           console.error("Failed to fetch bookings:", data.error);
@@ -93,7 +87,6 @@ const RestaurantBooking = () => {
     setSelectedBooking(booking); // Set the selected booking to edit
     setEditOpen(true); // Open the modal
   };
-
   const handleEditClose = () => {
     setSelectedBooking(null); // Clear the selected booking
     setEditOpen(false); // Close the modal
@@ -109,6 +102,7 @@ const RestaurantBooking = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newBooking),
+        credentials: 'include', // Include cookies
       });
       const data = await response.json();
       if (data.success) {
@@ -128,44 +122,41 @@ const RestaurantBooking = () => {
     }
   };
 
-  // Handle Edit Booking (Dummy Function)
-    // Handle Edit Booking (Dummy Function)
-    const handleEditBooking = async (updatedBooking) => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          `/api/RestaurantBooking/${updatedBooking._id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updatedBooking),
-          }
-        );
-  
-        const data = await response.json();
-        if (data.success) {
-          setBookings((prevBookings) =>
-            prevBookings.map((booking) =>
-              booking._id === updatedBooking._id ? updatedBooking : booking
-            )
-          );
-          toast.success("Booking updated sucessfully");
-          handleEditClose();
-        } else {
-          console.error("Failed to update booking:", data.error);
-          toast.error("Failed to update booking");
+  // Handle Edit Booking
+  const handleEditBooking = async (updatedBooking) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/RestaurantBooking/${updatedBooking._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedBooking),
+          credentials: 'include', // Include cookies
         }
-      } catch (error) {
-        console.error("Error updating booking:", error);
+      );
+      const data = await response.json();
+      if (data.success) {
+        setBookings((prevBookings) =>
+          prevBookings.map((booking) =>
+            booking._id === updatedBooking._id ? updatedBooking : booking
+          )
+        );
+        toast.success("Booking updated successfully");
+        handleEditClose();
+      } else {
+        console.error("Failed to update booking:", data.error);
         toast.error("Failed to update booking");
-      } finally {
-        setIsLoading(false);
       }
-    };
-  
-  
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      toast.error("Failed to update booking");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Handle Delete Booking
   const handleDelete = async (id) => {
@@ -173,6 +164,7 @@ const RestaurantBooking = () => {
       setIsLoading(true);
       const response = await fetch(`/api/RestaurantBooking/${id}`, {
         method: "DELETE",
+        credentials: 'include', // Include cookies
       });
       const data = await response.json();
       if (data.success) {
@@ -191,7 +183,6 @@ const RestaurantBooking = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div>
       <Navbar />

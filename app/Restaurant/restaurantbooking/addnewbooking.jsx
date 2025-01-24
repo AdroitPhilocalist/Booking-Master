@@ -25,7 +25,6 @@ const AddNewBookingForm = ({ onSubmit }) => {
         console.error("Error fetching tables:", error);
       }
     };
-
     fetchAvailableTables();
   }, []);
 
