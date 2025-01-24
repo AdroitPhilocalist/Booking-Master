@@ -1,3 +1,4 @@
+// app/Restaurant/invoice/page.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -23,8 +24,6 @@ import { Delete, Edit } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 
-
-
 const InvoicePage = () => {
   const [menu, setMenu] = useState();
   const [invoices, setInvoices] = useState([]);
@@ -34,11 +33,9 @@ const InvoicePage = () => {
   const [currentInvoice, setCurrentInvoice] = useState(null);
   const [printableInvoice, setPrintableInvoice] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
   // Date filter states
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
   const router = useRouter();
 
   useEffect(() => {
@@ -48,9 +45,8 @@ const InvoicePage = () => {
         const menuResponse = await fetch("/api/menuItem");
         const menuData = await menuResponse.json();
         setMenu(menuData.data || []);
-      }
-      catch (error) {
-        console.error("failed to fetch data", error);
+      } catch (error) {
+        console.error("Failed to fetch menu data", error);
       } finally {
         setIsLoading(false);
       }
@@ -61,6 +57,7 @@ const InvoicePage = () => {
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch("/api/restaurantinvoice");
         const data = await response.json();
         // Sort invoices by date in descending order (newest first)
@@ -76,28 +73,27 @@ const InvoicePage = () => {
     fetchInvoices();
   }, []);
 
- // Modify the filter function to maintain the sort order
- const filterByDate = () => {
-  if (startDate && endDate) {
-    const filtered = invoices.filter((invoice) => {
-      const invoiceDate = new Date(invoice.date);
-      return (
-        invoiceDate >= new Date(startDate) && 
-        invoiceDate <= new Date(endDate)
-      );
-    }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Keep newest first
-    setFilteredInvoices(filtered);
-  } else {
-    setFilteredInvoices([...invoices]); // Show all invoices sorted
-  }
-};
+  // Modify the filter function to maintain the sort order
+  const filterByDate = () => {
+    if (startDate && endDate) {
+      const filtered = invoices.filter((invoice) => {
+        const invoiceDate = new Date(invoice.date);
+        return (
+          invoiceDate >= new Date(startDate) && 
+          invoiceDate <= new Date(endDate)
+        );
+      }).sort((a, b) => new Date(b.date) - new Date(a.date)); // Keep newest first
+      setFilteredInvoices(filtered);
+    } else {
+      setFilteredInvoices([...invoices]); // Show all invoices sorted
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`/api/restaurantinvoice/${id}`, {
         method: "DELETE",
       });
-
       if (response.ok) {
         const updatedInvoices = invoices.filter((invoice) => invoice._id !== id);
         setInvoices(updatedInvoices);
@@ -105,7 +101,7 @@ const InvoicePage = () => {
         toast.success("Invoice deleted successfully");
       } else {
         console.error("Failed to delete invoice");
-        toast.success("Failed to delete invoice");
+        toast.error("Failed to delete invoice");
       }
     } catch (error) {
       console.error(error);
@@ -161,7 +157,6 @@ const InvoicePage = () => {
       setFilteredInvoices(newInvoices);
       setShowModal(false);
     }
-    
   };
 
   const handleCancelModal = () => {

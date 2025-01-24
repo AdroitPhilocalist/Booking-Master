@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { Box, Button, Container, FormControl, InputLabel, MenuItem, Select, TextField, Typography, Paper, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
@@ -7,6 +8,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   const [menu, setMenu] = useState([]);
@@ -43,90 +45,68 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     fetchMenu();
   }, []);
 
-    // Function to generate random alphanumeric string
-    const generateRandomString = (length) => {
-      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      let result = '';
-      for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const menuResponse = await fetch("/api/menuItem");
+        const menuData = await menuResponse.json();
+        setMenu(menuData.data);
+      } catch (error) {
+        console.error("Failed to fetch menu data", error);
       }
-      return result;
     };
-  
-    // Function to generate invoice number
-    const generateInvoiceNumber = () => {
-      return `INV-${generateRandomString(6)}`;
-    };
-  
-    useEffect(() => {
-      const fetchMenu = async () => {
-        try {
-          const menuResponse = await fetch("/api/menuItem");
-          const menuData = await menuResponse.json();
-          setMenu(menuData.data);
-        } catch (error) {
-          console.error("Failed to fetch menu data", error);
-        }
-      };
-      fetchMenu();
-  
-      // Generate invoice number only if there's no existing invoice
-      if (!existingInvoice) {
-        setFormData(prev => ({
-          ...prev,
-          invoiceno: generateInvoiceNumber()
-        }));
-      }
-    }, []);
+    fetchMenu();
+    // Generate invoice number only if there's no existing invoice
+    if (!existingInvoice) {
+      setFormData(prev => ({
+        ...prev,
+        invoiceno: generateInvoiceNumber()
+      }));
+    }
+  }, []);
 
-    useEffect(() => {
-      if (existingInvoice) {
-        const cgstArray = existingInvoice.menuitem?.map((item, index) => {
-          const cgstRate = menu.find(menuItem => menuItem.itemName === item)?.cgst || 0;
-          return cgstRate * existingInvoice.price[index] / 100;
-        }) || [];
-
-
-        const sgstArray = existingInvoice.menuitem?.map((item, index) => {
-          const sgstRate = menu.find(menuItem => menuItem.itemName === item)?.sgst || 0;
-          return sgstRate * existingInvoice.price[index] / 100;
-        }) || [];
-    
-        const amountWithGstArray = existingInvoice.menuitem?.map((item, index) => {
-          return existingInvoice.price[index] * existingInvoice.quantity[index] + (cgstArray[index] || 0) + (sgstArray[index] || 0);
-        }) || [];
-    
-        setFormData({
-          invoiceno: existingInvoice.invoiceno || "",
-          date: existingInvoice.date ? new Date(existingInvoice.date).toISOString().split("T")[0] : "",
-          time: existingInvoice.time || "",
-          custname: existingInvoice.custname || "",
-          custphone: existingInvoice.custphone || "",
-          custaddress:existingInvoice.custaddress || "",
-          custgst:existingInvoice.custgst || "",
-          menuitem: existingInvoice.menuitem || [],
-          quantity: existingInvoice.quantity || [],
-          price: existingInvoice.price || [],
-          totalamt: existingInvoice.totalamt || 0,
-          gst: existingInvoice.gst || (amountWithGstArray.reduce((sum, val) => sum + val, 0) - existingInvoice.totalamt),
-          payableamt: existingInvoice.payableamt || amountWithGstArray.reduce((sum, val) => sum + val, 0),
-          cgstArray: existingInvoice.cgstArray||[],
-          sgstArray: existingInvoice.sgstArray||[],
-          amountWithGstArray: existingInvoice.amountWithGstArray||[],
-        });
-    
-        setSelectedItems(
-          existingInvoice.menuitem?.map((item, index) => ({
-            name: item,
-            price: existingInvoice.price[index],
-            quantity: existingInvoice.quantity[index] || 1,
-            sgst: existingInvoice.sgstArray[index]/existingInvoice.quantity[index]||1,
-            cgst: existingInvoice.cgstArray[index]/existingInvoice.quantity[index]||1,
-          })) || []
-        );
-      }
-    }, [existingInvoice, menu]);
-    
+  useEffect(() => {
+    if (existingInvoice) {
+      const cgstArray = existingInvoice.menuitem?.map((item, index) => {
+        const cgstRate = menu.find(menuItem => menuItem.itemName === item)?.cgst || 0;
+        return cgstRate * existingInvoice.price[index] / 100;
+      }) || [];
+      const sgstArray = existingInvoice.menuitem?.map((item, index) => {
+        const sgstRate = menu.find(menuItem => menuItem.itemName === item)?.sgst || 0;
+        return sgstRate * existingInvoice.price[index] / 100;
+      }) || [];
+      const amountWithGstArray = existingInvoice.menuitem?.map((item, index) => {
+        return existingInvoice.price[index] * existingInvoice.quantity[index] + (cgstArray[index] || 0) + (sgstArray[index] || 0);
+      }) || [];
+      setFormData({
+        invoiceno: existingInvoice.invoiceno || "",
+        date: existingInvoice.date ? new Date(existingInvoice.date).toISOString().split("T")[0] : "",
+        time: existingInvoice.time || "",
+        custname: existingInvoice.custname || "",
+        custphone: existingInvoice.custphone || "",
+        custaddress: existingInvoice.custaddress || "",
+        custgst: existingInvoice.custgst || "",
+        menuitem: existingInvoice.menuitem || [],
+        quantity: existingInvoice.quantity || [],
+        price: existingInvoice.price || [],
+        totalamt: existingInvoice.totalamt || 0,
+        gst: existingInvoice.gst || (amountWithGstArray.reduce((sum, val) => sum + val, 0) - existingInvoice.totalamt),
+        payableamt: existingInvoice.payableamt || amountWithGstArray.reduce((sum, val) => sum + val, 0),
+        cgstArray: existingInvoice.cgstArray || [],
+        sgstArray: existingInvoice.sgstArray || [],
+        amountWithGstArray: existingInvoice.amountWithGstArray || [],
+      });
+      setSelectedItems(
+        existingInvoice.menuitem?.map((item, index) => ({
+          name: item,
+          price: existingInvoice.price[index],
+          quantity: existingInvoice.quantity[index] || 1,
+          cgst: cgstArray[index] / existingInvoice.quantity[index] || 1,
+          sgst: sgstArray[index] / existingInvoice.quantity[index] || 1,
+        })) || []
+      );
+    }
+  }, [existingInvoice, menu]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -135,13 +115,11 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   const addMenuItem = (e) => {
     const selectedItemName = e.target.value;
     if (!selectedItemName) return;
-
     // Find the selected menu item
     const selectedMenuItem = menu.find(item => item.itemName === selectedItemName);
     const cgstAmount = selectedMenuItem.price * (selectedMenuItem.cgst / 100);
     const sgstAmount = selectedMenuItem.price * (selectedMenuItem.sgst / 100);
     const totalWithGst = selectedMenuItem.price + sgstAmount + cgstAmount;
-
     // Create a new selected item object
     const newItem = {
       name: selectedItemName,
@@ -151,19 +129,15 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       sgst: sgstAmount,
       totalWithGst: totalWithGst,
     };
-
     // Update selected items
     const updatedSelectedItems = [...selectedItems, newItem];
     setSelectedItems(updatedSelectedItems);
-
     // Update form data
     const updatedSgstArray = [...formData.sgstArray, sgstAmount];
     const updatedCgstArray = [...formData.cgstArray, cgstAmount];
     const updatedAmountWithGstArray = [...formData.amountWithGstArray, totalWithGst];
-
     const totalAmount = calculateTotal(updatedSelectedItems);
     const payableAmount = calculatePayableAmount(updatedAmountWithGstArray);
-
     setFormData((prev) => ({
       ...prev,
       menuitem: updatedSelectedItems.map((item) => item.name),
@@ -181,7 +155,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
   const updateQuantity = (index, newQuantity) => {
     const updatedItems = [...selectedItems];
     updatedItems[index].quantity = newQuantity || 1;
-
     const updatedSgstArray = updatedItems.map(
       (item) => item.quantity * item.sgst
     );
@@ -189,14 +162,11 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       (item) => item.quantity * item.cgst
     );
     const updatedAmountWithGstArray = updatedItems.map(
-      (item) => item.quantity*(item.cgst +item.sgst)+item.quantity*item.price
+      (item) => item.quantity * (item.cgst + item.sgst) + item.quantity * item.price
     );
-
     setSelectedItems(updatedItems);
-
     const totalAmount = calculateTotal(updatedItems);
     const payableAmount = calculatePayableAmount(updatedAmountWithGstArray);
-
     setFormData((prev) => ({
       ...prev,
       quantity: updatedItems.map((item) => item.quantity),
@@ -211,16 +181,12 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
 
   const removeMenuItem = (index) => {
     const updatedItems = selectedItems.filter((_, i) => i !== index);
-
     const updatedSgstArray = formData.sgstArray.filter((_, i) => i !== index);
     const updatedCgstArray = formData.cgstArray.filter((_, i) => i !== index);
     const updatedAmountWithGstArray = formData.amountWithGstArray.filter((_, i) => i !== index);
-
     setSelectedItems(updatedItems);
-
     const totalAmount = calculateTotal(updatedItems);
     const payableAmount = calculatePayableAmount(updatedAmountWithGstArray);
-
     setFormData((prev) => ({
       ...prev,
       menuitem: updatedItems.map((item) => item.name),
@@ -246,15 +212,13 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
       const url = existingInvoice
         ? `/api/restaurantinvoice/${existingInvoice._id}`
         : "/api/restaurantinvoice";
-
       // Ensure gst is calculated correctly
       const submissionData = {
         ...formData,
         gst: formData.payableamt - formData.totalamt,
         payableamt: calculatePayableAmount(formData.amountWithGstArray),
       };
-      console.log(submissionData)
-
+      console.log(submissionData);
       const response = await fetch(url, {
         method,
         headers: {
@@ -262,7 +226,6 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
         },
         body: JSON.stringify(submissionData),
       });
-
       const data = await response.json();
       if (response.ok) {
         console.log("Invoice saved successfully:", data);
@@ -324,6 +287,20 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
     if (onCancel) onCancel();
   };
 
+  // Function to generate random alphanumeric string
+  const generateRandomString = (length) => {
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  // Function to generate invoice number
+  const generateInvoiceNumber = () => {
+    return `INV-${generateRandomString(6)}`;
+  };
   return (
     <Container 
       maxWidth="md" 
