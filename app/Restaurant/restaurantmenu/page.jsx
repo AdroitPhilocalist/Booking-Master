@@ -1,3 +1,4 @@
+// app/Restaurant/restaurantmenu/page.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -28,7 +29,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function RestaurantList() {
   const router = useRouter();
-
   const [restaurantItems, setRestaurantItems] = useState([]);
   const [error, setError] = useState(null);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -42,7 +42,6 @@ export default function RestaurantList() {
         setIsLoading(true);
         const response = await fetch("/api/menuItem");
         const result = await response.json();
-
         if (result.success) {
           setRestaurantItems(result.data);
         } else {
@@ -55,7 +54,6 @@ export default function RestaurantList() {
         setIsLoading(false);
       }
     };
-
     fetchMenuItems();
   }, []);
 
@@ -79,18 +77,15 @@ export default function RestaurantList() {
         },
         body: JSON.stringify(selectedItem),
       });
-
       const result = await response.json();
-
       if (result.success) {
         setRestaurantItems(
           (prev) =>
             prev.map((item) =>
               item._id === selectedItem._id ? result.data : item
             )
-          //toast.success("");
         );
-        toast.success("Item updated succesfully");
+        toast.success("Item updated successfully");
         setOpenEditModal(false);
       } else {
         alert(result.error);
@@ -109,9 +104,7 @@ export default function RestaurantList() {
       const response = await fetch(`/api/menuItem/${selectedItem._id}`, {
         method: "DELETE",
       });
-
       const result = await response.json();
-
       if (result.success) {
         setRestaurantItems((prev) =>
           prev.filter((item) => item._id !== selectedItem._id)
@@ -123,13 +116,12 @@ export default function RestaurantList() {
       }
     } catch (err) {
       console.error("Error deleting item:", err);
-      toast.error("Error deleting item:");
+      toast.error("Error deleting item");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (error) return <Typography>Error: {error}</Typography>;
 
   return (
     <div>
