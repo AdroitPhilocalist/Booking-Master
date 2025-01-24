@@ -122,7 +122,6 @@ export default function RestaurantList() {
     }
   };
 
-  if (error) return <Error>{error}</Error>;
 
   return (
     <div>
