@@ -6,110 +6,104 @@ import { Footer } from "../../_components/Footer";
 import { Button, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, TextField, Box } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import axios from 'axios';
 
 export default function Billing() {
-    const router = useRouter();
-    const [billingData, setBillingData] = useState([]);
-    const [originalBillingData, setOriginalBillingData] = useState([]);
-    const [filterStatus, setFilterStatus] = useState("all");
-    const [searchRoom, setSearchRoom] = useState("");
-    const [searchGuest, setSearchGuest] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const [billingData, setBillingData] = useState([]);
+  const [originalBillingData, setOriginalBillingData] = useState([]);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchRoom, setSearchRoom] = useState("");
+  const [searchGuest, setSearchGuest] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const [roomsResponse, billingResponse, bookingResponse] = await Promise.all([
-                    fetch("/api/rooms"),
-                    fetch("/api/Billing"),
-                    fetch("/api/NewBooking")
-                ]);
-                const [roomsResult, billingResult, bookingResult] = await Promise.all([
-                    roomsResponse.json(),
-                    billingResponse.json(),
-                    bookingResponse.json()
-                ]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+        const headers = { 'Authorization': `Bearer ${token}` };
 
-                if (roomsResult.success && billingResult.success && bookingResult.success) {
-                    const billingsMap = new Map(
-                        billingResult.data.map(bill => [bill._id, bill])
-                    );
-                    const bookingsMap = new Map(
-                        bookingResult.data.map(booking => [booking._id, booking])
-                    );
+        const [roomsResponse, billingResponse, bookingResponse] = await Promise.all([
+          axios.get("/api/rooms", { headers }),
+          axios.get("/api/Billing", { headers }),
+          axios.get("/api/NewBooking", { headers })
+        ]);
 
-                    // Process and sort bills
-                    const enrichedBills = roomsResult.data
-                        .flatMap(room => {
-                            if (!room.billWaitlist || room.billWaitlist.length === 0) return [];
-                            return room.billWaitlist.map((billId, index) => {
-                                const bill = billingsMap.get(billId);
-                                if (!bill) return null;
-                                const guestId = room.guestWaitlist[index];
-                                const guest = bookingsMap.get(guestId);
-                                return {
-                                    ...bill,
-                                    roomNo: room.number.toString(),
-                                    guestName: guest ? guest.guestName : "N/A",
-                                    checkInDate: guest ? guest.checkIn : null,  // Add check-in date
-                                    currentBillingId: billId,
-                                    timestamp: bill.createdAt || new Date().toISOString()
-                                };
-                            });
-                        })
-                        .filter(Boolean)
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        const roomsResult = roomsResponse.data.data;
+        const billingResult = billingResponse.data.data;
+        const bookingResult = bookingResponse.data.data;
 
-                    setBillingData(enrichedBills);
-                    setOriginalBillingData(enrichedBills);
-                } else {
-                    console.error("Failed to fetch data");
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        const billingsMap = new Map(
+          billingResult.map(bill => [bill._id, bill])
+        );
+        const bookingsMap = new Map(
+          bookingResult.map(booking => [booking._id, booking])
+        );
 
-        fetchData();
-    }, []);
+        // Process and sort bills
+        const enrichedBills = roomsResult.flatMap(room => {
+          if (!room.billWaitlist || room.billWaitlist.length === 0) return [];
+          return room.billWaitlist.map((billId, index) => {
+            const bill = billingsMap.get(billId);
+            if (!bill) return null;
+            const guestId = room.guestWaitlist[index];
+            const guest = bookingsMap.get(guestId);
+            return {
+              bill,
+              roomNo: room.number.toString(),
+              guestName: guest ? guest.guestName : "N/A",
+              checkInDate: guest ? guest.checkIn : null,  // Add check-in date
+              currentBillingId: billId,
+              timestamp: bill.createdAt || new Date().toISOString()
+            };
+          });
+        }).filter(Boolean).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-    const filteredBillingData = useMemo(() => {
-        let result = originalBillingData;
-        if (filterStatus !== "all") {
-            result = result.filter(
-                bill => bill.Bill_Paid === (filterStatus === "paid" ? "yes" : "no")
-            );
-        }
-        if (searchRoom) {
-            result = result.filter(bill =>
-                bill.roomNo.toString().toLowerCase().includes(searchRoom.toLowerCase())
-            );
-        }
-        if (searchGuest) {
-            result = result.filter(bill =>
-                bill.guestName.toLowerCase().includes(searchGuest.toLowerCase())
-            );
-        }
-        return result;
-    }, [originalBillingData, filterStatus, searchRoom, searchGuest]);
-
-    const handleViewBill = (bill) => {
-        router.push(`/property/billing/guest-bill/${bill.currentBillingId}`);
+        setBillingData(enrichedBills);
+        setOriginalBillingData(enrichedBills);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+    fetchData();
+  }, []);
 
-    // Function to check if the button should be disabled
-    const isButtonDisabled = (checkInDate) => {
-        if (!checkInDate) return true;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
-        const checkIn = new Date(checkInDate);
-        checkIn.setHours(0, 0, 0, 0);
-        return today < checkIn;
-    };
+  const filteredBillingData = useMemo(() => {
+    let result = originalBillingData;
+    if (filterStatus !== "all") {
+      result = result.filter(
+        bill => bill.bill.Bill_Paid.toLowerCase() === filterStatus
+      );
+    }
+    if (searchRoom) {
+      result = result.filter(bill =>
+        bill.roomNo.toString().toLowerCase().includes(searchRoom.toLowerCase())
+      );
+    }
+    if (searchGuest) {
+      result = result.filter(bill =>
+        bill.guestName.toLowerCase().includes(searchGuest.toLowerCase())
+      );
+    }
+    return result;
+  }, [originalBillingData, filterStatus, searchRoom, searchGuest]);
 
+  const handleViewBill = (bill) => {
+    router.push(`/property/billing/guest-bill/${bill.currentBillingId}`);
+  };
+
+  // Function to check if the button should be disabled
+  const isButtonDisabled = (checkInDate) => {
+    if (!checkInDate) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+    const checkIn = new Date(checkInDate);
+    checkIn.setHours(0, 0, 0, 0);
+    return today < checkIn;
+  };
     return (
         <div>
             <Navbar />
