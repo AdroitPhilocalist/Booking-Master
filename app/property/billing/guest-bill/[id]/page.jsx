@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
@@ -22,13 +21,10 @@ import {
 
 const BookingDashboard = () => {
   const { id } = useParams();
-
-  // State Management
   const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [remainingDueAmount, setRemainingDueAmount] = useState(0);
-
   // Modal States
   const [openRoomInvoiceModal, setOpenRoomInvoiceModal] = useState(false);
   const [openServiceInvoiceModal, setOpenServiceInvoiceModal] = useState(false);
@@ -36,14 +32,12 @@ const BookingDashboard = () => {
   const [openFoodModal, setOpenFoodModal] = useState(false);
   const [openFoodInvoiceModal, setOpenFoodInvoiceModal] = useState(false);
   const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
-
   // Service Form States
   const [serviceName, setServiceName] = useState("");
   const [serviceTax, setServiceTax] = useState("");
   const [servicePrice, setServicePrice] = useState("");
   const [serviceTotal, setServiceTotal] = useState("");
   const [services, setServices] = useState([]);
-
   // Food Form States
   const [menuItems, setMenuItems] = useState([]);
   const [selectedFoodItem, setSelectedFoodItem] = useState(null);
@@ -52,20 +46,16 @@ const BookingDashboard = () => {
   const [foodTax, setFoodTax] = useState("");
   const [foodQuantity, setFoodQuantity] = useState(1);
   const [selectedFoodItems, setSelectedFoodItems] = useState([]);
-
   // Payment Form States
   const [modeOfPayment, setModeOfPayment] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("");
-
   // Separated Items Lists
   const [foodItems, setFoodItems] = useState([]);
   const [serviceItems, setServiceItems] = useState([]);
-
   // Add new state variables for remarks
   const [foodRemarks, setFoodRemarks] = useState("");
   const [serviceRemarks, setServiceRemarks] = useState("");
   const [roomRemarks, setRoomRemarks] = useState("");
-
   // Modal Styles
   const modalStyle = {
     position: "absolute",
@@ -95,7 +85,9 @@ const BookingDashboard = () => {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const menuResponse = await axios.get("/api/menuItem");
+        const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const menuResponse = await axios.get("/api/menuItem", { headers });
         setMenuItems(menuResponse.data.data);
       } catch (err) {
         console.error("Error fetching menu items:", err);
@@ -108,20 +100,23 @@ const BookingDashboard = () => {
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
+        const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+        const headers = { 'Authorization': `Bearer ${token}` };
+
         // Fetch menu items for comparison
-        const menuResponse = await axios.get("/api/menuItem");
+        const menuResponse = await axios.get("/api/menuItem", { headers });
         const menuItemsList = menuResponse.data.data;
-    
+
         // Fetch billing details
-        const billingResponse = await axios.get(`/api/Billing/${id}`);
+        const billingResponse = await axios.get(`/api/Billing/${id}`, { headers });
         const billingData = billingResponse.data.data;
-    
+
         // Process existing items
         const existingServices = billingData.itemList || [];
         const existingPrices = billingData.priceList || [];
         const existingTaxes = billingData.taxList || [];
         const existingQuantities = billingData.quantityList || [];
-    
+
         // Separate food and service items
         const foodItemsArray = [];
         const serviceItemsArray = [];
@@ -139,31 +134,28 @@ const BookingDashboard = () => {
             serviceItemsArray.push(itemDetails);
           }
         });
-    
         setFoodItems(foodItemsArray);
         setServiceItems(serviceItemsArray);
         setServices([...serviceItemsArray, ...foodItemsArray]);
-    
+
         // Fetch room details
-        const roomsResponse = await axios.get("/api/rooms");
+        const roomsResponse = await axios.get("/api/rooms", { headers });
         const matchedRoom = roomsResponse.data.data.find(
           (room) => room.number === billingData.roomNo
         );
-    
         if (!matchedRoom) {
           throw new Error("No matching room found");
         }
-    
+
         // Fetch room categories
-        const roomCategoriesResponse = await axios.get("/api/roomCategories");
+        const roomCategoriesResponse = await axios.get("/api/roomCategories", { headers });
         const matchedCategory = roomCategoriesResponse.data.data.find(
           (category) => category._id === matchedRoom.category._id
         );
-    
+
         // Fetch bookings
-        const newBookingsResponse = await axios.get("/api/NewBooking");
+        const newBookingsResponse = await axios.get("/api/NewBooking", { headers });
         let matchedBooking;
-    
         if (billingData.Bill_Paid === "yes") {
           // Find the position of the current billing ID in the room's billWaitlist
           const currentBillIndex = matchedRoom.billWaitlist.findIndex(
@@ -173,7 +165,6 @@ const BookingDashboard = () => {
           if (currentBillIndex === -1) {
             throw new Error("Billing ID not found in room's billWaitlist");
           }
-    
           // Get the corresponding guest ID from the guestWaitlist array
           const correspondingGuestId = matchedRoom.guestWaitlist[currentBillIndex];
           console.log("correspondingGuestId", correspondingGuestId);
@@ -187,11 +178,9 @@ const BookingDashboard = () => {
             (booking) => booking._id === matchedRoom.currentGuestId
           );
         }
-    
         if (!matchedBooking) {
           throw new Error("No matching booking found");
         }
-    
         setRemainingDueAmount(billingData.dueAmount);
         setBookingData({
           billing: billingData,
@@ -206,7 +195,6 @@ const BookingDashboard = () => {
         console.error("Error fetching booking details:", err);
       }
     };
-
     fetchBookingDetails();
   }, [id]);
 
@@ -218,7 +206,6 @@ const BookingDashboard = () => {
     setServiceTax("");
     setServiceTotal("");
   };
-
   const handleCloseServicesModal = () => {
     setOpenServicesModal(false);
     setServiceName("");
@@ -226,14 +213,12 @@ const BookingDashboard = () => {
     setServiceTax("");
     setServiceTotal("");
   };
-
   const handleOpenRoomInvoiceModal = () => setOpenRoomInvoiceModal(true);
   const handleCloseRoomInvoiceModal = () => setOpenRoomInvoiceModal(false);
   const handleOpenServiceInvoiceModal = () => setOpenServiceInvoiceModal(true);
   const handleCloseServiceInvoiceModal = () => setOpenServiceInvoiceModal(false);
   const handleOpenFoodInvoiceModal = () => setOpenFoodInvoiceModal(true);
   const handleCloseFoodInvoiceModal = () => setOpenFoodInvoiceModal(false);
-
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
     setSelectedFoodItem(null);
@@ -241,9 +226,7 @@ const BookingDashboard = () => {
     setFoodPrice("");
     setFoodTax("");
   };
-
   const handleCloseFoodModal = () => setOpenFoodModal(false);
-
   const handleOpenBillPaymentModal = () => setOpenBillPaymentModal(true);
   const handleCloseBillPaymentModal = () => {
     setOpenBillPaymentModal(false);
@@ -256,16 +239,16 @@ const BookingDashboard = () => {
       alert("Please enter service name, price, and tax");
       return;
     }
-
     try {
+      const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+      const headers = { 'Authorization': `Bearer ${token}` };
       const response = await axios.put(`/api/Billing/${id}`, {
         itemList: [serviceName],
         priceList: [parseFloat(serviceTotal)],
         quantityList: [1],
         taxList: [parseFloat(serviceTax)],
         ServiceRemarks: [serviceRemarks] // Add service remarks
-      });
-
+      }, { headers });
       setServices([
         ...services,
         {
@@ -275,7 +258,6 @@ const BookingDashboard = () => {
           remarks: serviceRemarks
         }
       ]);
-
       handleCloseServicesModal();
       window.location.reload();
     } catch (error) {
@@ -307,13 +289,11 @@ const BookingDashboard = () => {
       alert("Please select a food item");
       return;
     }
-
     const newItem = {
-      ...selectedFoodItem,
+      selectedFoodItem,
       quantity: foodQuantity,
       totalPrice: selectedFoodItem.price * foodQuantity
     };
-
     setSelectedFoodItems([...selectedFoodItems, newItem]);
     setSelectedFoodItem(null);
     setFoodName("");
@@ -329,18 +309,16 @@ const BookingDashboard = () => {
 
   const handleUpdateQuantity = (index, newQuantity) => {
     if (newQuantity < 1) return;
-
     const updatedItems = selectedFoodItems.map((item, idx) => {
       if (idx === index) {
         return {
           ...item,
           quantity: newQuantity,
-          totalPrice: item.price * newQuantity
+          totalPrice: item.selectedFoodItem.price * newQuantity
         };
       }
       return item;
     });
-
     setSelectedFoodItems(updatedItems);
   };
 
@@ -349,25 +327,24 @@ const BookingDashboard = () => {
       alert("Please add at least one food item");
       return;
     }
-
     try {
+      const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+      const headers = { 'Authorization': `Bearer ${token}` };
       const response = await axios.put(`/api/Billing/${id}`, {
-        itemList: selectedFoodItems.map(item => item.itemName),
+        itemList: selectedFoodItems.map(item => item.selectedFoodItem.itemName),
         priceList: selectedFoodItems.map(item => item.totalPrice),
         quantityList: selectedFoodItems.map(item => item.quantity),
-        taxList: selectedFoodItems.map(item => parseFloat(item.gst)),
+        taxList: selectedFoodItems.map(item => parseFloat(item.selectedFoodItem.gst)),
         FoodRemarks: [foodRemarks] // Add food remarks
-      });
-
+      }, { headers });
       setServices([
         ...services,
-        ...selectedFoodItems.map(item => ({
-          name: item.itemName,
+        selectedFoodItems.map(item => ({
+          name: item.selectedFoodItem.itemName,
           price: item.totalPrice,
-          tax: parseFloat(item.gst)
+          tax: parseFloat(item.selectedFoodItem.gst)
         }))
       ]);
-
       handleCloseFoodModal();
       window.location.reload();
     } catch (error) {
@@ -378,38 +355,34 @@ const BookingDashboard = () => {
 
   const handleAddPayment = async () => {
     const paymentAmountNum = Number(paymentAmount);
-
     if (!paymentAmount || paymentAmountNum <= 0) {
       alert("Please enter a valid payment amount");
       return;
     }
-
     if (paymentAmountNum > remainingDueAmount) {
       alert(`Payment amount cannot exceed remaining due amount of ${remainingDueAmount}`);
       return;
     }
-
     if (!modeOfPayment) {
       alert("Please select a mode of payment");
       return;
     }
-
     try {
       const currentDate = new Date().toISOString();
+      const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+      const headers = { 'Authorization': `Bearer ${token}` };
       const response = await axios.put(`/api/Billing/${id}`, {
         amountAdvanced: paymentAmountNum + bookingData.billing.amountAdvanced,
         DateOfPayment: [currentDate],
         ModeOfPayment: [modeOfPayment],
         AmountOfPayment: [paymentAmountNum],
         RoomRemarks: [roomRemarks] // Add room remarks
-      });
-
+      }, { headers });
       const updatedBillingData = response.data.data;
       const updatedBookingData = { ...bookingData };
       updatedBookingData.billing = updatedBillingData;
       setBookingData(updatedBookingData);
       setRemainingDueAmount(updatedBillingData.dueAmount);
-
       handleCloseBillPaymentModal();
       setPaymentAmount("");
       setModeOfPayment("");
@@ -422,15 +395,17 @@ const BookingDashboard = () => {
 
   const handleCompletePayment = async () => {
     try {
+      const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+      const headers = { 'Authorization': `Bearer ${token}` };
       // Update Billing API
       await axios.put(`/api/Billing/${id}`, {
         Bill_Paid: "yes",
         dueAmount: 0,
-      });
+      }, { headers });
 
       // Get current room data
       const roomNo = bookingData.room._id;
-      const currentRoomResponse = await axios.get(`/api/rooms/${roomNo}`);
+      const currentRoomResponse = await axios.get(`/api/rooms/${roomNo}`, { headers });
       const currentRoomData = currentRoomResponse.data.data;
 
       // Find position of current IDs
@@ -448,7 +423,6 @@ const BookingDashboard = () => {
 
       // Check if there's a next booking
       const hasNextBooking = currentPosition < currentRoomData.billWaitlist.length - 1;
-
       if (hasNextBooking) {
         updateData = {
           ...updateData,
@@ -470,7 +444,7 @@ const BookingDashboard = () => {
       }
 
       // Update room with new data
-      await axios.put(`/api/rooms/${roomNo}`, updateData);
+      await axios.put(`/api/rooms/${roomNo}`, updateData, { headers });
 
       // Update state
       setRemainingDueAmount(0);
@@ -484,22 +458,12 @@ const BookingDashboard = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-        <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-          <svg aria-hidden="true" className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-          </svg>
-          <span className="mt-4 text-gray-700">Loading Booking Data...</span>
-        </div>
-      </div>
+      <div>Loading Booking Data...</div>
     );
   }
-
   if (error) {
     return <div>Error: {error}</div>;
   }
-
   const { billing, booking, room, category } = bookingData;
 
   return (
