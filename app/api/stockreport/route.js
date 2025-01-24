@@ -3,7 +3,10 @@ import InventoryList from "../../lib/models/InventoryList";
 import Inventory from "../../lib/models/Inventorycategory"; // Ensure this is imported
 import connectSTR from "../../lib/dbConnect";
 import mongoose from "mongoose";
+import Profile from "../../lib/models/Profile";
 import { NextResponse } from "next/server";
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const connectToDatabase = async () => {
   if (mongoose.connections[0]?.readyState === 1) return;
@@ -19,8 +22,29 @@ const connectToDatabase = async () => {
   }
 };
 
-export async function GET() {
+export async function GET(req) {
   try {
+    await connectToDatabase();
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Fetch the profile by userId to get the username
+    const profileResponse = await fetch(`/api/Profile/${userId}`);
+    const profileData = await profileResponse.json();
+    if (!profileData.success || !profileData.data) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+    const username = profileData.data.username;
     // Ensure all models are registered before querying
     if (!mongoose.models.StockReport) {
       mongoose.model('StockReport', StockReport.schema);
@@ -31,10 +55,7 @@ export async function GET() {
     if (!mongoose.models.Inventory) {
       mongoose.model('Inventory', Inventory.schema);
     }
-
-    await connectToDatabase();
-
-    const stockReports = await StockReport.find()
+    const stockReports = await StockReport.find({ username: username })
       .populate({
         path: "name",
         model: "InventoryList",
@@ -61,7 +82,6 @@ export async function GET() {
         select: "tax" 
       })
       .lean(); // Add .lean() for better performance and error handling
-
     return NextResponse.json({ stockReports });
   } catch (error) {
     console.error("Detailed error fetching stock reports:", error);
@@ -90,7 +110,6 @@ export async function POST(request) {
       "total",
       "purorsell"
     ];
-
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
@@ -99,17 +118,29 @@ export async function POST(request) {
         );
       }
     }
-
     await connectToDatabase();
-
-    // Ensure all models are registered before creating
-    if (!mongoose.models.StockReport) {
-      mongoose.model('StockReport', StockReport.schema);
+    const token = request.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
     }
-
-    const newStockReport = new StockReport(data);
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Fetch the profile by userId to get the username
+    const profileResponse = await fetch(`/api/Profile/${userId}`);
+    const profileData = await profileResponse.json();
+    if (!profileData.success || !profileData.data) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+    const username = profileData.data.username;
+    const newStockReport = new StockReport({ ...data, username: username });
     await newStockReport.save();
-
     const populatedStockReport = await StockReport.findById(newStockReport._id)
       .populate({
         path: "name",
@@ -132,7 +163,6 @@ export async function POST(request) {
         select: "tax"
       })
       .lean();
-
     return NextResponse.json(
       { message: "Stock report added successfully", stockReport: populatedStockReport },
       { status: 201 }

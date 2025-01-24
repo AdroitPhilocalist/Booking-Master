@@ -57,6 +57,8 @@ export async function POST(req) {
       { status: 200 }
     );
 
+    
+
     // Set both HTTP-only and client-accessible cookies
     response.cookies.set('authToken', token, {
       httpOnly: false,

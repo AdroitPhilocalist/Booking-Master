@@ -1,7 +1,10 @@
 import Inventory from "../../lib/models/Inventorycategory";
 import connectSTR from "../../lib/dbConnect";
 import mongoose from "mongoose";
+import Profile from "../../lib/models/Profile";
 import { NextResponse } from "next/server";
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 // Connect to the database
 const connectToDatabase = async () => {
@@ -13,10 +16,28 @@ const connectToDatabase = async () => {
 };
 
 // GET all products
-export async function GET() {
+export async function GET(req) {
   try {
     await connectToDatabase();
-    const products = await Inventory.find();
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+    const products = await Inventory.find({ username: profile.username });
     return NextResponse.json({ products });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -37,16 +58,31 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
     await connectToDatabase();
-
+    const token = request.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
     const newProduct = new Inventory({
       itemName: data.itemName,
       isActive: data.isActive !== true, // Default true unless explicitly false
+      username: profile.username,
     });
-
     await newProduct.save();
-
     return NextResponse.json(
       { message: "Product added successfully", product: newProduct },
       { status: 201 }
