@@ -11,6 +11,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+import { useRouter } from 'next/navigation';
 
 export default function InventoryList() {
   const [items, setItems] = useState([]);
@@ -23,69 +26,82 @@ export default function InventoryList() {
   const [filteredItems, setFilteredItems] = useState([]);
   const [stockQuantities, setStockQuantities] = useState({});
   const tableRef = useRef(null);
+  const router = useRouter();
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
-  // Fetch items, categories, and stock report data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const [itemsResponse, categoriesResponse, stockReportResponse] = await Promise.all([
-          fetch("/api/InventoryList"),
-          fetch("/api/InventoryCategory"),
-          fetch("/api/stockreport")
-        ]);
-
-        const itemsData = await itemsResponse.json();
-        const categoriesData = await categoriesResponse.json();
-        const stockReportData = await stockReportResponse.json();
-
-        // Process stock report data for dates and quantities
-        const purchaseDates = {};
-        const stockData = {};
-
-        stockReportData.stockReports.forEach(report => {
-          if (!report.name) return;
-
-          const itemId = report.name._id;
-          const quantity = Number(report.quantityAmount) || 0;
-
-          // Initialize stock data if not exists
-          if (!stockData[itemId]) {
-            stockData[itemId] = {
-              instock: 0,
-              outstock: 0
-            };
+    // Fetch items, categories, and stock report data
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          setIsLoading(true);
+          const token = getCookie('authToken'); // Get the token from cookies
+          if (!token) {
+            router.push('/'); // Redirect to login if no token is found
+            return;
           }
-
-          // Update last purchase date
-          if (report.purorsell === 'purchase' || report.purorsell === 'sell') {
-            const currentDate = new Date(report.purchasedate);
-            if (!purchaseDates[itemId] || new Date(purchaseDates[itemId]) < currentDate) {
-              purchaseDates[itemId] = report.purchasedate;
+          // Verify the token
+          const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+          const userId = decoded.payload.id;
+          // Fetch the profile by userId to get the username
+          const profileResponse = await fetch(`/api/Profile/${userId}`);
+          const profileData = await profileResponse.json();
+          if (!profileData.success || !profileData.data) {
+            router.push('/'); // Redirect to login if profile not found
+            return;
+          }
+          const username = profileData.data.username;
+  
+          const [itemsResponse, categoriesResponse, stockReportResponse] = await Promise.all([
+            fetch(`/api/InventoryList?username=${username}`),
+            fetch(`/api/InventoryCategory?username=${username}`),
+            fetch(`/api/stockreport?username=${username}`)
+          ]);
+  
+          const itemsData = await itemsResponse.json();
+          const categoriesData = await categoriesResponse.json();
+          const stockReportData = await stockReportResponse.json();
+  
+          // Process stock report data for dates and quantities
+          const purchaseDates = {};
+          const stockData = {};
+          stockReportData.stockReports.forEach(report => {
+            if (!report.name) return;
+            const itemId = report.name._id;
+            const quantity = Number(report.quantityAmount) || 0;
+            // Initialize stock data if not exists
+            if (!stockData[itemId]) {
+              stockData[itemId] = {
+                instock: 0,
+                outstock: 0
+              };
             }
-          }
-
-          // Update quantities
-          if (report.purorsell === 'purchase') {
-            stockData[itemId].instock += quantity;
-          } else if (report.purorsell === 'sell') {
-            stockData[itemId].outstock += quantity;
-          }
-        });
-
-        setLastPurchaseDates(purchaseDates);
-        setStockQuantities(stockData);
-        setItems(itemsData.items || []);
-        setCategories(categoriesData.products || []);
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+            // Update last purchase date
+            if (report.purorsell === 'purchase' || report.purorsell === 'sell') {
+              const currentDate = new Date(report.purchasedate);
+              if (!purchaseDates[itemId] || new Date(purchaseDates[itemId]) < currentDate) {
+                purchaseDates[itemId] = report.purchasedate;
+              }
+            }
+            // Update quantities
+            if (report.purorsell === 'purchase') {
+              stockData[itemId].instock += quantity;
+            } else if (report.purorsell === 'sell') {
+              stockData[itemId].outstock += quantity;
+            }
+          });
+  
+          setLastPurchaseDates(purchaseDates);
+          setStockQuantities(stockData);
+          setItems(itemsData.items || []);
+          setCategories(categoriesData.products || []);
+        } catch (error) {
+          console.error("Failed to fetch data", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchData();
+    }, [router]);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';

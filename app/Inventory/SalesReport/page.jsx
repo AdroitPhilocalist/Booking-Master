@@ -16,6 +16,9 @@ import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+import { useRouter } from 'next/navigation';
 
 const SalesReportPage = () => {
   const [purchaseReports, setPurchaseReports] = useState([]);
@@ -43,19 +46,38 @@ const SalesReportPage = () => {
 
   // Ref to access the table
   const tableRef = useRef(null);
+  const router = useRouter();
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        const token = getCookie('authToken'); // Get the token from cookies
+        if (!token) {
+          router.push('/'); // Redirect to login if no token is found
+          return;
+        }
+        // Verify the token
+        const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+        const userId = decoded.payload.id;
+        // Fetch the profile by userId to get the username
+        const profileResponse = await fetch(`/api/Profile/${userId}`);
+        const profileData = await profileResponse.json();
+        if (!profileData.success || !profileData.data) {
+          router.push('/'); // Redirect to login if profile not found
+          return;
+        }
+        const username = profileData.data.username;
+
         const [itemsResponse, purchaseResponse] = await Promise.all([
-          fetch("/api/InventoryList"),
-          fetch("/api/stockreport"),
+          fetch(`/api/InventoryList?username=${username}`),
+          fetch(`/api/stockreport?username=${username}`)
         ]);
+
         const itemsData = await itemsResponse.json();
         const purchaseData = await purchaseResponse.json();
-
         setItems(itemsData.items || []);
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
@@ -72,7 +94,8 @@ const SalesReportPage = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [router]);
+
 
   // Function to check for duplicates
   const checkForDuplicates = (field, value) => {
@@ -186,6 +209,7 @@ const SalesReportPage = () => {
       taxpercent: selectedItem._id,
       total: parseFloat(total),
       purorsell: "sell",
+      username: selectedItem.username // Include username in the request body
     };
 
     try {
@@ -248,7 +272,7 @@ const SalesReportPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ stock: newStock }),
+        body: JSON.stringify({ stock: newStock, username: selectedItem.username }),
       });
 
       const result = await response.json();

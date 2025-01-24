@@ -1,7 +1,10 @@
 import InventoryList from "../../lib/models/InventoryList";
 import connectSTR from "../../lib/dbConnect";
 import mongoose from "mongoose";
+import Profile from "../../lib/models/Profile"
 import { NextResponse } from "next/server";
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const connectToDatabase = async () => {
   if (mongoose.connections[0].readyState) return;
@@ -12,10 +15,28 @@ const connectToDatabase = async () => {
 };
 
 // GET all items with populated segment data
-export async function GET() {
+export async function GET(req) {
   try {
     await connectToDatabase();
-    const items = await InventoryList.find().populate('segment');
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+    const items = await InventoryList.find({ username: profile.username }).populate('segment');
     return NextResponse.json({ items });
   } catch (error) {
     console.error("Error fetching inventory items:", error);
@@ -31,7 +52,6 @@ export async function POST(request) {
   try {
     const data = await request.json();
     const requiredFields = ['itemCode', 'name', 'group', 'segment', 'auditable', 'tax', 'quantityUnit'];
-    
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
@@ -40,14 +60,31 @@ export async function POST(request) {
         );
       }
     }
-
     await connectToDatabase();
-
-    const newItem = new InventoryList(data);
+    const token = request.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+    const newItem = new InventoryList({
+      ...data,
+      username: profile.username, // Set the username from the profile
+    });
     await newItem.save();
-
     const populatedItem = await InventoryList.findById(newItem._id).populate('segment');
-
     return NextResponse.json(
       { message: "Item added successfully", item: populatedItem },
       { status: 201 }
