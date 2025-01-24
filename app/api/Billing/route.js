@@ -3,6 +3,8 @@ import connectSTR from '../../lib/dbConnect';
 import Billing from '../../lib/models/Billing';
 import mongoose from "mongoose";
 import { NextResponse } from 'next/server';
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const connectToDatabase = async () => {
   if (mongoose.connections[0].readyState) return;
@@ -11,6 +13,7 @@ const connectToDatabase = async () => {
     useUnifiedTopology: true,
   });
 };
+
 export async function POST(req) {
   try {
     await connectToDatabase();
@@ -19,12 +22,10 @@ export async function POST(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
-
     const newData = {
       ...data,
       username: profile.username
     };
-
     if (!newData.roomNo || !newData.billStartDate || !newData.billEndDate || !newData.itemList || 
         !newData.priceList || !newData.quantityList || newData.itemList.length !== newData.priceList.length || 
         newData.itemList.length !== newData.quantityList.length) {
@@ -33,7 +34,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-
     const newBill = new Billing(newData);
     await newBill.save();
     return NextResponse.json({ success: true, data: newBill }, { status: 201 });
@@ -45,6 +45,7 @@ export async function POST(req) {
     );
   }
 }
+
 export async function GET(req) {
   try {
     await connectToDatabase();
@@ -52,7 +53,6 @@ export async function GET(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
-
     const bills = await Billing.find({ username: profile.username });
     return NextResponse.json({ success: true, data: bills }, { status: 200 });
   } catch (error) {
