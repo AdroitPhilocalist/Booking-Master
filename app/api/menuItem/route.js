@@ -65,7 +65,7 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     const token = req.cookies.get('authToken')?.value;
-    console.log("barnik ", token);
+   
 
     if (!token) {
       return NextResponse.json({ 
@@ -76,7 +76,7 @@ export async function GET(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
-    console.log("das",profile);
+   
 
     if (!profile) {
       return NextResponse.json({ 
@@ -85,7 +85,7 @@ export async function GET(req) {
       }, { status: 404 });
     }
     const menuItems = await MenuItem.find({ username: profile.username });
-    console
+  
 
     return NextResponse.json({ success: true, data: menuItems }, { status: 200 });
   } catch (error) {
