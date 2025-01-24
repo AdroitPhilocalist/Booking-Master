@@ -9,14 +9,10 @@ import TextField from "@mui/material/TextField";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-// import TableContainer from '@mui/material/TableContainer';
-// import TableHead from '@mui/material/TableHead';
-// import TableRow from '@mui/material/TableRow';
-// import Paper from '@mui/material/Paper';
-// import Table from '@mui/material/Table';
-// import TableBody from '@mui/material/TableBody';
-// import TableCell from '@mui/material/TableCell';
 import React from 'react';
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import { ChevronUpIcon, ChevronDownIcon, PencilIcon } from '@heroicons/react/outline'; // Ensure you have @heroicons/react installed
 
@@ -47,18 +43,37 @@ const PurchaseReportPage = () => {
 
   // Ref to access the table
   const tableRef = useRef(null);
+  const router = useRouter();
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        const token = getCookie('authToken'); // Get the token from cookies
+        if (!token) {
+          router.push('/'); // Redirect to login if no token is found
+          return;
+        }
+        // Verify the token
+        const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+        const userId = decoded.payload.id;
+        // Fetch the profile by userId to get the username
+        const profileResponse = await fetch(`/api/Profile/${userId}`);
+        const profileData = await profileResponse.json();
+        if (!profileData.success || !profileData.data) {
+          router.push('/'); // Redirect to login if profile not found
+          return;
+        }
+        const username = profileData.data.username;
+
         const [itemsResponse, purchaseResponse] = await Promise.all([
-          fetch("/api/InventoryList"),
-          fetch("/api/stockreport"),
+          fetch(`/api/InventoryList?username=${username}`),
+          fetch(`/api/stockreport?username=${username}`)
         ]);
+
         const itemsData = await itemsResponse.json();
         const purchaseData = await purchaseResponse.json();
-
         setItems(itemsData.items || []);
         if (purchaseResponse.ok) {
           const purchases = purchaseData.stockReports.filter(
@@ -75,7 +90,7 @@ const PurchaseReportPage = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [router]);
 
   // Function to check for duplicates
   const checkForDuplicates = (field, value) => {
@@ -95,7 +110,6 @@ const PurchaseReportPage = () => {
       const taxMultiplier = 1 + (selectedItem.tax / 100);
       const calculatedTotal = parseFloat(quantityAmount) * parseFloat(rate) * taxMultiplier;
       setTotal(calculatedTotal.toFixed(2));
-
       // Check for validation conditions
       const isDisabled =
         !purchaseorderno ||
@@ -103,7 +117,6 @@ const PurchaseReportPage = () => {
         !Invoiceno ||
         duplicateError.purchaseorderno ||
         duplicateError.Invoiceno;
-
       setIsSaveDisabled(isDisabled);
     } else {
       setTotal("");
@@ -111,8 +124,8 @@ const PurchaseReportPage = () => {
     }
   }, [quantityAmount, rate, selectedItem, purchaseorderno, purchasedate, Invoiceno, duplicateError]);
 
-  // Update the handlers for purchaseorderno and invoiceno
-  const handlePurchaseOrderChange = (e) => {
+   // Update the handlers for purchaseorderno and invoiceno
+   const handlePurchaseOrderChange = (e) => {
     const value = e.target.value;
     setPurchaseorderno(value);
     const isDuplicate = checkForDuplicates('purchaseorderno', value);
@@ -133,7 +146,6 @@ const PurchaseReportPage = () => {
   };
 
   const handleOpenModal = () => setIsModalOpen(true);
-
   const handleCloseModal = () => {
     setPurchaseorderno("");
     setPurchasedate("");
@@ -154,9 +166,8 @@ const PurchaseReportPage = () => {
     setSelectedItem(item || null);
   };
 
-  const handlePurchase = async () => {    //warning toaster
-    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem ||
-      !quantityAmount || !rate) {
+  const handlePurchase = async () => {
+    if (!purchaseorderno || !purchasedate || !Invoiceno || !selectedItem || !quantityAmount || !rate) {
       toast.warn('🥲 Please fill in all fields!', {
         position: "top-right",
         autoClose: 5000,
@@ -169,12 +180,10 @@ const PurchaseReportPage = () => {
       });
       return;
     }
-
     if (!selectedItem) {
       setError("Please select an item");
       return;
     }
-
     const purchaseData = {
       purchaseorderno,
       name: selectedItem._id,
@@ -187,8 +196,8 @@ const PurchaseReportPage = () => {
       taxpercent: selectedItem._id,
       total: parseFloat(total),
       purorsell: "purchase",
+      username: selectedItem.username // Include username in the request body
     };
-
     try {
       const response = await fetch("/api/stockreport", {
         method: "POST",
@@ -197,20 +206,12 @@ const PurchaseReportPage = () => {
         },
         body: JSON.stringify(purchaseData),
       });
-
       const result = await response.json();
-
       if (response.ok) {
-        await updateStockQuantity(
-          selectedItem._id,
-          parseFloat(quantityAmount),
-          selectedItem.stock
-        );
+        await updateStockQuantity(selectedItem._id, parseFloat(quantityAmount), selectedItem.stock);
         setPurchaseReports((prevReports) => [...prevReports, result.stockReport]);
         handleCloseModal();
-
-        // Show success toast with onClose callback to reload the page
-        toast.success('👍 Item Purchased Successfully!', {  //success toaster
+        toast.success('👍 Item Purchased Successfully!', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -222,16 +223,16 @@ const PurchaseReportPage = () => {
           onClose: () => window.location.reload()
         });
       } else {
-        setError(result.error || "Failed to save purchase report"); //
-        toast.error('👎 Failed to save purchase report', {   //error toaster
-          position: "top-right", //
-          autoClose: 5000, //
-          hideProgressBar: false, //
-          closeOnClick: true, //
-          pauseOnHover: true, //
-          draggable: true, //
-          progress: undefined, //
-          theme: "dark", //
+        setError(result.error || "Failed to save purchase report");
+        toast.error('👎 Failed to save purchase report', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
         });
       }
     } catch (error) {
@@ -239,7 +240,6 @@ const PurchaseReportPage = () => {
       setError("Error saving purchase report");
     }
   };
-
 
   const updateStockQuantity = async (itemId, quantityAmount, currentStock) => {
     try {
@@ -249,9 +249,8 @@ const PurchaseReportPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ stock: newStock }),
+        body: JSON.stringify({ stock: newStock, username: selectedItem.username }), // Include username in the request body
       });
-
       const result = await response.json();
       if (!response.ok) {
         throw new Error("Failed to update stock");

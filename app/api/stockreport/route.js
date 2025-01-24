@@ -36,16 +36,23 @@ export async function GET(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     // Fetch the profile by userId to get the username
-    const profileResponse = await fetch(`/api/Profile/${userId}`);
-    const profileData = await profileResponse.json();
-    if (!profileData.success || !profileData.data) {
+    // const profileResponse = await fetch(`/api/Profile/${userId}`);
+    // const profileData = await profileResponse.json();
+    // if (!profileData.success || !profileData.data) {
+    //   return NextResponse.json({ 
+    //     success: false, 
+    //     error: 'Profile not found' 
+    //   }, { status: 404 });
+    // }
+    const profile = await Profile.findById(userId);
+    // const username = profileData.data.username;
+    // Ensure all models are registered before querying
+    if (!profile) {
       return NextResponse.json({ 
         success: false, 
         error: 'Profile not found' 
       }, { status: 404 });
     }
-    const username = profileData.data.username;
-    // Ensure all models are registered before querying
     if (!mongoose.models.StockReport) {
       mongoose.model('StockReport', StockReport.schema);
     }
@@ -55,7 +62,7 @@ export async function GET(req) {
     if (!mongoose.models.Inventory) {
       mongoose.model('Inventory', Inventory.schema);
     }
-    const stockReports = await StockReport.find({ username: username })
+    const stockReports = await StockReport.find({ username: profile.username })
       .populate({
         path: "name",
         model: "InventoryList",
@@ -130,16 +137,23 @@ export async function POST(request) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     // Fetch the profile by userId to get the username
-    const profileResponse = await fetch(`/api/Profile/${userId}`);
-    const profileData = await profileResponse.json();
-    if (!profileData.success || !profileData.data) {
+    // const profileResponse = await fetch(`/api/Profile/${userId}`);
+    // const profileData = await profileResponse.json();
+    // if (!profileData.success || !profileData.data) {
+    //   return NextResponse.json({ 
+    //     success: false, 
+    //     error: 'Profile not found' 
+    //   }, { status: 404 });
+    // }
+    // const username = profileData.data.username;
+    const profile = await Profile.findById(userId);
+    if (!profile) {
       return NextResponse.json({ 
         success: false, 
         error: 'Profile not found' 
       }, { status: 404 });
     }
-    const username = profileData.data.username;
-    const newStockReport = new StockReport({ ...data, username: username });
+    const newStockReport = new StockReport({ ...data, username: profile.username });
     await newStockReport.save();
     const populatedStockReport = await StockReport.findById(newStockReport._id)
       .populate({
