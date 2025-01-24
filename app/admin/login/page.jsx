@@ -114,9 +114,9 @@ export default function AdminLogin() {
           <button type="submit" className="bg-cyan-700 text-white px-4 py-2 shadow-sm rounded mb-4 mt-3 w-full">
             SUBMIT
           </button>
-          <Link href="/admin/login" className="text-blue-500 hover:text-blue-700">
+          {/* <Link href="/admin/login" className="text-blue-500 hover:text-blue-700">
             Forgot Password?
-          </Link>
+          </Link> */}
           {/* <p className="text-center mt-4 text-gray-500">
             © {timestamp}, Hotel Booking. All Rights Reserved.
           </p> */}

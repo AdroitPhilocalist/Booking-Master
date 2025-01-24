@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Bed, Home, PlaneLanding, PlaneTakeoff, UserCheck, UserPlus, Edit2, Trash2, CheckCircle2, XCircle, User, Key, Building, Tags, Info, Calendar } from "lucide-react";
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { useRouter } from "next/navigation";
 
 // Component for summary items at the top of the page
 const SummaryItem = ({ icon: Icon, title, count }) => (
@@ -549,6 +551,8 @@ export default function RoomDashboard() {
   const [filter, setFilter] = useState("all"); // New state for filter
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
   const handleDelete = async (roomId) => {
     try {
@@ -654,6 +658,11 @@ export default function RoomDashboard() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        const token = getCookie('authToken'); // Get the token from cookies
+        if (!token) {
+          router.push('/'); // Redirect to login if no token is found
+          return;
+        }
         const [roomsResponse, categoriesResponse] = await Promise.all([
           fetch("/api/rooms"),
           fetch("/api/roomCategories"),
@@ -794,8 +803,8 @@ export default function RoomDashboard() {
               <button
                 onClick={() => setFilter("all")}
                 className={`px-4 py-2 rounded transition-colors ${filter === "all"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-blue-100"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-blue-100"
                   }`}
               >
                 All Rooms
@@ -803,8 +812,8 @@ export default function RoomDashboard() {
               <button
                 onClick={() => setFilter("occupied")}
                 className={`px-4 py-2 rounded transition-colors ${filter === "occupied"
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-red-200"
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-red-200"
                   }`}
               >
                 Occupied
@@ -812,8 +821,8 @@ export default function RoomDashboard() {
               <button
                 onClick={() => setFilter("vacant")}
                 className={`px-4 py-2 rounded transition-colors ${filter === "vacant"
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-green-100"
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-green-100"
                   }`}
               >
                 Vacant
@@ -860,25 +869,25 @@ export default function RoomDashboard() {
           </div>
 
           {/* Rooms List */}
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-             {filteredRooms.map((room) => (
-               <RoomCard
-                 key={room._id}
-                 room={room}
-                 onDelete={handleDelete}
-                 onEdit={handleEdit}
-                 handleEdit={handleEdit}
-                 categories={categories}
-                 setRooms={setRooms}
-               />
-             ))}
-             {filteredRooms.length === 0 && (
-               <div className="text-center">No rooms found.</div>
-             )}
-           </div>
-         </div>
-       </div>
-       <Footer />
-     </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredRooms.map((room) => (
+              <RoomCard
+                key={room._id}
+                room={room}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                handleEdit={handleEdit}
+                categories={categories}
+                setRooms={setRooms}
+              />
+            ))}
+            {filteredRooms.length === 0 && (
+              <div className="text-center">No rooms found.</div>
+            )}
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </div>
   );
 }

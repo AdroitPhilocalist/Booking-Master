@@ -46,12 +46,12 @@ export default function InventoryList() {
         // Fetch the profile by userId to get the username
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
+        console.log(profileData);
         if (!profileData.success || !profileData.data) {
           router.push('/'); // Redirect to login if profile not found
           return;
         }
         const username = profileData.data.username;
-
         const [itemsResponse, categoriesResponse] = await Promise.all([
           fetch(`/api/InventoryList?username=${username}`),
           fetch(`/api/InventoryCategory?username=${username}`)

@@ -11,7 +11,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { setCookie } from 'cookies-next';
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -21,17 +22,39 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [timestamp, setTimestamp] = useState(null);
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
   useEffect(() => {
     setTimestamp(new Date().getFullYear());
-  }, []);
+    const checkProfileCompletion = async () => {
+      const token = getCookie('authToken');
+      if (token) {
+        try {
+          const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+          const userId = decoded.payload.id;
+          const profileResponse = await fetch(`/api/Profile/${userId}`);
+          const profileData = await profileResponse.json();
+          if (profileData.success && profileData.data) {
+            const profileComplete = profileData.data.Profile_Complete;
+            if (profileComplete === 'no') {
+              router.push("/master/profile");
+            } else {
+              router.push("/property/roomdashboard");
+            }
+          }
+        } catch (error) {
+          console.error("Error verifying token or fetching profile:", error);
+          router.push('/');
+        }
+      }
+    };
+    checkProfileCompletion();
+  }, [router]);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-
   const handleMouseUpPassword = (event) => {
     event.preventDefault();
   };
@@ -48,11 +71,23 @@ export default function Home() {
         body: JSON.stringify({ username, password }),
         credentials: 'include', // Important: This ensures cookies are sent with the request
       });
-
       const data = await response.json();
-      
       if (data.success) {
-        router.push("/property/roomdashboard");
+        const token = getCookie('authToken');
+        if (token) {
+          const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+          const userId = decoded.payload.id;
+          const profileResponse = await fetch(`/api/Profile/${userId}`);
+          const profileData = await profileResponse.json();
+          if (profileData.success && profileData.data) {
+            const profileComplete = profileData.data.Profile_Complete;
+            if (profileComplete === 'no') {
+              router.push("/master/profile");
+            } else {
+              router.push("/property/roomdashboard");
+            }
+          }
+        }
       } else {
         alert(data.error);
       }

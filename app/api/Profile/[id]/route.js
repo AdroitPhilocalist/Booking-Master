@@ -56,16 +56,19 @@ export async function GET(req, { params }) {
 export async function PUT(req, { params }) {
   try {
     await connectToDatabase();
+    const { id } = params;
+    const data = await req.json();
     const token = req.cookies.get('authToken')?.value;
     if (!token) {
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication token missing'
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
       }, { status: 401 });
     }
     // Verify the token
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
+    // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
     if (!profile) {
       return NextResponse.json({ 
@@ -73,29 +76,28 @@ export async function PUT(req, { params }) {
         error: 'Profile not found' 
       }, { status: 404 });
     }
-    const data = await req.json();
     // Validate required fields
-    if (
-      !data.hotelName ||
-      !data.mobileNo ||
-      !data.email ||
-      !data.username
-    ) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    // if (
+    //   !data.hotelName ||
+    //   !data.mobileNo ||
+    //   !data.email ||
+    //   !data.username
+    // ) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Missing required fields' },
+    //     { status: 400 }
+    //   );
+    // }
     // Check if username already exists for another profile
-    const existingProfile = await Profile.findOne({ username: data.username }).where('_id').ne(id);
-    if (existingProfile) {
-      return NextResponse.json(
-        { success: false, error: 'Username already exists' },
-        { status: 400 }
-      );
-    }
+    // const existingProfile = await Profile.findOne({ username: data.username }).where('_id').ne(id);
+    // if (existingProfile) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Username already exists' },
+    //     { status: 400 }
+    //   );
+    // }
     // Hash the password if it is provided
-    let updatedData = { ...data };
+    let updatedData = { ...data, username: profile.username };
     if (data.password) {
       const hashedPassword = await bcrypt.hash(data.password, 10);
       updatedData.password = hashedPassword;
