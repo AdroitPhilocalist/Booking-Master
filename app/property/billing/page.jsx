@@ -7,6 +7,8 @@ import { Button, TableContainer, Table, TableHead, TableBody, TableRow, TableCel
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 
 export default function Billing() {
   const router = useRouter();
@@ -16,23 +18,43 @@ export default function Billing() {
   const [searchRoom, setSearchRoom] = useState("");
   const [searchGuest, setSearchGuest] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
+        const authtoken = getCookie('authToken'); // Get the token from cookies
+        if (!authtoken) {
+          router.push('/'); // Redirect to login if no token is found
+          return;
+        }
+        // Verify the token
+        const decoded = await jwtVerify(authtoken, new TextEncoder().encode(SECRET_KEY));
+        const userId = decoded.payload.id;
+        // Fetch the profile by userId to get the username
+        const profileResponse = await fetch(`/api/Profile/${userId}`);
+        const profileData = await profileResponse.json();
+        console.log(profileData);
+        if (!profileData.success || !profileData.data) {
+          router.push('/'); // Redirect to login if profile not found
+          return;
+        }
+        const username = profileData.data.username;
         const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
         const headers = { 'Authorization': `Bearer ${token}` };
 
         const [roomsResponse, billingResponse, bookingResponse] = await Promise.all([
-          axios.get("/api/rooms", { headers }),
-          axios.get("/api/Billing", { headers }),
-          axios.get("/api/NewBooking", { headers })
+          axios.get(`/api/rooms?username=${username}`, { headers }),
+          axios.get(`/api/Billing?username=${username}`, { headers }),
+          axios.get(`/api/NewBooking?username=${username}`, { headers })
         ]);
 
         const roomsResult = roomsResponse.data.data;
         const billingResult = billingResponse.data.data;
         const bookingResult = bookingResponse.data.data;
+        console.log(billingResult);
+        console.log("Rooms Result : ",roomsResult);
 
         const billingsMap = new Map(
           billingResult.map(bill => [bill._id, bill])
@@ -40,26 +62,36 @@ export default function Billing() {
         const bookingsMap = new Map(
           bookingResult.map(booking => [booking._id, booking])
         );
-
+        console.log("Billings Map : ",billingsMap);
+        console.log("Bookings Map : ",bookingsMap);
         // Process and sort bills
         const enrichedBills = roomsResult.flatMap(room => {
-          if (!room.billWaitlist || room.billWaitlist.length === 0) return [];
+          console.log(" Inside Room ");
+          if (!room.billWaitlist || room.billWaitlist.length === 0) { 
+            console.log("No Bills : ",room.billWaitlist.length);
+            return []
+          };
+          console.log("Inside Bill");
           return room.billWaitlist.map((billId, index) => {
-            const bill = billingsMap.get(billId);
+            console.log("Bill ID : ",billId);
+            const bill = billingsMap.get(billId._id);
+            console.log("Bill : ",bill);
             if (!bill) return null;
             const guestId = room.guestWaitlist[index];
-            const guest = bookingsMap.get(guestId);
+            console.log("Guest ID : ",guestId);
+            const guest = bookingsMap.get(guestId._id);
+            console.log("Guest : ",guest);
             return {
               bill,
               roomNo: room.number.toString(),
               guestName: guest ? guest.guestName : "N/A",
               checkInDate: guest ? guest.checkIn : null,  // Add check-in date
-              currentBillingId: billId,
+              currentBillingId: billId._id,
               timestamp: bill.createdAt || new Date().toISOString()
             };
           });
         }).filter(Boolean).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
+        console.log("Enriched Bills : ",enrichedBills);
         setBillingData(enrichedBills);
         setOriginalBillingData(enrichedBills);
       } catch (error) {
@@ -73,6 +105,7 @@ export default function Billing() {
 
   const filteredBillingData = useMemo(() => {
     let result = originalBillingData;
+    console.log("Result : ",result);
     if (filterStatus !== "all") {
       result = result.filter(
         bill => bill.bill.Bill_Paid.toLowerCase() === filterStatus
@@ -141,8 +174,10 @@ export default function Billing() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
+                              {console.log(filteredBillingData)}
                                 {filteredBillingData.length > 0 ? (
                                     filteredBillingData.map((bill, index) => (
+                                      console.log(bill.bill.totalAmount),
                                         <TableRow
                                             key={index}
                                             sx={{
@@ -152,9 +187,9 @@ export default function Billing() {
                                         >
                                             <TableCell>{bill.roomNo || "N/A"}</TableCell>
                                             <TableCell>{bill.guestName || "N/A"}</TableCell>
-                                            <TableCell>₹{bill.totalAmount || 0}</TableCell>
-                                            <TableCell>₹{bill.amountAdvanced || 0}</TableCell>
-                                            <TableCell>₹{bill.dueAmount || 0}</TableCell>
+                                            <TableCell>₹{bill.bill.totalAmount || 0}</TableCell>
+                                            <TableCell>₹{bill.bill.amountAdvanced || 0}</TableCell>
+                                            <TableCell>₹{bill.bill.dueAmount || 0}</TableCell>
                                             <TableCell>{bill.Bill_Paid === 'yes' ? 'Paid' : 'Unpaid'}</TableCell>
                                             <TableCell>
                                                 <Button

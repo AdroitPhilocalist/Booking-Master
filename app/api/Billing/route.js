@@ -23,7 +23,6 @@ export async function POST(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
-    console.log('username:', profile.username);
     const newData = {
       ...data,
       username: profile.username
@@ -55,7 +54,9 @@ export async function GET(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
+    console.log('username:', profile.username);
     const bills = await Billing.find({ username: profile.username });
+    console.log('bills:', bills);
     return NextResponse.json({ success: true, data: bills }, { status: 200 });
   } catch (error) {
     console.error('Error fetching bills:', error);
