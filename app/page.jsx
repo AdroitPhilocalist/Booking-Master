@@ -26,7 +26,7 @@ export default function Home() {
 
   useEffect(() => {
     setTimestamp(new Date().getFullYear());
-    const checkProfileCompletion = async () => {
+    const checkAuthStatus = async () => {
       const token = getCookie('authToken');
       if (token) {
         try {
@@ -44,13 +44,13 @@ export default function Home() {
           }
         } catch (error) {
           console.error("Error verifying token or fetching profile:", error);
-          router.push('/');
+          // Token is invalid or expired, proceed to login page
         }
       }
     };
-    checkProfileCompletion();
+    checkAuthStatus();
   }, [router]);
-
+  
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
     event.preventDefault();

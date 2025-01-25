@@ -22,6 +22,8 @@ const PrintableRoomInvoice = ({ billId }) => {
           fetch(`/api/Billing/${billId}`),
           fetch('/api/Profile')
         ]);
+        console.log('billingResponse', billingResponse);
+        console.log('profileResponse', profileResponse);
         if (!billingResponse.ok || !profileResponse.ok) {
           throw new Error('Failed to fetch data');
         }
@@ -184,7 +186,7 @@ const PrintableRoomInvoice = ({ billId }) => {
                 </Typography>
               )}
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                GST No: {profile.gstNo}
+                GST No: {profile.gstNo || 'N/A'}
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>

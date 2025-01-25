@@ -6,6 +6,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
+  const cookie = request.cookies.get('authToken')?.value;
   // Allow access to the admin login page without any restrictions
   if (pathname === '/admin/login') {
     return NextResponse.next();
@@ -14,6 +15,9 @@ export async function middleware(request) {
   // Allow access to the normal user login page without any restrictions
   if (pathname === '/') {
     return NextResponse.next();
+  }
+  else if(pathname === '/' && cookie) {
+    return NextResponse.redirect(new URL('/property/roomdashboard', request.url));
   }
 
   // Check for admin routes
