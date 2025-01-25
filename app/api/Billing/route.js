@@ -23,6 +23,7 @@ export async function POST(req) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
+    console.log('username:', profile.username);
     const newData = {
       ...data,
       username: profile.username

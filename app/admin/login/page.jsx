@@ -62,9 +62,7 @@ export default function AdminLogin() {
   };
 
   return (
-
     <main>
-
       <div className="flex items-center flex-col justify-center min-h-screen bg-gradient-to-br from-cyan-700 to-cyan-600">
         <div className="mb-8">
         {isLoading && (

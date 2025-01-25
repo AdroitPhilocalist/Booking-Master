@@ -35,7 +35,6 @@ export async function GET(req, { params }) {
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
-    console.log('Profile:', profile);
     if (!profile) {
       return NextResponse.json({ 
         success: false, 

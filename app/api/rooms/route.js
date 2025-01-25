@@ -55,7 +55,6 @@ export async function POST(req) {
 
     // Extract the token from cookies
     const token = req.cookies.get('authToken')?.value;
-    console.log("Token : ",token);
     if (!token) {
       return NextResponse.json({ 
         success: false, 
@@ -65,10 +64,7 @@ export async function POST(req) {
 
     // Verify the token
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    console.log("Decoded : ",decoded);
-    console.log("SECRET_KEY : ",SECRET_KEY);
     const userId = decoded.payload.id;
-    console.log("userId : ",userId);
 
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
@@ -121,11 +117,9 @@ export async function GET(req) {
       if (!mongoose.models.Billing) {
         mongoose.model('Billing', Billing.schema);
       }
-    console.log("Inside Get");
 
     // Extract the token from cookies
     const token = req.cookies.get('authToken')?.value;
-    console.log("Token : ",token);
     if (!token) {
       return NextResponse.json({ 
         success: false, 
@@ -135,14 +129,9 @@ export async function GET(req) {
 
     // Verify the token
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    console.log("Decoded : ",decoded);
-    console.log("SECRET_KEY : ",SECRET_KEY);
     const userId = decoded.payload.id;
-    console.log("userId : ",userId);
-
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
-    console.log("Profile : ",profile);
     if (!profile) {
       return NextResponse.json({ 
         success: false, 
@@ -152,13 +141,11 @@ export async function GET(req) {
     
 
     // Fetch all rooms from the database filtered by username
-    console.log("before error");
-    console.log("profile.username", profile.username);
     const rooms = await Room.find({ username: profile.username })
       .populate('category')
       .populate('guestWaitlist')
       .populate('billWaitlist');
-    console.log("rooms",rooms);
+
 
     return NextResponse.json({ success: true, data: rooms }, { status: 200 });
   } catch (error) {
