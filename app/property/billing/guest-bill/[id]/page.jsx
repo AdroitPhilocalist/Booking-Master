@@ -26,7 +26,9 @@ const BookingDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [remainingDueAmount, setRemainingDueAmount] = useState(0);
-  const [printableInvoice, setPrintableInvoice] = useState(null)
+  const [printableRoomInvoice, setPrintableRoomInvoice] = useState(null);
+  const [printableFoodInvoice, setPrintableFoodInvoice] = useState(null);
+  const [printableServiceInvoice, setPrintableServiceInvoice] = useState(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   // Modal States
   const [openRoomInvoiceModal, setOpenRoomInvoiceModal] = useState(false);
@@ -217,8 +219,18 @@ const BookingDashboard = () => {
     setServiceTotal("");
   };
 
-  const handlePrintPreview = (billing) => {
-    setPrintableInvoice(billing);
+  const handleRoomPrintPreview = (billing) => {
+    setPrintableRoomInvoice(billing);
+    setShowPrintModal(true);
+  };
+
+  const handleServicePrintPreview = (billing) => {
+    setPrintableServiceInvoice(billing);
+    setShowPrintModal(true);
+  };
+
+  const handleFoodPrintPreview = (billing) => {
+    setPrintableFoodInvoice(billing);
     setShowPrintModal(true);
   };
 
@@ -753,12 +765,12 @@ const BookingDashboard = () => {
               variant="contained"
               color="info"
               className="mt-4 mb-4"
-              onClick={() => handlePrintPreview(billing)}
+              onClick={() => handleRoomPrintPreview(billing)}
             >
               Print Room Invoice
             </Button>
             {/* Room Invoice Modal */}
-            {showPrintModal && printableInvoice && (
+            {showPrintModal && printableRoomInvoice && (
               <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="flex justify-end mb-4">
@@ -766,7 +778,7 @@ const BookingDashboard = () => {
                       className="bg-red-500 text-white px-4 py-2 rounded"
                       onClick={() => {
                         setShowPrintModal(false);
-                        setPrintableInvoice(null);
+                        setPrintableRoomInvoice(null);
                       }}
                     >
                       Close
@@ -1040,7 +1052,7 @@ const BookingDashboard = () => {
               variant="contained"
               color="info"
               className="mt-4 mb-4"
-              onClick={() => handlePrintPreview(billing)}
+              onClick={() => handleServicePrintPreview(billing)}
             >
               Print Service Invoice
             </Button>
@@ -1075,12 +1087,12 @@ const BookingDashboard = () => {
               variant="contained"
               color="info"
               className="mt-4 mb-4"
-              onClick={() => handlePrintPreview(billing)}
+              onClick={() => handleFoodPrintPreview(billing)}
             >
               Print Food Invoice
             </Button>
             {/* Food Invoice Modal */}
-            {showPrintModal && printableInvoice && (
+            {showPrintModal && printableFoodInvoice && (
               <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="flex justify-end mb-4">
@@ -1088,7 +1100,7 @@ const BookingDashboard = () => {
                       className="bg-red-500 text-white px-4 py-2 rounded"
                       onClick={() => {
                         setShowPrintModal(false);
-                        setPrintableInvoice(null);
+                        setPrintableFoodInvoice(null);
                       }}
                     >
                       Close
@@ -1100,7 +1112,7 @@ const BookingDashboard = () => {
             )}
 
             {/* Similar modification for Service Invoice Modal */}
-            {showPrintModal && printableInvoice && (
+            {showPrintModal && printableServiceInvoice && (
               <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="flex justify-end mb-4">
@@ -1108,7 +1120,7 @@ const BookingDashboard = () => {
                       className="bg-red-500 text-white px-4 py-2 rounded"
                       onClick={() => {
                         setShowPrintModal(false);
-                        setPrintableInvoice(null);
+                        setPrintableServiceInvoice(null);
                       }}
                     >
                       Close

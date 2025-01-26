@@ -32,6 +32,7 @@ export default function BookingForm() {
     bookingPoint: '',
     dateofbirth: '',
     dateofanniversary: '',
+    referenceno: '',
     pinCode: '',
     mobileNo: '',
     guestName: '',
@@ -773,14 +774,6 @@ export default function BookingForm() {
                       helperText={errors.bookingType}
                       fullWidth
                       select
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 300, // Adjust the maximum height for the dropdown
-                            overflowY: 'auto', // Add scroll if needed
-                          },
-                        },
-                      }}
                     >
                       {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events', 'Others'].map((type) => (
                         <MenuItem key={type} value={type}>
