@@ -77,7 +77,7 @@ const PrintableRoomInvoice = ({ billId }) => {
                 if (billingData.Bill_Paid?.toLowerCase() === 'yes') {
                     // For paid bills, find the booking using billWaitlist
                     const billIndex = matchedRoom.billWaitlist.findIndex(
-                        billId => billId.toString() === billingData._id.toString()
+                        billId => billId._id.toString() === billingData._id.toString()
                     );
                     console.log('billIndex', billIndex);
                     if (billIndex === -1) {
@@ -88,7 +88,7 @@ const PrintableRoomInvoice = ({ billId }) => {
                     const guestId = matchedRoom.guestWaitlist[billIndex];
 
                     // Find the booking that matches this guest ID
-                    matchedBooking = bookingsData.data.find(b => b._id === guestId);
+                    matchedBooking = bookingsData.data.find(b => b._id === guestId._id);
                     console.log('booking', matchedBooking);
                 } else {
                     // For unpaid bills, use currentGuestId
