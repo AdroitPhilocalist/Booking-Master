@@ -149,13 +149,13 @@ const PrintableInvoice = ({ invoiceId }) => {
                 </Typography>
               </Box>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                {profile.addressLine1}
+                {profile.addressLine1 || 'N/A'}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                {profile.addressLine2}
+                {profile.addressLine2 || 'N/A'}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                {profile.district}, {profile.country} - {profile.pincode}
+                {profile.district || 'N/A'}, {profile.country} - {profile.pincode || 'N/A'}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                 Phone: {profile.mobileNo}
@@ -165,11 +165,11 @@ const PrintableInvoice = ({ invoiceId }) => {
               </Typography>
               {profile.website && (
                 <Typography variant="body2" color="textSecondary">
-                  Website: {profile.website}
+                  Website: {profile.website || 'N/A'}
                 </Typography>
               )}
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                Customer GST No: {profile.gstNo}
+                Restaurant GST No: {profile.gstNo || 'N/A'}
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
@@ -190,6 +190,9 @@ const PrintableInvoice = ({ invoiceId }) => {
               <Typography variant="body1">{invoice.custname}</Typography>
               <Typography variant="body2" color="textSecondary">
                 Phone: {invoice.custphone}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                Customer GST No: {invoice.custgst}
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
