@@ -162,7 +162,7 @@ const BookingDashboard = () => {
         if (billingData.Bill_Paid === "yes") {
           // Find the position of the current billing ID in the room's billWaitlist
           const currentBillIndex = matchedRoom.billWaitlist.findIndex(
-            billId => billId.toString() === billingData._id.toString()
+            billId => billId._id.toString() === billingData._id.toString()
           );
           console.log("currentBillIndex", currentBillIndex);
           if (currentBillIndex === -1) {
@@ -173,7 +173,7 @@ const BookingDashboard = () => {
           console.log("correspondingGuestId", correspondingGuestId);
           // Find the booking that matches this guest ID
           matchedBooking = newBookingsResponse.data.data.find(
-            (booking) => booking._id === correspondingGuestId.toString()
+            (booking) => booking._id === correspondingGuestId._id.toString()
           );
         } else {
           // Use the current logic for unpaid bills

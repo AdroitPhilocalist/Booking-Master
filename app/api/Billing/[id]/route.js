@@ -16,6 +16,7 @@ export async function GET(req, { params }) {
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
     const bill = await Billing.findById(id);
+    console.log('Bill:', bill);
     if (!bill || bill.username !== profile.username) {
       return NextResponse.json(
         { success: false, error: 'Bill not found' },
