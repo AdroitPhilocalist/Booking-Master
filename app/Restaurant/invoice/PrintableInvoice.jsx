@@ -56,7 +56,6 @@ const PrintableInvoice = ({ invoiceId }) => {
           fetch(`/api/restaurantinvoice/${invoiceId}`),
           fetch('/api/Profile')
         ]);
-        console.log(profileResponse);
         if (!invoiceResponse.ok || !profileResponse.ok) {
           throw new Error('Failed to fetch data');
         }

@@ -16,7 +16,8 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  Paper
 } from "@mui/material";
 
 const BookingDashboard = () => {
@@ -25,6 +26,8 @@ const BookingDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [remainingDueAmount, setRemainingDueAmount] = useState(0);
+  const [printableInvoice, setPrintableInvoice] = useState(null)
+  const [showPrintModal, setShowPrintModal] = useState(false);
   // Modal States
   const [openRoomInvoiceModal, setOpenRoomInvoiceModal] = useState(false);
   const [openServiceInvoiceModal, setOpenServiceInvoiceModal] = useState(false);
@@ -213,6 +216,12 @@ const BookingDashboard = () => {
     setServiceTax("");
     setServiceTotal("");
   };
+
+  const handlePrintPreview = (billing) => {
+    setPrintableInvoice(billing);
+    setShowPrintModal(true);
+  };
+
   const handleOpenRoomInvoiceModal = () => setOpenRoomInvoiceModal(true);
   const handleCloseRoomInvoiceModal = () => setOpenRoomInvoiceModal(false);
   const handleOpenServiceInvoiceModal = () => setOpenServiceInvoiceModal(true);
@@ -744,33 +753,29 @@ const BookingDashboard = () => {
               variant="contained"
               color="info"
               className="mt-4 mb-4"
-              onClick={handleOpenRoomInvoiceModal}
+              onClick={() => handlePrintPreview(billing)}
             >
               Print Room Invoice
             </Button>
             {/* Room Invoice Modal */}
-            <Modal
-              open={openRoomInvoiceModal}
-              onClose={handleCloseRoomInvoiceModal}
-              aria-labelledby="room-invoice-modal"
-            >
-              <Box sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90%",
-                maxWidth: "900px",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-                borderRadius: 2,
-              }}>
-                <PrintableRoomInvoice billId={id} />
-              </Box>
-            </Modal>
+            {showPrintModal && printableInvoice && (
+              <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-end mb-4">
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded"
+                      onClick={() => {
+                        setShowPrintModal(false);
+                        setPrintableInvoice(null);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <PrintableRoomInvoice billId={id} />
+                </div>
+              </div>
+            )}
             {/* Services Table */}
             <h3 className="font-semibold text-gray-800 text-center ml-16">
               Services ({serviceItems.length})
@@ -1035,7 +1040,7 @@ const BookingDashboard = () => {
               variant="contained"
               color="info"
               className="mt-4 mb-4"
-              onClick={handleOpenServiceInvoiceModal}
+              onClick={() => handlePrintPreview(billing)}
             >
               Print Service Invoice
             </Button>
@@ -1070,57 +1075,50 @@ const BookingDashboard = () => {
               variant="contained"
               color="info"
               className="mt-4 mb-4"
-              onClick={handleOpenFoodInvoiceModal}
+              onClick={() => handlePrintPreview(billing)}
             >
               Print Food Invoice
             </Button>
             {/* Food Invoice Modal */}
-            <Modal
-              open={openFoodInvoiceModal}
-              onClose={handleCloseFoodInvoiceModal}
-              aria-labelledby="food-invoice-modal"
-            >
-              <Box sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90%",
-                maxWidth: "900px",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-                borderRadius: 2,
-              }}>
-                <PrintableFoodInvoice billId={id} />
-              </Box>
-            </Modal>
+            {showPrintModal && printableInvoice && (
+              <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-end mb-4">
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded"
+                      onClick={() => {
+                        setShowPrintModal(false);
+                        setPrintableInvoice(null);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <PrintableFoodInvoice billId={id} />
+                </div>
+              </div>
+            )}
 
             {/* Similar modification for Service Invoice Modal */}
-            <Modal
-              open={openServiceInvoiceModal}
-              onClose={handleCloseServiceInvoiceModal}
-              aria-labelledby="service-invoice-modal"
-            >
-              <Box sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "90%",
-                maxWidth: "900px",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-                borderRadius: 2,
-              }}>
-                <PrintableServiceInvoice billId={id} />
-              </Box>
-            </Modal>
+            {showPrintModal && printableInvoice && (
+              <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-6 rounded shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-end mb-4">
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded"
+                      onClick={() => {
+                        setShowPrintModal(false);
+                        setPrintableInvoice(null);
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <PrintableServiceInvoice billId={id} />
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
