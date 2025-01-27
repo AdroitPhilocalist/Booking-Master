@@ -143,21 +143,8 @@ export async function PATCH(req, { params }) {
     await connectToDatabase();
     const { id } = await params; // Await params
 
-    // Extract the token from cookies
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication token missing' 
-      }, { status: 401 });
-    }
-
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
-
     // Find the profile by userId to get the username
-    const profile = await Profile.findById(userId);
+    const profile = await Profile.findById(id);
     if (!profile) {
       return NextResponse.json({ 
         success: false, 
