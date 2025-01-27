@@ -545,6 +545,12 @@ const SuperAdminDashboard = () => {
                                 >
                                   <Delete />
                                 </IconButton>
+                                <IconButton
+                            color="default"
+                            onClick={() => toggleActiveStatus(profile._id)}
+                          >
+                            <Visibility />
+                          </IconButton>
                               </TableCell>
                             </TableRow>
                           ))}
