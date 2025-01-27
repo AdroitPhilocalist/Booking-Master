@@ -154,11 +154,11 @@ export async function DELETE(req, { params }) {
 
 
 
-// New PATCH route to toggle the active status
+// PATCH route to toggle the active status
 export async function PATCH(req, { params }) {
   try {
     await connectToDatabase();
-    const { id } = params;
+    const { id } = await params; // Await params
 
     // Extract the token from cookies
     const token = req.cookies.get('authToken')?.value;
