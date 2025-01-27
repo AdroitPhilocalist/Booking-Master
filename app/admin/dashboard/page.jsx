@@ -157,7 +157,27 @@ const SuperAdminDashboard = () => {
     setErrors({});
     setOpenAddProfileDialog(true);
   };
-
+  const toggleActiveStatus = async (id) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.patch(`/api/Profile/${id}`);
+      const data = await response.json();
+      if (data.success) {
+        setProfiles((prevProfiles) =>
+          prevProfiles.map((profile) =>
+            profile._id === id ? data.data : profile
+          )
+        );
+        toast.success("Active status toggled successfully!");
+      } else {
+        toast.error("Failed to toggle active status: " + data.error);
+      }
+    } catch (error) {
+      toast.error("Error toggling active status: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleCloseAddProfileDialog = () => {
     setOpenAddProfileDialog(false);
     setFormData({
