@@ -26,7 +26,14 @@ import {
   DialogContentText,
   Stack,
 } from "@mui/material";
-import { Edit, Delete, Visibility, Add , CheckCircle, Cancel} from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Visibility,
+  Add,
+  CheckCircle,
+  Cancel,
+} from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import {
   Users,
@@ -206,6 +213,7 @@ const SuperAdminDashboard = () => {
       pinCode: "",
       website: "",
       Profile_Complete: "no",
+      Active: "yes",
     }));
     console.log(formData);
     // Validate fields on change
@@ -309,6 +317,8 @@ const SuperAdminDashboard = () => {
           gstNo: "",
           pinCode: "",
           website: "",
+          Profile_Complete: "no",
+          Active: "yes",
         });
         setErrors({});
         toast.success("Profile added successfully!");
@@ -426,54 +436,60 @@ const SuperAdminDashboard = () => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {profiles.length > 0 ? (profiles.map((profile) => (
-                            <TableRow
-                              key={profile._id}
-                              style={{
-                                backgroundColor:
-                                  profile.active === "no"
-                                    ? "#ffdddd"
-                                    : "#f8f9fa",
-                                transition: "background-color 0.3s",
-                              }}
-                            >
-                              <TableCell>{profile.hotelName}</TableCell>
-                              <TableCell>{profile.email}</TableCell>
-                              <TableCell>{profile.mobileNo}</TableCell>
-                              <TableCell>{profile.username || "N/A"}</TableCell>
-                              <TableCell>
-                                {profile.Active === "yes" ? (
-                                  <CheckCircle color="success" />
-                                ) : (
-                                  <Cancel color="error" />
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <IconButton
-                                  color="primary"
-                                  onClick={() =>
-                                    handleOpenEditProfileDialog(profile)
-                                  }
-                                >
-                                  <Edit />
-                                </IconButton>
-                                <IconButton
-                                  color="secondary"
-                                  onClick={() => handleDeleteClick(profile._id)}
-                                >
-                                  <Delete />
-                                </IconButton>
-                                <IconButton
-                                  color="default"
-                                  onClick={() =>
-                                    toggleActiveStatus(profile._id)
-                                  }
-                                >
-                                  <Visibility />
-                                </IconButton>
-                              </TableCell>
-                            </TableRow>
-                          ))):(
+                          {profiles.length > 0 ? (
+                            profiles.map((profile) => (
+                              <TableRow
+                                key={profile._id}
+                                style={{
+                                  backgroundColor:
+                                    profile.active === "no"
+                                      ? "#ffdddd"
+                                      : "#f8f9fa",
+                                  transition: "background-color 0.3s",
+                                }}
+                              >
+                                <TableCell>{profile.hotelName}</TableCell>
+                                <TableCell>{profile.email}</TableCell>
+                                <TableCell>{profile.mobileNo}</TableCell>
+                                <TableCell>
+                                  {profile.username || "N/A"}
+                                </TableCell>
+                                <TableCell>
+                                  {profile.Active === "yes" ? (
+                                    <CheckCircle color="success" />
+                                  ) : (
+                                    <Cancel color="error" />
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() =>
+                                      handleOpenEditProfileDialog(profile)
+                                    }
+                                  >
+                                    <Edit />
+                                  </IconButton>
+                                  <IconButton
+                                    color="secondary"
+                                    onClick={() =>
+                                      handleDeleteClick(profile._id)
+                                    }
+                                  >
+                                    <Delete />
+                                  </IconButton>
+                                  <IconButton
+                                    color="default"
+                                    onClick={() =>
+                                      toggleActiveStatus(profile._id)
+                                    }
+                                  >
+                                    <Visibility />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
                             <TableRow>
                               <TableCell colSpan={6} align="center">
                                 No profiles available.
