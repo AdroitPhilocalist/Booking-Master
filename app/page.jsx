@@ -14,6 +14,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useEffect, useState } from 'react';
+import { ToastContainer, toast } from "react-toastify";
 
 export default function Home() {
   const [username, setUsername] = React.useState('');
@@ -35,12 +36,21 @@ export default function Home() {
           const profileResponse = await fetch(`/api/Profile/${userId}`);
           const profileData = await profileResponse.json();
           if (profileData.success && profileData.data) {
+            const profileActive=profileData.data.Active;
             const profileComplete = profileData.data.Profile_Complete;
-            if (profileComplete === 'no') {
-              router.push("/master/profile");
-            } else {
-              router.push("/property/roomdashboard");
+            if(profileActive==='yes')
+            {
+              if (profileComplete === 'no') {
+                router.push("/master/profile");
+              } else {
+                router.push("/property/roomdashboard");
+              }
+
             }
+            else{
+              toast.error("Profile marked as inactive. Please contact admin");
+            }
+            
           }
         } catch (error) {
           console.error("Error verifying token or fetching profile:", error);
@@ -72,20 +82,32 @@ export default function Home() {
         credentials: 'include', // Important: This ensures cookies are sent with the request
       });
       const data = await response.json();
+      
       if (data.success) {
+        
         const token = getCookie('authToken');
         if (token) {
           const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
           const userId = decoded.payload.id;
           const profileResponse = await fetch(`/api/Profile/${userId}`);
           const profileData = await profileResponse.json();
+          
           if (profileData.success && profileData.data) {
+            const profileActive=profileData.data.Active;
             const profileComplete = profileData.data.Profile_Complete;
-            if (profileComplete === 'no') {
-              router.push("/master/profile");
-            } else {
-              router.push("/property/roomdashboard");
+            if(profileActive==='yes')
+            {
+              if (profileComplete === 'no') {
+                router.push("/master/profile");
+              } else {
+                router.push("/property/roomdashboard");
+              }
+
             }
+            else{
+              alert("Profile marked as inactive. Please contact admin");
+            }
+            
           }
         }
       } else {
