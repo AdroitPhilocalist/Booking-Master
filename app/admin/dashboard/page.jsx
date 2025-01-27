@@ -231,8 +231,8 @@ const SuperAdminDashboard = () => {
     if (password.length < 8) {
       errors.minLength = "Password must be at least 8 characters long.";
     }
-    if (password.length > 13) {
-      errors.maxLength = "Password must be no more than 13 characters long.";
+    if (password.length > 20) {
+      errors.maxLength = "Password must be no more than 20 characters long.";
     }
     if (!/[A-Z]/.test(password)) {
       errors.uppercase = "Password must contain at least one uppercase letter.";
@@ -259,9 +259,9 @@ const SuperAdminDashboard = () => {
     }
     if (
       !isEditing &&
-      (formData.password.length < 8 || formData.password.length > 13)
+      (formData.password.length < 8 || formData.password.length > 20)
     ) {
-      newErrors.password = "Password must be between 8 and 13 characters.";
+      newErrors.password = "Password must be between 8 and 20 characters.";
     }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
