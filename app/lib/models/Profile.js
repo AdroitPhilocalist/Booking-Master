@@ -60,6 +60,11 @@ const profileSchema = new mongoose.Schema({
     enum: ['yes', 'no'],
     default: 'no'
   },
+  Active: {
+    type: String,
+    enum: ['yes', 'no'],
+    default: 'yes'
+  },
   forgotUsername: {
     type: Boolean,
     default: false
