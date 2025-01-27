@@ -5,6 +5,9 @@ import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
+import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 export default function GuestList() {
@@ -15,13 +18,32 @@ export default function GuestList() {
     const [openEditModal, setOpenEditModal] = useState(false);
     const [editGuest, setEditGuest] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+    const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
     // Fetch guest data and filter for most recent entries per mobile number
     useEffect(() => {
         const fetchGuests = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch('/api/NewBooking');
+                const token = getCookie('authToken'); // Get the token from cookies
+                if (!token) {
+                    router.push('/'); // Redirect to login if no token is found
+                    return;
+                }
+                // Verify the token
+                const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+                const userId = decoded.payload.id;
+                // Fetch the profile by userId to get the username
+                const profileResponse = await fetch(`/api/Profile/${userId}`);
+                const profileData = await profileResponse.json();
+                console.log(profileData);
+                if (!profileData.success || !profileData.data) {
+                    router.push('/'); // Redirect to login if profile not found
+                    return;
+                }
+                const username = profileData.data.username;
+                const response = await fetch(`/api/NewBooking?username=${username}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -43,6 +65,7 @@ export default function GuestList() {
 
                     // Convert map values back to array
                     const filteredGuests = Array.from(guestMap.values());
+                    console.log(filteredGuests);
                     setGuests(filteredGuests);
                 } else {
                     setError('Failed to load guest data');
@@ -77,9 +100,14 @@ export default function GuestList() {
         }
     };
 
-    // Handle edit button click
     const handleEditClick = (guest) => {
-        setEditGuest(guest);
+        // Ensure bookingStatus has a default value if undefined
+        const guestWithDefaultStatus = {
+            ...guest,
+            bookingStatus: guest.bookingStatus || 'Confirm'
+        };
+        console.log('Editing guest with status:', guestWithDefaultStatus.bookingStatus);
+        setEditGuest(guestWithDefaultStatus);
         setOpenEditModal(true);
     };
 
@@ -128,12 +156,14 @@ export default function GuestList() {
         }
     };
 
-    // Rest of your component remains the same...
+    // Modified handleEditChange with logging
     const handleEditChange = (field, value) => {
-        setEditGuest((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+        console.log(`Changing ${field} to:`, value);
+        setEditGuest((prev) => {
+            const updated = { ...prev, [field]: value };
+            console.log('Updated guest state:', updated);
+            return updated;
+        });
     };
 
     if (error) return <p>{error}</p>;
@@ -249,21 +279,6 @@ export default function GuestList() {
                                     ))}
                                 </TextField>
 
-                                {/* Booking Source */}
-                                <TextField
-                                    select
-                                    label="Booking Source"
-                                    fullWidth
-                                    value={editGuest.bookingSource}
-                                    onChange={(e) => handleEditChange('bookingSource', e.target.value)}
-                                >
-                                    {['Walk In', 'Front Office', 'Agent', 'Office', 'Goibibo', 'Make My Trip', 'Agoda.com', 'Booking.com', 'Cleartrip', 'Yatra', 'Expedia', 'Trivago', 'Ease My Trip', 'Hotels.com', 'Happy Easy Go', 'TBO', 'Booking Engine', 'GO-MMT', 'Booking Master', 'Hoichoi', 'Others'].map((source) => (
-                                        <MenuItem key={source} value={source}>
-                                            {source}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-
                                 {/* Mobile Number */}
                                 <TextField
                                     label="Mobile Number"
@@ -321,22 +336,22 @@ export default function GuestList() {
                                     value={editGuest.children}
                                     onChange={(e) => handleEditChange('children', e.target.value)}
                                 />
-
+                                {console.log("Edit Guest : ", editGuest)}
+                                {console.log(" Guest : ", editGuest.bookingStatus)}
                                 {/* Booking Status */}
                                 <TextField
                                     select
                                     label="Booking Status"
                                     fullWidth
-                                    value={editGuest.bookingStatus}
+                                    value={editGuest.bookingStatus || 'Confirm'}
                                     onChange={(e) => handleEditChange('bookingStatus', e.target.value)}
                                 >
-                                    {['Confirmed', 'Blocked'].map((status) => (
+                                    {['Confirm', 'Block'].map((status) => (
                                         <MenuItem key={status} value={status}>
                                             {status}
                                         </MenuItem>
                                     ))}
                                 </TextField>
-
                                 {/* Address */}
                                 <TextField
                                     label="Address"
@@ -376,20 +391,6 @@ export default function GuestList() {
                                     onChange={(e) => handleEditChange('bookingReference', e.target.value)}
                                 />
 
-                                {/* Guest Type */}
-                                <TextField
-                                    select
-                                    label="Guest Type"
-                                    fullWidth
-                                    value={editGuest.guestType}
-                                    onChange={(e) => handleEditChange('guestType', e.target.value)}
-                                >
-                                    {['General', 'VIP Guest', 'VVIP Guest', 'Scanty baggage'].map((type) => (
-                                        <MenuItem key={type} value={type}>
-                                            {type}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
                                 {/* Remarks */}
                                 <TextField
                                     label="Remarks"
@@ -399,25 +400,6 @@ export default function GuestList() {
                                     value={editGuest.remarks}
                                     onChange={(e) => handleEditChange('remarks', e.target.value)}
                                 />
-                                {/* Guest Notes */}
-                                {/* <TextField
-                                    label="Guest Notes"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    value={editGuest.guestNotes}
-                                    onChange={(e) => handleEditChange('guestNotes', e.target.value)}
-                                /> */}
-
-                                {/* Internal Notes */}
-                                {/* <TextField
-                                    label="Internal Notes"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    value={editGuest.internalNotes}
-                                    onChange={(e) => handleEditChange('internalNotes', e.target.value)}
-                                /> */}
                             </div>
                         </DialogContent>
                         <DialogActions>
