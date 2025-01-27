@@ -134,3 +134,65 @@ export async function DELETE(req, { params }) {
     );
   }
 }
+
+
+// PATCH route to toggle the active status
+export async function PATCH(req, { params }) {
+  try {
+    await connectToDatabase();
+    const { id } = await params; // Await params
+
+    // Extract the token from cookies
+    const token = req.cookies.get('authToken')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Authentication token missing' 
+      }, { status: 401 });
+    }
+
+    // Verify the token
+    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    const userId = decoded.payload.id;
+
+    // Find the profile by userId to get the username
+    const profile = await Profile.findById(userId);
+    if (!profile) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Profile not found' 
+      }, { status: 404 });
+    }
+
+    // Fetch the profile by ID and ensure it belongs to the current user
+    const fetchedProfile = await Profile.findById(id);
+    if (!fetchedProfile || fetchedProfile.username !== profile.username) {
+      return NextResponse.json(
+        { success: false, error: 'Profile not found or unauthorized' },
+        { status: 404 }
+      );
+    }
+
+    // Toggle the active status
+    const updatedProfile = await Profile.findByIdAndUpdate(
+      id,
+      { active: fetchedProfile.active === 'yes' ? 'no' : 'yes' },
+      { new: true }
+    );
+
+    if (!updatedProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Profile not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: updatedProfile }, { status: 200 });
+  } catch (error) {
+    console.error('Error toggling active status:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to toggle active status' },
+      { status: 400 }
+    );
+  }
+}
