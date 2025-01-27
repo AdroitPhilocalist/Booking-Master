@@ -524,7 +524,7 @@ const SuperAdminDashboard = () => {
                                 </IconButton>
                               </TableCell>
                               <TableCell>
-                          {profile.active === 'yes' ? (
+                          {profile.Active === 'yes' ? (
                             <CheckCircle color="success" />
                           ) : (
                             <Cancel color="error" />
