@@ -55,12 +55,23 @@ const profileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  Profile_Complete: { type: String, enum: ['yes', 'no'], default: 'no' },
+  Profile_Complete: {
+    type: String,
+    enum: ['yes', 'no'],
+    default: 'no'
+  },
+  forgotUsername: {
+    type: Boolean,
+    default: false
+  },
+  forgotPassword: {
+    type: Boolean,
+    default: false
+  }
 }, {
-  timestamps: true, // Automatically manage createdAt and updatedAt fields
+  timestamps: true,
 });
 
-// Hash password before saving
 profileSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);

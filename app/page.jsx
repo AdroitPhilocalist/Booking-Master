@@ -182,7 +182,7 @@ export default function Home() {
             </div>
           </form>
           <div className="mt-4 text-center">
-            <Link href="/forgot-password" className="text-sm text-cyan-600 hover:text-cyan-500">
+            <Link href="/forgotcredentials" className="text-sm text-cyan-600 hover:text-cyan-500">
               Forgot Password?
             </Link>
           </div>
