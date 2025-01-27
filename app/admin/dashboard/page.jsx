@@ -423,15 +423,27 @@ const SuperAdminDashboard = () => {
                         </TableHead>
                         <TableBody>
                           {profiles.map((profile) => (
-                            <TableRow key={profile._id}
-                            style={{
-                              backgroundColor: profile.active === 'no' ? '#ffdddd' : '#f8f9fa',
-                              transition: 'background-color 0.3s',
-                            }}>
+                            <TableRow
+                              key={profile._id}
+                              style={{
+                                backgroundColor:
+                                  profile.active === "no"
+                                    ? "#ffdddd"
+                                    : "#f8f9fa",
+                                transition: "background-color 0.3s",
+                              }}
+                            >
                               <TableCell>{profile.hotelName}</TableCell>
                               <TableCell>{profile.email}</TableCell>
                               <TableCell>{profile.mobileNo}</TableCell>
                               <TableCell>{profile.username || "N/A"}</TableCell>
+                              <TableCell>
+                                {profile.active === "yes" ? (
+                                  <CheckCircle color="success" />
+                                ) : (
+                                  <Cancel color="error" />
+                                )}
+                              </TableCell>
                               <TableCell>
                                 <IconButton
                                   color="primary"
@@ -448,11 +460,13 @@ const SuperAdminDashboard = () => {
                                   <Delete />
                                 </IconButton>
                                 <IconButton
-                            color="default"
-                            onClick={() => toggleActiveStatus(profile._id)}
-                          >
-                            <Visibility />
-                          </IconButton>
+                                  color="default"
+                                  onClick={() =>
+                                    toggleActiveStatus(profile._id)
+                                  }
+                                >
+                                  <Visibility />
+                                </IconButton>
                               </TableCell>
                             </TableRow>
                           ))}
