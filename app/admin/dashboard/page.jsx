@@ -444,13 +444,11 @@ const SuperAdminDashboard = () => {
                                   <Delete />
                                 </IconButton>
                                 <IconButton
-                                  color="default"
-                                  onClick={() =>
-                                    (window.location.href = `/master/profile/${profile._id}`)
-                                  }
-                                >
-                                  <Visibility />
-                                </IconButton>
+                            color="default"
+                            onClick={() => toggleActiveStatus(profile._id)}
+                          >
+                            <Visibility />
+                          </IconButton>
                               </TableCell>
                             </TableRow>
                           ))}
