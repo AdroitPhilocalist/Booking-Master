@@ -481,12 +481,17 @@ const SuperAdminDashboard = () => {
                             <TableCell>Mobile No</TableCell>
                             <TableCell>Username</TableCell>
                             <TableCell>User Issue</TableCell>
+                            <TableCell>Status</TableCell>
                             <TableCell>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {profiles.map((profile) => (
-                            <TableRow key={profile._id}>
+                            <TableRow key={profile._id}
+                            style={{
+                              backgroundColor: profile.active === 'no' ? '#ffdddd' : '#f8f9fa',
+                              transition: 'background-color 0.3s',
+                            }}>
                               <TableCell>{profile.hotelName}</TableCell>
                               <TableCell>{profile.email}</TableCell>
                               <TableCell>{profile.mobileNo}</TableCell>
@@ -498,6 +503,13 @@ const SuperAdminDashboard = () => {
                                   {getIssueIcon(profile)}
                                 </IconButton>
                               </TableCell>
+                              <TableCell>
+                          {profile.active === 'yes' ? (
+                            <CheckCircle color="success" />
+                          ) : (
+                            <Cancel color="error" />
+                          )}
+                        </TableCell>
                               <TableCell>
                                 <IconButton
                                   color="primary"
