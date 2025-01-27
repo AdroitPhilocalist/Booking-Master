@@ -92,6 +92,7 @@ const SuperAdminDashboard = () => {
         setIsLoading(true);
         const response = await fetch("/api/Profile");
         const data = await response.json();
+        console.log(data);
         if (data.success) {
           setProfiles(data.data);
         } else {
@@ -161,11 +162,11 @@ const SuperAdminDashboard = () => {
     try {
       setIsLoading(true);
       const response = await axios.patch(`/api/Profile/${id}`);
-      const data = await response.json();
-      if (data.success) {
+      console.log(response);
+      if (response.status === 200) {
         setProfiles((prevProfiles) =>
           prevProfiles.map((profile) =>
-            profile._id === id ? data.data : profile
+            profile._id === id ? response.data.data : profile
           )
         );
         toast.success("Active status toggled successfully!");

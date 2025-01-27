@@ -160,11 +160,11 @@ export async function PATCH(req, { params }) {
         { status: 404 }
       );
     }
-
+    console.log(fetchedProfile.Profile_Complete);
     // Toggle the active status
     const updatedProfile = await Profile.findByIdAndUpdate(
       id,
-      { active: fetchedProfile.active === 'yes' ? 'no' : 'yes' },
+      { Active: fetchedProfile.Active === 'yes' ? 'no' : 'yes' },
       { new: true }
     );
 
