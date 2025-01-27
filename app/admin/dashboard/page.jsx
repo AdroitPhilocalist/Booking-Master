@@ -26,7 +26,7 @@ import {
   DialogContentText,
   Stack,
 } from "@mui/material";
-import { Edit, Delete, Visibility, Add } from "@mui/icons-material";
+import { Edit, Delete, Visibility, Add , CheckCircle, Cancel} from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import {
   Users,
@@ -94,6 +94,7 @@ const SuperAdminDashboard = () => {
     pinCode: "",
     website: "",
     Profile_Complete: "no",
+    Active: "yes",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
@@ -165,6 +166,7 @@ const SuperAdminDashboard = () => {
       pinCode: "",
       website: "",
       Profile_Complete: "no",
+      Active: "yes",
     });
     setErrors({});
     setOpenAddProfileDialog(true);
@@ -186,6 +188,7 @@ const SuperAdminDashboard = () => {
       pinCode: "",
       website: "",
       Profile_Complete: "no",
+      Active: "yes",
     });
     setErrors({});
   };
@@ -418,11 +421,12 @@ const SuperAdminDashboard = () => {
                             <TableCell>Email</TableCell>
                             <TableCell>Mobile No</TableCell>
                             <TableCell>Username</TableCell>
+                            <TableCell>Status</TableCell>
                             <TableCell>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {profiles.map((profile) => (
+                          {profiles.length > 0 ? (profiles.map((profile) => (
                             <TableRow
                               key={profile._id}
                               style={{
@@ -438,7 +442,7 @@ const SuperAdminDashboard = () => {
                               <TableCell>{profile.mobileNo}</TableCell>
                               <TableCell>{profile.username || "N/A"}</TableCell>
                               <TableCell>
-                                {profile.active === "yes" ? (
+                                {profile.Active === "yes" ? (
                                   <CheckCircle color="success" />
                                 ) : (
                                   <Cancel color="error" />
@@ -469,7 +473,13 @@ const SuperAdminDashboard = () => {
                                 </IconButton>
                               </TableCell>
                             </TableRow>
-                          ))}
+                          ))):(
+                            <TableRow>
+                              <TableCell colSpan={6} align="center">
+                                No profiles available.
+                              </TableCell>
+                            </TableRow>
+                          )}
                         </TableBody>
                       </Table>
                     </TableContainer>
