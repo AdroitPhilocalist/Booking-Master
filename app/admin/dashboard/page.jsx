@@ -29,17 +29,33 @@ import {
 import { Edit, Delete, Visibility, Add } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import {
-  Users, UserCircle, Building2, BedDouble, ListChecks, Users2, BookOpen,
-  ClipboardList, UtensilsCrossed, LayoutDashboard, TableProperties, Menu,
-  Receipt, FileText, Package, FolderTree, PackageSearch, ShoppingCart,
-  BarChart3, LogOut
-} from 'lucide-react';
+  Users,
+  UserCircle,
+  Building2,
+  BedDouble,
+  ListChecks,
+  Users2,
+  BookOpen,
+  ClipboardList,
+  UtensilsCrossed,
+  LayoutDashboard,
+  TableProperties,
+  Menu,
+  Receipt,
+  FileText,
+  Package,
+  FolderTree,
+  PackageSearch,
+  ShoppingCart,
+  BarChart3,
+  LogOut,
+} from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Navbar from "../../_components/admin-navbar";
-import {Footer} from "../../_components/Footer"
+import { Footer } from "../../_components/Footer";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -80,6 +96,7 @@ const SuperAdminDashboard = () => {
     Profile_Complete: "no",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [errors, setErrors] = useState({});
   const router = useRouter();
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -149,6 +166,7 @@ const SuperAdminDashboard = () => {
       website: "",
       Profile_Complete: "no",
     });
+    setErrors({});
     setOpenAddProfileDialog(true);
   };
 
@@ -169,6 +187,7 @@ const SuperAdminDashboard = () => {
       website: "",
       Profile_Complete: "no",
     });
+    setErrors({});
   };
 
   const handleChange = (e) => {
@@ -186,13 +205,75 @@ const SuperAdminDashboard = () => {
       Profile_Complete: "no",
     }));
     console.log(formData);
+    // Validate fields on change
+    let newErrors = { ...errors };
+    if (name === "username") {
+      if (value.length < 3 || value.length > 20) {
+        newErrors.username = "Username must be between 3 and 20 characters.";
+      } else if (!/^[a-zA-Z0-9]+$/.test(value)) {
+        newErrors.username = "Username must be alphanumeric.";
+      } else {
+        delete newErrors.username;
+      }
+    }
+    if (name === "password" && !isEditing) {
+      const passwordErrors = validatePassword(value);
+      if (Object.keys(passwordErrors).length > 0) {
+        newErrors.password = Object.values(passwordErrors).join(" ");
+      } else {
+        delete newErrors.password;
+      }
+    }
+    setErrors(newErrors);
   };
-
+  const validatePassword = (password) => {
+    const errors = {};
+    if (password.length < 8) {
+      errors.minLength = "Password must be at least 8 characters long.";
+    }
+    if (password.length > 13) {
+      errors.maxLength = "Password must be no more than 13 characters long.";
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.uppercase = "Password must contain at least one uppercase letter.";
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.lowercase = "Password must contain at least one lowercase letter.";
+    }
+    if (!/[0-9]/.test(password)) {
+      errors.digit = "Password must contain at least one digit.";
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.specialChar =
+        'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
+    }
+    return errors;
+  };
   const handleAddProfile = async () => {
+    // Validate form before submission
+    let newErrors = {};
+    if (formData.username.length < 3 || formData.username.length > 20) {
+      newErrors.username = "Username must be between 3 and 20 characters.";
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.username)) {
+      newErrors.username = "Username must be alphanumeric.";
+    }
+    if (
+      !isEditing &&
+      (formData.password.length < 8 || formData.password.length > 13)
+    ) {
+      newErrors.password = "Password must be between 8 and 13 characters.";
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please correct the form errors !!");
+      return;
+    }
     try {
       setIsLoading(true);
       const method = isEditing ? "PUT" : "POST";
-      const url = isEditing ? `/api/Profile/${selectedProfileId}` : "/api/Profile";
+      const url = isEditing
+        ? `/api/Profile/${selectedProfileId}`
+        : "/api/Profile";
       const response = await fetch(url, {
         method,
         headers: {
@@ -226,6 +307,7 @@ const SuperAdminDashboard = () => {
           pinCode: "",
           website: "",
         });
+        setErrors({});
         toast.success("Profile added successfully!");
       } else {
         toast.error("Username already exists !!");
@@ -246,6 +328,7 @@ const SuperAdminDashboard = () => {
       username: profile.username,
       password: "",
     });
+    setErrors({});
     setOpenAddProfileDialog(true);
     setSelectedProfileId(profile._id);
   };
@@ -256,9 +339,11 @@ const SuperAdminDashboard = () => {
 
   const deleteSpecificCookies = () => {
     // Delete authtoken
-    document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    document.cookie =
+      "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
     // Delete clienttoken
-    document.cookie = "adminclientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    document.cookie =
+      "adminclientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
   };
 
   const handleLogout = () => {
@@ -270,13 +355,13 @@ const SuperAdminDashboard = () => {
     // Add a small delay before redirecting
     setTimeout(() => {
       setIsLoggingOut(false);
-      router.push('/admin/login');
+      router.push("/admin/login");
     }, 800);
   };
 
   return (
     <div>
-      <Navbar/>
+      <Navbar />
       <div className="bg-amber-50 min-h-screen mt-6">
         <Container maxWidth="lg" style={{ marginTop: "0rem" }}>
           <Grid container spacing={3}>
@@ -292,7 +377,7 @@ const SuperAdminDashboard = () => {
                       color="primary"
                       onClick={handleOpenAddProfileDialog}
                     >
-                      Add New Profile  <Add className="ml-1" />
+                      Add New Profile <Add className="ml-1" />
                     </Button>
                   }
                 />
@@ -325,7 +410,9 @@ const SuperAdminDashboard = () => {
                               <TableCell>
                                 <IconButton
                                   color="primary"
-                                  onClick={() => handleOpenEditProfileDialog(profile)}
+                                  onClick={() =>
+                                    handleOpenEditProfileDialog(profile)
+                                  }
                                 >
                                   <Edit />
                                 </IconButton>
@@ -381,7 +468,9 @@ const SuperAdminDashboard = () => {
           open={openAddProfileDialog}
           onClose={handleCloseAddProfileDialog}
         >
-          <DialogTitle>{isEditing ? "Edit Profile" : "Add New Profile"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Profile" : "Add New Profile"}
+          </DialogTitle>
           <DialogContent sx={modalStyle}>
             <Stack spacing={2} className="mt-2">
               <TextField
@@ -419,6 +508,8 @@ const SuperAdminDashboard = () => {
                 value={formData.username}
                 onChange={handleChange}
                 required
+                error={Boolean(errors.username)}
+                helperText={errors.username}
               />
               <TextField
                 label="Password"
@@ -429,6 +520,8 @@ const SuperAdminDashboard = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required={!isEditing}
+                error={Boolean(errors.password)}
+                helperText={errors.password}
               />
             </Stack>
           </DialogContent>
@@ -457,9 +550,8 @@ const SuperAdminDashboard = () => {
             {isLoggingOut ? 'Logging out...' : 'Logout'}
           </span>
         </button> */}
-        
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };
