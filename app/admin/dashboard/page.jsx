@@ -25,38 +25,17 @@ import {
   TextField,
   DialogContentText,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import {
   Edit,
   Delete,
   Visibility,
   Add,
-  CheckCircle,
-  Cancel,
+  ErrorOutline,
+  CheckCircleOutline,
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import {
-  Users,
-  UserCircle,
-  Building2,
-  BedDouble,
-  ListChecks,
-  Users2,
-  BookOpen,
-  ClipboardList,
-  UtensilsCrossed,
-  LayoutDashboard,
-  TableProperties,
-  Menu,
-  Receipt,
-  FileText,
-  Package,
-  FolderTree,
-  PackageSearch,
-  ShoppingCart,
-  BarChart3,
-  LogOut,
-} from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
@@ -87,6 +66,8 @@ const SuperAdminDashboard = () => {
   const [selectedProfileId, setSelectedProfileId] = useState(null);
   const [openAddProfileDialog, setOpenAddProfileDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [openIssueDialog, setOpenIssueDialog] = useState(false);
+  const [issueProfile, setIssueProfile] = useState(null);
   const [formData, setFormData] = useState({
     hotelName: "",
     mobileNo: "",
@@ -101,7 +82,6 @@ const SuperAdminDashboard = () => {
     pinCode: "",
     website: "",
     Profile_Complete: "no",
-    Active: "yes",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
@@ -173,7 +153,6 @@ const SuperAdminDashboard = () => {
       pinCode: "",
       website: "",
       Profile_Complete: "no",
-      Active: "yes",
     });
     setErrors({});
     setOpenAddProfileDialog(true);
@@ -195,7 +174,6 @@ const SuperAdminDashboard = () => {
       pinCode: "",
       website: "",
       Profile_Complete: "no",
-      Active: "yes",
     });
     setErrors({});
   };
@@ -213,7 +191,6 @@ const SuperAdminDashboard = () => {
       pinCode: "",
       website: "",
       Profile_Complete: "no",
-      Active: "yes",
     }));
     console.log(formData);
     // Validate fields on change
@@ -242,8 +219,8 @@ const SuperAdminDashboard = () => {
     if (password.length < 8) {
       errors.minLength = "Password must be at least 8 characters long.";
     }
-    if (password.length > 20) {
-      errors.maxLength = "Password must be no more than 20 characters long.";
+    if (password.length > 13) {
+      errors.maxLength = "Password must be no more than 13 characters long.";
     }
     if (!/[A-Z]/.test(password)) {
       errors.uppercase = "Password must contain at least one uppercase letter.";
@@ -270,9 +247,9 @@ const SuperAdminDashboard = () => {
     }
     if (
       !isEditing &&
-      (formData.password.length < 8 || formData.password.length > 20)
+      (formData.password.length < 8 || formData.password.length > 13)
     ) {
-      newErrors.password = "Password must be between 8 and 20 characters.";
+      newErrors.password = "Password must be between 8 and 13 characters.";
     }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -317,8 +294,6 @@ const SuperAdminDashboard = () => {
           gstNo: "",
           pinCode: "",
           website: "",
-          Profile_Complete: "no",
-          Active: "yes",
         });
         setErrors({});
         toast.success("Profile added successfully!");
@@ -350,27 +325,93 @@ const SuperAdminDashboard = () => {
     height: 400, // Increased height
   };
 
-  const toggleActiveStatus = async (id) => {
+  const handleOpenIssueDialog = (profile) => {
+    setIssueProfile(profile);
+    setOpenIssueDialog(true);
+  };
+
+  const handleCloseIssueDialog = () => {
+    setOpenIssueDialog(false);
+    setIssueProfile(null);
+  };
+
+  const handleResolveIssue = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.patch(`/api/Profile/${id}`);
-      const data = await response.json();
-      if (data.success) {
+      const response = await axios.put(`/api/Profile/${issueProfile._id}`, {
+        forgotUsername: false,
+        forgotPassword: false,
+      });
+      console.log(response);
+      if (response.data.success) {
         setProfiles((prevProfiles) =>
           prevProfiles.map((profile) =>
-            profile._id === id ? data.data : profile
+            profile._id === issueProfile._id
+              ? { ...profile, forgotUsername: false, forgotPassword: false }
+              : profile
           )
         );
-        toast.success("Active status toggled successfully!");
+        handleCloseIssueDialog();
+        toast.success("Issue resolved successfully!");
       } else {
-        toast.error("Failed to toggle active status: " + data.error);
+        toast.error("Failed to resolve issue.");
       }
     } catch (error) {
-      toast.error("Error toggling active status: " + error.message);
+      toast.error("Error resolving issue.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const getIssueIcon = (profile) => {
+    if (profile.forgotUsername && profile.forgotPassword) {
+      return (
+        <Tooltip title="Forgot Username & Password">
+          <ErrorOutline
+            sx={{
+              color: "red",
+              animation: "pop 0.5s infinite alternate",
+            }}
+          />
+        </Tooltip>
+      );
+    } else if (profile.forgotUsername) {
+      return (
+        <Tooltip title="Forgot Username">
+          <ErrorOutline
+            sx={{
+              color: "orange",
+              animation: "pop 0.5s infinite alternate",
+            }}
+          />
+        </Tooltip>
+      );
+    } else if (profile.forgotPassword) {
+      return (
+        <Tooltip title="Forgot Password">
+          <ErrorOutline
+            sx={{
+              color: "yellow",
+              animation: "pop 0.5s infinite alternate",
+            }}
+          />
+        </Tooltip>
+      );
+    } else {
+      return (
+        <Tooltip title="No Issues">
+          <CheckCircleOutline
+            sx={{
+              color: "green",
+              animation: "pop 0.5s infinite alternate",
+            }}
+          />
+        </Tooltip>
+      );
+    }
+  };
+
+
   const deleteSpecificCookies = () => {
     // Delete authtoken
     document.cookie =
@@ -396,6 +437,17 @@ const SuperAdminDashboard = () => {
   return (
     <div>
       <Navbar />
+      {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+              <svg aria-hidden="true" className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+              </svg>
+              <span className="mt-4 text-gray-700">Loading Hotel List...</span>
+            </div>
+          </div>
+        )}
       <div className="bg-amber-50 min-h-screen mt-6">
         <Container maxWidth="lg" style={{ marginTop: "0rem" }}>
           <Grid container spacing={3}>
@@ -416,9 +468,6 @@ const SuperAdminDashboard = () => {
                   }
                 />
                 <CardContent>
-                  {isLoading ? (
-                    <Typography>Loading profiles...</Typography>
-                  ) : (
                     <TableContainer
                       component={Paper}
                       elevation={6}
@@ -431,75 +480,45 @@ const SuperAdminDashboard = () => {
                             <TableCell>Email</TableCell>
                             <TableCell>Mobile No</TableCell>
                             <TableCell>Username</TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell>User Issue</TableCell>
                             <TableCell>Actions</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {profiles.length > 0 ? (
-                            profiles.map((profile) => (
-                              <TableRow
-                                key={profile._id}
-                                style={{
-                                  backgroundColor:
-                                    profile.active === "no"
-                                      ? "#ffdddd"
-                                      : "#f8f9fa",
-                                  transition: "background-color 0.3s",
-                                }}
-                              >
-                                <TableCell>{profile.hotelName}</TableCell>
-                                <TableCell>{profile.email}</TableCell>
-                                <TableCell>{profile.mobileNo}</TableCell>
-                                <TableCell>
-                                  {profile.username || "N/A"}
-                                </TableCell>
-                                <TableCell>
-                                  {profile.Active === "yes" ? (
-                                    <CheckCircle color="success" />
-                                  ) : (
-                                    <Cancel color="error" />
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() =>
-                                      handleOpenEditProfileDialog(profile)
-                                    }
-                                  >
-                                    <Edit />
-                                  </IconButton>
-                                  <IconButton
-                                    color="secondary"
-                                    onClick={() =>
-                                      handleDeleteClick(profile._id)
-                                    }
-                                  >
-                                    <Delete />
-                                  </IconButton>
-                                  <IconButton
-                                    color="default"
-                                    onClick={() =>
-                                      toggleActiveStatus(profile._id)
-                                    }
-                                  >
-                                    <Visibility />
-                                  </IconButton>
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          ) : (
-                            <TableRow>
-                              <TableCell colSpan={6} align="center">
-                                No profiles available.
+                          {profiles.map((profile) => (
+                            <TableRow key={profile._id}>
+                              <TableCell>{profile.hotelName}</TableCell>
+                              <TableCell>{profile.email}</TableCell>
+                              <TableCell>{profile.mobileNo}</TableCell>
+                              <TableCell>{profile.username || "N/A"}</TableCell>
+                              <TableCell>
+                                <IconButton
+                                  onClick={() => handleOpenIssueDialog(profile)}
+                                >
+                                  {getIssueIcon(profile)}
+                                </IconButton>
+                              </TableCell>
+                              <TableCell>
+                                <IconButton
+                                  color="primary"
+                                  onClick={() =>
+                                    handleOpenEditProfileDialog(profile)
+                                  }
+                                >
+                                  <Edit />
+                                </IconButton>
+                                <IconButton
+                                  color="secondary"
+                                  onClick={() => handleDeleteClick(profile._id)}
+                                >
+                                  <Delete />
+                                </IconButton>
                               </TableCell>
                             </TableRow>
-                          )}
+                          ))}
                         </TableBody>
                       </Table>
                     </TableContainer>
-                  )}
                 </CardContent>
               </StyledCard>
             </Grid>
@@ -597,24 +616,67 @@ const SuperAdminDashboard = () => {
             </Button>
           </DialogActions>
         </StyledDialog>
-        {/* <button
-          onClick={handleLogout}
-          disabled={isLoggingOut}
-          className={`
-                flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 
-                text-white rounded-lg transform transition-all duration-300
-                ${isLoggingOut ? 'scale-95 opacity-80' : 'hover:scale-105'}
-                focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 
-                shadow-md hover:shadow-lg
-              `}
-        >
-          <LogOut className={`w-5 h-5 transform transition-transform duration-500 ${isLoggingOut ? 'rotate-90' : ''}`} />
-          <span className={`transition-opacity duration-300 ${isLoggingOut ? 'opacity-0' : 'opacity-100'}`}>
-            {isLoggingOut ? 'Logging out...' : 'Logout'}
-          </span>
-        </button> */}
       </div>
+      {/* Issue Dialog */}
+      <StyledDialog
+        open={openIssueDialog}
+        onClose={handleCloseIssueDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          style: {
+            backgroundColor: "#f9f9f9",
+            borderRadius: "16px",
+            padding: "2rem",
+            boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
+          },
+        }}
+      >
+        <DialogTitle>
+          {issueProfile?.forgotUsername && issueProfile?.forgotPassword
+            ? "Forgot Username & Password"
+            : issueProfile?.forgotUsername
+            ? "Forgot Username"
+            : issueProfile?.forgotPassword
+            ? "Forgot Password"
+            : "No Issues"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {issueProfile?.forgotUsername && issueProfile?.forgotPassword
+              ? "This user has requested help with both their username and password."
+              : issueProfile?.forgotUsername
+              ? "This user has requested help with their username."
+              : issueProfile?.forgotPassword
+              ? "This user has requested help with their password."
+              : "This user has no issues."}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseIssueDialog} color="primary">
+            Close
+          </Button>
+          {(issueProfile?.forgotUsername || issueProfile?.forgotPassword) && (
+            <Button onClick={handleResolveIssue} color="secondary">
+              Resolve
+            </Button>
+          )}
+        </DialogActions>
+      </StyledDialog>
       <Footer />
+      <style jsx global>{`
+        @keyframes pop {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 };

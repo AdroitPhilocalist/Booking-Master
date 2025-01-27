@@ -36,9 +36,9 @@ export async function GET(req, { params }) {
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
     if (!profile) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Profile not found' 
+      return NextResponse.json({
+        success: false,
+        error: 'Profile not found'
       }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: profile }, { status: 200 });
@@ -58,43 +58,26 @@ export async function PUT(req, { params }) {
     const { id } = params;
     const data = await req.json();
     const token = req.cookies.get('authToken')?.value;
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication token missing' 
+    const authtoken = req.cookies.get('adminauthToken')?.value;
+    if (!token && !authtoken) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication token missing'
       }, { status: 401 });
     }
     // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+    if (token) {
+      const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+      const userId = decoded.payload.id;
+    }
     // Find the profile by userId to get the username
-    const profile = await Profile.findById(userId);
+    const profile = await Profile.findById(id);
     if (!profile) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Profile not found' 
+      return NextResponse.json({
+        success: false,
+        error: 'Profile not found'
       }, { status: 404 });
     }
-    // Validate required fields
-    // if (
-    //   !data.hotelName ||
-    //   !data.mobileNo ||
-    //   !data.email ||
-    //   !data.username
-    // ) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Missing required fields' },
-    //     { status: 400 }
-    //   );
-    // }
-    // Check if username already exists for another profile
-    // const existingProfile = await Profile.findOne({ username: data.username }).where('_id').ne(id);
-    // if (existingProfile) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Username already exists' },
-    //     { status: 400 }
-    //   );
-    // }
     // Hash the password if it is provided
     let updatedData = { ...data, username: profile.username };
     if (data.password) {
@@ -105,7 +88,7 @@ export async function PUT(req, { params }) {
     const updatedProfile = await Profile.findByIdAndUpdate(
       id,
       { $set: updatedData },
-      { new: true, runValidators: true }
+      { new: true }
     );
     if (!updatedProfile) {
       return NextResponse.json(
