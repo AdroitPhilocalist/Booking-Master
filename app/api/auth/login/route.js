@@ -25,26 +25,36 @@ export async function POST(req) {
   try {
     await connectToDatabase();
     const data = await req.json();
-
+    
     if (!data.username || !data.password) {
       return NextResponse.json(
         { success: false, error: 'Username and password are required' },
         { status: 400 }
       );
     }
+    
 
     const profile = await Profile.findOne({ username: data.username });
     if (!profile) {
       return NextResponse.json(
-        { success: false, error: 'Invalid username or password' },
+        { success: false, error: 'Invalid username' },
         { status: 400 }
       );
     }
+    
 
     const isMatch = await bcrypt.compare(data.password, profile.password);
     if (!isMatch) {
       return NextResponse.json(
-        { success: false, error: 'Invalid username or password' },
+        { success: false, error: 'Invalid password' },
+        { status: 400 }
+      );
+    }
+    const profileActive=await profile.Active;
+    if(profileActive==="no")
+    {
+      return NextResponse.json(
+        { success: false, error: 'Profile Inactive!! Please contact admin.' },
         { status: 400 }
       );
     }

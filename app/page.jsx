@@ -36,20 +36,13 @@ export default function Home() {
           const profileResponse = await fetch(`/api/Profile/${userId}`);
           const profileData = await profileResponse.json();
           if (profileData.success && profileData.data) {
-            const profileActive=profileData.data.Active;
+            
             const profileComplete = profileData.data.Profile_Complete;
-            if(profileActive==='yes')
-            {
-              if (profileComplete === 'no') {
+            if (profileComplete === 'no') {
                 router.push("/master/profile");
               } else {
                 router.push("/property/roomdashboard");
               }
-
-            }
-            else{
-              toast.error("Profile marked as inactive. Please contact admin");
-            }
             
           }
         } catch (error) {
@@ -93,21 +86,13 @@ export default function Home() {
           const profileData = await profileResponse.json();
           
           if (profileData.success && profileData.data) {
-            const profileActive=profileData.data.Active;
             const profileComplete = profileData.data.Profile_Complete;
-            if(profileActive==='yes')
-            {
+
               if (profileComplete === 'no') {
                 router.push("/master/profile");
               } else {
                 router.push("/property/roomdashboard");
-              }
-
-            }
-            else{
-              alert("Profile marked as inactive. Please contact admin");
-            }
-            
+              }      
           }
         }
       } else {
