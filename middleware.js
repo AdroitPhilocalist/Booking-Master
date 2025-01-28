@@ -11,7 +11,7 @@ export async function middleware(request) {
   if (pathname === '/admin/login') {
     return NextResponse.next();
   }
-
+  
   // Allow access to the normal user login page without any restrictions
   if (pathname === '/') {
     return NextResponse.next();
