@@ -464,7 +464,7 @@ const SuperAdminDashboard = () => {
   };
 
   return (
-    <div>
+   <div>
       <Navbar />
       {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
@@ -572,7 +572,18 @@ const SuperAdminDashboard = () => {
           </Grid>
         </Container>
 
-        <ToastContainer />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
 
         {/* Delete Confirmation Dialog */}
         <StyledDialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
