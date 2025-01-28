@@ -180,10 +180,11 @@ const ForgottenCredentials = () => {
             <Alert
               icon={<CheckCircle className="text-green-500" />}
               severity="success"
-              className="bg-white shadow-xl"
+              className="fixed top-4 right-4 bg-white shadow-xl z-50"
             >
               {successMessage}
             </Alert>
+
           </motion.div>
         )}
       </AnimatePresence>
