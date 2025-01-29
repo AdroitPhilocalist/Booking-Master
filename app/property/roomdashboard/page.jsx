@@ -573,7 +573,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   ))}
                 </select>
               </label>
-              <label className="block mt-2">
+              {/* <label className="block mt-2">
                 Clean:
                 <select
                   name="clean"
@@ -584,7 +584,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <option value="true">Clean</option>
                   <option value="false">Dirty</option>
                 </select>
-              </label>
+              </label> */}
               <div className="flex justify-end mt-4">
                 <button
                   className="bg-blue-500 text-white px-2 py-1 rounded"
