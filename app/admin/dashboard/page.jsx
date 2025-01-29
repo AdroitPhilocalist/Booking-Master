@@ -41,7 +41,9 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Navbar from "../../_components/admin-navbar";
+import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { Footer } from "../../_components/Footer";
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -90,6 +92,12 @@ const SuperAdminDashboard = () => {
     const fetchProfiles = async () => {
       try {
         setIsLoading(true);
+        const token = getCookie('adminauthToken'); // Get the token from cookies
+        console.log(token);
+        if (!token) {
+          router.push('/admin/login'); // Redirect to login if no token is found
+          return;
+        }
         const response = await fetch("/api/Profile");
         const data = await response.json();
         console.log(data);
@@ -456,7 +464,7 @@ const SuperAdminDashboard = () => {
   };
 
   return (
-    <div>
+   <div>
       <Navbar />
       {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
@@ -564,7 +572,18 @@ const SuperAdminDashboard = () => {
           </Grid>
         </Container>
 
-        <ToastContainer />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
 
         {/* Delete Confirmation Dialog */}
         <StyledDialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
