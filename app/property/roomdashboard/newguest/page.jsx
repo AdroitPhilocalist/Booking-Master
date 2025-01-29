@@ -349,7 +349,7 @@ export default function BookingForm() {
         alert('Please select both Check-in and Check-out dates first');
         return;
       }
-
+      console.log('Checking availability for:', formData.checkIn, formData.checkOut);
       const response = await fetch('/api/rooms');
       if (!response.ok) {
         throw new Error('Failed to fetch rooms');
@@ -358,15 +358,18 @@ export default function BookingForm() {
       if (!result.success || !result.data) {
         throw new Error('No room data available');
       }
-
+      console.log('Fetched rooms:', result.data);
       const checkInDate = new Date(formData.checkIn);
       const checkOutDate = new Date(formData.checkOut);
 
       // Filter available rooms based on check-in and check-out date lists
       const availableRooms = result.data.filter(room => {
         // If no existing bookings, room is available
+        console.log('Checking room:', room.number);
+        console.log('Check-in dates:', room.checkInDateList);
+        console.log('Check-out dates:', room.checkOutDateList);
         if (!room.checkInDateList || !room.checkOutDateList ||
-          room.checkInDateList.length === 0 || room.checkOutDateList.length === 0) {
+          room.checkInDateList.length === 0 || room.checkOutDateList.length === 0 || room.billingStarted === 'No') {
           return true;
         }
 
@@ -374,10 +377,11 @@ export default function BookingForm() {
         for (let i = 0; i < room.checkInDateList.length; i++) {
           const existingCheckIn = new Date(room.checkInDateList[i]);
           const existingCheckOut = new Date(room.checkOutDateList[i]);
-
+          console.log('Existing booking:', existingCheckIn, existingCheckOut);
+          console.log('New booking:', checkInDate, checkOutDate);
           // Check for overlap
           const hasOverlap = !(checkOutDate < existingCheckIn || checkInDate >= existingCheckOut);
-
+          console.log('No overlap found', hasOverlap);
           if (hasOverlap) {
             return false; // Room is not available if there's any overlap
           }
@@ -433,6 +437,7 @@ export default function BookingForm() {
       }
 
       const bookingResult = await bookingResponse.json();
+      console.log('Booking result:', bookingResult);
       const guestId = bookingResult.data._id;
 
       // Fetch necessary data
@@ -531,14 +536,16 @@ export default function BookingForm() {
           roomUpdate.billingStarted = 'Yes';
         } else {
           // Fetch current guest's booking details
+          console.log('matchedRoom:', matchedRoom);
           console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
           const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
           const currentGuestData = await currentGuestResponse.json();
-          console.log('currentGuestData:', currentGuestData.data);
+          console.log('currentGuestData:', currentGuestData);
           const currentGuestCheckIn = new Date(currentGuestData.checkIn);
-
+          console.log('currentGuestCheckIn:', currentGuestCheckIn);
+          console.log('sortedGuestWaitlist:', sortedGuestWaitlist);
           // Fetch first waitlisted guest's booking details
-          const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]}`);
+          const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]._id}`);
           const firstWaitlistedGuestData = await firstWaitlistedGuestResponse.json();
           const firstWaitlistedCheckIn = new Date(firstWaitlistedGuestData.data.checkIn);
 

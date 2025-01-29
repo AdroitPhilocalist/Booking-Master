@@ -28,6 +28,8 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [currentGuest, setCurrentGuest] = useState(null);
 
+
+
   const handleEditChange = (e) => {
     const { name, value } = e.target;
 
@@ -75,7 +77,10 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
   };
   useEffect(() => {
     fetchGuestDetails();
+    console.log("Guest ID:",room.currentGuestId);
+    console.log("Billing ID:",room.currentBillingId);
   }, [room.occupied, room.currentGuestId]);
+  
 
   const handleEditSubmit = async () => {
     // Validation: Ensure a guest is selected when the room is set to "Occupied"
@@ -213,36 +218,87 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
     false: { bgColor: "bg-yellow-100", textColor: "text-yellow-700", label: "Needs Cleaning" }
   };
 
-   // Add new function to handle booking cancellation
-   const handleCancelBooking = async () => {
+  const handleCancelBooking = async () => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
       try {
-        // Update room status
-        const updatedRoomData = {
-          ...room,
-          occupied: "Vacant",
-          currentGuestId: null,
-          currentBillingId: null,
-          billingStarted: "No"
-        };
-
-        const response = await fetch(`/api/rooms/${room._id}`, {
-          method: "PUT",
+        const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+        const headers = { 'Authorization': `Bearer ${token}` };
+        console.log(room.currentBillingId);
+        // Update Billing status to cancelled
+        await fetch(`/api/Billing/${room.currentBillingId}`, {
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
+            ...headers,
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(updatedRoomData),
+          body: JSON.stringify({
+            Cancelled: "yes",
+          })
         });
 
-        const data = await response.json();
-        if (data.success) {
+        // Get current room data
+        const roomResponse = await fetch(`/api/rooms/${room._id}`, {
+          headers: headers
+        });
+        const roomData = await roomResponse.json();
+        const currentRoomData = roomData.data;
+
+        // Find position of current IDs
+        const currentPosition = currentRoomData.billWaitlist.findIndex(
+          billId => billId._id.toString() === room.currentBillingId.toString()
+        );
+
+        // Prepare update data
+        let updateData = {
+          billWaitlist: currentRoomData.billWaitlist,
+          guestWaitlist: currentRoomData.guestWaitlist,
+          checkInDateList: currentRoomData.checkInDateList,
+          checkOutDateList: currentRoomData.checkOutDateList,
+        };
+
+        // Check if there's a next booking
+        const hasNextBooking = currentPosition < currentRoomData.billWaitlist.length - 1;
+        if (hasNextBooking) {
+          updateData = {
+            ...updateData,
+            currentBillingId: currentRoomData.billWaitlist[currentPosition + 1],
+            currentGuestId: currentRoomData.guestWaitlist[currentPosition + 1],
+            occupied: "Vacant",
+            clean: true,
+            billingStarted: "No"
+          };
+        } else {
+          updateData = {
+            ...updateData,
+            currentBillingId: null,
+            currentGuestId: null,
+            occupied: "Vacant",
+            clean: true,
+            billingStarted: "No"
+          };
+        }
+
+        // Update room with new data
+        const updateResponse = await fetch(`/api/rooms/${room._id}`, {
+          method: 'PUT',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        const updateResult = await updateResponse.json();
+        
+        if (updateResult.success) {
           setShowGuestModal(false);
           setCurrentGuest(null);
           // Update rooms state
-          setRooms(prevRooms => 
-            prevRooms.map(r => r._id === room._id ? updatedRoomData : r)
-          );
-          window.location.reload(); // Refresh to show updated status
+          setRooms(prevRooms => prevRooms.map(r => 
+            r._id === room._id ? { ...r, ...updateData } : r
+          ));
+          alert("Booking cancelled successfully!");
+          window.location.reload();
         } else {
           alert("Failed to cancel booking");
         }
@@ -685,6 +741,8 @@ export default function RoomDashboard() {
         } else {
           console.error("Failed to fetch rooms or rooms is not an array");
         }
+
+        
 
         if (categoriesData.success && Array.isArray(categoriesData.data)) {
           setCategories(categoriesData.data);

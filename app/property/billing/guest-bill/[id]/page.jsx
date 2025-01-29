@@ -161,7 +161,7 @@ const BookingDashboard = () => {
         // Fetch bookings
         const newBookingsResponse = await axios.get("/api/NewBooking", { headers });
         let matchedBooking;
-        if (billingData.Bill_Paid === "yes") {
+        if (billingData.Bill_Paid === "yes" || billingData.Cancelled === "yes") {
           // Find the position of the current billing ID in the room's billWaitlist
           const currentBillIndex = matchedRoom.billWaitlist.findIndex(
             billId => billId._id.toString() === billingData._id.toString()
@@ -562,14 +562,14 @@ const BookingDashboard = () => {
                 color: "primary",
                 variant: "contained",
                 onClick: handleOpenServicesModal,
-                disabled: billing.Bill_Paid === "yes",
+                disabled: billing.Bill_Paid === "yes" || billing.Cancelled === "yes",
               },
               {
                 label: "Add Food",
                 color: "success",
                 variant: "contained",
                 onClick: handleOpenFoodModal,
-                disabled: billing.Bill_Paid === "yes",
+                disabled: billing.Bill_Paid === "yes" || billing.Cancelled === "yes",
               },
               {
                 label: "Bill Payment",
@@ -579,7 +579,7 @@ const BookingDashboard = () => {
                   remainingDueAmount > 0
                     ? handleOpenBillPaymentModal
                     : undefined,
-                disabled: remainingDueAmount <= 0,
+                disabled: remainingDueAmount <= 0 || billing.Cancelled === "yes",
               },
             ].map((btn, index) => (
               <Button
@@ -730,7 +730,7 @@ const BookingDashboard = () => {
               variant="contained"
               color="warning"
               className="mt-6 mb-4"
-              disabled={remainingDueAmount > 0 || billing.Bill_Paid === "yes"}
+              disabled={remainingDueAmount > 0 || billing.Bill_Paid === "yes" || billing.Cancelled === "yes"}
               onClick={handleCompletePayment}
             >
               Complete Payment

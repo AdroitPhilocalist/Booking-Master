@@ -10,7 +10,6 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 export async function GET(req, { params }) {
   try {
     await mongoose.connect(connectSTR);
-    const data = await req.json();
     const token = req.cookies.get('authToken')?.value;
     if (!token) {
       return NextResponse.json({

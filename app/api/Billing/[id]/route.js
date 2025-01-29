@@ -89,6 +89,7 @@ export async function PUT(req, { params }) {
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
+    console.log('Data:', data);
     const token = req.cookies.get('authToken')?.value;
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
@@ -99,6 +100,10 @@ export async function PUT(req, { params }) {
         { success: false, error: "Bill not found" },
         { status: 404 }
       );
+    }
+    // Handle Cancelled updates
+    if (data.Cancelled) {
+      bill.Cancelled = data.Cancelled;
     }
     // Handle itemList, priceList, quantityList, and taxList updates
     if (data.itemList && data.priceList && data.quantityList && data.taxList) {
