@@ -352,7 +352,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
           </div>
 
           {/* Clean Status with Hover Effect */}
-          <div className={`
+          {/*<div className={`
               text-center py-1 rounded 
               transition-all duration-300
               ${cleanStatusConfig[room.clean].bgColor} 
@@ -360,7 +360,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
               ${isHovered ? 'scale-105 shadow-md' : 'scale-100'}
             `}>
             {cleanStatusConfig[room.clean].label}
-          </div>
+          </div>*/}
 
           {/* Guest Information Modal */}
           {/* {showGuestModal && currentGuest && (
