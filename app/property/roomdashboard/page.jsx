@@ -447,16 +447,23 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
             </div>
           </div>
 
-          {/* Clean Status with Hover Effect */}
-          {/* <div className={`
-              text-center py-1 rounded 
-              transition-all duration-300
-              ${cleanStatusConfig[room.clean].bgColor} 
-              ${cleanStatusConfig[room.clean].textColor}
-              ${isHovered ? 'scale-105 shadow-md' : 'scale-100'}
-            `}>
-            {cleanStatusConfig[room.clean].label}
-          </div> */}
+          {/* Modified Booked On section to use createdAt */}
+          <div className={`
+            text-center py-1 rounded transition-all duration-300
+            ${currentGuest ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}
+            ${isHovered ? 'scale-105 shadow-md' : 'scale-100'}
+          `}>
+            Booked On: {currentGuest ? 
+              new Date(currentGuest.createdAt).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) 
+              : 'No Booking'
+            }
+          </div>
         </div>
       </div>
       {/* Guest Modal (similar to Edit Modal) */}
@@ -497,13 +504,13 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <div>
                     <p className="text-xs text-gray-500">Check-In</p>
                     <p className="font-medium">
-                      {new Date(currentGuest.checkIn).toLocaleDateString()}
+                      {new Date(currentGuest.checkIn).toLocaleDateString('en-GB')}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Check-Out</p>
                     <p className="font-medium">
-                      {new Date(currentGuest.checkOut).toLocaleDateString()}
+                      {new Date(currentGuest.checkOut).toLocaleDateString('en-GB')}
                     </p>
                   </div>
                 </div>
