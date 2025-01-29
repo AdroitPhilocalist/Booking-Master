@@ -6,6 +6,7 @@ import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { useRouter } from "next/navigation";
+import { Button } from "@mui/material";
 
 // Component for summary items at the top of the page
 const SummaryItem = ({ icon: Icon, title, count }) => (
@@ -212,6 +213,45 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
     false: { bgColor: "bg-yellow-100", textColor: "text-yellow-700", label: "Needs Cleaning" }
   };
 
+   // Add new function to handle booking cancellation
+   const handleCancelBooking = async () => {
+    if (window.confirm('Are you sure you want to cancel this booking?')) {
+      try {
+        // Update room status
+        const updatedRoomData = {
+          ...room,
+          occupied: "Vacant",
+          currentGuestId: null,
+          currentBillingId: null,
+          billingStarted: "No"
+        };
+
+        const response = await fetch(`/api/rooms/${room._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedRoomData),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setShowGuestModal(false);
+          setCurrentGuest(null);
+          // Update rooms state
+          setRooms(prevRooms => 
+            prevRooms.map(r => r._id === room._id ? updatedRoomData : r)
+          );
+          window.location.reload(); // Refresh to show updated status
+        } else {
+          alert("Failed to cancel booking");
+        }
+      } catch (error) {
+        console.error("Error cancelling booking:", error);
+        alert("Error cancelling booking");
+      }
+    }
+  };
 
   return (
     <div
@@ -246,7 +286,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
             >
               Room {room.number}
               {/* Guest Info Icon (only shows when occupied) */}
-              {room.occupied === "Occupied" && currentGuest && (
+              {currentGuest && (
                 <button
                   onClick={() => setShowGuestModal(true)}
                   className="ml-2 text-amber-600 hover:text-amber-800 transition-colors"
@@ -361,14 +401,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
             `}>
             {cleanStatusConfig[room.clean].label}
           </div>
-
-          {/* Guest Information Modal */}
-          {/* {showGuestModal && currentGuest && (
-          <GuestInfoModal 
-            guest={currentGuest} 
-            onClose={() => setShowGuestModal(false)} 
-          />
-        )} */}
         </div>
       </div>
       {/* Guest Modal (similar to Edit Modal) */}
@@ -433,6 +465,14 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                 </div>
               )}
             </div>
+             {/* New Cancel Booking Button */}
+             <button
+                onClick={handleCancelBooking}
+                className="w-full mt-4 flex items-center justify-center space-x-2 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+              >
+                <XCircle size={20} />
+                <span>Cancel Booking</span>
+              </button>
           </div>
         </div>
       )}
@@ -477,39 +517,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   ))}
                 </select>
               </label>
-              {/* <label className="block mt-2">
-                Occupancy:
-                <select
-                  name="occupied"
-                  value={updatedRoom.occupied}
-                  onChange={handleEditChange}
-                  className="border rounded w-full p-1"
-                >
-                  <option value="Vacant">Vacant</option>
-                  <option value="Occupied">Occupied</option>
-                </select>
-              </label> */}
-              {/* // Guest Selection (conditionally rendered)
-              {updatedRoom.occupied === "Occupied" && (
-                <label className="block mt-2">
-                  Guest:
-                  <select
-                    onChange={(e) =>
-                      setSelectedGuest(
-                        guestList.find((g) => g._id === e.target.value)
-                      )
-                    }
-                    className="border rounded w-full p-1"
-                  >
-                    <option value="">Select Guest</option>
-                    {guestList.map((guest) => (
-                      <option key={guest._id} value={guest._id}>
-                        {guest.guestName} - {guest.mobileNo}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )} */}
               <label className="block mt-2">
                 Clean:
                 <select
