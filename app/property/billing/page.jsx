@@ -105,29 +105,38 @@ export default function Billing() {
 
   const filteredBillingData = useMemo(() => {
     let result = originalBillingData;
-    console.log("Result : ", result);
+  
     if (filterStatus !== "all") {
-      if (filterStatus === "Booked" || filterStatus === "Checked In" || filterStatus === "Checked Out") {
+      if (["Booked", "Checked In", "Checked Out", "Cancelled"].includes(filterStatus)) {
+        // Existing date-based filtering logic
         result = result.filter(bill => {
           const today = new Date();
-          today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+          today.setHours(0, 0, 0, 0);
           const checkIn = new Date(bill.checkInDate);
+          const checkOut = new Date(bill.checkOutDate);
           checkIn.setHours(0, 0, 0, 0);
-          if (filterStatus === "Booked") {
-            return today < checkIn;
+  
+          if (filterStatus === "Cancelled") {
+            return bill.bill.Cancelled === 'yes';
+          } else if (filterStatus === "Booked") {
+            return today < checkIn && bill.bill.Cancelled !== 'yes';
           } else if (filterStatus === "Checked In") {
-            return today.toISOString() === checkIn.toISOString();
+            return today.toISOString() === checkIn.toISOString() && bill.bill.Cancelled !== 'yes';
           } else if (filterStatus === "Checked Out") {
-            return bill.bill.Bill_Paid === 'yes';
+            return today > checkOut && bill.bill.Cancelled !== 'yes';
           }
           return false;
         });
       } else {
-        result = result.filter(
-          bill => bill.bill.Bill_Paid.toLowerCase() === filterStatus
+        // Modified payment status filtering to exclude cancelled bills
+        result = result.filter(bill => 
+          bill.bill.Bill_Paid.toLowerCase() === filterStatus &&
+          bill.bill.Cancelled !== 'yes'  // Add this condition
         );
       }
     }
+  
+    // Existing search filters
     if (searchRoom) {
       result = result.filter(bill =>
         bill.roomNo.toString().toLowerCase().includes(searchRoom.toLowerCase())
@@ -145,22 +154,17 @@ export default function Billing() {
     router.push(`/property/billing/guest-bill/${bill.currentBillingId}`);
   };
 
-  // Function to check if the button should be disabled
-  const isButtonDisabled = (checkInDate) => {
-    if (!checkInDate) return true;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
-    const checkIn = new Date(checkInDate);
-    checkIn.setHours(0, 0, 0, 0);
-    return today < checkIn;
-  };
-
-  // Function to determine Guest Status
+  // Updated Guest Status function to include Cancelled status
   const getGuestStatus = (bill) => {
+    if (bill.bill.Cancelled === 'yes') {
+      return "Cancelled";
+    }
+
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+    today.setHours(0, 0, 0, 0);
     const checkIn = new Date(bill.checkInDate);
     checkIn.setHours(0, 0, 0, 0);
+
     if (today < checkIn) {
       return "Booked";
     } else if (today.toISOString() === checkIn.toISOString()) {
@@ -169,6 +173,14 @@ export default function Billing() {
       return "Checked Out";
     }
     return "Unknown";
+  };
+
+  // Updated Bill Status function
+  const getBillStatus = (bill) => {
+    if (bill.bill.Cancelled === 'yes') {
+      return 'Cancelled';
+    }
+    return bill.bill.Bill_Paid === 'yes' ? 'Paid' : 'Unpaid';
   };
 
   return (
@@ -206,7 +218,7 @@ export default function Billing() {
               Paid
             </Button>
             <Button
-              variant={filterStatus === "no" ? "contained" : "outlined"}
+              variant={filterStatus === "no"  ? "contained" : "outlined"}
               color="primary"
               onClick={() => setFilterStatus("no")}
             >
@@ -233,6 +245,11 @@ export default function Billing() {
             >
               Checked Out
             </Button>
+            <Button variant={filterStatus === "Cancelled" ? "contained" : "outlined"}
+              color="primary"
+              onClick={() => setFilterStatus("Cancelled")}>
+              Cancelled
+            </Button>
           </Box>
         </Box>
         <div className="container mx-auto py-4 px-4">
@@ -251,38 +268,30 @@ export default function Billing() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {console.log(filteredBillingData)}
                 {filteredBillingData.length > 0 ? (
                   filteredBillingData.map((bill, index) => (
-                    console.log(bill.bill.totalAmount),
-                    <TableRow
-                      key={index}
+                    <TableRow key={index}
                       sx={{
                         '& > td': { backgroundColor: 'white', textAlign: 'center' },
-                        background: `linear-gradient(to right, ${bill.Bill_Paid === 'yes' ? '#1ebc1e' : '#f24a23'} 5%, white 5%)`
-                      }}
-                    >
+                        background: `linear-gradient(to right, ${bill.bill.Cancelled === 'yes' ? '#808080' :
+                            bill.bill.Bill_Paid === 'yes' ? '#1ebc1e' : '#f24a23'
+                          } 5%, white 5%)`
+                      }}>
                       <TableCell>{bill.roomNo || "N/A"}</TableCell>
                       <TableCell>{bill.guestName || "N/A"}</TableCell>
                       <TableCell>₹{bill.bill.totalAmount || 0}</TableCell>
                       <TableCell>₹{bill.bill.amountAdvanced || 0}</TableCell>
                       <TableCell>₹{bill.bill.dueAmount || 0}</TableCell>
                       <TableCell>{getGuestStatus(bill)}</TableCell>
-                      <TableCell>{bill.bill.Bill_Paid === 'yes' ? 'Paid' : 'Unpaid'}</TableCell>
+                      <TableCell>{getBillStatus(bill)}</TableCell>
                       <TableCell>
                         <Button
                           variant="contained"
                           onClick={() => handleViewBill(bill)}
-                          disabled={isButtonDisabled(bill.checkInDate)}
                           sx={{
                             backgroundColor: "#28bfdb",
-                            '&:hover': { backgroundColor: "#1e9ab8" },
-                            '&.Mui-disabled': {
-                              backgroundColor: '#cccccc',
-                              color: '#666666'
-                            }
-                          }}
-                        >
+                            '&:hover': { backgroundColor: "#1e9ab8" }
+                          }}>
                           View Bill
                         </Button>
                       </TableCell>

@@ -28,8 +28,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [currentGuest, setCurrentGuest] = useState(null);
 
-
-
   const handleEditChange = (e) => {
     const { name, value } = e.target;
 
@@ -233,6 +231,7 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
           },
           body: JSON.stringify({
             Cancelled: "yes",
+            dueAmount: 0
           })
         });
 
@@ -423,8 +422,6 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
                   <span className="text-sm text-gray-600">{categoryInfo.category}</span>
 
                 </div>
-
-
               </div>
             </div>
             {/* Status Indicator */}

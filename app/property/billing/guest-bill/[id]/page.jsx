@@ -76,6 +76,7 @@ const BookingDashboard = () => {
 
   // Calculate service total when price or tax changes
   useEffect(() => {
+    const today = new Date();
     if (servicePrice && serviceTax) {
       const price = parseFloat(servicePrice);
       const taxRate = parseFloat(serviceTax);
@@ -557,29 +558,33 @@ const BookingDashboard = () => {
           {/* Action Buttons */}
           <div className="mt-6 grid grid-cols-3 md:grid-cols-3 gap-3">
             {[
+              // In your button configuration array:
               {
                 label: "Add Services",
                 color: "primary",
                 variant: "contained",
                 onClick: handleOpenServicesModal,
-                disabled: billing.Bill_Paid === "yes" || billing.Cancelled === "yes",
+                disabled: billing.Bill_Paid === "yes" ||
+                  billing.Cancelled === "yes" ||
+                  new Date(booking.checkIn) > new Date(),
               },
               {
                 label: "Add Food",
                 color: "success",
                 variant: "contained",
                 onClick: handleOpenFoodModal,
-                disabled: billing.Bill_Paid === "yes" || billing.Cancelled === "yes",
+                disabled: billing.Bill_Paid === "yes" ||
+                  billing.Cancelled === "yes" ||
+                  new Date(booking.checkIn) > new Date(),
               },
               {
                 label: "Bill Payment",
                 color: remainingDueAmount <= 0 ? "secondary" : "error",
                 variant: "contained",
-                onClick:
-                  remainingDueAmount > 0
-                    ? handleOpenBillPaymentModal
-                    : undefined,
-                disabled: remainingDueAmount <= 0 || billing.Cancelled === "yes",
+                onClick: remainingDueAmount > 0 ? handleOpenBillPaymentModal : undefined,
+                disabled: remainingDueAmount <= 0 ||
+                  billing.Cancelled === "yes" ||
+                  new Date(booking.checkIn) > new Date(),
               },
             ].map((btn, index) => (
               <Button
@@ -730,7 +735,10 @@ const BookingDashboard = () => {
               variant="contained"
               color="warning"
               className="mt-6 mb-4"
-              disabled={remainingDueAmount > 0 || billing.Bill_Paid === "yes" || billing.Cancelled === "yes"}
+              disabled={remainingDueAmount > 0 ||
+                billing.Bill_Paid === "yes" ||
+                billing.Cancelled === "yes" ||
+                new Date(booking.checkIn) > new Date()}
               onClick={handleCompletePayment}
             >
               Complete Payment
