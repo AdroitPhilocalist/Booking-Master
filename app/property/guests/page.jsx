@@ -8,6 +8,7 @@ import { Footer } from "../../_components/Footer";
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { Radio, RadioGroup, FormControlLabel, FormControl } from '@mui/material';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
@@ -18,9 +19,32 @@ export default function GuestList() {
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
     const [editGuest, setEditGuest] = useState(null);
+    // New state for room pricing data
+    const [roomCategories, setRoomCategories] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+
+    // Fetch room categories on component mount
+    useEffect(() => {
+        const fetchRoomCategories = async () => {
+            try {
+                const response = await fetch('/api/roomCategories');
+                const data = await response.json();
+                if (data.success) {
+                    // Create a map of category ID to price
+                    const categoryPrices = {};
+                    data.data.forEach(category => {
+                        categoryPrices[category._id] = category.total;
+                    });
+                    setRoomCategories(categoryPrices);
+                }
+            } catch (error) {
+                console.error('Error fetching room categories:', error);
+            }
+        };
+        fetchRoomCategories();
+    }, []);
 
     // Fetch guest data and filter for most recent entries per mobile number
     useEffect(() => {
@@ -85,6 +109,39 @@ export default function GuestList() {
     const handleDeleteClick = (id) => {
         setDeleteGuestId(id);
         setOpenDeleteDialog(true);
+    };
+
+    // Function to calculate nights between dates
+    const calculateNights = (checkIn, checkOut) => {
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+        const diffTime = Math.abs(end - start);
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    // Function to calculate new room price
+    const calculateRoomPrice = async (roomNumbers, checkIn, checkOut) => {
+        try {
+            // Get room details for each room number
+            const roomPromises = roomNumbers.map(async (roomNum) => {
+                const response = await fetch(`/api/rooms?number=${roomNum}`);
+                const data = await response.json();
+                if (data.success && data.data.length > 0) {
+                    const room = data.data[0];
+                    return roomCategories[room.category._id] || 0;
+                }
+                return 0;
+            });
+
+            const roomPrices = await Promise.all(roomPromises);
+            const totalRoomPrice = roomPrices.reduce((sum, price) => sum + price, 0);
+            const nights = calculateNights(checkIn, checkOut);
+
+            return totalRoomPrice * nights;
+        } catch (error) {
+            console.error('Error calculating room price:', error);
+            return 0;
+        }
     };
 
     // Confirm delete
@@ -157,13 +214,103 @@ export default function GuestList() {
         }
     };
 
-    const handleEditChange = (field, value) => {
-        console.log(`Changing ${field} to:`, value);
-        setEditGuest((prev) => {
-            const updated = { ...prev, [field]: value };
-            console.log('Updated guest state:', updated);
-            return updated;
-        });
+    const handleEditChange = async (field, value) => {
+        if (field === 'checkOut') {
+            try {
+                const token = document.cookie.split('; ').find(row => row.startsWith('authToken=')).split('=')[1];
+                const headers = { 'Authorization': `Bearer ${token}` };
+
+                // Get all billing records
+                const billingResponse = await fetch('/api/Billing');
+                const billingData = await billingResponse.json();
+
+                if (billingData.success && billingData.data) {
+                    // Find all billing records that match the room numbers
+                    const matchedBillings = billingData.data.filter(bill =>
+                        editGuest.roomNumbers.some(roomNum => bill.roomNo === roomNum.toString()) && 
+                        bill.Bill_Paid === 'no'
+                    );
+
+                    // Process each matched billing record
+                    for (const billing of matchedBillings) {
+                        // Calculate new room price for each room
+                        const newRoomPrice = await calculateRoomPrice(
+                            [parseInt(billing.roomNo)],
+                            editGuest.checkIn,
+                            value
+                        );
+
+                        // Update billing with new price
+                        const updatedBilling = {
+                            ...billing,
+                            priceList: [newRoomPrice, ...billing.priceList.slice(1)],
+                            totalAmount: newRoomPrice,
+                            dueAmount: newRoomPrice
+                        };
+
+                        // Update billing record
+                        await fetch(`/api/Billing/${billing._id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updatedBilling)
+                        });
+                    }
+                    // Fetch room details
+                    const roomsResponse = await axios.get("/api/rooms", { headers });
+                    console.log('Rooms:', roomsResponse.data.data);
+                    console.log('Matched billings:', matchedBillings[0].roomNo);
+                    const matchedRoom = roomsResponse.data.data.find(
+                        (room) => room.number === matchedBillings[0].roomNo
+                    );
+                    if (!matchedRoom) {
+                        throw new Error("No matching room found");
+                    }
+                    console.log('Matched room:', matchedRoom._id);
+                    // Update checkOutDateList for each room
+                    for (const roomNumber of editGuest.roomNumbers) {
+                        console.log('Updating checkOutDateList for room:', roomNumber);
+                        // Fetch the current room data
+                        const roomResponse = await fetch(`/api/rooms/${matchedRoom._id}`);
+                        const roomData = await roomResponse.json();
+                        console.log('Room data:', roomData.success);
+                        if (roomData.success) {
+                            const room = roomData.data;
+                            console.log('Room:', room);
+                            // Find the index of the previous checkout date in the checkOutDateList
+                            const oldCheckoutDate = new Date(editGuest.checkOut).toISOString();
+                            console.log('Old checkout date:', oldCheckoutDate);
+                            console.log('CheckOutDateList:', room.checkOutDateList);
+                            const dateIndex = room.checkOutDateList.indexOf(oldCheckoutDate);
+                            console.log('Date index:', dateIndex);
+                            if (dateIndex !== -1) {
+                                // Create new checkOutDateList with updated date
+                                const updatedCheckOutDateList = [...room.checkOutDateList];
+                                updatedCheckOutDateList[dateIndex] = value;
+
+                                // Update the room with new checkOutDateList
+                                const updatedRoom = {
+                                    ...room,
+                                    checkOutDateList: updatedCheckOutDateList
+                                };
+
+                                // Send update to rooms API
+                                await fetch(`/api/rooms/${room._id}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ checkOutDateList: updatedCheckOutDateList })
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating checkOutDateList:', error);
+                alert('Failed to update room checkout dates. Please try again.');
+                return;
+            }
+        }
+
+        setEditGuest((prev) => ({ ...prev, [field]: value }));
     };
 
     if (error) return <p>{error}</p>;
@@ -276,6 +423,50 @@ export default function GuestList() {
 
                                 {/* Guest Name */}
                                 <TextField label="Guest Name" fullWidth value={editGuest.guestName} onChange={(e) => handleEditChange('guestName', e.target.value)} />
+
+                                {/* CheckIn Date (Read-Only and Disabled) */}
+                                <TextField
+                                    label="CheckIn Date"
+                                    value={editGuest.checkIn ? new Date(editGuest.checkIn).toISOString().split('T')[0] : ''}
+                                    InputProps={{
+                                        readOnly: true,
+                                    }}
+                                    fullWidth
+                                    margin="normal"
+                                    disabled
+                                />
+
+                                {/* CheckOut Date (Editable with Validation) */}
+                                <TextField
+                                    label="CheckOut Date"
+                                    type="date"
+                                    value={editGuest.checkOut ? new Date(editGuest.checkOut).toISOString().split('T')[0] : ''}
+                                    onChange={(e) => {
+                                        const newCheckoutDate = e.target.value;
+                                        const checkInDate = new Date(editGuest.checkIn);
+                                        const currentCheckoutDate = new Date(editGuest.checkOut);
+                                        const newCheckoutDateObj = new Date(newCheckoutDate);
+
+                                        // Validation: CheckOut Date must not be earlier than CheckIn Date
+                                        if (newCheckoutDateObj < checkInDate) {
+                                            alert("CheckOut Date cannot be earlier than CheckIn Date.");
+                                            return;
+                                        }
+
+                                        // Validation: CheckOut Date must not be later than the current CheckOut Date
+                                        if (newCheckoutDateObj > currentCheckoutDate) {
+                                            alert("CheckOut Date cannot be later than the current CheckOut Date.");
+                                            return;
+                                        }
+
+                                        handleEditChange('checkOut', newCheckoutDate);
+                                    }}
+                                    fullWidth
+                                    margin="normal"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
 
                                 {/* Company Name */}
                                 <TextField label="Company Name" fullWidth value={editGuest.companyName} onChange={(e) => handleEditChange('companyName', e.target.value)} />

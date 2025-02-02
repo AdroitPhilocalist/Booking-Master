@@ -64,7 +64,7 @@ export async function PATCH(req, { params }) {
     );
     const newSubTotal = newSubtotalList.reduce((total, subtotal) => total + subtotal, 0);
     const newTaxTotal = updatedTaxList.reduce((total, tax) => total + tax, 0);
-    const newTotalAmount = newSubTotal + newTaxTotal;
+    const newTotalAmount = newSubTotal;
     const newDueAmount = newTotalAmount - billingData.amountAdvanced;
     // Update the billing data
     billingData.itemList = updatedItemList;
@@ -105,6 +105,7 @@ export async function PUT(req, { params }) {
     if (data.Cancelled) {
       bill.Cancelled = data.Cancelled;
     }
+    
     // Handle itemList, priceList, quantityList, and taxList updates
     if (data.itemList && data.priceList && data.quantityList && data.taxList) {
       const newItemList = data.itemList || [];
