@@ -106,7 +106,7 @@ const newBookingSchema = new mongoose.Schema({
   },
   bookingStatus: { 
     type: String, 
-    enum: ['Confirm', 'Block','Pencil'], 
+    enum: ['Confirm', 'Block'], 
     required: true 
   },
   address: { 
@@ -140,6 +140,14 @@ const newBookingSchema = new mongoose.Schema({
   roomNumbers: { 
     type: [Number],
     required: true 
+  },
+  CheckedIn: {
+    type: Boolean,
+    default: false
+  },
+  CheckedOut: {
+    type: Boolean,
+    default: false
   },
   username: {  // New field
     type: String,

@@ -667,10 +667,6 @@ export default function RoomDashboard() {
   };
 
   const updateRoomStatusBasedOnDate = async (rooms) => {
-    const today = new Date();
-    console.log(today);
-    today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
-
     const updatedRooms = await Promise.all(
       rooms.map(async (room) => {
         if (room.currentGuestId) {
@@ -679,30 +675,45 @@ export default function RoomDashboard() {
             const response = await fetch("/api/NewBooking");
             const data = await response.json();
             const guest = data.data.find(g => g._id === room.currentGuestId);
-
+  
             if (guest) {
-              const checkInDate = new Date(guest.checkIn);
-              checkInDate.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
-
-              // Check if today is check-in day
-              if (checkInDate.getTime() === today.getTime()) {
+              // Check if the guest has CheckedIn
+              if (guest.CheckedIn === true) {
                 // Only update if the status needs to change
                 if (room.occupied !== "Occupied" || room.clean !== false) {
                   const updatedRoom = {
                     ...room,
                     occupied: "Occupied",
-                    clean: false
+                    clean: false,
                   };
-
+  
                   // Update room in the database
                   const updateResponse = await fetch(`/api/rooms/${room._id}`, {
                     method: "PUT",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(updatedRoom),
                   });
-
+  
+                  if (updateResponse.ok) {
+                    return updatedRoom;
+                  }
+                }
+              } else {
+                // If CheckedIn is false, ensure the room is marked as Vacant and Clean
+                if (room.occupied !== "Vacant" || room.clean !== true) {
+                  const updatedRoom = {
+                    ...room,
+                    occupied: "Vacant",
+                    clean: true,
+                  };
+  
+                  // Update room in the database
+                  const updateResponse = await fetch(`/api/rooms/${room._id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedRoom),
+                  });
+  
                   if (updateResponse.ok) {
                     return updatedRoom;
                   }
@@ -716,7 +727,7 @@ export default function RoomDashboard() {
         return room;
       })
     );
-
+  
     return updatedRooms;
   };
 

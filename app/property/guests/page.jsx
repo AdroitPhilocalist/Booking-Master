@@ -8,6 +8,7 @@ import { Footer } from "../../_components/Footer";
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useRouter } from 'next/navigation';
+import { Radio, RadioGroup, FormControlLabel, FormControl } from '@mui/material';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 
 export default function GuestList() {
@@ -156,7 +157,6 @@ export default function GuestList() {
         }
     };
 
-    // Modified handleEditChange with logging
     const handleEditChange = (field, value) => {
         console.log(`Changing ${field} to:`, value);
         setEditGuest((prev) => {
@@ -265,141 +265,84 @@ export default function GuestList() {
                         <DialogContent>
                             <div className="grid grid-cols-2 gap-4 mt-2">
                                 {/* Booking Type */}
-                                <TextField
-                                    select
-                                    label="Booking Type"
-                                    fullWidth
-                                    value={editGuest.bookingType}
-                                    onChange={(e) => handleEditChange('bookingType', e.target.value)}
-                                >
+                                <TextField select label="Booking Type" fullWidth value={editGuest.bookingType} onChange={(e) => handleEditChange('bookingType', e.target.value)} >
                                     {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Office', 'Social Events'].map((type) => (
-                                        <MenuItem key={type} value={type}>
-                                            {type}
-                                        </MenuItem>
+                                        <MenuItem key={type} value={type}>{type}</MenuItem>
                                     ))}
                                 </TextField>
 
                                 {/* Mobile Number */}
-                                <TextField
-                                    label="Mobile Number"
-                                    fullWidth
-                                    value={editGuest.mobileNo}
-                                    onChange={(e) => handleEditChange('mobileNo', e.target.value)}
-                                />
+                                <TextField label="Mobile Number" fullWidth value={editGuest.mobileNo} onChange={(e) => handleEditChange('mobileNo', e.target.value)} />
 
                                 {/* Guest Name */}
-                                <TextField
-                                    label="Guest Name"
-                                    fullWidth
-                                    value={editGuest.guestName}
-                                    onChange={(e) => handleEditChange('guestName', e.target.value)}
-                                />
+                                <TextField label="Guest Name" fullWidth value={editGuest.guestName} onChange={(e) => handleEditChange('guestName', e.target.value)} />
 
                                 {/* Company Name */}
-                                <TextField
-                                    label="Company Name"
-                                    fullWidth
-                                    value={editGuest.companyName}
-                                    onChange={(e) => handleEditChange('companyName', e.target.value)}
-                                />
+                                <TextField label="Company Name" fullWidth value={editGuest.companyName} onChange={(e) => handleEditChange('companyName', e.target.value)} />
 
                                 {/* GSTIN */}
-                                <TextField
-                                    label="GSTIN"
-                                    fullWidth
-                                    value={editGuest.gstin}
-                                    onChange={(e) => handleEditChange('gstin', e.target.value)}
-                                />
+                                <TextField label="GSTIN" fullWidth value={editGuest.gstin} onChange={(e) => handleEditChange('gstin', e.target.value)} />
 
                                 {/* Guest Email */}
-                                <TextField
-                                    label="Guest Email"
-                                    fullWidth
-                                    value={editGuest.guestEmail}
-                                    onChange={(e) => handleEditChange('guestEmail', e.target.value)}
-                                />
+                                <TextField label="Guest Email" fullWidth value={editGuest.guestEmail} onChange={(e) => handleEditChange('guestEmail', e.target.value)} />
 
                                 {/* Adults */}
-                                <TextField
-                                    label="Adults"
-                                    type="number"
-                                    fullWidth
-                                    value={editGuest.adults}
-                                    onChange={(e) => handleEditChange('adults', e.target.value)}
-                                />
+                                <TextField label="Adults" type="number" fullWidth value={editGuest.adults} onChange={(e) => handleEditChange('adults', e.target.value)} />
 
                                 {/* Children */}
-                                <TextField
-                                    label="Children"
-                                    type="number"
-                                    fullWidth
-                                    value={editGuest.children}
-                                    onChange={(e) => handleEditChange('children', e.target.value)}
-                                />
-                                {console.log("Edit Guest : ", editGuest)}
-                                {console.log(" Guest : ", editGuest.bookingStatus)}
+                                <TextField label="Children" type="number" fullWidth value={editGuest.children} onChange={(e) => handleEditChange('children', e.target.value)} />
+
                                 {/* Booking Status */}
-                                <TextField
-                                    select
-                                    label="Booking Status"
-                                    fullWidth
-                                    value={editGuest.bookingStatus || 'Confirm'}
-                                    onChange={(e) => handleEditChange('bookingStatus', e.target.value)}
-                                >
+                                <TextField select label="Booking Status" fullWidth value={editGuest.bookingStatus || 'Confirm'} onChange={(e) => handleEditChange('bookingStatus', e.target.value)} >
                                     {['Confirm', 'Block'].map((status) => (
-                                        <MenuItem key={status} value={status}>
-                                            {status}
-                                        </MenuItem>
+                                        <MenuItem key={status} value={status}>{status}</MenuItem>
                                     ))}
                                 </TextField>
+                                {/* Checked In */}
+                                <FormControl component="fieldset">
+                                    <Typography variant="subtitle1">Checked In:</Typography>
+                                    <RadioGroup
+                                        row
+                                        name="checkedIn"
+                                        value={editGuest.CheckedIn}
+                                        onChange={(e) => handleEditChange('CheckedIn', e.target.value === 'true')}
+                                    >
+                                        <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                                        <FormControlLabel value={false} control={<Radio />} label="No" />
+                                    </RadioGroup>
+                                </FormControl>
+
+                                {/* Checked Out */}
+                                <FormControl component="fieldset">
+                                    <Typography variant="subtitle1">Checked Out:</Typography>
+                                    <RadioGroup
+                                        row
+                                        name="checkedOut"
+                                        value={editGuest.CheckedOut}
+                                        onChange={(e) => handleEditChange('CheckedOut', e.target.value === 'true')}
+                                    >
+                                        <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                                        <FormControlLabel value={false} control={<Radio />} label="No" />
+                                    </RadioGroup>
+                                </FormControl>
                                 {/* Address */}
-                                <TextField
-                                    label="Address"
-                                    fullWidth
-                                    value={editGuest.address}
-                                    onChange={(e) => handleEditChange('address', e.target.value)}
-                                />
+                                <TextField label="Address" fullWidth value={editGuest.address} onChange={(e) => handleEditChange('address', e.target.value)} />
 
                                 {/* State */}
-                                <TextField
-                                    label="State"
-                                    fullWidth
-                                    value={editGuest.state}
-                                    onChange={(e) => handleEditChange('state', e.target.value)}
-                                />
+                                <TextField label="State" fullWidth value={editGuest.state} onChange={(e) => handleEditChange('state', e.target.value)} />
 
                                 {/* Meal Plan */}
-                                <TextField
-                                    select
-                                    label="Meal Plan"
-                                    fullWidth
-                                    value={editGuest.mealPlan}
-                                    onChange={(e) => handleEditChange('mealPlan', e.target.value)}
-                                >
+                                <TextField select label="Meal Plan" fullWidth value={editGuest.mealPlan} onChange={(e) => handleEditChange('mealPlan', e.target.value)} >
                                     {['EP', 'AP', 'CP', 'MAP'].map((plan) => (
-                                        <MenuItem key={plan} value={plan}>
-                                            {plan}
-                                        </MenuItem>
+                                        <MenuItem key={plan} value={plan}>{plan}</MenuItem>
                                     ))}
                                 </TextField>
 
                                 {/* Booking Reference */}
-                                <TextField
-                                    label="Booking Reference"
-                                    fullWidth
-                                    value={editGuest.bookingReference}
-                                    onChange={(e) => handleEditChange('bookingReference', e.target.value)}
-                                />
+                                <TextField label="Booking Reference" fullWidth value={editGuest.bookingReference} onChange={(e) => handleEditChange('bookingReference', e.target.value)} />
 
                                 {/* Remarks */}
-                                <TextField
-                                    label="Remarks"
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    value={editGuest.remarks}
-                                    onChange={(e) => handleEditChange('remarks', e.target.value)}
-                                />
+                                <TextField label="Remarks" fullWidth multiline rows={3} value={editGuest.remarks} onChange={(e) => handleEditChange('remarks', e.target.value)} />
                             </div>
                         </DialogContent>
                         <DialogActions>
@@ -410,8 +353,6 @@ export default function GuestList() {
                         </DialogActions>
                     </Dialog>
                 )}
-
-
             </div>
             <Footer />
         </div>
