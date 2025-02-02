@@ -44,6 +44,7 @@ const PrintableFoodInvoice = ({ billId }) => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const [isPaid, setIsPaid] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,6 +69,7 @@ const PrintableFoodInvoice = ({ billId }) => {
         const billing = billingData.data;
         // Set payment status
         setIsPaid(billing.Bill_Paid?.toLowerCase() === 'yes');
+        setIsCancelled(billing.Cancelled?.toLowerCase() === 'yes');
         // Filter only food items from billing data
         const menuResponse = await fetch('/api/menuItem');
         const menuData = await menuResponse.json();
@@ -97,7 +99,7 @@ const PrintableFoodInvoice = ({ billId }) => {
         const matchedRoom = roomsData.data.find(room => room.number === billing.roomNo);
         let booking;
 
-                if (billing.Bill_Paid?.toLowerCase() === 'yes') {
+                if (billing.Bill_Paid?.toLowerCase() === 'yes' || billing.Cancelled?.toLowerCase() === 'yes') {
                     // For paid bills, find the booking using billWaitlist
                     const billIndex = matchedRoom.billWaitlist.findIndex(
                         billId => billId._id.toString() === billing._id.toString()
@@ -319,7 +321,21 @@ const PrintableFoodInvoice = ({ billId }) => {
             </Box>
           )}
 
-
+          {/* Cancelled Image */}
+          {isCancelled && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+              <img
+                src="/cancelled.png"
+                alt="Cancelled"
+                style={{
+                  width: '250px',
+                  height: 'auto',
+                  opacity: 0.8
+                }}
+              />
+            </Box>
+          )}
+          
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="body2" color="textSecondary" sx={{ mb: 2, textAlign: 'center' }}>

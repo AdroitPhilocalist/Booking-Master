@@ -39,6 +39,7 @@ const PrintableRoomInvoice = ({ billId }) => {
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isPaid, setIsPaid] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
 
   useEffect(() => {
     const fetchInvoiceData = async () => {
@@ -48,6 +49,7 @@ const PrintableRoomInvoice = ({ billId }) => {
           fetch(`/api/Billing/${billId}`),
           fetch('/api/Profile')
         ]);
+        console.log('billingResponse', billingResponse);
         if (!billingResponse.ok || !profileResponse.ok) {
           throw new Error('Failed to fetch data');
         }
@@ -58,6 +60,8 @@ const PrintableRoomInvoice = ({ billId }) => {
         const billingData = billing.data;
         // Set payment status
         setIsPaid(billingData.Bill_Paid?.toLowerCase() === 'yes');
+        // Set cancellation status
+        setIsCancelled(billingData.Cancelled?.toLowerCase() === 'yes');
         // 2. Fetch and find matched room
         const roomsResponse = await fetch("/api/rooms");
         const roomsData = await roomsResponse.json();
@@ -73,27 +77,27 @@ const PrintableRoomInvoice = ({ billId }) => {
         const bookingsResponse = await fetch('/api/NewBooking');
         const bookingsData = await bookingsResponse.json()
         let matchedBooking;
+        console.log('billingData', billingData);
+        if (billingData.Bill_Paid?.toLowerCase() === 'yes' || billingData.Cancelled?.toLowerCase() === 'yes') {
+          // For paid bills, find the booking using billWaitlist
+          const billIndex = matchedRoom.billWaitlist.findIndex(
+            billId => billId._id.toString() === billingData._id.toString()
+          );
+          console.log('billIndex', billIndex);
+          if (billIndex === -1) {
+            throw new Error('Billing ID not found in room\'s billWaitlist');
+          }
 
-                if (billingData.Bill_Paid?.toLowerCase() === 'yes') {
-                    // For paid bills, find the booking using billWaitlist
-                    const billIndex = matchedRoom.billWaitlist.findIndex(
-                        billId => billId._id.toString() === billingData._id.toString()
-                    );
-                    console.log('billIndex', billIndex);
-                    if (billIndex === -1) {
-                        throw new Error('Billing ID not found in room\'s billWaitlist');
-                    }
+          // Get the corresponding guest ID from guestWaitlist
+          const guestId = matchedRoom.guestWaitlist[billIndex];
 
-                    // Get the corresponding guest ID from guestWaitlist
-                    const guestId = matchedRoom.guestWaitlist[billIndex];
-
-                    // Find the booking that matches this guest ID
-                    matchedBooking = bookingsData.data.find(b => b._id === guestId._id);
-                    console.log('booking', matchedBooking);
-                } else {
-                    // For unpaid bills, use currentGuestId
-                    matchedBooking = bookingsData.data.find(b => b._id === matchedRoom.currentGuestId);
-                }
+          // Find the booking that matches this guest ID
+          matchedBooking = bookingsData.data.find(b => b._id === guestId._id);
+          console.log('booking', matchedBooking);
+        } else {
+          // For unpaid bills, use currentGuestId
+          matchedBooking = bookingsData.data.find(b => b._id === matchedRoom.currentGuestId);
+        }
 
 
         if (!matchedBooking) {
@@ -145,19 +149,19 @@ const PrintableRoomInvoice = ({ billId }) => {
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-        <svg 
-          aria-hidden="true" 
-          className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" 
-          viewBox="0 0 100 101" 
-          fill="none" 
+        <svg
+          aria-hidden="true"
+          className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+          viewBox="0 0 100 101"
+          fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path 
-            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" 
+          <path
+            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
             fill="currentColor"
           />
-          <path 
-            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" 
+          <path
+            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
             fill="currentFill"
           />
         </svg>
@@ -192,7 +196,7 @@ const PrintableRoomInvoice = ({ billId }) => {
 
   return (
     <>
-    <style>{printStyles}</style>
+      <style>{printStyles}</style>
       <Box id="printable-invoice" sx={{ p: 4, maxWidth: '800px', margin: 'auto', bgcolor: '#f5f5f5', borderRadius: 2, maxHeight: '90vh', overflowY: 'auto', overflowX: 'hidden' }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
           <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -313,6 +317,20 @@ const PrintableRoomInvoice = ({ billId }) => {
             </Box>
           )}
 
+          {/* Cancelled Image */}
+          {isCancelled && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+              <img
+                src="/cancelled.png"
+                alt="Cancelled"
+                style={{
+                  width: '250px',
+                  height: 'auto',
+                  opacity: 0.8
+                }}
+              />
+            </Box>
+          )}
 
           <Divider sx={{ my: 3 }} />
 

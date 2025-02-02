@@ -34,6 +34,7 @@ const PrintableServiceInvoice = ({ billId }) => {
     const [profile, setProfile] = useState(null);
     const [services, setServices] = useState([]);
     const [isPaid, setIsPaid] = useState(false);
+    const [isCancelled, setIsCancelled] = useState(false);
 
     useEffect(() => {
         const fetchInvoiceData = async () => {
@@ -54,6 +55,7 @@ const PrintableServiceInvoice = ({ billId }) => {
                 const billing = billingData.data;
                 // Set payment status
                 setIsPaid(billing.Bill_Paid?.toLowerCase() === 'yes');
+                setIsCancelled(billing.Cancelled?.toLowerCase() === 'yes');
 
                 // 2. Fetch booking details using room number from billing
                 const bookingsResponse = await fetch('/api/NewBooking');
@@ -65,7 +67,7 @@ const PrintableServiceInvoice = ({ billId }) => {
                 const matchedRoom = roomsData.data.find(room => room.number === billing.roomNo);
                 let booking;
 
-                if (billing.Bill_Paid?.toLowerCase() === 'yes') {
+                if (billing.Bill_Paid?.toLowerCase() === 'yes' || billing.Cancelled?.toLowerCase() === 'yes') {
                     // For paid bills, find the booking using billWaitlist
                     const billIndex = matchedRoom.billWaitlist.findIndex(
                         billId => billId._id.toString() === billing._id.toString()
@@ -273,6 +275,22 @@ const PrintableServiceInvoice = ({ billId }) => {
                             />
                         </Box>
                     )}
+
+                    {/* Cancelled Image */}
+                    {isCancelled && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+                            <img
+                                src="/cancelled.png"
+                                alt="Cancelled"
+                                style={{
+                                    width: '250px',
+                                    height: 'auto',
+                                    opacity: 0.8
+                                }}
+                            />
+                        </Box>
+                    )}
+                    
                     <Divider sx={{ my: 3 }} />
 
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2, textAlign: 'center' }}>
