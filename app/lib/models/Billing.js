@@ -1,31 +1,35 @@
 import mongoose from 'mongoose';
 
 const BillingSchema = new mongoose.Schema({
-  roomNo: { type: String, ref: 'Room', required: true },
-  itemList: { type: [String], required: true },
-  priceList: { type: [Number], required: true },
+  roomNo: { type: [String], ref: 'Room', required: true },
+  itemList: { type: [[String]], required: true },
+  priceList: { type: [[Number]], required: true },
   quantityList: {
-    type: [Number],
+    type: [[Number]],
     required: true,
     validate: {
       validator: function(quantities) {
-        return quantities.every(qty => qty > 0);
+        return quantities.every(roomQuantities => 
+          roomQuantities.every(qty => qty > 0)
+        );
       },
       message: 'Quantity values must be positive numbers'
     }
   },
   taxList: {
-    type: [Number],
+    type: [[Number]],
     default: [],
     validate: {
       validator: function(taxes) {
-        return taxes.every(tax => tax >= 0);
+        return taxes.every(roomTaxes => 
+          roomTaxes.every(tax => tax >= 0)
+        );
       },
       message: 'Tax values must be non-negative numbers'
     }
   },
-  billStartDate: { type: Date, ref: 'NewBooking', required: true },
-  billEndDate: { type: Date, ref: 'NewBooking', required: true },
+  billStartDate: { type: [Date], ref: 'NewBooking', required: true },
+  billEndDate: { type: [Date], ref: 'NewBooking', required: true },
   totalAmount: { type: Number, required: true, default: 0 },
   amountAdvanced: { type: Number, default: 0 },
   dueAmount: {
@@ -34,7 +38,6 @@ const BillingSchema = new mongoose.Schema({
       return this.totalAmount - this.amountAdvanced;
     }
   },
-  
   Bill_Paid: { type: String, enum: ['yes', 'no'], default: 'no' },
   Cancelled: { type: String, enum: ['yes', 'no'], default: 'no' },
   DateOfPayment: { type: [Date], default: [] },
@@ -50,11 +53,10 @@ const BillingSchema = new mongoose.Schema({
     }
   },
   AmountOfPayment: { type: [Number], default: [] },
-  // New fields for remarks
-  FoodRemarks: { type: [String], default: [] },
-  ServiceRemarks: { type: [String], default: [] },
-  RoomRemarks: { type: [String], default: [] },
-  username: {  // New field
+  FoodRemarks: { type: [[String]], default: [] },
+  ServiceRemarks: { type: [[String]], default: [] },
+  RoomRemarks: { type: [[String]], default: [] },
+  username: {
     type: String,
     required: true,
   },
