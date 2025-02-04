@@ -1,23 +1,43 @@
-'use client'
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Bed, Users, Calendar, Clock, Building, Tag,
-  ArrowRight, CheckCircle, Home, Hotel, Coffee
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Card, CardContent, Checkbox, Typography, Box, Chip } from '@mui/material';
+  Bed,
+  Users,
+  Calendar,
+  Clock,
+  Building,
+  Tag,
+  ArrowRight,
+  CheckCircle,
+  Home,
+  Hotel,
+  Coffee,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Typography,
+  Box,
+  Chip,
+} from "@mui/material";
 import Navbar from "../../../_components/Navbar";
 import { Footer } from "../../../_components/Footer";
-import TextField from '@mui/material/TextField';
-import { Grid } from '@mui/material';
-import MenuItem from '@mui/material/MenuItem';
-import { Autocomplete } from '@mui/material';
-
+import TextField from "@mui/material/TextField";
+import { Grid } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import { Autocomplete } from "@mui/material";
 
 export default function BookingForm() {
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [mobileNumbers, setMobileNumbers] = useState([]); // For storing all mobile numbers
   const [filteredMobileNumbers, setFilteredMobileNumbers] = useState([]); // For filtered mobile numbers
@@ -26,70 +46,79 @@ export default function BookingForm() {
   const [errors, setErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [formData, setFormData] = useState({
-    bookingType: '',
-    bookingId: '',
-    bookingSource: '',
-    bookingPoint: '',
-    dateofbirth: '',
-    dateofanniversary: '',
-    referenceno: '',
-    pinCode: '',
-    mobileNo: '',
-    guestName: '',
-    guestid: '',
-    guestidno: '',
-    passportIssueDate: '',
-    passportExpireDate: '',
-    visaNumber: '',
-    visaIssueDate: '',
-    visaExpireDate: '',
-    companyName: '',
-    gstin: '',
-    guestEmail: '',
+    bookingType: "",
+    bookingId: "",
+    bookingSource: "",
+    bookingPoint: "",
+    dateofbirth: "",
+    dateofanniversary: "",
+    referenceno: "",
+    pinCode: "",
+    mobileNo: "",
+    guestName: "",
+    guestid: "",
+    guestidno: "",
+    passportIssueDate: "",
+    passportExpireDate: "",
+    visaNumber: "",
+    visaIssueDate: "",
+    visaExpireDate: "",
+    companyName: "",
+    gstin: "",
+    guestEmail: "",
     adults: 1,
     children: 0,
-    checkIn: '',
-    checkOut: '',
-    expectedArrival: '',
-    expectedDeparture: '',
-    bookingStatus: '',
-    address: '',
-    remarks: '',
-    state: '',
-    mealPlan: '',
-    bookingReference: '',
+    checkIn: "",
+    checkOut: "",
+    expectedArrival: "",
+    expectedDeparture: "",
+    bookingStatus: "",
+    address: "",
+    remarks: "",
+    state: "",
+    mealPlan: "",
+    bookingReference: "",
     stopPosting: false,
-    guestType: '',
-    guestNotes: '',
-    internalNotes: '',
+    guestType: "",
+    guestNotes: "",
+    internalNotes: "",
   });
 
   const placeholders = {
-    bookingPoint: 'Enter Booking Point',
-    pinCode: 'Enter Pin Code',
-    mobileNo: 'Enter Mobile Number',
-    guestName: 'Enter Guest Name',
-    companyName: 'Enter Company Name',
-    dateofbirth: 'Enter date of birth',
-    dateofanniversary: 'Enter date of anniversary',
-    gstin: 'Enter GSTIN',
-    guestEmail: 'Enter Guest Email',
-    address: 'Enter Guest Address',
-    state: 'Enter Guest State',
-    bookingReference: 'Enter Booking Reference',
-    guestNotes: 'Enter Guest Notes',
-    internalNotes: 'Enter Internal Notes',
-    remarks: 'Enter Remarks'
+    bookingPoint: "Enter Booking Point",
+    pinCode: "Enter Pin Code",
+    mobileNo: "Enter Mobile Number",
+    guestName: "Enter Guest Name",
+    companyName: "Enter Company Name",
+    dateofbirth: "Enter date of birth",
+    dateofanniversary: "Enter date of anniversary",
+    gstin: "Enter GSTIN",
+    guestEmail: "Enter Guest Email",
+    address: "Enter Guest Address",
+    state: "Enter Guest State",
+    bookingReference: "Enter Booking Reference",
+    guestNotes: "Enter Guest Notes",
+    internalNotes: "Enter Internal Notes",
+    remarks: "Enter Remarks",
   };
 
   // Validation rules
   const validateForm = () => {
     const newErrors = {};
     const requiredFields = [
-      'guestName', 'gstin',
-      'bookingReference', 'expectedArrival', 'expectedDeparture', 'mobileNo',
-      'guestid', 'guestidno', 'referenceno', 'checkIn', 'checkOut',
-      'dateofbirth', 'bookingStatus'
+      "guestName",
+      "gstin",
+      "bookingReference",
+      "expectedArrival",
+      "expectedDeparture",
+      "mobileNo",
+      "guestid",
+      "guestidno",
+      "referenceno",
+      "checkIn",
+      "checkOut",
+      "dateofbirth",
+      "bookingStatus",
     ];
 
     // Initialize all error flags at the start
@@ -109,92 +138,108 @@ export default function BookingForm() {
 
     // Date of Birth validation (18 years or above)
     if (formData.dateofbirth) {
-        const dobDate = new Date(formData.dateofbirth);
-        const today = new Date();
-        const age = today.getFullYear() - dobDate.getFullYear();
-        const monthDiff = today.getMonth() - dobDate.getMonth();
-        
-        // Adjust age if birthday hasn't occurred this year
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
-            const adjustedAge = age - 1;
-            if (adjustedAge < 18) {
-                newErrors.dateofbirth = 'Guest must be 18 years or older';
-                dobError = true;
-            }
-        } else if (age < 18) {
-            newErrors.dateofbirth = 'Guest must be 18 years or older';
-            dobError = true;
+      const dobDate = new Date(formData.dateofbirth);
+      const today = new Date();
+      const age = today.getFullYear() - dobDate.getFullYear();
+      const monthDiff = today.getMonth() - dobDate.getMonth();
+
+      // Adjust age if birthday hasn't occurred this year
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < dobDate.getDate())
+      ) {
+        const adjustedAge = age - 1;
+        if (adjustedAge < 18) {
+          newErrors.dateofbirth = "Guest must be 18 years or older";
+          dobError = true;
         }
+      } else if (age < 18) {
+        newErrors.dateofbirth = "Guest must be 18 years or older";
+        dobError = true;
+      }
     }
 
     // Anniversary date validation (not in future)
     if (formData.dateofanniversary) {
-        const anniversaryDate = new Date(formData.dateofanniversary);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
-        
-        if (anniversaryDate > today) {
-            newErrors.dateofanniversary = 'Anniversary date cannot be in the future';
-            anniversaryError = true;
-        }
+      const anniversaryDate = new Date(formData.dateofanniversary);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+
+      if (anniversaryDate > today) {
+        newErrors.dateofanniversary =
+          "Anniversary date cannot be in the future";
+        anniversaryError = true;
+      }
     }
 
     // Check if any required field is empty
-    const hasEmptyFields = requiredFields.some(field => !formData[field]);
+    const hasEmptyFields = requiredFields.some((field) => !formData[field]);
 
     // Date validations
     const currentDate = new Date();
     const checkInDate = new Date(formData.checkIn);
     const checkOutDate = new Date(formData.checkOut);
 
-    if (new Date(checkInDate).setHours(0, 0, 0, 0) < new Date(currentDate).setHours(0, 0, 0, 0)) {
-      newErrors.checkIn = 'Check-in date cannot be in the past';
+    if (
+      new Date(checkInDate).setHours(0, 0, 0, 0) <
+      new Date(currentDate).setHours(0, 0, 0, 0)
+    ) {
+      newErrors.checkIn = "Check-in date cannot be in the past";
       dateErrors = true;
     }
 
     if (checkOutDate <= checkInDate) {
-      newErrors.checkOut = 'Check-out date must be after check-in date';
+      newErrors.checkOut = "Check-out date must be after check-in date";
       dateErrors = true;
     }
 
     // Mobile number validation
     if (formData.mobileNo && !/^\d{10}$/.test(formData.mobileNo)) {
-      newErrors.mobileNo = 'Mobile number must be 10 digits';
+      newErrors.mobileNo = "Mobile number must be 10 digits";
       mobileError = true;
     }
 
     // Email validation
-    if (formData.guestEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)) {
-      newErrors.guestEmail = 'Invalid email format';
+    if (
+      formData.guestEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)
+    ) {
+      newErrors.guestEmail = "Invalid email format";
       emailError = true;
     }
 
     // GSTIN validation
-    if (formData.gstin && !/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}$/.test(formData.gstin)) {
-      newErrors.gstin = 'Invalid GSTIN format';
+    if (
+      formData.gstin &&
+      !/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}$/.test(formData.gstin)
+    ) {
+      newErrors.gstin = "Invalid GSTIN format";
       gstinError = true;
     }
 
     // Reference number validation
-    if (formData.referenceno && (isNaN(formData.referenceno) || formData.referenceno < 0)) {
-      newErrors.referenceno = 'Reference number must be a positive number';
+    if (
+      formData.referenceno &&
+      (isNaN(formData.referenceno) || formData.referenceno < 0)
+    ) {
+      newErrors.referenceno = "Reference number must be a positive number";
       referenceError = true;
     }
 
     // Adults validation
     if (formData.adults < 1) {
-      newErrors.adults = 'At least 1 adult is required';
+      newErrors.adults = "At least 1 adult is required";
       adultsError = true;
     }
 
     // Children validation
     if (formData.children < 0) {
-      newErrors.children = 'Number of children cannot be negative';
+      newErrors.children = "Number of children cannot be negative";
       childrenError = true;
     }
 
     // Passport-related validations
-    if (formData.guestid === 'passport') {
+    if (formData.guestid === "passport") {
       const today = new Date();
       const passportIssue = new Date(formData.passportIssueDate);
       const visaIssue = new Date(formData.visaIssueDate);
@@ -202,29 +247,30 @@ export default function BookingForm() {
       const visaExpiry = new Date(formData.visaExpireDate);
 
       if (passportIssue > today) {
-        newErrors.passportIssueDate = 'Passport issue date cannot be in future';
+        newErrors.passportIssueDate = "Passport issue date cannot be in future";
         passportIssueError = true;
       }
 
       if (visaIssue > today) {
-        newErrors.visaIssueDate = 'Visa issue date cannot be in future';
+        newErrors.visaIssueDate = "Visa issue date cannot be in future";
         visaIssueError = true;
       }
 
       if (passportExpiry < today) {
-        newErrors.passportExpireDate = 'Passport has expired';
+        newErrors.passportExpireDate = "Passport has expired";
         passportError = true;
       }
 
       if (visaExpiry < today) {
-        newErrors.visaExpireDate = 'Visa has expired';
+        newErrors.visaExpireDate = "Visa has expired";
         visaError = true;
       }
     }
 
     setErrors(newErrors);
 
-    const isValid = !hasEmptyFields &&
+    const isValid =
+      !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
       !emailError &&
@@ -251,7 +297,9 @@ export default function BookingForm() {
 
   useEffect(() => {
     const generateBookingId = () => {
-      return "SOLV-" + Math.random().toString(36).substring(2, 12).toUpperCase();
+      return (
+        "SOLV-" + Math.random().toString(36).substring(2, 12).toUpperCase()
+      );
     };
 
     setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
@@ -259,43 +307,44 @@ export default function BookingForm() {
 
   // Function to format date to YYYY-MM-DD
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return ''; // Return empty string if invalid date
-    return date.toISOString().split('T')[0];
+    if (isNaN(date.getTime())) return ""; // Return empty string if invalid date
+    return date.toISOString().split("T")[0];
   };
 
   // Add this useEffect to fetch all mobile numbers when component mounts
   useEffect(() => {
     const fetchMobileNumbers = async () => {
       try {
-        const response = await fetch('/api/NewBooking');
-        if (!response.ok) throw new Error('Failed to fetch bookings');
+        const response = await fetch("/api/NewBooking");
+        if (!response.ok) throw new Error("Failed to fetch bookings");
         const result = await response.json();
         if (result.success && result.data) {
           // Extract unique mobile numbers
-          const uniqueMobileNumbers = [...new Set(result.data.map(booking => booking.mobileNo))];
+          const uniqueMobileNumbers = [
+            ...new Set(result.data.map((booking) => booking.mobileNo)),
+          ];
           setMobileNumbers(uniqueMobileNumbers);
         }
       } catch (error) {
-        console.error('Error fetching mobile numbers:', error);
+        console.error("Error fetching mobile numbers:", error);
       }
     };
 
     fetchMobileNumbers();
   }, []);
 
-
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/roomCategories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
+      const response = await fetch("/api/roomCategories");
+      if (!response.ok) throw new Error("Failed to fetch categories");
       const result = await response.json();
       if (result.success && result.data) {
         setCategories(result.data);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -304,10 +353,12 @@ export default function BookingForm() {
   }, []);
 
   useEffect(() => {
-    if (selectedCategory === 'all') {
+    if (selectedCategory === "all") {
       setFilteredRooms(rooms);
     } else {
-      const filtered = rooms.filter(room => room.category._id === selectedCategory);
+      const filtered = rooms.filter(
+        (room) => room.category._id === selectedCategory
+      );
       setFilteredRooms(filtered);
     }
   }, [selectedCategory, rooms]);
@@ -319,17 +370,17 @@ export default function BookingForm() {
   // Update handleChange to include validation
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === 'checkbox' ? checked : value;
+    const newValue = type === "checkbox" ? checked : value;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: newValue
+      [name]: newValue,
     }));
 
     // Clear error for the changed field
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: undefined
+      [name]: undefined,
     }));
   };
 
@@ -341,35 +392,46 @@ export default function BookingForm() {
   };
   const handleCheckAvailability = async () => {
     if (!validateForm()) {
-      alert('Please fill in all required fields correctly before checking room availability');
+      alert(
+        "Please fill in all required fields correctly before checking room availability"
+      );
       return;
     }
     try {
       if (!formData.checkIn || !formData.checkOut) {
-        alert('Please select both Check-in and Check-out dates first');
+        alert("Please select both Check-in and Check-out dates first");
         return;
       }
-      console.log('Checking availability for:', formData.checkIn, formData.checkOut);
-      const response = await fetch('/api/rooms');
+      console.log(
+        "Checking availability for:",
+        formData.checkIn,
+        formData.checkOut
+      );
+      const response = await fetch("/api/rooms");
       if (!response.ok) {
-        throw new Error('Failed to fetch rooms');
+        throw new Error("Failed to fetch rooms");
       }
       const result = await response.json();
       if (!result.success || !result.data) {
-        throw new Error('No room data available');
+        throw new Error("No room data available");
       }
-      console.log('Fetched rooms:', result.data);
+      console.log("Fetched rooms:", result.data);
       const checkInDate = new Date(formData.checkIn);
       const checkOutDate = new Date(formData.checkOut);
 
       // Filter available rooms based on check-in and check-out date lists
-      const availableRooms = result.data.filter(room => {
+      const availableRooms = result.data.filter((room) => {
         // If no existing bookings, room is available
-        console.log('Checking room:', room.number);
-        console.log('Check-in dates:', room.checkInDateList);
-        console.log('Check-out dates:', room.checkOutDateList);
-        if (!room.checkInDateList || !room.checkOutDateList ||
-          room.checkInDateList.length === 0 || room.checkOutDateList.length === 0 || room.billingStarted === 'No') {
+        console.log("Checking room:", room.number);
+        console.log("Check-in dates:", room.checkInDateList);
+        console.log("Check-out dates:", room.checkOutDateList);
+        if (
+          !room.checkInDateList ||
+          !room.checkOutDateList ||
+          room.checkInDateList.length === 0 ||
+          room.checkOutDateList.length === 0 ||
+          room.billingStarted === "No"
+        ) {
           return true;
         }
 
@@ -377,11 +439,13 @@ export default function BookingForm() {
         for (let i = 0; i < room.checkInDateList.length; i++) {
           const existingCheckIn = new Date(room.checkInDateList[i]);
           const existingCheckOut = new Date(room.checkOutDateList[i]);
-          console.log('Existing booking:', existingCheckIn, existingCheckOut);
-          console.log('New booking:', checkInDate, checkOutDate);
+          console.log("Existing booking:", existingCheckIn, existingCheckOut);
+          console.log("New booking:", checkInDate, checkOutDate);
           // Check for overlap
-          const hasOverlap = !(checkOutDate < existingCheckIn || checkInDate >= existingCheckOut);
-          console.log('No overlap found', hasOverlap);
+          const hasOverlap = !(
+            checkOutDate < existingCheckIn || checkInDate >= existingCheckOut
+          );
+          console.log("No overlap found", hasOverlap);
           if (hasOverlap) {
             return false; // Room is not available if there's any overlap
           }
@@ -392,11 +456,10 @@ export default function BookingForm() {
       setRooms(availableRooms);
       setModalOpen(true);
     } catch (error) {
-      console.error('Error fetching room data:', error.message);
-      alert('Error fetching room data');
+      console.error("Error fetching room data:", error.message);
+      alert("Error fetching room data");
     }
   };
-
 
   const handleRoomSelection = (roomId) => {
     setSelectedRooms((prevSelectedRooms) => {
@@ -404,7 +467,7 @@ export default function BookingForm() {
         ? prevSelectedRooms.filter((room) => room !== roomId)
         : [...prevSelectedRooms, roomId];
 
-      console.log('Updated selectedRooms:', newSelectedRooms); // Debugging selection
+      console.log("Updated selectedRooms:", newSelectedRooms); // Debugging selection
 
       return newSelectedRooms;
     });
@@ -416,56 +479,63 @@ export default function BookingForm() {
       const indices = dates.map((_, index) => index);
       indices.sort((a, b) => new Date(dates[a]) - new Date(dates[b]));
       return [
-        indices.map(i => dates[i]),
-        ...arrays.map(arr => indices.map(i => arr[i]))
+        indices.map((i) => dates[i]),
+        ...arrays.map((arr) => indices.map((i) => arr[i])),
       ];
     };
     try {
-      console.log('Selected rooms:', selectedRooms);
+      console.log("Selected rooms:", selectedRooms);
       const roomNumbers = selectedRooms.map((room) => Number(room));
       const bookingData = { ...formData, roomNumbers: roomNumbers };
 
       // Create booking
-      const bookingResponse = await fetch('/api/NewBooking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const bookingResponse = await fetch("/api/NewBooking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
 
       if (!bookingResponse.ok) {
-        throw new Error('Failed to create booking');
+        throw new Error("Failed to create booking");
       }
 
       const bookingResult = await bookingResponse.json();
-      console.log('Booking result:', bookingResult);
+      console.log("Booking result:", bookingResult);
       const guestId = bookingResult.data._id;
 
       // Fetch necessary data
       const [roomsResponse, categoriesResponse] = await Promise.all([
-        fetch('/api/rooms'),
-        fetch('/api/roomCategories')
+        fetch("/api/rooms"),
+        fetch("/api/roomCategories"),
       ]);
 
       const roomsData = await roomsResponse.json();
       const categoriesData = await categoriesResponse.json();
 
       if (!roomsData.success || !categoriesData.success) {
-        throw new Error('Failed to fetch room or category data');
+        throw new Error("Failed to fetch room or category data");
       }
 
       const rooms = roomsData.data;
       const categories = categoriesData.data;
+      let allRoomNumbers = [];
+      let roomCharges = [];
+      let roomTaxes = [];
+      let quantities = [];
+      let totalAmount = 0;
 
       // Process each selected room
       for (const selectedRoomNumber of selectedRooms) {
-        const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
+        const matchedRoom = rooms.find(
+          (room) => room.number === selectedRoomNumber
+        );
         if (!matchedRoom) {
           console.error(`Room ${selectedRoomNumber} not found`);
           continue;
         }
 
         const matchedCategory = categories.find(
-          category => category._id === matchedRoom.category._id
+          (category) => category._id === matchedRoom.category._id
         );
         if (!matchedCategory) {
           console.error(`Category for room ${selectedRoomNumber} not found`);
@@ -481,77 +551,87 @@ export default function BookingForm() {
         const roomCharge = matchedCategory.total * numberOfNights;
         const roomTax = matchedCategory.gst;
 
-        // Create billing record
-        const billingResponse = await fetch('/api/Billing', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            roomNo: selectedRoomNumber,
-            itemList: ['Room Charge'],
-            priceList: [roomCharge],
-            taxList: [roomTax],
-            quantityList: [1],
-            billStartDate: checkInDate,
-            billEndDate: checkOutDate,
-            totalAmount: roomCharge,
-            amountAdvanced: 0,
-            dueAmount: roomCharge,
-            Bill_Paid: 'no'
-          })
-        });
-
-        const billingData = await billingResponse.json();
-        if (!billingData.success) {
-          throw new Error(`Failed to create billing for room ${selectedRoomNumber}`);
-        }
+        allRoomNumbers.push(selectedRoomNumber);
+        roomCharges.push(roomCharge);
+        roomTaxes.push(roomTax);
+        quantities.push(1);
+        totalAmount += roomCharge + (roomCharge * roomTax) / 100;
 
         // Prepare new dates and lists
-        const newCheckInDateList = [...(matchedRoom.checkInDateList || []), formData.checkIn];
-        const newCheckOutDateList = [...(matchedRoom.checkOutDateList || []), formData.checkOut];
-        const newBillWaitlist = [...(matchedRoom.billWaitlist || []), billingData.data._id];
-        const newGuestWaitlist = [...(matchedRoom.guestWaitlist || []), guestId];
+        const newCheckInDateList = [
+          ...(matchedRoom.checkInDateList || []),
+          formData.checkIn,
+        ];
+        const newCheckOutDateList = [
+          ...(matchedRoom.checkOutDateList || []),
+          formData.checkOut,
+        ];
+        const newBillWaitlist = [
+          ...(matchedRoom.billWaitlist || []),
+          billingData.data._id,
+        ];
+        const newGuestWaitlist = [
+          ...(matchedRoom.guestWaitlist || []),
+          guestId,
+        ];
 
         // Sort all arrays based on proximity to current date
         const currentDate = new Date();
-        const [sortedCheckInDates, sortedCheckOutDates, sortedBillWaitlist, sortedGuestWaitlist] =
-          sortDatesWithCorrespondingArrays(
-            newCheckInDateList,
-            newCheckOutDateList,
-            newBillWaitlist,
-            newGuestWaitlist
-          );
+        const [
+          sortedCheckInDates,
+          sortedCheckOutDates,
+          sortedBillWaitlist,
+          sortedGuestWaitlist,
+        ] = sortDatesWithCorrespondingArrays(
+          newCheckInDateList,
+          newCheckOutDateList,
+          newBillWaitlist,
+          newGuestWaitlist
+        );
 
         // Initialize room update object
         const roomUpdate = {
           checkInDateList: sortedCheckInDates,
           checkOutDateList: sortedCheckOutDates,
           billWaitlist: sortedBillWaitlist,
-          guestWaitlist: sortedGuestWaitlist
+          guestWaitlist: sortedGuestWaitlist,
         };
 
-        if (matchedRoom.billingStarted === 'No') {
+        if (matchedRoom.billingStarted === "No") {
           // If room is not currently booked, simply assign new booking as current
           roomUpdate.currentBillingId = billingData.data._id;
           roomUpdate.currentGuestId = guestId;
-          roomUpdate.billingStarted = 'Yes';
+          roomUpdate.billingStarted = "Yes";
         } else {
           // Fetch current guest's booking details
-          console.log('matchedRoom:', matchedRoom);
-          console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
-          const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
+          console.log("matchedRoom:", matchedRoom);
+          console.log(
+            "matchedRoom.currentGuestId:",
+            matchedRoom.currentGuestId
+          );
+          const currentGuestResponse = await fetch(
+            `/api/NewBooking/${matchedRoom.currentGuestId}`
+          );
           const currentGuestData = await currentGuestResponse.json();
-          console.log('currentGuestData:', currentGuestData);
+          console.log("currentGuestData:", currentGuestData);
           const currentGuestCheckIn = new Date(currentGuestData.checkIn);
-          console.log('currentGuestCheckIn:', currentGuestCheckIn);
-          console.log('sortedGuestWaitlist:', sortedGuestWaitlist);
+          console.log("currentGuestCheckIn:", currentGuestCheckIn);
+          console.log("sortedGuestWaitlist:", sortedGuestWaitlist);
           // Fetch first waitlisted guest's booking details
-          const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]._id}`);
-          const firstWaitlistedGuestData = await firstWaitlistedGuestResponse.json();
-          const firstWaitlistedCheckIn = new Date(firstWaitlistedGuestData.data.checkIn);
+          const firstWaitlistedGuestResponse = await fetch(
+            `/api/NewBooking/${sortedGuestWaitlist[0]._id}`
+          );
+          const firstWaitlistedGuestData =
+            await firstWaitlistedGuestResponse.json();
+          const firstWaitlistedCheckIn = new Date(
+            firstWaitlistedGuestData.data.checkIn
+          );
 
           // Compare dates to determine which should be current
           const currentDateDiff = Math.abs(currentDate - currentGuestCheckIn);
-          const waitlistedDateDiff = Math.abs(currentDate - firstWaitlistedCheckIn);
+          const waitlistedDateDiff = Math.abs(
+            currentDate - firstWaitlistedCheckIn
+          );
 
           if (waitlistedDateDiff < currentDateDiff) {
             // If waitlisted guest's check-in is closer to current date
@@ -561,22 +641,66 @@ export default function BookingForm() {
         }
 
         // Update room with new data
-        const roomUpdateResponse = await fetch(`/api/rooms/${matchedRoom._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(roomUpdate)
-        });
+        const roomUpdateResponse = await fetch(
+          `/api/rooms/${matchedRoom._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(roomUpdate),
+          }
+        );
 
         if (!roomUpdateResponse.ok) {
           throw new Error(`Failed to update room ${selectedRoomNumber}`);
         }
       }
 
-      alert('Booking created successfully!');
+      // Create single billing record for all rooms
+      const billingResponse = await fetch("/api/Billing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomNo: allRoomNumbers,
+          itemList: Array(allRoomNumbers.length).fill("Room Charge"),
+          priceList: roomCharges,
+          taxList: roomTaxes,
+          quantityList: quantities,
+          billStartDate: new Date(formData.checkIn),
+          billEndDate: new Date(formData.checkOut),
+          totalAmount: totalAmount,
+          amountAdvanced: 0,
+          dueAmount: totalAmount,
+          Bill_Paid: "no",
+        }),
+      });
+
+      const billingData = await billingResponse.json();
+      if (!billingData.success)
+        throw new Error("Failed to create consolidated billing");
+      // Update all rooms with the same billing ID
+      for (const selectedRoomNumber of selectedRooms) {
+        const matchedRoom = rooms.find(
+          (room) => room.number === selectedRoomNumber
+        );
+        const roomUpdateResponse = await fetch(
+          `/api/rooms/${matchedRoom._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              currentBillingId: billingData.data._id,
+              currentGuestId: guestId,
+              billingStarted: "Yes",
+            }),
+          }
+        );
+      }
+
+      alert("Booking created successfully!");
       setModalOpen(false);
-      router.push('/property/roomdashboard');
+      router.push("/property/roomdashboard");
     } catch (error) {
-      console.error('Error in booking submission:', error);
+      console.error("Error in booking submission:", error);
       alert(`Failed to create booking: ${error.message}`);
     }
   };
@@ -587,25 +711,25 @@ export default function BookingForm() {
       scale: 0.95,
       transition: {
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
     visible: {
       opacity: 1,
       scale: 1,
       transition: {
         duration: 0.4,
-        ease: [0.4, 0, 0.2, 1]
-      }
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
     exit: {
       opacity: 0,
       scale: 0.95,
       transition: {
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    }
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
   };
 
   const cardAnimation = {
@@ -614,33 +738,33 @@ export default function BookingForm() {
       y: 20,
       transition: {
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.4,
-        ease: [0.4, 0, 0.2, 1]
-      }
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
     exit: {
       opacity: 0,
       y: -20,
       transition: {
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
     hover: {
       y: -8,
       scale: 1.02,
       transition: {
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    }
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
   };
 
   const filterAnimation = {
@@ -649,23 +773,23 @@ export default function BookingForm() {
       x: -20,
       transition: {
         duration: 0.3,
-        ease: [0.4, 0, 0.2, 1]
-      }
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
     visible: {
       opacity: 1,
       x: 0,
       transition: {
         duration: 0.4,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    }
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
   };
 
   // Function to handle modal close
   const handleCloseModal = () => {
     setSelectedRooms([]); // Reset selected rooms
-    setSelectedCategory('all'); // Reset category filter
+    setSelectedCategory("all"); // Reset category filter
     setModalOpen(false); // Close the modal
   };
 
@@ -673,43 +797,48 @@ export default function BookingForm() {
   const handleMobileNumberChange = async (event, newValue) => {
     const inputValue = newValue || event.target.value;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      mobileNo: inputValue
+      mobileNo: inputValue,
     }));
 
     // Clear mobile number error
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      mobileNo: undefined
+      mobileNo: undefined,
     }));
 
     if (newValue && mobileNumbers.includes(newValue)) {
       try {
-        const response = await fetch('/api/NewBooking');
-        if (!response.ok) throw new Error('Failed to fetch bookings');
+        const response = await fetch("/api/NewBooking");
+        if (!response.ok) throw new Error("Failed to fetch bookings");
         const result = await response.json();
         if (result.success && result.data) {
-          const guestBooking = result.data.find(booking => booking.mobileNo === newValue);
+          const guestBooking = result.data.find(
+            (booking) => booking.mobileNo === newValue
+          );
           if (guestBooking) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
-              guestName: guestBooking.guestName || '',
-              dateofbirth: formatDate(guestBooking.dateofbirth) || '',
-              dateofanniversary: formatDate(guestBooking.dateofanniversary) || '',
-              guestEmail: guestBooking.guestEmail || '',
-              guestid: guestBooking.guestid || '',
-              guestidno: guestBooking.guestidno || ''
+              guestName: guestBooking.guestName || "",
+              dateofbirth: formatDate(guestBooking.dateofbirth) || "",
+              dateofanniversary:
+                formatDate(guestBooking.dateofanniversary) || "",
+              guestEmail: guestBooking.guestEmail || "",
+              guestid: guestBooking.guestid || "",
+              guestidno: guestBooking.guestidno || "",
             }));
           }
         }
       } catch (error) {
-        console.error('Error fetching guest details:', error);
+        console.error("Error fetching guest details:", error);
       }
     }
 
     if (inputValue) {
-      const filtered = mobileNumbers.filter(number => number.startsWith(inputValue));
+      const filtered = mobileNumbers.filter((number) =>
+        number.startsWith(inputValue)
+      );
       setFilteredMobileNumbers(filtered);
     } else {
       setFilteredMobileNumbers([]);
@@ -723,7 +852,9 @@ export default function BookingForm() {
       options={filteredMobileNumbers}
       value={formData.mobileNo}
       onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
-      onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+      onInputChange={(event, newValue) =>
+        handleMobileNumberChange(event, newValue)
+      }
       renderInput={(params) => (
         <TextField
           {...params}
@@ -734,13 +865,10 @@ export default function BookingForm() {
         />
       )}
       filterOptions={(options, { inputValue }) =>
-        options.filter(option =>
-          option.startsWith(inputValue)
-        )
+        options.filter((option) => option.startsWith(inputValue))
       }
     />
   );
-
 
   // Add useEffect for continuous form validation
   useEffect(() => {
@@ -754,7 +882,9 @@ export default function BookingForm() {
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="bg-white shadow rounded-lg p-6">
-              <h1 className="text-2xl font-semibold text-cyan-800 mb-4">Guest Reservation Form</h1>
+              <h1 className="text-2xl font-semibold text-cyan-800 mb-4">
+                Guest Reservation Form
+              </h1>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Booking ID */}
@@ -782,7 +912,14 @@ export default function BookingForm() {
                       fullWidth
                       select
                     >
-                      {['FIT', 'Group', 'Corporate', 'Corporate Group', 'Social Events', 'Others'].map((type) => (
+                      {[
+                        "FIT",
+                        "Group",
+                        "Corporate",
+                        "Corporate Group",
+                        "Social Events",
+                        "Others",
+                      ].map((type) => (
                         <MenuItem key={type} value={type}>
                           {type}
                         </MenuItem>
@@ -826,9 +963,12 @@ export default function BookingForm() {
                       error={!!errors.bookingStatus}
                       helperText={errors.bookingStatus}
                     >
-                      {['Confirm', 'Block'].map((status) => (
-                        <MenuItem key={status} value={status}>{status}</MenuItem>
-                      ))}required
+                      {["Confirm", "Block"].map((status) => (
+                        <MenuItem key={status} value={status}>
+                          {status}
+                        </MenuItem>
+                      ))}
+                      required
                     </TextField>
                   </Grid>
 
@@ -848,8 +988,12 @@ export default function BookingForm() {
                     freeSolo
                     options={filteredMobileNumbers}
                     value={formData.mobileNo}
-                    onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
-                    onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+                    onChange={(event, newValue) =>
+                      handleMobileNumberChange(event, newValue)
+                    }
+                    onInputChange={(event, newValue) =>
+                      handleMobileNumberChange(event, newValue)
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -933,8 +1077,16 @@ export default function BookingForm() {
                       fullWidth
                       select
                     >
-                      {['Adhaar', 'Driving License', 'Voter ID Card', 'Passport', 'Others'].map((idType) => (
-                        <MenuItem key={idType} value={idType}>{idType}</MenuItem>
+                      {[
+                        "Adhaar",
+                        "Driving License",
+                        "Voter ID Card",
+                        "Passport",
+                        "Others",
+                      ].map((idType) => (
+                        <MenuItem key={idType} value={idType}>
+                          {idType}
+                        </MenuItem>
                       ))}
                     </TextField>
                   </Grid>
@@ -951,7 +1103,7 @@ export default function BookingForm() {
                   />
 
                   {/* Conditional Passport Fields */}
-                  {formData.guestid === 'Passport' && (
+                  {formData.guestid === "Passport" && (
                     <>
                       <TextField
                         label="Passport Issue Date"
@@ -1119,8 +1271,10 @@ export default function BookingForm() {
                       error={!!errors.mealPlan}
                       helperText={errors.mealPlan}
                     >
-                      {['EP', 'CP', 'AP', 'MAP'].map((plan) => (
-                        <MenuItem key={plan} value={plan}>{plan}</MenuItem>
+                      {["EP", "CP", "AP", "MAP"].map((plan) => (
+                        <MenuItem key={plan} value={plan}>
+                          {plan}
+                        </MenuItem>
                       ))}
                     </TextField>
                   </Grid>
@@ -1156,8 +1310,8 @@ export default function BookingForm() {
                     onClick={handleCheckAvailability}
                     disabled={!isFormValid}
                     sx={{
-                      '&:hover': { backgroundColor: '#3b82f6' },
-                      fontWeight: 'bold',
+                      "&:hover": { backgroundColor: "#3b82f6" },
+                      fontWeight: "bold",
                     }}
                   >
                     Check Room Availability
@@ -1166,18 +1320,17 @@ export default function BookingForm() {
                   <Button
                     variant="outlined"
                     color="secondary"
-                    onClick={() => router.push('/property/roomdashboard')}
+                    onClick={() => router.push("/property/roomdashboard")}
                     sx={{
-                      fontWeight: 'bold',
+                      fontWeight: "bold",
                       ml: 4, // Margin-left for spacing
-                      '&:hover': {
-                        backgroundColor: '#e0e0e0', // Light gray shade for hover effect
+                      "&:hover": {
+                        backgroundColor: "#e0e0e0", // Light gray shade for hover effect
                       },
                     }}
                   >
                     Back
                   </Button>
-
                 </div>
               </form>
             </div>
@@ -1221,8 +1374,8 @@ export default function BookingForm() {
                   className="flex flex-wrap gap-3 mb-6"
                 >
                   <Button
-                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                    onClick={() => handleCategoryFilter('all')}
+                    variant={selectedCategory === "all" ? "default" : "outline"}
+                    onClick={() => handleCategoryFilter("all")}
                     className="group transition-all duration-500 ease-in-out hover:shadow-lg"
                   >
                     <Building className="w-4 h-4 mr-2 transition-transform duration-500 ease-in-out group-hover:scale-125" />
@@ -1232,7 +1385,11 @@ export default function BookingForm() {
                   {categories.map((category) => (
                     <Button
                       key={category._id}
-                      variant={selectedCategory === category._id ? 'default' : 'outline'}
+                      variant={
+                        selectedCategory === category._id
+                          ? "default"
+                          : "outline"
+                      }
                       onClick={() => handleCategoryFilter(category._id)}
                       className="group transition-all duration-500 ease-in-out hover:shadow-lg"
                     >
@@ -1257,9 +1414,11 @@ export default function BookingForm() {
                         transition={{ delay: index * 0.05 }}
                         className={`
                         relative rounded-xl overflow-hidden transform-gpu
-                        ${selectedRooms.includes(room.number)
-                            ? 'ring-2 ring-blue-500 shadow-lg'
-                            : 'ring-1 ring-gray-200'}
+                        ${
+                          selectedRooms.includes(room.number)
+                            ? "ring-2 ring-blue-500 shadow-lg"
+                            : "ring-1 ring-gray-200"
+                        }
                       `}
                       >
                         <motion.div
@@ -1320,7 +1479,7 @@ export default function BookingForm() {
                               transition={{
                                 type: "spring",
                                 stiffness: 500,
-                                damping: 30
+                                damping: 30,
                               }}
                               className="absolute top-2 right-2"
                             >
@@ -1355,7 +1514,7 @@ export default function BookingForm() {
                   <Button
                     disabled={selectedRooms.length === 0}
                     onClick={handleSubmit}
-                    sx={{ fontWeight: 'bold', color: 'white' }}
+                    sx={{ fontWeight: "bold", color: "white" }}
                     className="bg-gradient-to-r from-blue-600 to-cyan-600
                            transition-all duration-300 ease-in-out 
                            hover:opacity-90 hover:scale-105 hover:shadow-lg"
@@ -1370,5 +1529,5 @@ export default function BookingForm() {
       </div>
       <Footer />
     </div>
-  )
+  );
 }

@@ -251,19 +251,19 @@ const SuperAdminDashboard = () => {
     if (password.length > 13) {
       errors.maxLength = "Password must be no more than 13 characters long.";
     }
-    if (!/[A-Z]/.test(password)) {
-      errors.uppercase = "Password must contain at least one uppercase letter.";
-    }
-    if (!/[a-z]/.test(password)) {
-      errors.lowercase = "Password must contain at least one lowercase letter.";
-    }
-    if (!/[0-9]/.test(password)) {
-      errors.digit = "Password must contain at least one digit.";
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      errors.specialChar =
-        'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
-    }
+    // if (!/[A-Z]/.test(password)) {
+    //   errors.uppercase = "Password must contain at least one uppercase letter.";
+    // }
+    // if (!/[a-z]/.test(password)) {
+    //   errors.lowercase = "Password must contain at least one lowercase letter.";
+    // }
+    // if (!/[0-9]/.test(password)) {
+    //   errors.digit = "Password must contain at least one digit.";
+    // }
+    // if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    //   errors.specialChar =
+    //     'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
+    // }
     return errors;
   };
   const handleAddProfile = async () => {
