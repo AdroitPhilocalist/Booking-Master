@@ -7,6 +7,9 @@ import { Footer } from "../../_components/Footer";
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
+import {
+  Add
+} from "@mui/icons-material";
 
 // Component for summary items at the top of the page
 const SummaryItem = ({ icon: Icon, title, count }) => (
@@ -943,7 +946,7 @@ export default function RoomDashboard() {
                 href="roomdashboard/newguest"
                 className="bg-blue-600 text-white px-4 py-2 rounded"
               >
-                New Reservation+
+                New Reservation <Add/>
               </Link>
             </div>
           </div>
