@@ -35,7 +35,7 @@ export default function Billing() {
         // Fetch the profile by userId to get the username
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
-        console.log(profileData);
+        // console.log(profileData);
         if (!profileData.success || !profileData.data) {
           router.push('/'); // Redirect to login if profile not found
           return;
@@ -67,6 +67,7 @@ export default function Billing() {
         // Process and sort bills
         const enrichedBills = roomsResult.flatMap(room => {
           console.log(" Inside Room ");
+          console.log("Bill wait list", room.billWaitlist)
           if (!room.billWaitlist || room.billWaitlist.length === 0) {
             console.log("No Bills : ", room.billWaitlist.length);
             return []

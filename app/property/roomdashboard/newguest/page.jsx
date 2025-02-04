@@ -297,9 +297,9 @@ export default function BookingForm() {
 
   useEffect(() => {
     const generateBookingId = () => {
-      return (
-        "SOLV-" + Math.random().toString(36).substring(2, 12).toUpperCase()
-      );
+      const timestamp = Date.now().toString(36);
+      const randomString = Math.random().toString(36).substring(2, 8);
+      return `SOLV-${timestamp}-${randomString}`.toUpperCase();
     };
 
     setFormData((prev) => ({ ...prev, bookingId: generateBookingId() }));
@@ -479,189 +479,72 @@ export default function BookingForm() {
       const indices = dates.map((_, index) => index);
       indices.sort((a, b) => new Date(dates[a]) - new Date(dates[b]));
       return [
-        indices.map((i) => dates[i]),
-        ...arrays.map((arr) => indices.map((i) => arr[i])),
+        indices.map(i => dates[i]),
+        ...arrays.map(arr => indices.map(i => arr[i]))
       ];
     };
     try {
-      console.log("Selected rooms:", selectedRooms);
-      const roomNumbers = selectedRooms.map((room) => Number(room));
-      const bookingData = { ...formData, roomNumbers: roomNumbers };
-
+      console.log('Selected rooms:', selectedRooms);
+      const bookingData = { ...formData, roomNumbers: selectedRooms };
+  
       // Create booking
-      const bookingResponse = await fetch("/api/NewBooking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const bookingResponse = await fetch('/api/NewBooking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData),
       });
-
-      if (!bookingResponse.ok) {
-        throw new Error("Failed to create booking");
-      }
-
+  
       const bookingResult = await bookingResponse.json();
-      console.log("Booking result:", bookingResult);
       const guestId = bookingResult.data._id;
-
+  
       // Fetch necessary data
       const [roomsResponse, categoriesResponse] = await Promise.all([
-        fetch("/api/rooms"),
-        fetch("/api/roomCategories"),
+        fetch('/api/rooms'),
+        fetch('/api/roomCategories')
       ]);
-
+  
       const roomsData = await roomsResponse.json();
       const categoriesData = await categoriesResponse.json();
-
-      if (!roomsData.success || !categoriesData.success) {
-        throw new Error("Failed to fetch room or category data");
-      }
-
       const rooms = roomsData.data;
       const categories = categoriesData.data;
+  
+      // Initialize arrays for consolidated billing
       let allRoomNumbers = [];
       let roomCharges = [];
       let roomTaxes = [];
       let quantities = [];
       let totalAmount = 0;
-
+  
       // Process each selected room
       for (const selectedRoomNumber of selectedRooms) {
-        const matchedRoom = rooms.find(
-          (room) => room.number === selectedRoomNumber
-        );
-        if (!matchedRoom) {
-          console.error(`Room ${selectedRoomNumber} not found`);
-          continue;
-        }
-
-        const matchedCategory = categories.find(
-          (category) => category._id === matchedRoom.category._id
-        );
-        if (!matchedCategory) {
-          console.error(`Category for room ${selectedRoomNumber} not found`);
-          continue;
-        }
-
+        const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
+        const matchedCategory = categories.find(category => category._id === matchedRoom.category._id);
+  
         // Calculate billing details
         const checkInDate = new Date(formData.checkIn);
         const checkOutDate = new Date(formData.checkOut);
-        const numberOfNights = Math.ceil(
-          (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
-        );
-        const roomCharge = matchedCategory.total * numberOfNights;
+        const numberOfNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        const roomCharge = matchedCategory.tariff * numberOfNights;
         const roomTax = matchedCategory.gst;
-
+  
+        // Collect data for consolidated billing
         allRoomNumbers.push(selectedRoomNumber);
         roomCharges.push(roomCharge);
         roomTaxes.push(roomTax);
         quantities.push(1);
-        totalAmount += roomCharge + (roomCharge * roomTax) / 100;
-
-        // Prepare new dates and lists
-        const newCheckInDateList = [
-          ...(matchedRoom.checkInDateList || []),
-          formData.checkIn,
-        ];
-        const newCheckOutDateList = [
-          ...(matchedRoom.checkOutDateList || []),
-          formData.checkOut,
-        ];
-        const newBillWaitlist = [
-          ...(matchedRoom.billWaitlist || []),
-          billingData.data._id,
-        ];
-        const newGuestWaitlist = [
-          ...(matchedRoom.guestWaitlist || []),
-          guestId,
-        ];
-
-        // Sort all arrays based on proximity to current date
-        const currentDate = new Date();
-        const [
-          sortedCheckInDates,
-          sortedCheckOutDates,
-          sortedBillWaitlist,
-          sortedGuestWaitlist,
-        ] = sortDatesWithCorrespondingArrays(
-          newCheckInDateList,
-          newCheckOutDateList,
-          newBillWaitlist,
-          newGuestWaitlist
-        );
-
-        // Initialize room update object
-        const roomUpdate = {
-          checkInDateList: sortedCheckInDates,
-          checkOutDateList: sortedCheckOutDates,
-          billWaitlist: sortedBillWaitlist,
-          guestWaitlist: sortedGuestWaitlist,
-        };
-
-        if (matchedRoom.billingStarted === "No") {
-          // If room is not currently booked, simply assign new booking as current
-          roomUpdate.currentBillingId = billingData.data._id;
-          roomUpdate.currentGuestId = guestId;
-          roomUpdate.billingStarted = "Yes";
-        } else {
-          // Fetch current guest's booking details
-          console.log("matchedRoom:", matchedRoom);
-          console.log(
-            "matchedRoom.currentGuestId:",
-            matchedRoom.currentGuestId
-          );
-          const currentGuestResponse = await fetch(
-            `/api/NewBooking/${matchedRoom.currentGuestId}`
-          );
-          const currentGuestData = await currentGuestResponse.json();
-          console.log("currentGuestData:", currentGuestData);
-          const currentGuestCheckIn = new Date(currentGuestData.checkIn);
-          console.log("currentGuestCheckIn:", currentGuestCheckIn);
-          console.log("sortedGuestWaitlist:", sortedGuestWaitlist);
-          // Fetch first waitlisted guest's booking details
-          const firstWaitlistedGuestResponse = await fetch(
-            `/api/NewBooking/${sortedGuestWaitlist[0]._id}`
-          );
-          const firstWaitlistedGuestData =
-            await firstWaitlistedGuestResponse.json();
-          const firstWaitlistedCheckIn = new Date(
-            firstWaitlistedGuestData.data.checkIn
-          );
-
-          // Compare dates to determine which should be current
-          const currentDateDiff = Math.abs(currentDate - currentGuestCheckIn);
-          const waitlistedDateDiff = Math.abs(
-            currentDate - firstWaitlistedCheckIn
-          );
-
-          if (waitlistedDateDiff < currentDateDiff) {
-            // If waitlisted guest's check-in is closer to current date
-            roomUpdate.currentGuestId = sortedGuestWaitlist[0];
-            roomUpdate.currentBillingId = sortedBillWaitlist[0];
-          }
-        }
-
-        // Update room with new data
-        const roomUpdateResponse = await fetch(
-          `/api/rooms/${matchedRoom._id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(roomUpdate),
-          }
-        );
-
-        if (!roomUpdateResponse.ok) {
-          throw new Error(`Failed to update room ${selectedRoomNumber}`);
-        }
+        totalAmount += roomCharge + (roomCharge * roomTax / 100);
+  
+        // Update room records...
+        // (Keep existing room update logic here)
       }
-
+  
       // Create single billing record for all rooms
-      const billingResponse = await fetch("/api/Billing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const billingResponse = await fetch('/api/Billing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           roomNo: allRoomNumbers,
-          itemList: Array(allRoomNumbers.length).fill("Room Charge"),
+          itemList: Array(allRoomNumbers.length).fill('Room Charge'),
           priceList: roomCharges,
           taxList: roomTaxes,
           quantityList: quantities,
@@ -670,41 +553,87 @@ export default function BookingForm() {
           totalAmount: totalAmount,
           amountAdvanced: 0,
           dueAmount: totalAmount,
-          Bill_Paid: "no",
-        }),
+          Bill_Paid: 'no'
+        })
       });
-
+  
       const billingData = await billingResponse.json();
-      if (!billingData.success)
-        throw new Error("Failed to create consolidated billing");
+      if (!billingData.success) throw new Error('Failed to create consolidated billing');
+  
       // Update all rooms with the same billing ID
       for (const selectedRoomNumber of selectedRooms) {
-        const matchedRoom = rooms.find(
-          (room) => room.number === selectedRoomNumber
-        );
-        const roomUpdateResponse = await fetch(
-          `/api/rooms/${matchedRoom._id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              currentBillingId: billingData.data._id,
-              currentGuestId: guestId,
-              billingStarted: "Yes",
-            }),
-          }
-        );
-      }
+        const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
+        // Prepare new dates and lists
+        const newCheckInDateList = [...(matchedRoom.checkInDateList || []), formData.checkIn];
+        const newCheckOutDateList = [...(matchedRoom.checkOutDateList || []), formData.checkOut];
+        const newBillWaitlist = [...(matchedRoom.billWaitlist || []), billingData.data._id];
+        const newGuestWaitlist = [...(matchedRoom.guestWaitlist || []), guestId];
 
-      alert("Booking created successfully!");
+        // Sort all arrays based on proximity to current date
+        const currentDate = new Date();
+        const [sortedCheckInDates, sortedCheckOutDates, sortedBillWaitlist, sortedGuestWaitlist] =
+          sortDatesWithCorrespondingArrays(
+            newCheckInDateList,
+            newCheckOutDateList,
+            newBillWaitlist,
+            newGuestWaitlist
+          );
+
+        // Initialize room update object
+        const roomUpdate = {
+          checkInDateList: sortedCheckInDates,
+          checkOutDateList: sortedCheckOutDates,
+          billWaitlist: sortedBillWaitlist,
+          guestWaitlist: sortedGuestWaitlist
+        };
+
+        if (matchedRoom.billingStarted === 'No') {
+          // If room is not currently booked, simply assign new booking as current
+          roomUpdate.currentBillingId = billingData.data._id;
+          roomUpdate.currentGuestId = guestId;
+          roomUpdate.billingStarted = 'Yes';
+        } else {
+          // Fetch current guest's booking details
+          console.log('matchedRoom:', matchedRoom);
+          console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
+          const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
+          const currentGuestData = await currentGuestResponse.json();
+          console.log('currentGuestData:', currentGuestData);
+          const currentGuestCheckIn = new Date(currentGuestData.checkIn);
+          console.log('currentGuestCheckIn:', currentGuestCheckIn);
+          console.log('sortedGuestWaitlist:', sortedGuestWaitlist);
+          // Fetch first waitlisted guest's booking details
+          const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]._id}`);
+          const firstWaitlistedGuestData = await firstWaitlistedGuestResponse.json();
+          const firstWaitlistedCheckIn = new Date(firstWaitlistedGuestData.data.checkIn);
+
+          // Compare dates to determine which should be current
+          const currentDateDiff = Math.abs(currentDate - currentGuestCheckIn);
+          const waitlistedDateDiff = Math.abs(currentDate - firstWaitlistedCheckIn);
+
+          if (waitlistedDateDiff < currentDateDiff) {
+            // If waitlisted guest's check-in is closer to current date
+            roomUpdate.currentGuestId = sortedGuestWaitlist[0];
+            roomUpdate.currentBillingId = sortedBillWaitlist[0];
+          }
+        }
+        const roomUpdateResponse = await fetch(`/api/rooms/${matchedRoom._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(roomUpdate)
+        });
+      }
+  
+      alert('Booking created with consolidated billing!');
       setModalOpen(false);
-      router.push("/property/roomdashboard");
+      router.push('/property/roomdashboard');
+  
     } catch (error) {
-      console.error("Error in booking submission:", error);
+      console.error('Error in booking submission:', error);
       alert(`Failed to create booking: ${error.message}`);
     }
   };
-
+  
   const modalAnimation = {
     hidden: {
       opacity: 0,
