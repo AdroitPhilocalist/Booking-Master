@@ -1061,7 +1061,7 @@ const BookingDashboard = () => {
                 {/* Room Selection Dropdown */}
                 <FormControl fullWidth margin="normal">
                   <Typography
-                    id="add-services-modal"
+                    id="add-foods-modal"
                     variant="h9"
                     component="h1"
                     sx={{ color: "text.secondary" }}
