@@ -948,7 +948,7 @@ const BookingDashboard = () => {
                     <td>{service.name}</td>
                     <td>{service.quantity}</td>
                     <td>{service.tax}%</td>
-                    <td>{service.price.toFixed(2)}</td>
+                    <td>{(parseFloat(service.price) || 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1063,18 +1063,20 @@ const BookingDashboard = () => {
               aria-labelledby="add-food-modal"
             >
               <Box
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: 600,
-                  bgcolor: "background.paper",
-                  border: "2px solid #000",
-                  boxShadow: 24,
-                  p: 4,
-                }}
-              >
+    sx={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: 600,
+      bgcolor: "background.paper",
+      border: "2px solid #000",
+      boxShadow: 24,
+      p: 4,
+      maxHeight: "80vh", // Set a maximum height
+      overflowY: "auto", // Enables scrolling
+    }}
+  >
                 <Typography id="add-food-modal" variant="h6" component="h2">
                   Add Food Items
                 </Typography>
