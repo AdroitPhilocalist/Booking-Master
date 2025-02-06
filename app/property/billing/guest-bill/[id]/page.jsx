@@ -61,6 +61,7 @@ const BookingDashboard = () => {
   const [foodRemarks, setFoodRemarks] = useState("");
   const [serviceRemarks, setServiceRemarks] = useState("");
   const [roomRemarks, setRoomRemarks] = useState("");
+  const [selectedRoomIndex, setSelectedRoomIndex] = useState(0);
   // Modal Styles
   const modalStyle = {
     position: "absolute",
