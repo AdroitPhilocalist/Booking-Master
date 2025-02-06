@@ -39,13 +39,13 @@ const BookingDashboard = () => {
   const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
   // Service Form States
   const [serviceName, setServiceName] = useState("");
-  const [serviceTax, setServiceTax] = useState("");
-  const [servicePrice, setServicePrice] = useState("");
-  const [serviceTotal, setServiceTotal] = useState("");
+  const [serviceTax, setServiceTax] = useState("0");
+  const [servicePrice, setServicePrice] = useState("0");
+  const [serviceTotal, setServiceTotal] = useState("0");
   const [services, setServices] = useState([]);
   // Food Form States
   const [menuItems, setMenuItems] = useState([]);
-  const [selectedFoodItem, setSelectedFoodItem] = useState({});
+  const [selectedFoodItem, setSelectedFoodItem] = useState([]);
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
   const [foodTax, setFoodTax] = useState("");
@@ -265,7 +265,7 @@ const BookingDashboard = () => {
   const handleCloseFoodInvoiceModal = () => setOpenFoodInvoiceModal(false);
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
-    setSelectedFoodItem({});
+    setSelectedFoodItem([]);
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
@@ -341,9 +341,9 @@ const BookingDashboard = () => {
     );
     if (selectedItem) {
       setSelectedFoodItem(selectedItem);
-      setFoodName(selectedItem.itemName);
-      setFoodPrice(selectedItem.price);
-      setFoodTax(selectedItem.gst);
+      setFoodName(selectedItem.itemName || "");
+      setFoodPrice(selectedItem.price?.toString() || "0"); // Ensure string value
+      setFoodTax(selectedItem.gst?.toString() || "0"); // Ensure string value
       setFoodQuantity(1);
     }
   };
@@ -366,7 +366,7 @@ const BookingDashboard = () => {
       totalPrice: selectedFoodItem.price * foodQuantity,
     };
     setSelectedFoodItems([...selectedFoodItems, newItem]);
-    setSelectedFoodItem({});
+    setSelectedFoodItem([]);
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
