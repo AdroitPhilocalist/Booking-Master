@@ -132,25 +132,46 @@ const BookingDashboard = () => {
         const existingTaxes = billingData.taxList || [];
         const existingQuantities = billingData.quantityList || [];
 
+        console.log("existingServices", existingServices);
+        console.log("existingPrices", existingPrices);
+        console.log("existingTaxes", existingTaxes);
+        console.log("existingQuantities", existingQuantities);
+
         // Separate food and service items
         const foodItemsArray = [];
         const serviceItemsArray = [];
-        existingServices.forEach((item, index) => {
-          const menuItem = menuItemsList.find(
-            (menuItem) => menuItem.itemName === item
-          );
-          const itemDetails = {
-            name: item,
-            price: existingPrices[index] || 0,
-            quantity: existingQuantities[index] || 1,
-            tax: existingTaxes[index] || 0,
-          };
-          if (menuItem) {
-            foodItemsArray.push(itemDetails);
-          } else if (item !== "Room Charge") {
-            serviceItemsArray.push(itemDetails);
-          }
+
+        existingServices.forEach((roomServices, roomIndex) => {
+          const roomPrices = existingPrices[roomIndex] || [];
+          const roomTaxes = existingTaxes[roomIndex] || [];
+          const roomQuantities = existingQuantities[roomIndex] || [];
+
+          roomServices.forEach((item, itemIndex) => {
+            const menuItem = menuItemsList.find(
+              (menuItem) => menuItem.itemName === item
+            );
+
+            const itemDetails = {
+              name: item,
+              price: roomPrices[itemIndex] || 0,
+              quantity: roomQuantities[itemIndex] || 1,
+              tax: roomTaxes[itemIndex] || 0,
+              roomIndex: roomIndex, // Track which room this item belongs to
+            };
+
+            if (menuItem) {
+              // If the item is a food item, add it to the foodItemsArray
+              foodItemsArray.push(itemDetails);
+            } else if (item !== "Room Charge") {
+              // Exclude "Room Charge" and add other items to serviceItemsArray
+              serviceItemsArray.push(itemDetails);
+            }
+          });
         });
+
+        console.log("foodItemsArray", foodItemsArray);
+        console.log("serviceItemsArray", serviceItemsArray);
+
         setFoodItems(foodItemsArray);
         setServiceItems(serviceItemsArray);
         setServices([...serviceItemsArray, ...foodItemsArray]);
@@ -307,7 +328,7 @@ const BookingDashboard = () => {
         (quantities, index) =>
           index === selectedRoomIndex ? [...quantities, 1] : quantities
       );
-      console.log("itemlist",updatedItemList);
+      console.log("itemlist", updatedItemList);
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
@@ -345,7 +366,7 @@ const BookingDashboard = () => {
       setSelectedFoodItem(selectedItem);
       setFoodName(selectedItem.itemName || "");
       setFoodPrice(selectedItem.price?.toString() || "0"); // Ensure string value
-      setFoodTax((selectedItem.sgst+selectedItem.cgst)?.toString() || "0"); // Ensure string value
+      setFoodTax((selectedItem.sgst + selectedItem.cgst)?.toString() || "0"); // Ensure string value
       setFoodQuantity(1);
     }
   };
@@ -406,32 +427,32 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-  
+
       // Convert prices to numbers and handle taxes
       const foodUpdates = selectedFoodItems.map(item => ({
         name: item.selectedFoodItem.itemName,
         price: Number(item.totalPrice),
-        tax: Number(item.selectedFoodItem.sgst+item.selectedFoodItem.cgst) || 0,
+        tax: Number(item.selectedFoodItem.sgst + item.selectedFoodItem.cgst) || 0,
         quantity: Number(item.quantity)
       }));
-  
+
       // Get current billing state
       const billingResponse = await axios.get(`/api/Billing/${id}`, { headers });
       const currentBilling = billingResponse.data.data;
-  
+
       // Update arrays immutably
       const updatedItemList = currentBilling.itemList.map(arr => [...arr]);
       const updatedPriceList = currentBilling.priceList.map(arr => [...arr]);
       const updatedQuantityList = currentBilling.quantityList.map(arr => [...arr]);
       const updatedTaxList = currentBilling.taxList.map(arr => [...arr]);
-  
+
       foodUpdates.forEach(item => {
         updatedItemList[selectedRoomIndex].push(item.name);
         updatedPriceList[selectedRoomIndex].push(item.price);
         updatedQuantityList[selectedRoomIndex].push(item.quantity);
         updatedTaxList[selectedRoomIndex].push(item.tax);
       });
-  
+
       // Submit updated data
       await axios.put(`/api/Billing/${id}`, {
         itemList: updatedItemList,
@@ -441,20 +462,20 @@ const BookingDashboard = () => {
         roomIndex: selectedRoomIndex,
         FoodRemarks: [...currentBilling.FoodRemarks, foodRemarks]
       }, { headers });
-  
+
       // Update local state
       setServices([...services, ...foodUpdates.map(item => ({
         ...item,
         roomIndex: selectedRoomIndex
       }))]);
-      
+
       handleCloseFoodModal();
     } catch (error) {
       console.error("Error adding food:", error);
       alert("Failed to add food. Check console for details.");
     }
   };
-  
+
 
   const handleAddPayment = async () => {
     const paymentAmountNum = Number(paymentAmount);
@@ -897,7 +918,7 @@ const BookingDashboard = () => {
                         ))}
                     </td> */}
                     <td className="p-2 text-right">
-                      {billing.priceList[0][index].toFixed(2)}
+                      {billing.priceList[index][0].toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -930,27 +951,25 @@ const BookingDashboard = () => {
                 </div>
               </div>
             )}
-            {/* Services Table */}
-            <h3 className="font-semibold text-gray-800 text-center ml-16">
+            <h3 className="mt-4 font-semibold text-gray-800 text-center ml-16">
               Services ({serviceItems.length})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Item</th>
-                  <th className="p-2 text-center">Item Quantity</th>
-                  <th className="p-2 text-center">Item Tax</th>
+                  <th className="p-2 text-center">Quantity</th>
+                  <th className="p-2 text-center">Tax</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
-                {services.map((service, index) => (
+                {serviceItems.map((service, index) => (
                   <tr key={index}>
-                    <td>Room {billing.roomNo[service.roomIndex]}</td>
-                    <td>{service.name}</td>
-                    <td>{service.quantity}</td>
-                    <td>{service.tax}%</td>
-                    <td>{(parseFloat(service.price) || 0).toFixed(2)}</td>
+                    <td className="p-2 text-left">{service.name}</td>
+                    <td className="p-2 text-center">{service.quantity}</td>
+                    <td className="p-2 text-center">{service.tax}%</td>
+                    <td className="p-2 text-right">{parseFloat(service.price).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
