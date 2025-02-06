@@ -524,7 +524,7 @@ export default function BookingForm() {
         const checkInDate = new Date(formData.checkIn);
         const checkOutDate = new Date(formData.checkOut);
         const numberOfNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-        const roomCharge = matchedCategory.tariff * numberOfNights;
+        const roomCharge = matchedCategory.total * numberOfNights;
         const roomTax = matchedCategory.gst;
   
         // Collect data for consolidated billing
@@ -532,7 +532,7 @@ export default function BookingForm() {
         roomCharges.push([roomCharge]);
         roomTaxes.push([roomTax]);
         quantities.push([1]);
-        totalAmount += roomCharge + (roomCharge * roomTax / 100);
+        totalAmount += roomCharge;
   
         // Update room records...
         // (Keep existing room update logic here)
