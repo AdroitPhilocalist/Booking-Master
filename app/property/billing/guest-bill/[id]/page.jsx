@@ -289,37 +289,44 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-      const updatedItemList = billing.itemList.map((items, index) => 
+      const updatedItemList = billing.itemList.map((items, index) =>
         index === selectedRoomIndex ? [...items, serviceName] : items
       );
-      
-      const updatedPriceList = billing.priceList.map((prices, index) => 
-        index === selectedRoomIndex ? [...prices, parseFloat(serviceTotal)] : prices
+
+      const updatedPriceList = billing.priceList.map((prices, index) =>
+        index === selectedRoomIndex
+          ? [...prices, parseFloat(serviceTotal)]
+          : prices
       );
-  
-      const updatedTaxList = billing.taxList.map((taxes, index) => 
+
+      const updatedTaxList = billing.taxList.map((taxes, index) =>
         index === selectedRoomIndex ? [...taxes, parseFloat(serviceTax)] : taxes
       );
-  
-      const updatedQuantityList = billing.quantityList.map((quantities, index) => 
-        index === selectedRoomIndex ? [...quantities, 1] : quantities
+
+      const updatedQuantityList = billing.quantityList.map(
+        (quantities, index) =>
+          index === selectedRoomIndex ? [...quantities, 1] : quantities
       );
-      const response = await axios.put(`/api/Billing/${id}`, {
-        itemList: updatedItemList,
-        priceList: updatedPriceList,
-        taxList: updatedTaxList,
-        quantityList: updatedQuantityList,
-        ServiceRemarks: [...billing.ServiceRemarks, serviceRemarks]
-      }, { headers });
+      const response = await axios.put(
+        `/api/Billing/${id}`,
+        {
+          itemList: updatedItemList,
+          priceList: updatedPriceList,
+          taxList: updatedTaxList,
+          quantityList: updatedQuantityList,
+          ServiceRemarks: [...billing.ServiceRemarks, serviceRemarks],
+        },
+        { headers }
+      );
       // Update local state
-    const newService = {
-      roomIndex: selectedRoomIndex,
-      name: serviceName,
-      price: serviceTotal,
-      tax: serviceTax,
-      quantity: 1
-    };
-    setServices([...services, newService]);
+      const newService = {
+        roomIndex: selectedRoomIndex,
+        name: serviceName,
+        price: serviceTotal,
+        tax: serviceTax,
+        quantity: 1,
+      };
+      setServices([...services, newService]);
       handleCloseServicesModal();
       window.location.reload();
     } catch (error) {
@@ -915,16 +922,13 @@ const BookingDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {serviceItems.map((service, index) => (
+                {services.map((service, index) => (
                   <tr key={index}>
-                    <td className="p-2 text-left">{service.name}</td>
-                    <td className="p-2 text-center">{service.quantity}</td>
-                    <td className="p-2 text-center">{service.tax}%</td>
-                    <td className="p-2 text-right">
-                      <td className="p-2 text-right">
-                        {Number(service.price).toFixed(2)}
-                      </td>
-                    </td>
+                    <td>Room {billing.roomNo[service.roomIndex]}</td>
+                    <td>{service.name}</td>
+                    <td>{service.quantity}</td>
+                    <td>{service.tax}%</td>
+                    <td>{service.price.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -941,9 +945,15 @@ const BookingDashboard = () => {
                 </Typography>
                 {/* Room Selection Dropdown */}
                 <FormControl fullWidth margin="normal">
-                <Typography id="add-services-modal" variant="h9" component="h1" sx={{ color: 'text.secondary' }} mb={1}>
-                  Select Room
-                </Typography>
+                  <Typography
+                    id="add-services-modal"
+                    variant="h9"
+                    component="h1"
+                    sx={{ color: "text.secondary" }}
+                    mb={1}
+                  >
+                    Select Room
+                  </Typography>
                   <Select
                     value={selectedRoomIndex}
                     onChange={(e) =>
@@ -1050,9 +1060,15 @@ const BookingDashboard = () => {
                 </Typography>
                 {/* Room Selection Dropdown */}
                 <FormControl fullWidth margin="normal">
-                <Typography id="add-services-modal" variant="h9" component="h1" sx={{ color: 'text.secondary' }} mb={1}>
-                  Select Room
-                </Typography>
+                  <Typography
+                    id="add-services-modal"
+                    variant="h9"
+                    component="h1"
+                    sx={{ color: "text.secondary" }}
+                    mb={1}
+                  >
+                    Select Room
+                  </Typography>
                   <Select
                     value={selectedRoomIndex}
                     onChange={(e) =>
