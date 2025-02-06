@@ -289,26 +289,37 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-      const response = await axios.put(
-        `/api/Billing/${id}`,
-        {
-          itemList: [serviceName],
-          priceList: [parseFloat(serviceTotal)],
-          quantityList: [1],
-          taxList: [parseFloat(serviceTax)],
-          ServiceRemarks: [serviceRemarks], // Add service remarks
-        },
-        { headers }
+      const updatedItemList = billing.itemList.map((items, index) => 
+        index === selectedRoomIndex ? [...items, serviceName] : items
       );
-      setServices([
-        ...services,
-        {
-          name: serviceName,
-          price: parseFloat(serviceTotal),
-          tax: parseFloat(serviceTax),
-          remarks: serviceRemarks,
-        },
-      ]);
+      
+      const updatedPriceList = billing.priceList.map((prices, index) => 
+        index === selectedRoomIndex ? [...prices, parseFloat(serviceTotal)] : prices
+      );
+  
+      const updatedTaxList = billing.taxList.map((taxes, index) => 
+        index === selectedRoomIndex ? [...taxes, parseFloat(serviceTax)] : taxes
+      );
+  
+      const updatedQuantityList = billing.quantityList.map((quantities, index) => 
+        index === selectedRoomIndex ? [...quantities, 1] : quantities
+      );
+      const response = await axios.put(`/api/Billing/${id}`, {
+        itemList: updatedItemList,
+        priceList: updatedPriceList,
+        taxList: updatedTaxList,
+        quantityList: updatedQuantityList,
+        ServiceRemarks: [...billing.ServiceRemarks, serviceRemarks]
+      }, { headers });
+      // Update local state
+    const newService = {
+      roomIndex: selectedRoomIndex,
+      name: serviceName,
+      price: serviceTotal,
+      tax: serviceTax,
+      quantity: 1
+    };
+    setServices([...services, newService]);
       handleCloseServicesModal();
       window.location.reload();
     } catch (error) {
