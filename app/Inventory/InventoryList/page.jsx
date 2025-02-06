@@ -113,6 +113,7 @@ export default function InventoryList() {
             ? { ...category, isActive: true }
             : category
         )
+        
       );
       //toast.success("Item updated successfully");
     } catch (error) {

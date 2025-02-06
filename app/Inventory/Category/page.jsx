@@ -18,6 +18,12 @@ import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {Dialog,
+        DialogActions,
+        DialogContent,
+        DialogTitle} from "@mui/material";
+
+
 
 export default function InventoryCategory() {
   const [products, setProducts] = useState([]);
@@ -38,7 +44,7 @@ export default function InventoryCategory() {
           return;
         }
         console.log('Hello');
-        console.log("SECRET KEY :",SECRET_KEY);
+        console.log("SECRET KEY :", SECRET_KEY);
         // Verify the token
         const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
         console.log(decoded);
@@ -105,7 +111,7 @@ export default function InventoryCategory() {
         );
       setShowModal(false);
       setCurrentProduct(null);
-      
+      toast.success("Product saved successfully");
     } catch (error) {
       console.error("Error saving product", error);
       toast.error("Error saving product")
@@ -194,22 +200,22 @@ export default function InventoryCategory() {
     <div>
       <Navbar />
 
-    
+
 
       <div className="bg-amber-50 min-h-screen">
 
-      <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="dark"
-            />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
 
 
         {isLoading && (
@@ -261,7 +267,27 @@ export default function InventoryCategory() {
               </TableBody>
             </Table>
           </TableContainer>
-        </div>
+
+                {/* Delete Confirmation Dialog */}
+          {/* <Dialog
+            open={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+          >
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete this menu item?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+              <Button onClick={handleDeleteProduct} color="error">
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog> */}
+
+        </div> 
         {showModal && (
           <AddProductModal onClose={() => setShowModal(false)} onSubmit={handleAddProduct} initialValue={currentProduct?.itemName || ""} />
         )}
