@@ -868,33 +868,38 @@ const BookingDashboard = () => {
             </Button>
 
             <h3 className="mt-4 font-semibold text-gray-800 text-center ml-16">
-              Room Tokens (1)
+              Room Tokens ({billing.roomNo.length})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Date</th>
                   <th className="p-2 text-center">Room Details</th>
+                  <th className="p-2 text-center">Room Charges</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="p-2 text-left">
-                    {new Date(booking.checkIn).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className="p-2 text-center">
-                    Rooms #
-                    {Array.isArray(billing.roomNo)
-                      ? billing.roomNo.join(", ")
-                      : billing.roomNo}{" "}
-                    - {room.category.category}
-                  </td>
-
-                  <td className="p-2 text-right">
-                    {category.total.toFixed(2)}
-                  </td>
-                </tr>
+                {billing.roomNo.map((roomNumber, index) => (
+                  <tr key={index}>
+                    <td className="p-2 text-left">
+                      {new Date(booking.checkIn).toLocaleDateString("en-GB")}
+                    </td>
+                    <td className="p-2 text-center">
+                      Room # {roomNumber} - {room.category.category}
+                    </td>
+                    <td className="p-2 text-center">
+                      {billing.itemList[index]
+                        .filter(item => item === "Room Charge")
+                        .map((item, idx) => (
+                          <div key={idx}>{item}</div>
+                        ))}
+                    </td>
+                    <td className="p-2 text-right">
+                      {billing.priceList[0][index].toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             <Button
