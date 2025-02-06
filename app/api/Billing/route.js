@@ -28,8 +28,7 @@ export async function POST(req) {
       username: profile.username
     };
     if (!newData.roomNo || !newData.billStartDate || !newData.billEndDate || !newData.itemList || 
-        !newData.priceList || !newData.quantityList || newData.itemList.length !== newData.priceList.length || 
-        newData.itemList.length !== newData.quantityList.length) {
+        !newData.priceList || !newData.quantityList) {
       return NextResponse.json(
         { success: false, error: 'Missing or mismatched required fields' },
         { status: 400 }
