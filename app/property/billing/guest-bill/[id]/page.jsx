@@ -1037,6 +1037,24 @@ const BookingDashboard = () => {
                 <Typography id="add-food-modal" variant="h6" component="h2">
                   Add Food Items
                 </Typography>
+                {/* Room Selection Dropdown */}
+                <FormControl fullWidth margin="normal">
+                <Typography id="add-services-modal" variant="h9" component="h1" sx={{ color: 'text.secondary' }} mb={1}>
+                  Select Room
+                </Typography>
+                  <Select
+                    value={selectedRoomIndex}
+                    onChange={(e) =>
+                      setSelectedRoomIndex(Number(e.target.value))
+                    }
+                  >
+                    {billing.roomNo.map((room, index) => (
+                      <MenuItem key={index} value={index}>
+                        Room {room}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
                 {/* Food Selection Form */}
                 <div className="mb-4">
