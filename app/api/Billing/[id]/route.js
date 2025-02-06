@@ -34,7 +34,7 @@ export async function GET(req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
-  const { id } =  await params;
+  const { id } = await params;
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
@@ -78,7 +78,7 @@ export async function PATCH(req, { params }) {
     const roomSubtotal = roomPrices.reduce((total, price) => total + price, 0);
 
     // Calculate other items subtotal with quantities
-    const otherSubtotal = otherPrices.reduce((total, price, index) => 
+    const otherSubtotal = otherPrices.reduce((total, price, index) =>
       total + (price * (otherQuantities[index] || 1)), 0
     );
 
@@ -112,13 +112,13 @@ export async function PUT(req, { params }) {
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
-    
+
     // Authentication and authorization
     const token = req.cookies.get('authToken')?.value;
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
-    
+
     // Get existing bill
     const bill = await Billing.findById(id);
     if (!bill || bill.username !== profile.username) {
@@ -129,7 +129,7 @@ export async function PUT(req, { params }) {
     }
 
     // Initialize arrays if not present
-    const initializeNestedArrays = (arr, length) => 
+    const initializeNestedArrays = (arr, length) =>
       Array.isArray(arr) ? arr : Array(length).fill([]);
 
     // Handle nested array updates
@@ -141,34 +141,34 @@ export async function PUT(req, { params }) {
 
     // Handle itemList, priceList, quantityList, and taxList updates
     // Modified array update logic
-if (data.itemList && data.priceList && data.quantityList && data.taxList) {
-  const roomIndex = data.roomIndex || 0;
-  console.log("data whooooooo",data.itemList[roomIndex]);
-  console.log("room index",roomIndex);
-  console.log("before");
-  console.log(bill.itemList);
-  
-  // Initialize arrays if empty
-  if (!bill.itemList[roomIndex]) bill.itemList[roomIndex] = [];
-  if (!bill.priceList[roomIndex]) bill.priceList[roomIndex] = [];
-  if (!bill.quantityList[roomIndex]) bill.quantityList[roomIndex] = [];
-  if (!bill.taxList[roomIndex]) bill.taxList[roomIndex] = [];
+    if (data.itemList && data.priceList && data.quantityList && data.taxList) {
+      const roomIndex = data.roomIndex || 0;
+      console.log("data whooooooo", data.itemList[roomIndex]);
+      console.log("room index", roomIndex);
+      console.log("before");
+      console.log(bill.itemList);
 
-  // Append new items correctly
+      // Initialize arrays if empty
+      if (!bill.itemList[roomIndex]) bill.itemList[roomIndex] = [];
+      if (!bill.priceList[roomIndex]) bill.priceList[roomIndex] = [];
+      if (!bill.quantityList[roomIndex]) bill.quantityList[roomIndex] = [];
+      if (!bill.taxList[roomIndex]) bill.taxList[roomIndex] = [];
 
-  bill.itemList[roomIndex]=data.itemList[roomIndex];
-  bill.priceList[roomIndex]=data.priceList[roomIndex];
-  bill.quantityList[roomIndex]=data.quantityList[roomIndex];
-  bill.taxList[roomIndex]=data.taxList[roomIndex];
-  console.log("after");
-  console.log(bill.itemList);
+      // Append new items correctly
 
-  // Recalculate totals correctly
-  bill.totalAmount = bill.priceList.flatMap((roomPrices, i) =>
-    roomPrices.map((price, j) => 
-      price + (price * (bill.taxList[i][j] || 0) / 100)
-    )
-  ).reduce((sum, price) => sum + price, 0);
+      bill.itemList[roomIndex] = data.itemList[roomIndex];
+      bill.priceList[roomIndex] = data.priceList[roomIndex];
+      bill.quantityList[roomIndex] = data.quantityList[roomIndex];
+      bill.taxList[roomIndex] = data.taxList[roomIndex];
+      console.log("after");
+      console.log(bill.itemList);
+
+      // Recalculate totals correctly
+      bill.totalAmount = bill.priceList.flatMap((roomPrices, i) =>
+        roomPrices.map((price, j) =>
+          price + (price * (bill.taxList[i][j] || 0) / 100)
+        )
+      ).reduce((sum, price) => sum + price, 0);
 
       bill.dueAmount = bill.totalAmount - bill.amountAdvanced;
     }
@@ -176,7 +176,7 @@ if (data.itemList && data.priceList && data.quantityList && data.taxList) {
     // Handle remarks updates
     const updateRemarks = (field, newRemarks) => {
       if (newRemarks) {
-        bill[field] = Array.isArray(bill[field]) 
+        bill[field] = Array.isArray(bill[field])
           ? [...bill[field], ...newRemarks]
           : newRemarks;
       }
@@ -197,11 +197,12 @@ if (data.itemList && data.priceList && data.quantityList && data.taxList) {
       }
       bill.amountAdvanced += newPayment;
       bill.dueAmount = bill.totalAmount - bill.amountAdvanced;
-      
+
       // Add payment details
       const now = new Date();
       bill.DateOfPayment.push(now);
-      bill.ModeOfPayment.push(data.ModeOfPayment || 'Cash');
+      console.log("data.ModeOfPayment", data.ModeOfPayment);
+      bill.ModeOfPayment.push(data.ModeOfPayment.toString() || 'Cash');
       bill.AmountOfPayment.push(newPayment);
     }
 
