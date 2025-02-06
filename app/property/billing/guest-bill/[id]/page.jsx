@@ -930,7 +930,9 @@ const BookingDashboard = () => {
                 </Typography>
                 {/* Room Selection Dropdown */}
                 <FormControl fullWidth margin="normal">
-                  <InputLabel>Select Room</InputLabel>
+                <Typography id="add-services-modal" variant="h9" component="h1" sx={{ color: 'text.secondary' }} mb={1}>
+                  Select Room
+                </Typography>
                   <Select
                     value={selectedRoomIndex}
                     onChange={(e) =>
