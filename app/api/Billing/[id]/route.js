@@ -85,15 +85,18 @@ export async function PATCH(req, { params }) {
 }
 
 export async function PUT(req, { params }) {
-  const { id } = params;
+  const { id } = await params; // Add await for Next.js 15
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
-    console.log('Data:', data);
+    
+    // Authentication and authorization
     const token = req.cookies.get('authToken')?.value;
     const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
+    
+    // Get existing bill
     const bill = await Billing.findById(id);
     if (!bill || bill.username !== profile.username) {
       return NextResponse.json(
@@ -101,63 +104,89 @@ export async function PUT(req, { params }) {
         { status: 404 }
       );
     }
-    // Handle Cancelled updates
-    if (data.Cancelled) {
-      bill.Cancelled = data.Cancelled;
-    }
-    
+
+    // Initialize arrays if not present
+    const initializeNestedArrays = (arr, length) => 
+      Array.isArray(arr) ? arr : Array(length).fill([]);
+
+    // Handle nested array updates
+    const updateNestedArray = (target, source, index) => {
+      if (!target[index]) target[index] = [];
+      target[index].push(...source);
+      return target;
+    };
+
     // Handle itemList, priceList, quantityList, and taxList updates
     if (data.itemList && data.priceList && data.quantityList && data.taxList) {
-      const newItemList = data.itemList || [];
-      const newPriceList = data.priceList || [];
-      const newQuantityList = data.quantityList || [];
-      const newTaxList = data.taxList || [];
-      bill.itemList = [...bill.itemList, ...newItemList];
-      bill.priceList = [...bill.priceList, ...newPriceList];
-      bill.quantityList = [...bill.quantityList, ...newQuantityList];
-      bill.taxList = [...bill.taxList, ...newTaxList];
-      // Update the total amount
-      const newTotalAmount = bill.totalAmount + newPriceList.reduce((sum, price) => sum + price, 0);
-      bill.totalAmount = newTotalAmount;
-      bill.dueAmount = newTotalAmount - bill.amountAdvanced;
+      const roomIndex = data.roomIndex || 0; // Default to first room
+
+      // Initialize arrays if needed
+      bill.itemList = initializeNestedArrays(bill.itemList, bill.roomNo.length);
+      bill.priceList = initializeNestedArrays(bill.priceList, bill.roomNo.length);
+      bill.quantityList = initializeNestedArrays(bill.quantityList, bill.roomNo.length);
+      bill.taxList = initializeNestedArrays(bill.taxList, bill.roomNo.length);
+
+      // Update specific room's arrays
+      bill.itemList = updateNestedArray([...bill.itemList], data.itemList, roomIndex);
+      bill.priceList = updateNestedArray([...bill.priceList], data.priceList.map(Number), roomIndex);
+      bill.quantityList = updateNestedArray([...bill.quantityList], data.quantityList.map(Number), roomIndex);
+      bill.taxList = updateNestedArray([...bill.taxList], data.taxList.map(Number), roomIndex);
+
+      // Recalculate totals
+      bill.totalAmount = bill.priceList.flatMap((roomPrices, i) => 
+        roomPrices.map((price, j) => 
+          price + (price * (bill.taxList[i][j] || 0) / 100)
+        )
+      ).reduce((sum, price) => sum + price, 0);
+
+      bill.dueAmount = bill.totalAmount - bill.amountAdvanced;
     }
+
     // Handle remarks updates
-    if (data.FoodRemarks) {
-      bill.FoodRemarks = [...bill.FoodRemarks, ...data.FoodRemarks];
-    }
-    if (data.ServiceRemarks) {
-      bill.ServiceRemarks = [...bill.ServiceRemarks, ...data.ServiceRemarks];
-    }
-    if (data.RoomRemarks) {
-      bill.RoomRemarks = [...bill.RoomRemarks, ...data.RoomRemarks];
-    }
-    // Update the Bill_Paid attribute if provided
-    if (typeof data.Bill_Paid !== "undefined") {
-      bill.Bill_Paid = data.Bill_Paid;
-    }
-    // Handle amountAdvanced updates
-    if (typeof data.amountAdvanced !== "undefined") {
-      const newAmountAdvanced = parseFloat(data.amountAdvanced);
-      if (newAmountAdvanced > bill.totalAmount) {
+    const updateRemarks = (field, newRemarks) => {
+      if (newRemarks) {
+        bill[field] = Array.isArray(bill[field]) 
+          ? [...bill[field], ...newRemarks]
+          : newRemarks;
+      }
+    };
+
+    updateRemarks('FoodRemarks', data.FoodRemarks);
+    updateRemarks('ServiceRemarks', data.ServiceRemarks);
+    updateRemarks('RoomRemarks', data.RoomRemarks);
+
+    // Handle payment updates
+    if (data.amountAdvanced !== undefined) {
+      const newPayment = Number(data.amountAdvanced);
+      if (newPayment > bill.totalAmount) {
         return NextResponse.json(
           { success: false, error: "Payment exceeds total amount" },
           { status: 400 }
         );
       }
-      bill.amountAdvanced = newAmountAdvanced;
+      bill.amountAdvanced += newPayment;
       bill.dueAmount = bill.totalAmount - bill.amountAdvanced;
+      
+      // Add payment details
+      const now = new Date();
+      bill.DateOfPayment.push(now);
+      bill.ModeOfPayment.push(data.ModeOfPayment || 'Cash');
+      bill.AmountOfPayment.push(newPayment);
     }
-    if (data.DateOfPayment) {
-      bill.DateOfPayment = [...bill.DateOfPayment, ...data.DateOfPayment];
+
+    // Handle status updates
+    if (typeof data.Bill_Paid !== "undefined") {
+      bill.Bill_Paid = data.Bill_Paid;
+      if (data.Bill_Paid === "yes") bill.dueAmount = 0;
     }
-    if (data.ModeOfPayment) {
-      bill.ModeOfPayment = [...bill.ModeOfPayment, ...data.ModeOfPayment];
+
+    if (data.Cancelled) {
+      bill.Cancelled = data.Cancelled;
     }
-    if (data.AmountOfPayment) {
-      bill.AmountOfPayment = [...bill.AmountOfPayment, ...data.AmountOfPayment];
-    }
+
     const updatedBill = await bill.save();
     return NextResponse.json({ success: true, data: updatedBill }, { status: 200 });
+
   } catch (error) {
     console.error("Error updating bill:", error);
     return NextResponse.json(
@@ -166,6 +195,7 @@ export async function PUT(req, { params }) {
     );
   }
 }
+
 
 export async function DELETE(req, { params }) {
   const { id } = params;
