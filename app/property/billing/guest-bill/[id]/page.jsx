@@ -876,7 +876,7 @@ const BookingDashboard = () => {
                 <tr className="bg-gray-200">
                   <th className="p-2 text-left">Date</th>
                   <th className="p-2 text-center">Room Details</th>
-                  <th className="p-2 text-center">Room Charges</th>
+                  {/* <th className="p-2 text-center">Room Charges</th> */}
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
@@ -889,13 +889,13 @@ const BookingDashboard = () => {
                     <td className="p-2 text-center">
                       Room # {roomNumber} - {room.category.category}
                     </td>
-                    <td className="p-2 text-center">
+                    {/* <td className="p-2 text-center">
                       {billing.itemList[index]
                         .filter(item => item === "Room Charge")
                         .map((item, idx) => (
                           <div key={idx}>{item}</div>
                         ))}
-                    </td>
+                    </td> */}
                     <td className="p-2 text-right">
                       {billing.priceList[0][index].toFixed(2)}
                     </td>
