@@ -307,6 +307,7 @@ const BookingDashboard = () => {
         (quantities, index) =>
           index === selectedRoomIndex ? [...quantities, 1] : quantities
       );
+      console.log("itemlist",updatedItemList);
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
@@ -314,6 +315,7 @@ const BookingDashboard = () => {
           priceList: updatedPriceList,
           taxList: updatedTaxList,
           quantityList: updatedQuantityList,
+          roomIndex: selectedRoomIndex,
           ServiceRemarks: [...billing.ServiceRemarks, serviceRemarks],
         },
         { headers }
@@ -328,7 +330,7 @@ const BookingDashboard = () => {
       };
       setServices([...services, newService]);
       handleCloseServicesModal();
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("Error adding service:", error);
       alert("Failed to add service");
@@ -343,7 +345,7 @@ const BookingDashboard = () => {
       setSelectedFoodItem(selectedItem);
       setFoodName(selectedItem.itemName || "");
       setFoodPrice(selectedItem.price?.toString() || "0"); // Ensure string value
-      setFoodTax(selectedItem.gst?.toString() || "0"); // Ensure string value
+      setFoodTax((selectedItem.sgst+selectedItem.cgst)?.toString() || "0"); // Ensure string value
       setFoodQuantity(1);
     }
   };
@@ -409,7 +411,7 @@ const BookingDashboard = () => {
       const foodUpdates = selectedFoodItems.map(item => ({
         name: item.selectedFoodItem.itemName,
         price: Number(item.totalPrice),
-        tax: Number(item.selectedFoodItem.gst) || 0,
+        tax: Number(item.selectedFoodItem.sgst+item.selectedFoodItem.cgst) || 0,
         quantity: Number(item.quantity)
       }));
   
@@ -436,6 +438,7 @@ const BookingDashboard = () => {
         priceList: updatedPriceList,
         quantityList: updatedQuantityList,
         taxList: updatedTaxList,
+        roomIndex: selectedRoomIndex,
         FoodRemarks: [...currentBilling.FoodRemarks, foodRemarks]
       }, { headers });
   

@@ -143,6 +143,10 @@ export async function PUT(req, { params }) {
     // Modified array update logic
 if (data.itemList && data.priceList && data.quantityList && data.taxList) {
   const roomIndex = data.roomIndex || 0;
+  console.log("data whooooooo",data.itemList[roomIndex]);
+  console.log("room index",roomIndex);
+  console.log("before");
+  console.log(bill.itemList);
   
   // Initialize arrays if empty
   if (!bill.itemList[roomIndex]) bill.itemList[roomIndex] = [];
@@ -151,10 +155,13 @@ if (data.itemList && data.priceList && data.quantityList && data.taxList) {
   if (!bill.taxList[roomIndex]) bill.taxList[roomIndex] = [];
 
   // Append new items correctly
-  bill.itemList[roomIndex].push(...data.itemList);
-  bill.priceList[roomIndex].push(...data.priceList.map(Number));
-  bill.quantityList[roomIndex].push(...data.quantityList.map(Number));
-  bill.taxList[roomIndex].push(...data.taxList.map(Number));
+
+  bill.itemList[roomIndex]=data.itemList[roomIndex];
+  bill.priceList[roomIndex]=data.priceList[roomIndex];
+  bill.quantityList[roomIndex]=data.quantityList[roomIndex];
+  bill.taxList[roomIndex]=data.taxList[roomIndex];
+  console.log("after");
+  console.log(bill.itemList);
 
   // Recalculate totals correctly
   bill.totalAmount = bill.priceList.flatMap((roomPrices, i) =>

@@ -4,13 +4,6 @@ const BillingSchema = new mongoose.Schema({
   roomNo: { type: [String], ref: 'Room', required: true },
   itemList: { 
     type: [[String]],
-    validate: {
-      validator: function(items) {
-        return items.every(roomItems => 
-          roomItems.every(item => typeof item === 'string')
-        )
-      }
-    }
   },
   priceList: {
     type: [[Number]],
