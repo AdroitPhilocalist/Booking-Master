@@ -404,34 +404,54 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
+  
+      // Create copies of the existing arrays to maintain immutability
+      const updatedItemList = [...billing.itemList];
+      const updatedPriceList = [...billing.priceList];
+      const updatedQuantityList = [...billing.quantityList];
+      const updatedTaxList = [...billing.taxList];
+  
+      // Ensure the arrays exist for the selected room index
+      if (!updatedItemList[selectedRoomIndex]) updatedItemList[selectedRoomIndex] = [];
+      if (!updatedPriceList[selectedRoomIndex]) updatedPriceList[selectedRoomIndex] = [];
+      if (!updatedQuantityList[selectedRoomIndex]) updatedQuantityList[selectedRoomIndex] = [];
+      if (!updatedTaxList[selectedRoomIndex]) updatedTaxList[selectedRoomIndex] = [];
+  
+      // Append new items to the selected room's arrays
+      selectedFoodItems.forEach(item => {
+        updatedItemList[selectedRoomIndex].push(item.selectedFoodItem.itemName);
+        updatedPriceList[selectedRoomIndex].push(item.totalPrice);
+        updatedQuantityList[selectedRoomIndex].push(item.quantity);
+        updatedTaxList[selectedRoomIndex].push(parseFloat(item.selectedFoodItem.gst));
+      });
+  
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
-          itemList: selectedFoodItems.map(
-            (item) => item.selectedFoodItem.itemName
-          ),
-          priceList: selectedFoodItems.map((item) => item.totalPrice),
-          quantityList: selectedFoodItems.map((item) => item.quantity),
-          taxList: selectedFoodItems.map((item) =>
-            parseFloat(item.selectedFoodItem.gst)
-          ),
-          FoodRemarks: [foodRemarks], // Add food remarks
+          itemList: updatedItemList,
+          priceList: updatedPriceList,
+          quantityList: updatedQuantityList,
+          taxList: updatedTaxList,
+          FoodRemarks: [...billing.FoodRemarks, foodRemarks]
         },
         { headers }
       );
-      setServices([
-        ...services,
-        selectedFoodItems.map((item) => ({
-          name: item.selectedFoodItem.itemName,
-          price: item.totalPrice,
-          tax: parseFloat(item.selectedFoodItem.gst),
-        })),
-      ]);
+  
+      // Update local state with room index information
+      const newFoodItems = selectedFoodItems.map(item => ({
+        name: item.selectedFoodItem.itemName,
+        price: item.totalPrice,
+        tax: parseFloat(item.selectedFoodItem.gst),
+        quantity: item.quantity,
+        roomIndex: selectedRoomIndex
+      }));
+  
+      setServices([...services, ...newFoodItems]);
       handleCloseFoodModal();
       window.location.reload();
     } catch (error) {
       console.error("Error adding food:", error);
-      alert("Failed to add food");
+      alert("Failed to add food. Please check the console for details.");
     }
   };
 
