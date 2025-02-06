@@ -43,29 +43,51 @@ export async function PATCH(req, { params }) {
     const userId = decoded.payload.id;
     const profile = await Profile.findById(userId);
     const billingData = await Billing.findById(id);
+
     if (!billingData || billingData.username !== profile.username) {
       return NextResponse.json(
         { success: false, error: 'Bill not found' },
         { status: 404 }
       );
     }
-    // Update existing fields with new logic to handle quantityList
+
+    // Update roomNo if provided
+    if (data.roomNo) {
+      billingData.roomNo = data.roomNo; // Handle array of room numbers
+    }
+
+    // Update existing fields with new logic to handle lists
     const updatedItemList = data.itemList || billingData.itemList;
     const updatedPriceList = data.priceList || billingData.priceList;
     const updatedQuantityList = data.quantityList || billingData.quantityList;
     const updatedTaxList = data.taxList || billingData.taxList;
+
     // Handle remarks updates
     if (data.FoodRemarks) billingData.FoodRemarks = data.FoodRemarks;
     if (data.ServiceRemarks) billingData.ServiceRemarks = data.ServiceRemarks;
     if (data.RoomRemarks) billingData.RoomRemarks = data.RoomRemarks;
+
     // Calculate new totalAmount including taxes and quantities
-    const newSubtotalList = updatedPriceList.map((price, index) => 
-      price * (updatedQuantityList[index] || 1)
+    // For room prices (first entries in priceList matching roomNo length)
+    const roomCount = billingData.roomNo.length;
+    const roomPrices = updatedPriceList.slice(0, roomCount);
+    const otherPrices = updatedPriceList.slice(roomCount);
+    const otherQuantities = updatedQuantityList.slice(roomCount);
+
+    // Calculate room subtotal (each room price is already per room)
+    const roomSubtotal = roomPrices.reduce((total, price) => total + price, 0);
+
+    // Calculate other items subtotal with quantities
+    const otherSubtotal = otherPrices.reduce((total, price, index) => 
+      total + (price * (otherQuantities[index] || 1)), 0
     );
-    const newSubTotal = newSubtotalList.reduce((total, subtotal) => total + subtotal, 0);
+
+    // Calculate final totals
+    const newSubTotal = roomSubtotal + otherSubtotal;
     const newTaxTotal = updatedTaxList.reduce((total, tax) => total + tax, 0);
     const newTotalAmount = newSubTotal;
     const newDueAmount = newTotalAmount - billingData.amountAdvanced;
+
     // Update the billing data
     billingData.itemList = updatedItemList;
     billingData.priceList = updatedPriceList;
@@ -73,6 +95,7 @@ export async function PATCH(req, { params }) {
     billingData.taxList = updatedTaxList;
     billingData.totalAmount = newTotalAmount;
     billingData.dueAmount = newDueAmount;
+
     await billingData.save();
     return NextResponse.json({ success: true, data: billingData }, { status: 200 });
   } catch (error) {

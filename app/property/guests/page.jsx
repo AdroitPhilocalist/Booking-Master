@@ -225,29 +225,43 @@ export default function GuestList() {
                 const billingData = await billingResponse.json();
 
                 if (billingData.success && billingData.data) {
-                    // Find all billing records that match the room numbers
-                    const matchedBillings = billingData.data.filter(bill =>
-                        editGuest.roomNumbers.some(roomNum => bill.roomNo === roomNum.toString()) && 
-                        bill.Bill_Paid === 'no'
-                    );
-
-                    // Process each matched billing record
-                    for (const billing of matchedBillings) {
-                        // Calculate new room price for each room
-                        const newRoomPrice = await calculateRoomPrice(
-                            [parseInt(billing.roomNo)],
-                            editGuest.checkIn,
-                            value
+                    const matchedBillings = billingData.data.filter(bill => {
+                        const billRoomSet = new Set(bill.roomNo);
+                        const hasMatchingRoom = editGuest.roomNumbers.some(roomNum =>
+                            billRoomSet.has(roomNum.toString())
                         );
+                        return hasMatchingRoom && bill.Bill_Paid === 'no';
+                    });
 
-                        // Update billing with new price
+                    console.log('Matched billings:', matchedBillings);
+
+                    for (const billing of matchedBillings) {
+                        // Calculate new room price for each room in the billing
+                        const roomPrices = await Promise.all(
+                            billing.roomNo.map(async (roomNumber) =>
+                                await calculateRoomPrice(
+                                    [parseInt(roomNumber)],
+                                    editGuest.checkIn,
+                                    value
+                                )
+                            )
+                        );
+                        console.log('Room prices:', roomPrices);
+                    
+                        // Calculate total for totalAmount and dueAmount
+                        const totalNewRoomPrice = roomPrices.reduce((sum, price) => sum + price, 0);
+                        console.log('Total new room price:', totalNewRoomPrice);
+                    
+                        // Update billing with individual room prices in priceList
                         const updatedBilling = {
                             ...billing,
-                            priceList: [newRoomPrice, ...billing.priceList.slice(1)],
-                            totalAmount: newRoomPrice,
-                            dueAmount: newRoomPrice
+                            priceList: roomPrices, // Store individual room prices instead of the sum
+                            totalAmount: totalNewRoomPrice,
+                            dueAmount: totalNewRoomPrice
                         };
-
+                    
+                        console.log('Updated billing:', updatedBilling);
+                    
                         // Update billing record
                         await fetch(`/api/Billing/${billing._id}`, {
                             method: 'PATCH',
@@ -255,27 +269,40 @@ export default function GuestList() {
                             body: JSON.stringify(updatedBilling)
                         });
                     }
+
                     // Fetch room details
                     const roomsResponse = await axios.get("/api/rooms", { headers });
                     console.log('Rooms:', roomsResponse.data.data);
-                    console.log('Matched billings:', matchedBillings[0].roomNo);
-                    const matchedRoom = roomsResponse.data.data.find(
-                        (room) => room.number === matchedBillings[0].roomNo
+                    console.log('Matched Rooms:', matchedBillings[0].roomNo);
+
+                    // Find all matched rooms for the first billing's room numbers
+                    const matchedRooms = roomsResponse.data.data.filter(
+                        (room) => matchedBillings[0].roomNo.includes(room.number)
                     );
-                    if (!matchedRoom) {
-                        throw new Error("No matching room found");
+
+                    if (matchedRooms.length === 0) {
+                        throw new Error("No matching rooms found");
                     }
-                    console.log('Matched room:', matchedRoom._id);
+
+                    console.log('Matched rooms:', matchedRooms.map(room => room._id));
+
                     // Update checkOutDateList for each room
                     for (const roomNumber of editGuest.roomNumbers) {
                         console.log('Updating checkOutDateList for room:', roomNumber);
+
+                        // Find the matching room for this room number
+                        const matchedRoom = matchedRooms.find(room => room.number === roomNumber);
+                        if (!matchedRoom) continue;
+
                         // Fetch the current room data
                         const roomResponse = await fetch(`/api/rooms/${matchedRoom._id}`);
                         const roomData = await roomResponse.json();
                         console.log('Room data:', roomData.success);
+
                         if (roomData.success) {
                             const room = roomData.data;
                             console.log('Room:', room);
+
                             // Find the index of the previous checkout date in the checkOutDateList
                             const oldCheckoutDate = new Date(editGuest.checkOut).toISOString();
                             console.log('Old checkout date:', oldCheckoutDate);
@@ -286,13 +313,13 @@ export default function GuestList() {
                                 // Create new checkOutDateList with updated date
                                 const updatedCheckOutDateList = [...room.checkOutDateList];
                                 updatedCheckOutDateList[dateIndex] = value;
-
+                    
                                 // Update the room with new checkOutDateList
                                 const updatedRoom = {
                                     ...room,
                                     checkOutDateList: updatedCheckOutDateList
                                 };
-
+                    
                                 // Send update to rooms API
                                 await fetch(`/api/rooms/${room._id}`, {
                                     method: 'PATCH',

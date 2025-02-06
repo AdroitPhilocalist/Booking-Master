@@ -18,6 +18,9 @@ import { Delete, Edit } from '@mui/icons-material';
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export default function InventoryList() {
   const [items, setItems] = useState([]);
@@ -111,8 +114,10 @@ export default function InventoryList() {
             : category
         )
       );
+      //toast.success("Item updated successfully");
     } catch (error) {
       console.error('Error updating category status:', error);
+      toast.error("Error updating category status:");
     }
   };
 
@@ -150,6 +155,7 @@ export default function InventoryList() {
         setItems((prev) => [...prev, data.item]);
         // Update category status when new item is added
         await updateCategoryStatus(formData.segment);
+        toast.success("Item added successfully");
       } else {
         setItems((prev) =>
           prev.map((item) =>
@@ -161,6 +167,7 @@ export default function InventoryList() {
       setCurrentItem(null);
     } catch (error) {
       console.error("Error saving item:", error);
+      toast.error("Error saving item:");
     }
   };
 
@@ -193,10 +200,13 @@ export default function InventoryList() {
 
       const data = await response.json();
       console.log(data.message);
+      
       // Remove the deleted product from the state
       setItems((prev) => prev.filter((item) => item._id !== id));
+      toast.success("Item deleted successfully");
     } catch (error) {
       console.error("Error deleting product:", error);
+      toast.error("Error deleting product:");
     }
   };
 
@@ -209,6 +219,19 @@ export default function InventoryList() {
     <div>
       <Navbar />
       <div className="bg-amber-50 min-h-screen">
+      <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
