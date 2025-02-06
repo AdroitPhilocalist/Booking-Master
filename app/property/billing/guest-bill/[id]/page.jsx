@@ -951,25 +951,30 @@ const BookingDashboard = () => {
                 </div>
               </div>
             )}
-            <h3 className="mt-4 font-semibold text-gray-800 text-center ml-16">
+            {/* Services Table */}
+            <h3 className="font-semibold text-gray-800 text-center ml-16">
               Services ({serviceItems.length})
             </h3>
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
+                  <th className="p-2 text-left">Room No.</th>
                   <th className="p-2 text-left">Item</th>
-                  <th className="p-2 text-center">Quantity</th>
-                  <th className="p-2 text-center">Tax</th>
+                  <th className="p-2 text-center">Item Quantity</th>
+                  <th className="p-2 text-center">Item Tax</th>
                   <th className="p-2 text-right">Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {serviceItems.map((service, index) => (
                   <tr key={index}>
+                    <td className="p-2 text-left">Room #{billing.roomNo[service.roomIndex]}</td> 
                     <td className="p-2 text-left">{service.name}</td>
                     <td className="p-2 text-center">{service.quantity}</td>
                     <td className="p-2 text-center">{service.tax}%</td>
-                    <td className="p-2 text-right">{parseFloat(service.price).toFixed(2)}</td>
+                    <td className="p-2 text-right">
+                      {(parseFloat(service.price) || 0).toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1299,6 +1304,7 @@ const BookingDashboard = () => {
             <table className="w-full mt-2 bg-gray-100 rounded text-sm mb-4">
               <thead>
                 <tr className="bg-gray-200">
+                  <th className="p-2 text-left">Room No.</th>
                   <th className="p-2 text-left">Item</th>
                   <th className="p-2 text-center">Item Quantity</th>
                   <th className="p-2 text-center">Item Tax</th>
@@ -1308,6 +1314,7 @@ const BookingDashboard = () => {
               <tbody>
                 {foodItems.map((food, index) => (
                   <tr key={index}>
+                    <td className="p-2 text-left">Room #{billing.roomNo[food.roomIndex]}</td> 
                     <td className="p-2 text-left">{food.name}</td>
                     <td className="p-2 text-center">{food.quantity}</td>
                     <td className="p-2 text-center">{food.tax}%</td>
