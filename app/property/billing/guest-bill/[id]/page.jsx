@@ -45,7 +45,7 @@ const BookingDashboard = () => {
   const [services, setServices] = useState([]);
   // Food Form States
   const [menuItems, setMenuItems] = useState([]);
-  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
+  const [selectedFoodItem, setSelectedFoodItem] = useState({});
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
   const [foodTax, setFoodTax] = useState("");
@@ -265,7 +265,7 @@ const BookingDashboard = () => {
   const handleCloseFoodInvoiceModal = () => setOpenFoodInvoiceModal(false);
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
-    setSelectedFoodItem(null);
+    setSelectedFoodItem({});
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
@@ -366,7 +366,7 @@ const BookingDashboard = () => {
       totalPrice: selectedFoodItem.price * foodQuantity,
     };
     setSelectedFoodItems([...selectedFoodItems, newItem]);
-    setSelectedFoodItem(null);
+    setSelectedFoodItem({});
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
