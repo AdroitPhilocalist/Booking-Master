@@ -8,7 +8,7 @@ import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 export async function GET(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
   try {
     await mongoose.connect(connectSTR);
     const token = req.cookies.get('authToken')?.value;
@@ -34,7 +34,7 @@ export async function GET(req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
-  const { id } = params;
+  const { id } =  await params;
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
