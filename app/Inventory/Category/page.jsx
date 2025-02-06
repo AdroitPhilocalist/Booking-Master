@@ -16,6 +16,8 @@ import { Delete, Edit } from '@mui/icons-material';
 import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function InventoryCategory() {
   const [products, setProducts] = useState([]);
@@ -55,6 +57,7 @@ export default function InventoryCategory() {
         setProducts(data.products || []);
       } catch (error) {
         console.error("Failed to fetch products", error);
+        toast.error("Failed to fetch products");
         router.push('/'); // Redirect to login if any error occurs
       } finally {
         setIsLoading(false);
@@ -102,8 +105,10 @@ export default function InventoryCategory() {
         );
       setShowModal(false);
       setCurrentProduct(null);
+      
     } catch (error) {
-      console.error("Error saving product:", error);
+      console.error("Error saving product", error);
+      toast.error("Error saving product")
     }
   };
 
@@ -142,8 +147,10 @@ export default function InventoryCategory() {
       setProducts((prev) =>
         prev.map((p) => (p._id === id ? data.product : p))
       );
+      toast.success("");
     } catch (error) {
       console.error("Error toggling status:", error);
+      toast.error("Error toggling status:");
     }
   };
 
@@ -175,15 +182,36 @@ export default function InventoryCategory() {
       console.log(data.message);
       // Remove the deleted product from the state
       setProducts((prev) => prev.filter((product) => product._id !== id));
+      toast.success("Product deleted successfully");
+
     } catch (error) {
       console.error("Error deleting product:", error);
+      toast.error("Error deleting product:");
     }
   };
 
   return (
     <div>
       <Navbar />
+
+    
+
       <div className="bg-amber-50 min-h-screen">
+
+      <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+
+
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
