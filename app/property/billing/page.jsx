@@ -15,8 +15,6 @@ import {
   TextField,
   Box,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
 import axios from "axios";
 import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
 import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
@@ -94,6 +92,7 @@ export default function Billing() {
               const guest = bookingsMap.get(guestId._id);
               return {
                 bill, // the billing document
+                guestId: guestId._id, // Unique Guest ID
                 roomNo: room.number.toString(), // individual room number
                 guestName: guest ? guest.guestName : "N/A",
                 checkInDate: guest ? guest.checkIn : null,
@@ -104,21 +103,16 @@ export default function Billing() {
           })
           .filter(Boolean)
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        // Group billing records by guest (using guestName as key)
         const groupedBills = enrichedBills.reduce((acc, cur) => {
-          // Use guestName (or guest id, if available) as grouping key
-          const key = cur.guestName;
+          const key = cur.guestId; // Use Guest ID as the grouping key
           if (!acc[key]) {
-            // Start a new group and turn roomNo into an array
             acc[key] = { ...cur, roomNo: [cur.roomNo] };
           } else {
-            // Append this room number into the existing group
             acc[key].roomNo.push(cur.roomNo);
-            // (Optional:) Aggregate other details if needed (e.g., totalAmount, checkIn/out dates.)
           }
           return acc;
         }, {});
+
         const mergedBillings = Object.values(groupedBills);
 
         // Update state with consolidated billing records
@@ -181,8 +175,10 @@ export default function Billing() {
       );
     }
     if (searchGuest) {
-      result = result.filter((bill) =>
-        bill.guestName.toLowerCase().includes(searchGuest.toLowerCase())
+      result = result.filter(
+        (bill) =>
+          bill.guestName.toLowerCase().includes(searchGuest.toLowerCase()) ||
+          bill.guestId.includes(searchGuest) // Search by Guest ID
       );
     }
     return result;
@@ -405,13 +401,12 @@ export default function Billing() {
                           backgroundColor: "white",
                           textAlign: "center",
                         },
-                        background: `linear-gradient(to right, ${
-                          bill.bill.Cancelled === "yes"
-                            ? "#808080"
-                            : bill.bill.Bill_Paid === "yes"
+                        background: `linear-gradient(to right, ${bill.bill.Cancelled === "yes"
+                          ? "#808080"
+                          : bill.bill.Bill_Paid === "yes"
                             ? "#1ebc1e"
                             : "#f24a23"
-                        } 5%, white 5%)`,
+                          } 5%, white 5%)`,
                       }}
                     >
                       <TableCell>
