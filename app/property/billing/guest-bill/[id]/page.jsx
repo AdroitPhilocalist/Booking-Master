@@ -404,19 +404,19 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-  
+
       // Create copies of the existing arrays to maintain immutability
       const updatedItemList = [...billing.itemList];
       const updatedPriceList = [...billing.priceList];
       const updatedQuantityList = [...billing.quantityList];
       const updatedTaxList = [...billing.taxList];
-  
+
       // Ensure the arrays exist for the selected room index
       if (!updatedItemList[selectedRoomIndex]) updatedItemList[selectedRoomIndex] = [];
       if (!updatedPriceList[selectedRoomIndex]) updatedPriceList[selectedRoomIndex] = [];
       if (!updatedQuantityList[selectedRoomIndex]) updatedQuantityList[selectedRoomIndex] = [];
       if (!updatedTaxList[selectedRoomIndex]) updatedTaxList[selectedRoomIndex] = [];
-  
+
       // Append new items to the selected room's arrays
       selectedFoodItems.forEach(item => {
         updatedItemList[selectedRoomIndex].push(item.selectedFoodItem.itemName);
@@ -424,7 +424,7 @@ const BookingDashboard = () => {
         updatedQuantityList[selectedRoomIndex].push(item.quantity);
         updatedTaxList[selectedRoomIndex].push(parseFloat(item.selectedFoodItem.gst));
       });
-  
+
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
@@ -436,7 +436,7 @@ const BookingDashboard = () => {
         },
         { headers }
       );
-  
+
       // Update local state with room index information
       const newFoodItems = selectedFoodItems.map(item => ({
         name: item.selectedFoodItem.itemName,
@@ -445,7 +445,7 @@ const BookingDashboard = () => {
         quantity: item.quantity,
         roomIndex: selectedRoomIndex
       }));
-  
+
       setServices([...services, ...newFoodItems]);
       handleCloseFoodModal();
       window.location.reload();
@@ -809,11 +809,7 @@ const BookingDashboard = () => {
               </div>
               <div className="text-gray-800 font-semibold text-right">
                 <p>
-                  {(
-                    parseFloat(category.total) *
-                    ((new Date(booking.checkOut) - new Date(booking.checkIn)) /
-                      (1000 * 3600 * 24))
-                  ).toFixed(2)}
+                  {(billing.priceList[0]?.reduce((sum, price) => sum + parseFloat(price), 0) || 0).toFixed(2)}
                 </p>
 
                 <p>{parseFloat(billing.totalAmount).toFixed(2)}</p>
@@ -1063,20 +1059,20 @@ const BookingDashboard = () => {
               aria-labelledby="add-food-modal"
             >
               <Box
-    sx={{
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: 600,
-      bgcolor: "background.paper",
-      border: "2px solid #000",
-      boxShadow: 24,
-      p: 4,
-      maxHeight: "80vh", // Set a maximum height
-      overflowY: "auto", // Enables scrolling
-    }}
-  >
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 600,
+                  bgcolor: "background.paper",
+                  border: "2px solid #000",
+                  boxShadow: 24,
+                  p: 4,
+                  maxHeight: "80vh", // Set a maximum height
+                  overflowY: "auto", // Enables scrolling
+                }}
+              >
                 <Typography id="add-food-modal" variant="h6" component="h2">
                   Add Food Items
                 </Typography>
