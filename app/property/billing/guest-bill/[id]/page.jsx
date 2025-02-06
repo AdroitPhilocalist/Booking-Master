@@ -45,7 +45,7 @@ const BookingDashboard = () => {
   const [services, setServices] = useState([]);
   // Food Form States
   const [menuItems, setMenuItems] = useState([]);
-  const [selectedFoodItem, setSelectedFoodItem] = useState(null);
+  const [selectedFoodItem, setSelectedFoodItem] = useState({});
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
   const [foodTax, setFoodTax] = useState("");
@@ -265,7 +265,7 @@ const BookingDashboard = () => {
   const handleCloseFoodInvoiceModal = () => setOpenFoodInvoiceModal(false);
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
-    setSelectedFoodItem(null);
+    setSelectedFoodItem({});
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
@@ -289,26 +289,44 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
+      const updatedItemList = billing.itemList.map((items, index) =>
+        index === selectedRoomIndex ? [...items, serviceName] : items
+      );
+
+      const updatedPriceList = billing.priceList.map((prices, index) =>
+        index === selectedRoomIndex
+          ? [...prices, parseFloat(serviceTotal)]
+          : prices
+      );
+
+      const updatedTaxList = billing.taxList.map((taxes, index) =>
+        index === selectedRoomIndex ? [...taxes, parseFloat(serviceTax)] : taxes
+      );
+
+      const updatedQuantityList = billing.quantityList.map(
+        (quantities, index) =>
+          index === selectedRoomIndex ? [...quantities, 1] : quantities
+      );
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
-          itemList: [serviceName],
-          priceList: [parseFloat(serviceTotal)],
-          quantityList: [1],
-          taxList: [parseFloat(serviceTax)],
-          ServiceRemarks: [serviceRemarks], // Add service remarks
+          itemList: updatedItemList,
+          priceList: updatedPriceList,
+          taxList: updatedTaxList,
+          quantityList: updatedQuantityList,
+          ServiceRemarks: [...billing.ServiceRemarks, serviceRemarks],
         },
         { headers }
       );
-      setServices([
-        ...services,
-        {
-          name: serviceName,
-          price: parseFloat(serviceTotal),
-          tax: parseFloat(serviceTax),
-          remarks: serviceRemarks,
-        },
-      ]);
+      // Update local state
+      const newService = {
+        roomIndex: selectedRoomIndex,
+        name: serviceName,
+        price: serviceTotal,
+        tax: serviceTax,
+        quantity: 1,
+      };
+      setServices([...services, newService]);
       handleCloseServicesModal();
       window.location.reload();
     } catch (error) {
@@ -348,7 +366,7 @@ const BookingDashboard = () => {
       totalPrice: selectedFoodItem.price * foodQuantity,
     };
     setSelectedFoodItems([...selectedFoodItems, newItem]);
-    setSelectedFoodItem(null);
+    setSelectedFoodItem({});
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
@@ -386,34 +404,54 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
+  
+      // Create copies of the existing arrays to maintain immutability
+      const updatedItemList = [...billing.itemList];
+      const updatedPriceList = [...billing.priceList];
+      const updatedQuantityList = [...billing.quantityList];
+      const updatedTaxList = [...billing.taxList];
+  
+      // Ensure the arrays exist for the selected room index
+      if (!updatedItemList[selectedRoomIndex]) updatedItemList[selectedRoomIndex] = [];
+      if (!updatedPriceList[selectedRoomIndex]) updatedPriceList[selectedRoomIndex] = [];
+      if (!updatedQuantityList[selectedRoomIndex]) updatedQuantityList[selectedRoomIndex] = [];
+      if (!updatedTaxList[selectedRoomIndex]) updatedTaxList[selectedRoomIndex] = [];
+  
+      // Append new items to the selected room's arrays
+      selectedFoodItems.forEach(item => {
+        updatedItemList[selectedRoomIndex].push(item.selectedFoodItem.itemName);
+        updatedPriceList[selectedRoomIndex].push(item.totalPrice);
+        updatedQuantityList[selectedRoomIndex].push(item.quantity);
+        updatedTaxList[selectedRoomIndex].push(parseFloat(item.selectedFoodItem.gst));
+      });
+  
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
-          itemList: selectedFoodItems.map(
-            (item) => item.selectedFoodItem.itemName
-          ),
-          priceList: selectedFoodItems.map((item) => item.totalPrice),
-          quantityList: selectedFoodItems.map((item) => item.quantity),
-          taxList: selectedFoodItems.map((item) =>
-            parseFloat(item.selectedFoodItem.gst)
-          ),
-          FoodRemarks: [foodRemarks], // Add food remarks
+          itemList: updatedItemList,
+          priceList: updatedPriceList,
+          quantityList: updatedQuantityList,
+          taxList: updatedTaxList,
+          FoodRemarks: [...billing.FoodRemarks, foodRemarks]
         },
         { headers }
       );
-      setServices([
-        ...services,
-        selectedFoodItems.map((item) => ({
-          name: item.selectedFoodItem.itemName,
-          price: item.totalPrice,
-          tax: parseFloat(item.selectedFoodItem.gst),
-        })),
-      ]);
+  
+      // Update local state with room index information
+      const newFoodItems = selectedFoodItems.map(item => ({
+        name: item.selectedFoodItem.itemName,
+        price: item.totalPrice,
+        tax: parseFloat(item.selectedFoodItem.gst),
+        quantity: item.quantity,
+        roomIndex: selectedRoomIndex
+      }));
+  
+      setServices([...services, ...newFoodItems]);
       handleCloseFoodModal();
       window.location.reload();
     } catch (error) {
       console.error("Error adding food:", error);
-      alert("Failed to add food");
+      alert("Failed to add food. Please check the console for details.");
     }
   };
 
@@ -904,16 +942,13 @@ const BookingDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {serviceItems.map((service, index) => (
+                {services.map((service, index) => (
                   <tr key={index}>
-                    <td className="p-2 text-left">{service.name}</td>
-                    <td className="p-2 text-center">{service.quantity}</td>
-                    <td className="p-2 text-center">{service.tax}%</td>
-                    <td className="p-2 text-right">
-                      <td className="p-2 text-right">
-                        {Number(service.price).toFixed(2)}
-                      </td>
-                    </td>
+                    <td>Room {billing.roomNo[service.roomIndex]}</td>
+                    <td>{service.name}</td>
+                    <td>{service.quantity}</td>
+                    <td>{service.tax}%</td>
+                    <td>{(parseFloat(service.price) || 0).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -930,9 +965,15 @@ const BookingDashboard = () => {
                 </Typography>
                 {/* Room Selection Dropdown */}
                 <FormControl fullWidth margin="normal">
-                <Typography id="add-services-modal" variant="h9" component="h1" sx={{ color: 'text.secondary' }} mb={1}>
-                  Select Room
-                </Typography>
+                  <Typography
+                    id="add-services-modal"
+                    variant="h9"
+                    component="h1"
+                    sx={{ color: "text.secondary" }}
+                    mb={1}
+                  >
+                    Select Room
+                  </Typography>
                   <Select
                     value={selectedRoomIndex}
                     onChange={(e) =>
@@ -1022,26 +1063,34 @@ const BookingDashboard = () => {
               aria-labelledby="add-food-modal"
             >
               <Box
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: 600,
-                  bgcolor: "background.paper",
-                  border: "2px solid #000",
-                  boxShadow: 24,
-                  p: 4,
-                }}
-              >
+    sx={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: 600,
+      bgcolor: "background.paper",
+      border: "2px solid #000",
+      boxShadow: 24,
+      p: 4,
+      maxHeight: "80vh", // Set a maximum height
+      overflowY: "auto", // Enables scrolling
+    }}
+  >
                 <Typography id="add-food-modal" variant="h6" component="h2">
                   Add Food Items
                 </Typography>
                 {/* Room Selection Dropdown */}
                 <FormControl fullWidth margin="normal">
-                <Typography id="add-services-modal" variant="h9" component="h1" sx={{ color: 'text.secondary' }} mb={1}>
-                  Select Room
-                </Typography>
+                  <Typography
+                    id="add-foods-modal"
+                    variant="h9"
+                    component="h1"
+                    sx={{ color: "text.secondary" }}
+                    mb={1}
+                  >
+                    Select Room
+                  </Typography>
                   <Select
                     value={selectedRoomIndex}
                     onChange={(e) =>
