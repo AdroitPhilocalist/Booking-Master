@@ -157,12 +157,11 @@ const BookingDashboard = () => {
 
         // Fetch room details
         const roomsResponse = await axios.get("/api/rooms", { headers });
-        const matchedRoom = roomsResponse.data.data.find(
-          (room) =>
+        const matchedRoom = roomsResponse.data.data.find((room) =>
           billingData.roomNo && Array.isArray(billingData.roomNo)
-          ? billingData.roomNo.includes(String(room.number))
-          : room.number === billingData.roomNo
-          );
+            ? billingData.roomNo.includes(String(room.number))
+            : room.number === billingData.roomNo
+        );
         if (!matchedRoom) {
           throw new Error("No matching room found");
         }
@@ -911,9 +910,9 @@ const BookingDashboard = () => {
                     <td className="p-2 text-center">{service.quantity}</td>
                     <td className="p-2 text-center">{service.tax}%</td>
                     <td className="p-2 text-right">
-                    <td className="p-2 text-right">
-  {Number(service.price).toFixed(2)}
-</td>
+                      <td className="p-2 text-right">
+                        {Number(service.price).toFixed(2)}
+                      </td>
                     </td>
                   </tr>
                 ))}
@@ -929,6 +928,22 @@ const BookingDashboard = () => {
                 <Typography id="add-services-modal" variant="h6" component="h2">
                   Add Service
                 </Typography>
+                {/* Room Selection Dropdown */}
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Select Room</InputLabel>
+                  <Select
+                    value={selectedRoomIndex}
+                    onChange={(e) =>
+                      setSelectedRoomIndex(Number(e.target.value))
+                    }
+                  >
+                    {billing.roomNo.map((room, index) => (
+                      <MenuItem key={index} value={index}>
+                        Room {room}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <TextField
                   fullWidth
                   margin="normal"
