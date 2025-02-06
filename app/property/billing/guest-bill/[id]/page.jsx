@@ -39,13 +39,13 @@ const BookingDashboard = () => {
   const [openBillPaymentModal, setOpenBillPaymentModal] = useState(false);
   // Service Form States
   const [serviceName, setServiceName] = useState("");
-  const [serviceTax, setServiceTax] = useState("");
-  const [servicePrice, setServicePrice] = useState("");
-  const [serviceTotal, setServiceTotal] = useState("");
+  const [serviceTax, setServiceTax] = useState("0");
+  const [servicePrice, setServicePrice] = useState("0");
+  const [serviceTotal, setServiceTotal] = useState("0");
   const [services, setServices] = useState([]);
   // Food Form States
   const [menuItems, setMenuItems] = useState([]);
-  const [selectedFoodItem, setSelectedFoodItem] = useState({});
+  const [selectedFoodItem, setSelectedFoodItem] = useState([]);
   const [foodName, setFoodName] = useState("");
   const [foodPrice, setFoodPrice] = useState("");
   const [foodTax, setFoodTax] = useState("");
@@ -265,7 +265,7 @@ const BookingDashboard = () => {
   const handleCloseFoodInvoiceModal = () => setOpenFoodInvoiceModal(false);
   const handleOpenFoodModal = () => {
     setOpenFoodModal(true);
-    setSelectedFoodItem({});
+    setSelectedFoodItem([]);
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
@@ -307,6 +307,7 @@ const BookingDashboard = () => {
         (quantities, index) =>
           index === selectedRoomIndex ? [...quantities, 1] : quantities
       );
+      console.log("itemlist",updatedItemList);
       const response = await axios.put(
         `/api/Billing/${id}`,
         {
@@ -314,6 +315,7 @@ const BookingDashboard = () => {
           priceList: updatedPriceList,
           taxList: updatedTaxList,
           quantityList: updatedQuantityList,
+          roomIndex: selectedRoomIndex,
           ServiceRemarks: [...billing.ServiceRemarks, serviceRemarks],
         },
         { headers }
@@ -328,7 +330,7 @@ const BookingDashboard = () => {
       };
       setServices([...services, newService]);
       handleCloseServicesModal();
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("Error adding service:", error);
       alert("Failed to add service");
@@ -341,9 +343,9 @@ const BookingDashboard = () => {
     );
     if (selectedItem) {
       setSelectedFoodItem(selectedItem);
-      setFoodName(selectedItem.itemName);
-      setFoodPrice(selectedItem.price);
-      setFoodTax(selectedItem.gst);
+      setFoodName(selectedItem.itemName || "");
+      setFoodPrice(selectedItem.price?.toString() || "0"); // Ensure string value
+      setFoodTax((selectedItem.sgst+selectedItem.cgst)?.toString() || "0"); // Ensure string value
       setFoodQuantity(1);
     }
   };
@@ -366,7 +368,7 @@ const BookingDashboard = () => {
       totalPrice: selectedFoodItem.price * foodQuantity,
     };
     setSelectedFoodItems([...selectedFoodItems, newItem]);
-    setSelectedFoodItem({});
+    setSelectedFoodItem([]);
     setFoodName("");
     setFoodPrice("");
     setFoodTax("");
@@ -404,56 +406,55 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-
-      // Create copies of the existing arrays to maintain immutability
-      const updatedItemList = [...billing.itemList];
-      const updatedPriceList = [...billing.priceList];
-      const updatedQuantityList = [...billing.quantityList];
-      const updatedTaxList = [...billing.taxList];
-
-      // Ensure the arrays exist for the selected room index
-      if (!updatedItemList[selectedRoomIndex]) updatedItemList[selectedRoomIndex] = [];
-      if (!updatedPriceList[selectedRoomIndex]) updatedPriceList[selectedRoomIndex] = [];
-      if (!updatedQuantityList[selectedRoomIndex]) updatedQuantityList[selectedRoomIndex] = [];
-      if (!updatedTaxList[selectedRoomIndex]) updatedTaxList[selectedRoomIndex] = [];
-
-      // Append new items to the selected room's arrays
-      selectedFoodItems.forEach(item => {
-        updatedItemList[selectedRoomIndex].push(item.selectedFoodItem.itemName);
-        updatedPriceList[selectedRoomIndex].push(item.totalPrice);
-        updatedQuantityList[selectedRoomIndex].push(item.quantity);
-        updatedTaxList[selectedRoomIndex].push(parseFloat(item.selectedFoodItem.gst));
-      });
-
-      const response = await axios.put(
-        `/api/Billing/${id}`,
-        {
-          itemList: updatedItemList,
-          priceList: updatedPriceList,
-          quantityList: updatedQuantityList,
-          taxList: updatedTaxList,
-          FoodRemarks: [...billing.FoodRemarks, foodRemarks]
-        },
-        { headers }
-      );
-
-      // Update local state with room index information
-      const newFoodItems = selectedFoodItems.map(item => ({
+  
+      // Convert prices to numbers and handle taxes
+      const foodUpdates = selectedFoodItems.map(item => ({
         name: item.selectedFoodItem.itemName,
-        price: item.totalPrice,
-        tax: parseFloat(item.selectedFoodItem.gst),
-        quantity: item.quantity,
-        roomIndex: selectedRoomIndex
+        price: Number(item.totalPrice),
+        tax: Number(item.selectedFoodItem.sgst+item.selectedFoodItem.cgst) || 0,
+        quantity: Number(item.quantity)
       }));
-
-      setServices([...services, ...newFoodItems]);
+  
+      // Get current billing state
+      const billingResponse = await axios.get(`/api/Billing/${id}`, { headers });
+      const currentBilling = billingResponse.data.data;
+  
+      // Update arrays immutably
+      const updatedItemList = currentBilling.itemList.map(arr => [...arr]);
+      const updatedPriceList = currentBilling.priceList.map(arr => [...arr]);
+      const updatedQuantityList = currentBilling.quantityList.map(arr => [...arr]);
+      const updatedTaxList = currentBilling.taxList.map(arr => [...arr]);
+  
+      foodUpdates.forEach(item => {
+        updatedItemList[selectedRoomIndex].push(item.name);
+        updatedPriceList[selectedRoomIndex].push(item.price);
+        updatedQuantityList[selectedRoomIndex].push(item.quantity);
+        updatedTaxList[selectedRoomIndex].push(item.tax);
+      });
+  
+      // Submit updated data
+      await axios.put(`/api/Billing/${id}`, {
+        itemList: updatedItemList,
+        priceList: updatedPriceList,
+        quantityList: updatedQuantityList,
+        taxList: updatedTaxList,
+        roomIndex: selectedRoomIndex,
+        FoodRemarks: [...currentBilling.FoodRemarks, foodRemarks]
+      }, { headers });
+  
+      // Update local state
+      setServices([...services, ...foodUpdates.map(item => ({
+        ...item,
+        roomIndex: selectedRoomIndex
+      }))]);
+      
       handleCloseFoodModal();
-      window.location.reload();
     } catch (error) {
       console.error("Error adding food:", error);
-      alert("Failed to add food. Please check the console for details.");
+      alert("Failed to add food. Check console for details.");
     }
   };
+  
 
   const handleAddPayment = async () => {
     const paymentAmountNum = Number(paymentAmount);

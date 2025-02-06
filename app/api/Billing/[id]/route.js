@@ -8,7 +8,7 @@ import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 export async function GET(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
   try {
     await mongoose.connect(connectSTR);
     const token = req.cookies.get('authToken')?.value;
@@ -34,7 +34,7 @@ export async function GET(req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
-  const { id } = params;
+  const { id } =  await params;
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
@@ -140,27 +140,35 @@ export async function PUT(req, { params }) {
     };
 
     // Handle itemList, priceList, quantityList, and taxList updates
-    if (data.itemList && data.priceList && data.quantityList && data.taxList) {
-      const roomIndex = data.roomIndex || 0; // Default to first room
+    // Modified array update logic
+if (data.itemList && data.priceList && data.quantityList && data.taxList) {
+  const roomIndex = data.roomIndex || 0;
+  console.log("data whooooooo",data.itemList[roomIndex]);
+  console.log("room index",roomIndex);
+  console.log("before");
+  console.log(bill.itemList);
+  
+  // Initialize arrays if empty
+  if (!bill.itemList[roomIndex]) bill.itemList[roomIndex] = [];
+  if (!bill.priceList[roomIndex]) bill.priceList[roomIndex] = [];
+  if (!bill.quantityList[roomIndex]) bill.quantityList[roomIndex] = [];
+  if (!bill.taxList[roomIndex]) bill.taxList[roomIndex] = [];
 
-      // Initialize arrays if needed
-      bill.itemList = initializeNestedArrays(bill.itemList, bill.roomNo.length);
-      bill.priceList = initializeNestedArrays(bill.priceList, bill.roomNo.length);
-      bill.quantityList = initializeNestedArrays(bill.quantityList, bill.roomNo.length);
-      bill.taxList = initializeNestedArrays(bill.taxList, bill.roomNo.length);
+  // Append new items correctly
 
-      // Update specific room's arrays
-      bill.itemList = updateNestedArray([...bill.itemList], data.itemList, roomIndex);
-      bill.priceList = updateNestedArray([...bill.priceList], data.priceList.map(Number), roomIndex);
-      bill.quantityList = updateNestedArray([...bill.quantityList], data.quantityList.map(Number), roomIndex);
-      bill.taxList = updateNestedArray([...bill.taxList], data.taxList.map(Number), roomIndex);
+  bill.itemList[roomIndex]=data.itemList[roomIndex];
+  bill.priceList[roomIndex]=data.priceList[roomIndex];
+  bill.quantityList[roomIndex]=data.quantityList[roomIndex];
+  bill.taxList[roomIndex]=data.taxList[roomIndex];
+  console.log("after");
+  console.log(bill.itemList);
 
-      // Recalculate totals
-      bill.totalAmount = bill.priceList.flatMap((roomPrices, i) => 
-        roomPrices.map((price, j) => 
-          price + (price * (bill.taxList[i][j] || 0) / 100)
-        )
-      ).reduce((sum, price) => sum + price, 0);
+  // Recalculate totals correctly
+  bill.totalAmount = bill.priceList.flatMap((roomPrices, i) =>
+    roomPrices.map((price, j) => 
+      price + (price * (bill.taxList[i][j] || 0) / 100)
+    )
+  ).reduce((sum, price) => sum + price, 0);
 
       bill.dueAmount = bill.totalAmount - bill.amountAdvanced;
     }

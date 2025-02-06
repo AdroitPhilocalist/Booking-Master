@@ -529,9 +529,9 @@ export default function BookingForm() {
   
         // Collect data for consolidated billing
         allRoomNumbers.push(selectedRoomNumber);
-        roomCharges.push(roomCharge);
-        roomTaxes.push(roomTax);
-        quantities.push(1);
+        roomCharges.push([roomCharge]);
+        roomTaxes.push([roomTax]);
+        quantities.push([1]);
         totalAmount += roomCharge + (roomCharge * roomTax / 100);
   
         // Update room records...
@@ -544,7 +544,7 @@ export default function BookingForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           roomNo: allRoomNumbers,
-          itemList: Array(allRoomNumbers.length).fill('Room Charge'),
+          itemList: Array.from({ length: allRoomNumbers.length }, () => ['Room Charge']),
           priceList: roomCharges,
           taxList: roomTaxes,
           quantityList: quantities,
@@ -553,11 +553,13 @@ export default function BookingForm() {
           totalAmount: totalAmount,
           amountAdvanced: 0,
           dueAmount: totalAmount,
-          Bill_Paid: 'no'
+          Bill_Paid: 'no',
         })
       });
+      
   
       const billingData = await billingResponse.json();
+      console.log("billing data", billingData);
       if (!billingData.success) throw new Error('Failed to create consolidated billing');
   
       // Update all rooms with the same billing ID
@@ -625,6 +627,7 @@ export default function BookingForm() {
       }
   
       alert('Booking created with consolidated billing!');
+
       setModalOpen(false);
       router.push('/property/roomdashboard');
   

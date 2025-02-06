@@ -2,8 +2,20 @@ import mongoose from 'mongoose';
 
 const BillingSchema = new mongoose.Schema({
   roomNo: { type: [String], ref: 'Room', required: true },
-  itemList: { type: [[String]], required: true },
-  priceList: { type: [[Number]], required: true },
+  itemList: { 
+    type: [[String]],
+  },
+  priceList: {
+    type: [[Number]],
+    validate: {
+      validator: function(prices) {
+        return prices.every(roomPrices => 
+          roomPrices.every(Number.isFinite)
+        )
+      }
+    }
+  },
+  
   quantityList: {
     type: [[Number]],
     required: true,
@@ -39,7 +51,7 @@ const BillingSchema = new mongoose.Schema({
     }
   },
   Bill_Paid: { type: String, enum: ['yes', 'no'], default: 'no' },
-  Cancelled: { type: String, enum: ['yes', 'no'], default: 'no' },
+  Cancelled: { type: [String], enum: ['yes', 'no'], default: 'no' },
   DateOfPayment: { type: [Date], default: [] },
   ModeOfPayment: {
     type: [String],
