@@ -69,32 +69,46 @@ export async function PATCH(req, { params }) {
 
     // Calculate new totalAmount including taxes and quantities
     // For room prices (first entries in priceList matching roomNo length)
-    const roomCount = billingData.roomNo.length;
-    const roomPrices = updatedPriceList.slice(0, roomCount);
-    const otherPrices = updatedPriceList.slice(roomCount);
-    const otherQuantities = updatedQuantityList.slice(roomCount);
+    // const roomCount = billingData.roomNo.length;
+    // const roomPrices = updatedPriceList.slice(0, roomCount);
+    // const otherPrices = updatedPriceList.slice(roomCount);
+    // const otherQuantities = updatedQuantityList.slice(roomCount);
 
-    // Calculate room subtotal (each room price is already per room)
-    const roomSubtotal = roomPrices.reduce((total, price) => total + price, 0);
+    // // Calculate room subtotal (each room price is already per room)
+    // const roomSubtotal = roomPrices.reduce((total, price) => total + price, 0);
 
-    // Calculate other items subtotal with quantities
-    const otherSubtotal = otherPrices.reduce((total, price, index) =>
-      total + (price * (otherQuantities[index] || 1)), 0
-    );
+    // // Calculate other items subtotal with quantities
+    // const otherSubtotal = otherPrices.reduce((total, price, index) =>
+    //   total + (price * (otherQuantities[index] || 1)), 0
+    // );
 
-    // Calculate final totals
-    const newSubTotal = roomSubtotal + otherSubtotal;
-    const newTaxTotal = updatedTaxList.reduce((total, tax) => total + tax, 0);
-    const newTotalAmount = newSubTotal;
-    const newDueAmount = newTotalAmount - billingData.amountAdvanced;
+    // // Calculate final totals
+    // const newSubTotal = roomSubtotal + otherSubtotal;
+    // const newTaxTotal = updatedTaxList.reduce((total, tax) => total + tax, 0);
+    // const newTotalAmount = newSubTotal;
+    // const newDueAmount = newTotalAmount - billingData.amountAdvanced;
+
+
+    billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
+      roomPrices.map((price, j) =>
+        price + (price * (billingData.taxList[i][j] || 0) / 100)
+      )
+    ).reduce((sum, price) => sum + price, 0);
+
+    billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
 
     // Update the billing data
     billingData.itemList = updatedItemList;
     billingData.priceList = updatedPriceList;
     billingData.quantityList = updatedQuantityList;
     billingData.taxList = updatedTaxList;
-    billingData.totalAmount = newTotalAmount;
-    billingData.dueAmount = newDueAmount;
+    billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
+      roomPrices.map((price, j) =>
+        price + (price * (billingData.taxList[i][j] || 0) / 100)
+      )
+    ).reduce((sum, price) => sum + price, 0);
+
+    billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
 
     await billingData.save();
     return NextResponse.json({ success: true, data: billingData }, { status: 200 });
