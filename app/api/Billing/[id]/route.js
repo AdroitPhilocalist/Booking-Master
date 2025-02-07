@@ -44,6 +44,8 @@ export async function PATCH(req, { params }) {
     const profile = await Profile.findById(userId);
     const billingData = await Billing.findById(id);
 
+    console.log('Data:', data);
+
     if (!billingData || billingData.username !== profile.username) {
       return NextResponse.json(
         { success: false, error: 'Bill not found' },
@@ -89,13 +91,13 @@ export async function PATCH(req, { params }) {
     // const newDueAmount = newTotalAmount - billingData.amountAdvanced;
 
 
-    billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
-      roomPrices.map((price, j) =>
-        price + (price * (billingData.taxList[i][j] || 0) / 100)
-      )
-    ).reduce((sum, price) => sum + price, 0);
+    // billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
+    //   roomPrices.map((price, j) =>
+    //     price + (price * (billingData.taxList[i][j] || 0) / 100)
+    //   )
+    // ).reduce((sum, price) => sum + price, 0);
 
-    billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
+    // billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
 
     // Update the billing data
     billingData.itemList = updatedItemList;
@@ -104,7 +106,7 @@ export async function PATCH(req, { params }) {
     billingData.taxList = updatedTaxList;
     billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
       roomPrices.map((price, j) =>
-        price + (price * (billingData.taxList[i][j] || 0) / 100)
+        price 
       )
     ).reduce((sum, price) => sum + price, 0);
 
@@ -180,7 +182,7 @@ export async function PUT(req, { params }) {
       // Recalculate totals correctly
       bill.totalAmount = bill.priceList.flatMap((roomPrices, i) =>
         roomPrices.map((price, j) =>
-          price + (price * (bill.taxList[i][j] || 0) / 100)
+          price 
         )
       ).reduce((sum, price) => sum + price, 0);
 

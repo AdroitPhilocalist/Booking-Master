@@ -283,14 +283,18 @@ const RoomCard = ({
           .find((row) => row.startsWith("authToken="))
           .split("=")[1];
         const headers = { Authorization: `Bearer ${token}` };
-        
-        // Fetch current billing data
-        const billingResponse = await fetch(`/api/Billing/${room.currentBillingId}`, { headers: headers });
+        console.log(room.currentBillingId);
+        console.log("room number", room.number);
+        const billingResponse = await fetch(
+          `/api/Billing/${room.currentBillingId}`,
+          { headers: headers }
+        );
         const billingResponseData = await billingResponse.json();
         const billData = billingResponseData.data;
-        
-        if(billData.roomNo.length == 1) {
-          // If this is the only room in the billing, mark as cancelled
+        console.log("bill itemlist", billData.roomNo);
+        if(billData.roomNo.length==1)
+        {
+          //Update Billing status to cancelled
           await fetch(`/api/Billing/${room.currentBillingId}`, {
             method: 'PUT',
             headers: {
@@ -302,25 +306,32 @@ const RoomCard = ({
               dueAmount: 0
             })
           });
-        } else {
-          // Find index of room to remove
+
+        }
+        else{
+
           const indexToRemove = billData.roomNo.indexOf(room.number);
-          
-          // Get the price being removed
-          const priceBeingRemoved = billData.priceList[indexToRemove];
-          
-          // Calculate new amounts
-          const newTotalAmount = billData.totalAmount - priceBeingRemoved;
-          const newDueAmount = billData.dueAmount - priceBeingRemoved;
-          
-          // Filter out the cancelled room's data
-          const updatedItemList = billData.itemList.filter((_, index) => index !== indexToRemove);
-          const updatedPriceList = billData.priceList.filter((_, index) => index !== indexToRemove);
-          const updatedQuantityList = billData.quantityList.filter((_, index) => index !== indexToRemove);
-          const updatedTaxList = billData.taxList.filter((_, index) => index !== indexToRemove);
-          const updatedRoomList = billData.roomNo.filter((_, index) => index !== indexToRemove);
-  
-          // Update billing with new amounts and filtered lists
+          console.log("bill itemlist", billData.roomNo.filter((_, index) => index !== indexToRemove));
+          const currentItemList = billData.itemList;
+          const currentPriceList = billData.priceList;
+          const currentQuantityList = billData.quantityList;
+          const currentTaxList = billData.taxList;
+          const currentRoomList=billData.roomNo;
+          const updatedItemList = currentItemList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedPriceList = currentPriceList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedQuantityList = currentQuantityList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedTaxList = currentTaxList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedRoomList = currentRoomList.filter(
+            (_, index) => index !== indexToRemove
+          );
           const response = await axios.patch(
             `/api/Billing/${room.currentBillingId}`,
             {
@@ -328,26 +339,25 @@ const RoomCard = ({
               priceList: updatedPriceList,
               taxList: updatedTaxList,
               quantityList: updatedQuantityList,
-              roomNo: updatedRoomList,
-              totalAmount: newTotalAmount,
-              dueAmount: newDueAmount
+              roomNo:updatedRoomList,
             },
             { headers }
           );
+
         }
-  
+
         // Get current room data
         const roomResponse = await fetch(`/api/rooms/${room._id}`, {
           headers: headers
         });
         const roomData = await roomResponse.json();
         const currentRoomData = roomData.data;
-  
+
         // Find position of current IDs
         const currentPosition = currentRoomData.billWaitlist.findIndex(
           billId => billId._id.toString() === room.currentBillingId.toString()
         );
-  
+
         // Prepare update data
         let updateData = {
           billWaitlist: currentRoomData.billWaitlist,
@@ -355,7 +365,7 @@ const RoomCard = ({
           checkInDateList: currentRoomData.checkInDateList,
           checkOutDateList: currentRoomData.checkOutDateList,
         };
-  
+
         // Check if there's a next booking
         const hasNextBooking = currentPosition < currentRoomData.billWaitlist.length - 1;
         if (hasNextBooking) {
@@ -377,7 +387,7 @@ const RoomCard = ({
             billingStarted: "No"
           };
         }
-  
+
         // Update room with new data
         const updateResponse = await fetch(`/api/rooms/${room._id}`, {
           method: 'PUT',
@@ -387,12 +397,13 @@ const RoomCard = ({
           },
           body: JSON.stringify(updateData)
         });
-  
+
         const updateResult = await updateResponse.json();
-  
+
         if (updateResult.success) {
           setShowGuestModal(false);
           setCurrentGuest(null);
+          // Update rooms state
           setRooms(prevRooms => prevRooms.map(r =>
             r._id === room._id ? { ...r, ...updateData } : r
           ));
@@ -407,7 +418,7 @@ const RoomCard = ({
       }
     }
   };
-
+  
   return (
     <div
       className="relative"
