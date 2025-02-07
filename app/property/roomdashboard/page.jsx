@@ -290,10 +290,8 @@ const RoomCard = ({
         );
         const billingResponseData = await billingResponse.json();
         const billData = billingResponseData.data;
-        billData.roomNo=['1','2','3']
         console.log("bill itemlist", billData.roomNo);
         const indexToRemove = billData.roomNo.indexOf(room.number);
-        console.log("bill itemlist", billData.roomNo.filter((_, index) => index !== indexToRemove));
         const currentItemList = billData.itemList;
         const currentPriceList = billData.priceList;
         const currentQuantityList = billData.quantityList;
