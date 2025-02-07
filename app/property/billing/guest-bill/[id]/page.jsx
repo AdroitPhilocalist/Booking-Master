@@ -106,7 +106,6 @@ const BookingDashboard = () => {
     fetchMenuItems();
   }, []);
 
-  // Fetch booking details
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
@@ -156,14 +155,12 @@ const BookingDashboard = () => {
               price: roomPrices[itemIndex] || 0,
               quantity: roomQuantities[itemIndex] || 1,
               tax: roomTaxes[itemIndex] || 0,
-              roomIndex: roomIndex, // Track which room this item belongs to
+              roomIndex: roomIndex,
             };
 
             if (menuItem) {
-              // If the item is a food item, add it to the foodItemsArray
               foodItemsArray.push(itemDetails);
             } else if (item !== "Room Charge") {
-              // Exclude "Room Charge" and add other items to serviceItemsArray
               serviceItemsArray.push(itemDetails);
             }
           });
@@ -176,66 +173,66 @@ const BookingDashboard = () => {
         setServiceItems(serviceItemsArray);
         setServices([...serviceItemsArray, ...foodItemsArray]);
 
-        // Fetch room details
+        // Fetch room details - Modified to handle multiple rooms
         const roomsResponse = await axios.get("/api/rooms", { headers });
-        const matchedRoom = roomsResponse.data.data.find((room) =>
-          billingData.roomNo && Array.isArray(billingData.roomNo)
-            ? billingData.roomNo.includes(String(room.number))
-            : room.number === billingData.roomNo
+        const matchedRooms = roomsResponse.data.data.filter((room) =>
+          billingData.roomNo.includes(String(room.number))
         );
-        if (!matchedRoom) {
-          throw new Error("No matching room found");
+
+        if (matchedRooms.length === 0) {
+          throw new Error("No matching rooms found");
         }
+        console.log("matchedRooms", matchedRooms);
 
         // Fetch room categories
         const roomCategoriesResponse = await axios.get("/api/roomCategories", {
           headers,
         });
-        const matchedCategory = roomCategoriesResponse.data.data.find(
-          (category) => category._id === matchedRoom.category._id
+
+        // Get categories for all matched rooms
+        const matchedCategories = matchedRooms.map(room =>
+          roomCategoriesResponse.data.data.find(
+            category => category._id === room.category._id
+          )
         );
 
         // Fetch bookings
         const newBookingsResponse = await axios.get("/api/NewBooking", {
           headers,
         });
-        let matchedBooking;
-        if (
-          billingData.Bill_Paid === "yes" ||
-          billingData.Cancelled === "yes"
-        ) {
-          // Find the position of the current billing ID in the room's billWaitlist
-          const currentBillIndex = matchedRoom.billWaitlist.findIndex(
-            (billId) => billId._id.toString() === billingData._id.toString()
-          );
-          console.log("currentBillIndex", currentBillIndex);
-          if (currentBillIndex === -1) {
-            throw new Error("Billing ID not found in room's billWaitlist");
+
+        // Find bookings for all rooms
+        const matchedBookings = await Promise.all(matchedRooms.map(async (room) => {
+          if (billingData.Bill_Paid === "yes" || billingData.Cancelled === "yes") {
+            const currentBillIndex = room.billWaitlist.findIndex(
+              (billId) => billId._id.toString() === billingData._id.toString()
+            );
+
+            if (currentBillIndex === -1) {
+              return null;
+            }
+
+            const correspondingGuestId = room.guestWaitlist[currentBillIndex];
+            return newBookingsResponse.data.data.find(
+              (booking) => booking._id === correspondingGuestId._id.toString()
+            );
+          } else {
+            return newBookingsResponse.data.data.find(
+              (booking) => booking._id === room.currentGuestId
+            );
           }
-          // Get the corresponding guest ID from the guestWaitlist array
-          const correspondingGuestId =
-            matchedRoom.guestWaitlist[currentBillIndex];
-          console.log("correspondingGuestId", correspondingGuestId);
-          console.log("Booking Data", correspondingGuestId._id);
-          // Find the booking that matches this guest ID
-          matchedBooking = newBookingsResponse.data.data.find(
-            (booking) => booking._id === correspondingGuestId._id.toString()
-          );
-        } else {
-          // Use the current logic for unpaid bills
-          matchedBooking = newBookingsResponse.data.data.find(
-            (booking) => booking._id === matchedRoom.currentGuestId
-          );
-        }
-        if (!matchedBooking) {
-          throw new Error("No matching booking found");
-        }
-        setRemainingDueAmount(billingData.dueAmount);
+        }));
+
+        // Filter out duplicates and null values
+        const uniqueBookings = Array.from(
+          new Set(matchedBookings.filter(booking => booking).map(JSON.stringify))
+        ).map(JSON.parse);
+        console.log("uniqueBookings", uniqueBookings);
         setBookingData({
           billing: billingData,
-          booking: matchedBooking,
-          room: matchedRoom,
-          category: matchedCategory,
+          bookings: uniqueBookings, // Use unique bookings
+          rooms: matchedRooms,
+          categories: matchedCategories,
         });
         setLoading(false);
       } catch (err) {
@@ -638,6 +635,7 @@ const BookingDashboard = () => {
   }
   const { billing, booking, room, category } = bookingData;
 
+  console.log("Booking Data: ", bookingData);
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
@@ -646,13 +644,14 @@ const BookingDashboard = () => {
           {/* Header */}
           <h2 className="text-xl font-semibold text-gray-800">
             Booking Dashboard{" "}
-            <span className="text-gray-500">({booking.bookingId})</span>
+            {console.log("Booking Data: ", bookingData.bookings.bookingId)}
+            <span className="text-gray-500">({bookingData.bookings[0].bookingId})</span>
           </h2>
 
           {/* Booking Information */}
           <div className="mt-4 bg-blue-100 p-4 rounded">
             <p className="text-lg font-semibold">
-              {booking.guestName}{" "}
+              {bookingData.bookings[0].guestName}{" "}
               <span className="text-sm text-green-700 bg-green-100 px-2 py-1 rounded">
                 Posting On
               </span>
@@ -660,33 +659,33 @@ const BookingDashboard = () => {
             <p className="mt-2 text-sm text-gray-700">
               Check-In:{" "}
               <strong>
-                {new Date(booking.checkIn).toLocaleDateString("en-GB")}
+                {new Date(bookingData.bookings[0].checkIn).toLocaleDateString("en-GB")}
               </strong>{" "}
               | Expected Check-Out:{" "}
               <strong>
-                {new Date(booking.checkOut).toLocaleDateString("en-GB")}
+                {new Date(bookingData.bookings[0].checkOut).toLocaleDateString("en-GB")}
               </strong>{" "}
-              | Phone No: <strong>+91 {booking.mobileNo}</strong>
+              | Phone No: <strong>+91 {bookingData.bookings[0].mobileNo}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
-              Guest ID: <strong>{booking.guestid}</strong> | Date of Birth:{" "}
+              Guest ID: <strong>{bookingData.bookings[0].guestid}</strong> | Date of Birth:{" "}
               <strong>
-                {new Date(booking.dateofbirth).toLocaleDateString("en-GB")}
+                {new Date(bookingData.bookings[0].dateofbirth).toLocaleDateString("en-GB")}
               </strong>{" "}
-              | Booking Type: <strong>{booking.bookingType}</strong> | Booking
-              Source: <strong>{booking.bookingSource}</strong>
+              | Booking Type: <strong>{bookingData.bookings[0].bookingType}</strong> | Booking
+              Source: <strong>{bookingData.bookings[0].bookingSource}</strong>
             </p>
             <p className="mt-1 text-sm text-gray-700">
               Booked On:{" "}
               <strong>
-                {new Date(booking.createdAt).toLocaleDateString("en-GB")}
+                {new Date(bookingData.bookings[0].createdAt).toLocaleDateString("en-GB")}
               </strong>{" "}
               | PAX:{" "}
               <strong>
-                {booking.adults} Adult {booking.children} Child
+                {bookingData.bookings[0].adults} Adult {bookingData.bookings[0].children} Child
               </strong>{" "}
-              | Meal Plan: <strong>{booking.mealPlan}</strong> | Notes:{" "}
-              <strong>{booking.remarks || "-"}</strong>
+              | Meal Plan: <strong>{bookingData.bookings[0].mealPlan}</strong> | Notes:{" "}
+              <strong>{bookingData.bookings[0].remarks || "-"}</strong>
             </p>
           </div>
 
@@ -694,8 +693,8 @@ const BookingDashboard = () => {
           <div className="mt-6 bg-blue-50 p-4 rounded">
             <h3 className="font-semibold text-gray-800">Rooms Booked</h3>
             <p className="text-sm text-gray-700">
-              {new Date(booking.checkIn).toLocaleDateString()} (
-              {new Date(booking.checkIn).toLocaleString("default", {
+              {new Date(bookingData.bookings[0].checkIn).toLocaleDateString()} (
+              {new Date(bookingData.bookings[0].checkIn).toLocaleString("default", {
                 weekday: "short",
               })}
               ) &raquo; Rooms:{" "}
@@ -717,7 +716,7 @@ const BookingDashboard = () => {
                 disabled:
                   billing.Bill_Paid === "yes" ||
                   billing.Cancelled === "yes" ||
-                  new Date(booking.checkIn) > new Date(),
+                  new Date(bookingData.bookings[0].checkIn) > new Date(),
               },
               {
                 label: "Add Food",
@@ -727,7 +726,7 @@ const BookingDashboard = () => {
                 disabled:
                   billing.Bill_Paid === "yes" ||
                   billing.Cancelled === "yes" ||
-                  new Date(booking.checkIn) > new Date(),
+                  new Date(bookingData.bookings[0].checkIn) > new Date(),
               },
               {
                 label: "Bill Payment",
@@ -740,7 +739,7 @@ const BookingDashboard = () => {
                 disabled:
                   remainingDueAmount <= 0 ||
                   billing.Cancelled === "yes" ||
-                  new Date(booking.checkIn) > new Date(),
+                  new Date(bookingData.bookings[0].checkIn) > new Date(),
               },
             ].map((btn, index) => (
               <Button
@@ -833,24 +832,23 @@ const BookingDashboard = () => {
             <h3 className="font-semibold text-gray-800">Billing Summary</h3>
             <div className="grid grid-cols-2 gap-4 mt-2">
               <div className="text-gray-700">
-                <p>Total Room Charges (incl. GST: {category.gst}%):</p>
+                <p>Total Room Charges (incl. GST):</p>
                 <p>Billed Amount:</p>
                 <p>Cumulative Paid Amount:</p>
                 <p>Due Amount:</p>
               </div>
               <div className="text-gray-800 font-semibold text-right">
-                {billing.roomNo.map((roomNumber, index) => {
-                  // Ensure billing.priceList[index] exists and is an array
-                  const roomPrice = Array.isArray(billing.priceList[index])
-                    ? parseFloat(billing.priceList[index][0]) || 0
-                    : 0;
+                {(() => {
+                  // Calculate total room charges
+                  const totalRoomCharges = billing.priceList.reduce((sum, priceArray) => {
+                    // Check if priceArray is an array and has values
+                    const price = Array.isArray(priceArray) ? parseFloat(priceArray[0]) || 0 : 0;
+                    return sum + price;
+                  }, 0);
 
-                  return (
-                    <React.Fragment key={index}>
-                      {roomPrice.toFixed(2)}
-                    </React.Fragment>
-                  );
-                })}
+                  // Display the total
+                  return totalRoomCharges.toFixed(2);
+                })()}
 
                 <p>{parseFloat(billing.totalAmount).toFixed(2)}</p>
 
@@ -900,7 +898,7 @@ const BookingDashboard = () => {
                 remainingDueAmount > 0 ||
                 billing.Bill_Paid === "yes" ||
                 billing.Cancelled === "yes" ||
-                new Date(booking.checkIn) > new Date()
+                new Date(bookingData.bookings[0].checkIn) > new Date()
               }
               onClick={handleCompletePayment}
             >
@@ -922,10 +920,10 @@ const BookingDashboard = () => {
                 {billing.roomNo.map((roomNumber, index) => (
                   <tr key={index}>
                     <td className="p-2 text-left">
-                      {new Date(booking.checkIn).toLocaleDateString("en-GB")}
+                      {new Date(bookingData.bookings[0].checkIn).toLocaleDateString("en-GB")}
                     </td>
                     <td className="p-2 text-center">
-                      Room # {roomNumber} - {room.category.category}
+                      Room # {roomNumber} - {bookingData.rooms[index].category.category}
                     </td>
                     <td className="p-2 text-right">
                       {billing.priceList[index][0].toFixed(2)}
