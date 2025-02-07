@@ -154,7 +154,10 @@ export async function PUT(req, { params }) {
       target[index].push(...source);
       return target;
     };
-
+    console.log("data.dueAmount", data);
+    if(data.dueAmount) {
+      bill.dueAmount = data.dueAmount;
+    }
     // Handle itemList, priceList, quantityList, and taxList updates
     // Modified array update logic
     if (data.itemList && data.priceList && data.quantityList && data.taxList) {
@@ -169,6 +172,7 @@ export async function PUT(req, { params }) {
       if (!bill.priceList[roomIndex]) bill.priceList[roomIndex] = [];
       if (!bill.quantityList[roomIndex]) bill.quantityList[roomIndex] = [];
       if (!bill.taxList[roomIndex]) bill.taxList[roomIndex] = [];
+
 
       // Append new items correctly
 
@@ -228,11 +232,14 @@ export async function PUT(req, { params }) {
       if (data.Bill_Paid === "yes") bill.dueAmount = 0;
     }
 
-    if (data.Cancelled) {
-      bill.Cancelled = data.Cancelled;
-    }
-
+  // Handle status updates
+  if (typeof data.Cancelled !== "undefined") {
+    bill.Cancelled = data.Cancelled;
+    if (data.Cancelled === "yes") bill.dueAmount = 0;
+  }
+    
     const updatedBill = await bill.save();
+    console.log("bill", updatedBill);
     return NextResponse.json({ success: true, data: updatedBill }, { status: 200 });
 
   } catch (error) {

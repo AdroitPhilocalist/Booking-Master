@@ -46,71 +46,71 @@ export default function GuestList() {
         fetchRoomCategories();
     }, []);
 
-// Modified useEffect for fetching guests
-useEffect(() => {
-    const fetchGuests = async () => {
-        try {
-            setIsLoading(true);
-            const token = getCookie('authToken');
-            if (!token) {
-                router.push('/');
-                return;
+    // Modified useEffect for fetching guests
+    useEffect(() => {
+        const fetchGuests = async () => {
+            try {
+                setIsLoading(true);
+                const token = getCookie('authToken');
+                if (!token) {
+                    router.push('/');
+                    return;
+                }
+
+                const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+                const userId = decoded.payload.id;
+
+                const profileResponse = await fetch(`/api/Profile/${userId}`);
+                const profileData = await profileResponse.json();
+                if (!profileData.success || !profileData.data) {
+                    router.push('/');
+                    return;
+                }
+                const username = profileData.data.username;
+
+                // Fetch guest data
+                const response = await fetch(`/api/NewBooking?username=${username}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Fetch all billing data
+                    const billingResponse = await fetch('/api/Billing');
+                    const billingData = await billingResponse.json();
+
+                    const guestMap = new Map();
+                    const sortedGuests = [...data.data].sort((a, b) => {
+                        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    });
+
+                    sortedGuests.forEach(guest => {
+                        if (!guestMap.has(guest.mobileNo)) {
+                            // Check if the guest is checked out or has a cancelled bill
+                            const isCancelled = billingData.success && billingData.data.some(bill => {
+                                const billRoomSet = new Set(bill.roomNo);
+                                const hasMatchingRoom = guest.roomNumbers.some(roomNum =>
+                                    billRoomSet.has(roomNum.toString())
+                                );
+                                return hasMatchingRoom && bill.Cancelled === 'yes';
+                            });
+                            console.log('Guest:', guest.CheckedOut);
+                            // Add a flag to indicate if edit/delete should be disabled
+                            guest.disableActions = guest.CheckedOut === true || isCancelled;
+                            guestMap.set(guest.mobileNo, guest);
+                        }
+                    });
+
+                    setGuests(Array.from(guestMap.values()));
+                } else {
+                    setError('Failed to load guest data');
+                }
+            } catch (err) {
+                setError('Error fetching guests');
+            } finally {
+                setIsLoading(false);
             }
-
-            const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-            const userId = decoded.payload.id;
-
-            const profileResponse = await fetch(`/api/Profile/${userId}`);
-            const profileData = await profileResponse.json();
-            if (!profileData.success || !profileData.data) {
-                router.push('/');
-                return;
-            }
-            const username = profileData.data.username;
-
-            // Fetch guest data
-            const response = await fetch(`/api/NewBooking?username=${username}`);
-            const data = await response.json();
-
-            if (data.success) {
-                // Fetch all billing data
-                const billingResponse = await fetch('/api/Billing');
-                const billingData = await billingResponse.json();
-
-                const guestMap = new Map();
-                const sortedGuests = [...data.data].sort((a, b) => {
-                    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-                });
-
-                sortedGuests.forEach(guest => {
-                    if (!guestMap.has(guest.mobileNo)) {
-                        // Check if the guest is checked out or has a cancelled bill
-                        const isCancelled = billingData.success && billingData.data.some(bill => {
-                            const billRoomSet = new Set(bill.roomNo);
-                            const hasMatchingRoom = guest.roomNumbers.some(roomNum =>
-                                billRoomSet.has(roomNum.toString())
-                            );
-                            return hasMatchingRoom && bill.Cancelled === 'yes';
-                        });
-                        console.log('Guest:', guest.CheckedOut);
-                        // Add a flag to indicate if edit/delete should be disabled
-                        guest.disableActions = guest.CheckedOut === true || isCancelled;
-                        guestMap.set(guest.mobileNo, guest);
-                    }
-                });
-
-                setGuests(Array.from(guestMap.values()));
-            } else {
-                setError('Failed to load guest data');
-            }
-        } catch (err) {
-            setError('Error fetching guests');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    fetchGuests();
-}, []);
+        };
+        fetchGuests();
+    }, []);
 
     // Handle delete button click
     const handleDeleteClick = (id) => {
@@ -151,15 +151,140 @@ useEffect(() => {
         }
     };
 
-    // Confirm delete
+    // Modified handleConfirmDelete function
     const handleConfirmDelete = async () => {
         try {
             setIsLoading(true);
-            await fetch(`/api/NewBooking/${deleteGuestId}`, { method: 'DELETE' });
+            const token = getCookie('authToken');
+            if (!token) {
+                router.push('/');
+                return;
+            }
+
+            // Find the guest to be deleted
+            const guestToDelete = guests.find(guest => guest._id === deleteGuestId);
+            if (!guestToDelete) {
+                throw new Error('Guest not found');
+            }
+
+            // Get billing records for this guest's rooms
+            const billingResponse = await fetch('/api/Billing');
+            const billingData = await billingResponse.json();
+
+            if (!billingData.success) {
+                throw new Error('Failed to fetch billing data');
+            }
+
+            // Find relevant billing records for guest's rooms
+            const relevantBillings = billingData.data.filter(bill => {
+                const billRoomSet = new Set(bill.roomNo);
+                return guestToDelete.roomNumbers.some(roomNum =>
+                    billRoomSet.has(roomNum.toString()) && bill.Bill_Paid === 'no'
+                );
+            });
+
+            // Process each billing record
+            for (const billing of relevantBillings) {
+
+                // If billing has only one room, mark it as cancelled
+                await fetch(`/api/Billing/${billing._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Cancelled: "yes",
+                        dueAmount: 0
+                    })
+                });
+            }
+
+            // Update room status for each room
+            for (const roomNumber of guestToDelete.roomNumbers) {
+                // Get room details
+                console.log('Room number:', roomNumber);
+                const roomsResponse = await fetch('/api/rooms');
+                const roomsData = await roomsResponse.json();
+
+                if (!roomsData.success) {
+                    throw new Error('Failed to fetch rooms data');
+                }
+
+                const room = roomsData.data.find(r => r.number === roomNumber.toString());
+                if (!room) continue;
+                console.log('Room:', room);
+                // Get current room data
+                const roomResponse = await fetch(`/api/rooms/${room._id}`);
+                const roomData = await roomResponse.json();
+                const currentRoomData = roomData.data;
+                // Find position of current billing ID
+                const guestPosition = currentRoomData.guestWaitlist.findIndex(
+                    (guestId) => guestId._id.toString() === deleteGuestId.toString()
+                );
+                console.log('Guest position:', guestPosition);
+                // Find position of current billing ID
+                const currentBilling = relevantBillings.find(bill =>
+                    bill.roomNo.includes(roomNumber.toString())
+                );
+                console.log('Current billing:', currentBilling);
+                if (!currentBilling) continue;
+
+                const currentPosition = currentRoomData.billWaitlist.findIndex(
+                    (billId) => billId._id.toString() === currentBilling._id.toString()
+                );
+
+                // Prepare update data
+                let updateData = {
+                    billWaitlist: currentRoomData.billWaitlist,
+                    guestWaitlist: currentRoomData.guestWaitlist,
+                    checkInDateList: currentRoomData.checkInDateList,
+                    checkOutDateList: currentRoomData.checkOutDateList,
+                };
+                console.log('Current position:', currentPosition);
+                console.log('Current room data:', currentRoomData.billWaitlist.length);
+                // Check if there's a next booking
+                const hasNextBooking = guestPosition < currentRoomData.billWaitlist.length - 1;
+                if (hasNextBooking) {
+                    console.log('Next booking found');
+                    updateData = {
+                        ...updateData,
+                        currentBillingId: currentRoomData.billWaitlist[currentPosition + 1],
+                        currentGuestId: currentRoomData.guestWaitlist[currentPosition + 1],
+                        occupied: "Vacant",
+                        clean: true,
+                        billingStarted: "No"
+                    };
+                } else {
+                    updateData = {
+                        ...updateData,
+                        currentBillingId: null,
+                        currentGuestId: null,
+                        occupied: "Vacant",
+                        clean: true,
+                        billingStarted: "No"
+                    };
+                }
+
+                console.log('Update data:', updateData);
+
+                // Update room with new data
+                await fetch(`/api/rooms/${room._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+            }
+
+            // Update local state
             setGuests(guests.filter((guest) => guest._id !== deleteGuestId));
             setOpenDeleteDialog(false);
+            alert('Guest booking cancelled and deleted successfully!');
+
         } catch (error) {
             console.error('Error deleting guest:', error);
+            alert('Error deleting guest: ' + error.message);
         } finally {
             setIsLoading(false);
         }
@@ -254,11 +379,11 @@ useEffect(() => {
                             )
                         );
                         console.log('Room prices:', roomPrices);
-                    
+
                         // Calculate total for totalAmount and dueAmount
                         const totalNewRoomPrice = roomPrices.reduce((sum, price) => sum + price, 0);
                         console.log('Total new room price:', totalNewRoomPrice);
-                    
+
                         // Update billing with individual room prices in priceList
                         const updatedBilling = {
                             ...billing,
@@ -266,9 +391,9 @@ useEffect(() => {
                             totalAmount: totalNewRoomPrice,
                             dueAmount: totalNewRoomPrice
                         };
-                    
+
                         console.log('Updated billing:', updatedBilling);
-                    
+
                         // Update billing record
                         await fetch(`/api/Billing/${billing._id}`, {
                             method: 'PATCH',
@@ -320,13 +445,13 @@ useEffect(() => {
                                 // Create new checkOutDateList with updated date
                                 const updatedCheckOutDateList = [...room.checkOutDateList];
                                 updatedCheckOutDateList[dateIndex] = value;
-                    
+
                                 // Update the room with new checkOutDateList
                                 const updatedRoom = {
                                     ...room,
                                     checkOutDateList: updatedCheckOutDateList
                                 };
-                    
+
                                 // Send update to rooms API
                                 await fetch(`/api/rooms/${room._id}`, {
                                     method: 'PATCH',
@@ -404,10 +529,10 @@ useEffect(() => {
                                                 <TableCell>
                                                     <Tooltip title={guest.disableActions ? "Actions disabled for checked-out or cancelled bookings" : "Edit guest"}>
                                                         <span>
-                                                            <IconButton 
-                                                                color="primary" 
+                                                            <IconButton
+                                                                color="primary"
                                                                 onClick={() => handleEditClick(guest)}
-                                                                disabled={guest.disableActions}
+
                                                             >
                                                                 <Edit />
                                                             </IconButton>
@@ -415,10 +540,10 @@ useEffect(() => {
                                                     </Tooltip>
                                                     <Tooltip title={guest.disableActions ? "Actions disabled for checked-out or cancelled bookings" : "Delete guest"}>
                                                         <span>
-                                                            <IconButton 
-                                                                color="secondary" 
+                                                            <IconButton
+                                                                color="secondary"
                                                                 onClick={() => handleDeleteClick(guest._id)}
-                                                                disabled={guest.disableActions}
+
                                                             >
                                                                 <Delete />
                                                             </IconButton>
@@ -475,7 +600,7 @@ useEffect(() => {
                                 {/* CheckIn Date (Read-Only and Disabled) */}
                                 <TextField
                                     label="CheckIn Date"
-                                    value={editGuest.checkIn ? new Date(editGuest.checkIn).toISOString().split('T')[0] : ''}
+                                    value={editGuest.checkIn ? new Date(editGuest.checkIn).toLocaleDateString('en-GB') : ''}
                                     InputProps={{
                                         readOnly: true,
                                     }}
@@ -494,7 +619,6 @@ useEffect(() => {
                                         const checkInDate = new Date(editGuest.checkIn);
                                         const currentCheckoutDate = new Date(editGuest.checkOut);
                                         const newCheckoutDateObj = new Date(newCheckoutDate);
-
                                         // Validation: CheckOut Date must not be earlier than CheckIn Date
                                         if (newCheckoutDateObj < checkInDate) {
                                             alert("CheckOut Date cannot be earlier than CheckIn Date.");
