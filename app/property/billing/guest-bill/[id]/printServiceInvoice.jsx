@@ -297,18 +297,20 @@ const PrintableServiceInvoice = ({ billId }) => {
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ bgcolor: '#00bcd4' }}>
+                                <TableCell sx={{ color: 'white' }}>Room No.</TableCell>
                                     <TableCell sx={{ color: 'white' }}>Service</TableCell>
                                     <TableCell align="center" sx={{ color: 'white' }}>Quantity</TableCell>
-                                    <TableCell align="center" sx={{ color: 'white' }}>Tax(%)</TableCell>
+                                    <TableCell align="center" sx={{ color: 'white' }}>Tax</TableCell>
                                     <TableCell align="right" sx={{ color: 'white' }}>Total</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {serviceItems.map((service, index) => (
                                     <TableRow key={index}>
+                                        <TableCell>Room #{billing.roomNo[service.roomIndex]}</TableCell>
                                         <TableCell>{service.name}</TableCell>
                                         <TableCell align="center">{service.quantity}</TableCell>
-                                        <TableCell align="center">{service.tax}</TableCell>
+                                        <TableCell align="center">{service.tax}%</TableCell>
                                         <TableCell align="right">₹{(parseFloat(service.price) || 0).toFixed(2)}</TableCell>
                                     </TableRow>
                                 ))}
