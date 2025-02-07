@@ -314,8 +314,8 @@ const RoomCard = ({
         const updatedRoomList = currentRoomList.filter(
           (_, index) => index !== indexToRemove
         );
-        const response = await axios.put(
-          `/api/Billing/${id}`,
+        const response = await axios.patch(
+          `/api/Billing/${room.currentBillingId}`,
           {
             itemList: updatedItemList,
             priceList: updatedPriceList,
