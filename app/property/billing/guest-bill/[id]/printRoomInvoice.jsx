@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import HotelIcon from '@mui/icons-material/Hotel';
+import axios from 'axios';
 
 // Add print-specific styles
 const printStyles = `
@@ -37,6 +38,7 @@ const PrintableRoomInvoice = ({ billId }) => {
   const [bookingData, setBookingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [serviceItems, setServiceItems] = useState([]);
   const [profile, setProfile] = useState(null);
   const [isPaid, setIsPaid] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -44,6 +46,12 @@ const PrintableRoomInvoice = ({ billId }) => {
   useEffect(() => {
     const fetchInvoiceData = async () => {
       try {
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("authToken="))
+          .split("=")[1];
+        const headers = { Authorization: `Bearer ${token}` };
+        console.log('billId', billId);
         // 1. First fetch billing details
         const [billingResponse, profileResponse] = await Promise.all([
           fetch(`/api/Billing/${billId}`),
@@ -58,6 +66,7 @@ const PrintableRoomInvoice = ({ billId }) => {
           profileResponse.json()
         ]);
         const billingData = billing.data;
+        console.log('billingData', billingData);
         // Set payment status
         setIsPaid(billingData.Bill_Paid?.toLowerCase() === 'yes');
         // Set cancellation status
@@ -65,68 +74,108 @@ const PrintableRoomInvoice = ({ billId }) => {
         // 2. Fetch and find matched room
         const roomsResponse = await fetch("/api/rooms");
         const roomsData = await roomsResponse.json();
-        const matchedRoom = roomsData.data.find(
-          (room) => room.number === billingData.roomNo
+        console.log('roomsData', roomsData.data);
+        const matchedRooms = roomsData.data.filter((room) =>
+          billingData.roomNo.includes(String(room.number))
         );
 
-        if (!matchedRoom) {
+        console.log('matchedRooms', matchedRooms);
+
+        if (!matchedRooms) {
           throw new Error("No matching room found");
         }
 
-        // 3. Fetch bookings and match using currentGuestId
-        const bookingsResponse = await fetch('/api/NewBooking');
-        const bookingsData = await bookingsResponse.json()
-        let matchedBooking;
-        console.log('billingData', billingData);
-        if (billingData.Bill_Paid?.toLowerCase() === 'yes' || billingData.Cancelled?.toLowerCase() === 'yes') {
-          // For paid bills, find the booking using billWaitlist
-          const billIndex = matchedRoom.billWaitlist.findIndex(
-            billId => billId._id.toString() === billingData._id.toString()
-          );
-          console.log('billIndex', billIndex);
-          if (billIndex === -1) {
-            throw new Error('Billing ID not found in room\'s billWaitlist');
+        // Fetch bookings
+        const newBookingsResponse = await axios.get("/api/NewBooking", {
+          headers,
+        });
+        // Find bookings for all rooms
+        const matchedBookings = await Promise.all(matchedRooms.map(async (room) => {
+          if (billingData.Bill_Paid === "yes" || billingData.Cancelled === "yes") {
+            const currentBillIndex = room.billWaitlist.findIndex(
+              (billId) => billId._id.toString() === billingData._id.toString()
+            );
+
+            if (currentBillIndex === -1) {
+              return null;
+            }
+
+            const correspondingGuestId = room.guestWaitlist[currentBillIndex];
+            return newBookingsResponse.data.data.find(
+              (booking) => booking._id === correspondingGuestId._id.toString()
+            );
+          } else {
+            return newBookingsResponse.data.data.find(
+              (booking) => booking._id === room.currentGuestId
+            );
           }
+        }));
 
-          // Get the corresponding guest ID from guestWaitlist
-          const guestId = matchedRoom.guestWaitlist[billIndex];
+        console.log('matchedBookings', matchedBookings);
 
-          // Find the booking that matches this guest ID
-          matchedBooking = bookingsData.data.find(b => b._id === guestId._id);
-          console.log('booking', matchedBooking);
-        } else {
-          // For unpaid bills, use currentGuestId
-          matchedBooking = bookingsData.data.find(b => b._id === matchedRoom.currentGuestId);
-        }
-
-
-        if (!matchedBooking) {
+        if (!matchedBookings) {
           throw new Error("No matching booking found");
         }
 
-        // 4. Fetch room category details
-        const roomCategoriesResponse = await fetch("/api/roomCategories");
-        const roomCategoriesData = await roomCategoriesResponse.json();
-        const matchedCategory = roomCategoriesData.data.find(
-          (category) => category._id === matchedRoom.category._id
+        // Filter out duplicates and null values
+        const uniqueBookings = Array.from(
+          new Set(matchedBookings.filter(booking => booking).map(JSON.stringify))
+        ).map(JSON.parse);
+        console.log("uniqueBookings", uniqueBookings);
+
+        // Fetch room categories
+        const roomCategoriesResponse = await axios.get("/api/roomCategories", {
+          headers,
+        });
+
+        // Get categories for all matched rooms
+        const matchedCategories = matchedRooms.map(room =>
+          roomCategoriesResponse.data.data.find(
+            category => category._id === room.category._id
+          )
         );
 
-        // 5. Extract room charge service from billing data
-        const roomService = billingData.itemList
-          .map((item, index) => ({
-            name: item,
-            price: billingData.priceList[index],
-            tax: billingData.taxList[index],
-            quantity: billingData.quantityList[index]
-          }))
-          .filter(service => service.name === 'Room Charge');
+        // Fetch menu items for comparison
+        const menuResponse = await axios.get("/api/menuItem", { headers });
+        const menuItemsList = menuResponse.data.data;
+
+        // Fetch billing details
+        console.log("billingData", billingData.itemList);
+
+        // Process existing items
+        const existingServices = billingData.itemList || [];
+        const existingPrices = billingData.priceList || [];
+        const existingTaxes = billingData.taxList || [];
+        const existingQuantities = billingData.quantityList || [];
+
+        const serviceItemsArray = [];
+
+        existingServices.forEach((roomServices, roomIndex) => {
+          const roomPrices = existingPrices[roomIndex] || [];
+          const roomTaxes = existingTaxes[roomIndex] || [];
+          const roomQuantities = existingQuantities[roomIndex] || [];
+
+          roomServices.forEach((item, itemIndex) => {
+            const itemDetails = {
+              name: item,
+              price: roomPrices[itemIndex] || 0,
+              quantity: roomQuantities[itemIndex] || 1,
+              tax: roomTaxes[itemIndex] || 0,
+              roomIndex: roomIndex,
+            };
+            if (item === "Room Charge") {
+              serviceItemsArray.push(itemDetails);
+            }
+          });
+        });
+        setServiceItems(serviceItemsArray);
+        console.log("serviceItemsArray", serviceItemsArray);
 
         setBookingData({
           billing: billingData,
-          booking: matchedBooking,
-          room: matchedRoom,
-          category: matchedCategory,
-          services: roomService
+          booking: uniqueBookings[0],
+          room: matchedRooms,
+          category: matchedCategories,
         });
         setProfile(profileData.data[0]);
         setLoading(false);
@@ -191,8 +240,10 @@ const PrintableRoomInvoice = ({ billId }) => {
   const formattedDate = currentDate.toLocaleDateString('en-GB');
   const formattedTime = currentDate.toLocaleTimeString();
 
-  const totalServicesAmount = services.reduce((total, service) => total + service.price, 0);
-  const serviceTax = services.reduce((tax, service) => tax + service.tax, 0);
+  const totalServicesAmount = serviceItems.reduce((total, service) => total + service.price, 0);
+  console.log('totalServicesAmount', totalServicesAmount);
+  const serviceTax = serviceItems.reduce((tax, service) => tax + service.tax, 0);
+  console.log('serviceTax', serviceTax);
 
   return (
     <>
@@ -267,19 +318,23 @@ const PrintableRoomInvoice = ({ billId }) => {
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#00bcd4' }}>
-                  <TableCell sx={{ color: 'white' }}>Date</TableCell>
-                  <TableCell sx={{ color: 'white' }}>Room Details</TableCell>
+                  <TableCell align="left" sx={{ color: 'white' }}>Date</TableCell>
+                  <TableCell align='center' sx={{ color: 'white' }}>Room Details</TableCell>
+                  <TableCell align='center' sx={{ color: 'white' }}>Room Tax</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Amount</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell>{new Date(booking.checkIn).toLocaleDateString('en-GB')}</TableCell>
-                  <TableCell>
-                    Room #{billing.roomNo} - {room.category.category}
-                  </TableCell>
-                  <TableCell align="right">₹{category.total.toFixed(2)}</TableCell>
-                </TableRow>
+                {billing.roomNo.map((roomNumber, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{new Date(bookingData.booking.checkIn).toLocaleDateString("en-GB")}</TableCell>
+                    <TableCell align="center">
+                      Room #{roomNumber} - {bookingData.room[index].category.category}
+                    </TableCell>
+                    <TableCell align="center">{billing.taxList[index][0].toFixed(2)}%</TableCell>
+                    <TableCell align="right">₹{billing.priceList[index][0].toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>

@@ -133,11 +133,6 @@ const BookingDashboard = () => {
         const existingTaxes = billingData.taxList || [];
         const existingQuantities = billingData.quantityList || [];
 
-        console.log("existingServices", existingServices);
-        console.log("existingPrices", existingPrices);
-        console.log("existingTaxes", existingTaxes);
-        console.log("existingQuantities", existingQuantities);
-
         // Separate food and service items
         const foodItemsArray = [];
         const serviceItemsArray = [];
@@ -167,9 +162,6 @@ const BookingDashboard = () => {
             }
           });
         });
-
-        console.log("foodItemsArray", foodItemsArray);
-        console.log("serviceItemsArray", serviceItemsArray);
 
         setFoodItems(foodItemsArray);
         setServiceItems(serviceItemsArray);
