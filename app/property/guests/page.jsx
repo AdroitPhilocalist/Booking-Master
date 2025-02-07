@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Button, TextField } from '@mui/material';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 import Navbar from "../../_components/Navbar";
 import { Footer } from "../../_components/Footer";
@@ -46,64 +46,71 @@ export default function GuestList() {
         fetchRoomCategories();
     }, []);
 
-    // Fetch guest data and filter for most recent entries per mobile number
-    useEffect(() => {
-        const fetchGuests = async () => {
-            try {
-                setIsLoading(true);
-                const token = getCookie('authToken'); // Get the token from cookies
-                if (!token) {
-                    router.push('/'); // Redirect to login if no token is found
-                    return;
-                }
-                // Verify the token
-                const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-                const userId = decoded.payload.id;
-                // Fetch the profile by userId to get the username
-                const profileResponse = await fetch(`/api/Profile/${userId}`);
-                const profileData = await profileResponse.json();
-                console.log(profileData);
-                if (!profileData.success || !profileData.data) {
-                    router.push('/'); // Redirect to login if profile not found
-                    return;
-                }
-                const username = profileData.data.username;
-                const response = await fetch(`/api/NewBooking?username=${username}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    // Create a map to store the most recent guest for each mobile number
-                    const guestMap = new Map();
-
-                    // Sort guests by creation date (assuming there's a createdAt field)
-                    // If there's no createdAt field, you might need to modify this logic
-                    const sortedGuests = [...data.data].sort((a, b) => {
-                        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-                    });
-
-                    // Keep only the most recent guest for each mobile number
-                    sortedGuests.forEach(guest => {
-                        if (!guestMap.has(guest.mobileNo)) {
-                            guestMap.set(guest.mobileNo, guest);
-                        }
-                    });
-
-                    // Convert map values back to array
-                    const filteredGuests = Array.from(guestMap.values());
-                    console.log(filteredGuests);
-                    setGuests(filteredGuests);
-                } else {
-                    setError('Failed to load guest data');
-                }
-            } catch (err) {
-                setError('Error fetching guests');
-            } finally {
-                setIsLoading(false);
+// Modified useEffect for fetching guests
+useEffect(() => {
+    const fetchGuests = async () => {
+        try {
+            setIsLoading(true);
+            const token = getCookie('authToken');
+            if (!token) {
+                router.push('/');
+                return;
             }
-        };
 
-        fetchGuests();
-    }, []);
+            const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+            const userId = decoded.payload.id;
+
+            const profileResponse = await fetch(`/api/Profile/${userId}`);
+            const profileData = await profileResponse.json();
+            if (!profileData.success || !profileData.data) {
+                router.push('/');
+                return;
+            }
+            const username = profileData.data.username;
+
+            // Fetch guest data
+            const response = await fetch(`/api/NewBooking?username=${username}`);
+            const data = await response.json();
+
+            if (data.success) {
+                // Fetch all billing data
+                const billingResponse = await fetch('/api/Billing');
+                const billingData = await billingResponse.json();
+
+                const guestMap = new Map();
+                const sortedGuests = [...data.data].sort((a, b) => {
+                    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                });
+
+                sortedGuests.forEach(guest => {
+                    if (!guestMap.has(guest.mobileNo)) {
+                        // Check if the guest is checked out or has a cancelled bill
+                        const isCancelled = billingData.success && billingData.data.some(bill => {
+                            const billRoomSet = new Set(bill.roomNo);
+                            const hasMatchingRoom = guest.roomNumbers.some(roomNum =>
+                                billRoomSet.has(roomNum.toString())
+                            );
+                            return hasMatchingRoom && bill.Cancelled === 'yes';
+                        });
+                        console.log('Guest:', guest.CheckedOut);
+                        // Add a flag to indicate if edit/delete should be disabled
+                        guest.disableActions = guest.CheckedOut === true || isCancelled;
+                        guestMap.set(guest.mobileNo, guest);
+                    }
+                });
+
+                setGuests(Array.from(guestMap.values()));
+            } else {
+                setError('Failed to load guest data');
+            }
+        } catch (err) {
+            setError('Error fetching guests');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchGuests();
+}, []);
 
     // Handle delete button click
     const handleDeleteClick = (id) => {
@@ -390,19 +397,33 @@ export default function GuestList() {
                                     <TableBody>
                                         {guests.map((guest) => (
                                             <TableRow key={guest._id}>
-                                                <TableCell component="th" style={{}}>
-                                                    {guest.guestName}
-                                                </TableCell>
-                                                <TableCell style={{}}>{guest.mobileNo}</TableCell>
-                                                <TableCell style={{}}>{guest.guestEmail || 'N/A'}</TableCell>
-                                                <TableCell style={{}}>{guest.address}</TableCell>
+                                                <TableCell component="th">{guest.guestName}</TableCell>
+                                                <TableCell>{guest.mobileNo}</TableCell>
+                                                <TableCell>{guest.guestEmail || 'N/A'}</TableCell>
+                                                <TableCell>{guest.address}</TableCell>
                                                 <TableCell>
-                                                    <IconButton color="primary" onClick={() => handleEditClick(guest)}>
-                                                        <Edit />
-                                                    </IconButton>
-                                                    <IconButton color="secondary" onClick={() => handleDeleteClick(guest._id)}>
-                                                        <Delete />
-                                                    </IconButton>
+                                                    <Tooltip title={guest.disableActions ? "Actions disabled for checked-out or cancelled bookings" : "Edit guest"}>
+                                                        <span>
+                                                            <IconButton 
+                                                                color="primary" 
+                                                                onClick={() => handleEditClick(guest)}
+                                                                disabled={guest.disableActions}
+                                                            >
+                                                                <Edit />
+                                                            </IconButton>
+                                                        </span>
+                                                    </Tooltip>
+                                                    <Tooltip title={guest.disableActions ? "Actions disabled for checked-out or cancelled bookings" : "Delete guest"}>
+                                                        <span>
+                                                            <IconButton 
+                                                                color="secondary" 
+                                                                onClick={() => handleDeleteClick(guest._id)}
+                                                                disabled={guest.disableActions}
+                                                            >
+                                                                <Delete />
+                                                            </IconButton>
+                                                        </span>
+                                                    </Tooltip>
                                                 </TableCell>
                                             </TableRow>
                                         ))}

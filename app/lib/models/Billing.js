@@ -51,7 +51,7 @@ const BillingSchema = new mongoose.Schema({
     }
   },
   Bill_Paid: { type: String, enum: ['yes', 'no'], default: 'no' },
-  Cancelled: { type: [String], enum: ['yes', 'no'], default: 'no' },
+  Cancelled: { type: String, enum: ['yes', 'no'], default: 'no' },
   DateOfPayment: { type: [Date], default: [] },
   ModeOfPayment: {
     type: [String],
