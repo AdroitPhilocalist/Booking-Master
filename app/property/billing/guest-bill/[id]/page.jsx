@@ -726,7 +726,7 @@ const BookingDashboard = () => {
                 disabled:
                   billing.Bill_Paid === "yes" ||
                   billing.Cancelled === "yes" ||
-                  new Date(bookingData.bookings[0].checkIn) > new Date(),
+                  new Date(bookingData.bookings[0].checkIn).toLocaleDateString("en-GB") > new Date().toLocaleDateString("en-GB"),
               },
               {
                 label: "Add Food",
@@ -736,7 +736,7 @@ const BookingDashboard = () => {
                 disabled:
                   billing.Bill_Paid === "yes" ||
                   billing.Cancelled === "yes" ||
-                  new Date(bookingData.bookings[0].checkIn) > new Date(),
+                  new Date(bookingData.bookings[0].checkIn).toLocaleDateString("en-GB") > new Date().toLocaleDateString("en-GB"),
               },
               {
                 label: "Bill Payment",
@@ -749,7 +749,7 @@ const BookingDashboard = () => {
                 disabled:
                   remainingDueAmount <= 0 ||
                   billing.Cancelled === "yes" ||
-                  new Date(bookingData.bookings[0].checkIn) > new Date(),
+                  new Date(bookingData.bookings[0].checkIn).toLocaleDateString("en-GB") > new Date().toLocaleDateString("en-GB"),
               },
             ].map((btn, index) => (
               <Button
@@ -908,7 +908,7 @@ const BookingDashboard = () => {
                 remainingDueAmount > 0 ||
                 billing.Bill_Paid === "yes" ||
                 billing.Cancelled === "yes" ||
-                new Date(bookingData.bookings[0].checkIn) > new Date()
+                new Date(bookingData.bookings[0].checkIn).toLocaleDateString("en-GB") > new Date().toLocaleDateString("en-GB")
               }
               onClick={handleCompletePayment}
             >
