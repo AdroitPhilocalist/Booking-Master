@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import axios from 'axios';
 
 const printStyles = `
   @media print {
@@ -42,113 +43,164 @@ const PrintableFoodInvoice = ({ billId }) => {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [invoiceData, setInvoiceData] = useState(null);
   const [error, setError] = useState(null);
+  const [services, setServices] = useState([]);
   const [isPaid, setIsPaid] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [foodItems, setFoodItems] = useState([]);
+  const [serviceItems, setServiceItems] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+
+  // Fetch menu items
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("authToken="))
+          .split("=")[1];
+        const headers = { Authorization: `Bearer ${token}` };
+        const menuResponse = await axios.get("/api/menuItem", { headers });
+        setMenuItems(menuResponse.data.data);
+      } catch (err) {
+        console.error("Error fetching menu items:", err);
+      }
+    };
+    fetchMenuItems();
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInvoiceData = async () => {
       try {
-        // Fetch all required data in parallel
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("authToken="))
+          .split("=")[1];
+        const headers = { Authorization: `Bearer ${token}` };
+        console.log('billId', billId);
+
+        // Fetch menu items for comparison
+        const menuResponse = await axios.get("/api/menuItem", { headers });
+        const menuItemsList = menuResponse.data.data;
+        // 1. First fetch billing details
         const [billingResponse, profileResponse] = await Promise.all([
           fetch(`/api/Billing/${billId}`),
           fetch('/api/Profile')
         ]);
-
         if (!billingResponse.ok || !profileResponse.ok) {
           throw new Error('Failed to fetch data');
         }
-
-        const [billingData, profileData] = await Promise.all([
+        const [billing, profileData] = await Promise.all([
           billingResponse.json(),
           profileResponse.json()
         ]);
 
-        console.log(billingData);
-        console.log(profileData);
-        const billing = billingData.data;
+        const billingData = billing.data;
         // Set payment status
-        setIsPaid(billing.Bill_Paid?.toLowerCase() === 'yes');
-        setIsCancelled(billing.Cancelled?.toLowerCase() === 'yes');
-        // Filter only food items from billing data
-        const menuResponse = await fetch('/api/menuItem');
-        const menuData = await menuResponse.json();
-        const menuItems = menuData.data;
+        setIsPaid(billingData.Bill_Paid?.toLowerCase() === 'yes');
+        // Set cancellation status
+        setIsCancelled(billingData.Cancelled?.toLowerCase() === 'yes');
 
-        const foodItems = billingData.data.itemList
-          .map((item, index) => {
-            const menuItem = menuItems.find(menu => menu.itemName === item);
-            if (menuItem) {
-              return {
-                name: item,
-                quantity: billingData.data.quantityList[index],
-                price: billingData.data.priceList[index],
-                tax: billingData.data.taxList[index]
-              };
-            }
-            return null;
-          })
-          .filter(item => item !== null);
-
-        // Get booking details
+        // 2. Fetch booking details using room number from billing
         const bookingsResponse = await fetch('/api/NewBooking');
         const bookingsData = await bookingsResponse.json();
         const roomsResponse = await fetch('/api/rooms');
         const roomsData = await roomsResponse.json();
-        console.log(bookingsData);
-        const matchedRoom = roomsData.data.find(room => room.number === billing.roomNo);
-        let booking;
+        console.log('roomsData', roomsData.data);
+        console.log('billingData', billingData);
+        const matchedRooms = roomsData.data.filter((room) =>
+          billingData.roomNo.includes(String(room.number))
+        );
+        console.log('matchedRooms', matchedRooms);
 
-                if (billing.Bill_Paid?.toLowerCase() === 'yes' || billing.Cancelled?.toLowerCase() === 'yes') {
-                    // For paid bills, find the booking using billWaitlist
-                    const billIndex = matchedRoom.billWaitlist.findIndex(
-                        billId => billId._id.toString() === billing._id.toString()
-                    );
+        if (!matchedRooms) {
+          throw new Error("No matching room found");
+        }
+        // Fetch bookings
+        const newBookingsResponse = await axios.get("/api/NewBooking", {
+          headers,
+        });
+        // Find bookings for all rooms
+        const matchedBookings = await Promise.all(matchedRooms.map(async (room) => {
+          if (billingData.Bill_Paid === "yes" || billingData.Cancelled === "yes") {
+            const currentBillIndex = room.billWaitlist.findIndex(
+              (billId) => billId._id.toString() === billingData._id.toString()
+            );
 
-                    if (billIndex === -1) {
-                        throw new Error('Billing ID not found in room\'s billWaitlist');
-                    }
+            if (currentBillIndex === -1) {
+              return null;
+            }
 
-                    // Get the corresponding guest ID from guestWaitlist
-                    const guestId = matchedRoom.guestWaitlist[billIndex];
+            const correspondingGuestId = room.guestWaitlist[currentBillIndex];
+            return newBookingsResponse.data.data.find(
+              (booking) => booking._id === correspondingGuestId._id.toString()
+            );
+          } else {
+            return newBookingsResponse.data.data.find(
+              (booking) => booking._id === room.currentGuestId
+            );
+          }
+        }));
 
-                    // Find the booking that matches this guest ID
-                    booking = bookingsData.data.find(b => b._id === guestId._id);
-                } else {
-                    // For unpaid bills, use currentGuestId
-                    booking = bookingsData.data.find(b => b._id === matchedRoom.currentGuestId);
-                }
+        console.log('matchedBookings', matchedBookings);
 
-        console.log(booking);
-        // Prepare invoice data
-        const invoiceData = {
-          invoiceno: booking.bookingId,
-          custname: booking.guestName,
-          custphone: booking.mobileNo,
-          date: new Date(),
-          time: new Date().toLocaleTimeString(),
-          menuitem: foodItems.map(item => item.name),
-          quantity: foodItems.map(item => item.quantity),
-          price: foodItems.map(item => item.price / item.quantity), // Unit price
-          tax: foodItems.map(item => item.tax),
-          gst: foodItems.reduce((sum, item) => sum + item.tax, 0),
-          payableamt: foodItems.reduce((sum, item) => sum + item.price + (item.price * item.tax / 100), 0),
-          gstin: booking.gstin
-        };
+        if (!matchedBookings) {
+          throw new Error("No matching booking found");
+        }
 
-        setInvoice(invoiceData);
+
+        // Process existing items
+        const existingServices = billingData.itemList || [];
+        const existingPrices = billingData.priceList || [];
+        const existingTaxes = billingData.taxList || [];
+        const existingQuantities = billingData.quantityList || [];
+
+        // Separate food and service items
+        const foodItemsArray = [];
+        const serviceItemsArray = [];
+
+        existingServices.forEach((roomServices, roomIndex) => {
+          const roomPrices = existingPrices[roomIndex] || [];
+          const roomTaxes = existingTaxes[roomIndex] || [];
+          const roomQuantities = existingQuantities[roomIndex] || [];
+
+          roomServices.forEach((item, itemIndex) => {
+            const menuItem = menuItemsList.find(
+              (menuItem) => menuItem.itemName === item
+            );
+
+            const itemDetails = {
+              name: item,
+              price: roomPrices[itemIndex] || 0,
+              quantity: roomQuantities[itemIndex] || 1,
+              tax: roomTaxes[itemIndex] || 0,
+              roomIndex: roomIndex,
+            };
+
+            if (menuItem) {
+              foodItemsArray.push(itemDetails);
+            } else if (item !== "Room Charge") {
+              serviceItemsArray.push(itemDetails);
+            }
+          });
+        });
+
+        setFoodItems(foodItemsArray);
+        setServiceItems(serviceItemsArray);
+        setServices([...serviceItemsArray, ...foodItemsArray]);
+
+        setServices(serviceItems);
+        setInvoiceData({ billing: billingData, booking: matchedBookings[0] });
         setProfile(profileData.data[0]);
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
-        console.error('Error fetching data:', err);
       }
     };
 
-    if (billId) {
-      fetchData();
-    }
+    fetchInvoiceData();
   }, [billId]);
 
   const handlePrint = () => {
@@ -175,25 +227,15 @@ const PrintableFoodInvoice = ({ billId }) => {
     );
   }
 
-  if (!invoice) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <Typography variant="h6">No invoice found</Typography>
-      </Box>
-    );
-  }
+  const { booking, billing } = invoiceData;
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString('en-GB');
+  const formattedTime = currentDate.toLocaleTimeString();
 
-  // Prepare items with correct attributes for display
-  const preparedItems = invoice.menuitem.map((item, index) => ({
-    name: item,
-    qty: invoice.quantity[index],
-    rate: invoice.price[index],
-    gst: invoice.tax[index],
-    amount: invoice.quantity[index] * invoice.price[index]
-  }));
 
-  // Calculate subtotal from items
-  const subtotal = preparedItems.reduce((total, item) => total + item.amount, 0);
+  // Calculate total services amount
+  const totalServicesAmount = foodItems.reduce((total, service) => total + service.price, 0);
+  const serviceTax = foodItems.reduce((tax, service) => tax + service.tax, 0);
 
   return (
     <>
@@ -234,29 +276,32 @@ const PrintableFoodInvoice = ({ billId }) => {
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#00bcd4' }}>
-                Food Invoice
+                Service Invoice
               </Typography>
               <Typography variant="body1" color="textSecondary">
-                #{invoice.invoiceno}
+                #{booking.bookingId}
               </Typography>
             </Grid>
           </Grid>
 
           <Divider sx={{ my: 3 }} />
 
+          {/* Guest Details */}
           <Grid container spacing={2} sx={{ mb: 4 }}>
             <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Bill To:</Typography>
-              <Typography variant="body1">{invoice.custname}</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Guest Details:</Typography>
+              <Typography variant="body1">{booking.guestName}</Typography>
               <Typography variant="body2" color="textSecondary">
-                Phone: +91 {invoice.custphone}
+                Phone: +91 {booking.mobileNo}
               </Typography>
-              <Typography variant="body1">Customer GST No.: {invoice.gstin}</Typography>
+              <Typography variant="body1">Customer GST No.: {booking.gstin}</Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Invoice Date:</Typography>
-              <Typography variant="body1">{new Date(invoice.date).toLocaleDateString()}</Typography>
-              <Typography variant="body1" color="textSecondary">Time: {invoice.time}</Typography>
+              <Typography variant="body1">{formattedDate}</Typography>
+              <Typography variant="body1" color="textSecondary">
+                Time: {formattedTime}
+              </Typography>
             </Grid>
           </Grid>
 
@@ -264,42 +309,43 @@ const PrintableFoodInvoice = ({ billId }) => {
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#00bcd4' }}>
+                  <TableCell sx={{ color: 'white' }}>Room No.</TableCell>
                   <TableCell sx={{ color: 'white' }}>Item</TableCell>
                   <TableCell align="center" sx={{ color: 'white' }}>Quantity</TableCell>
-                  <TableCell align="center" sx={{ color: 'white' }}>Tax(%)</TableCell>
+                  <TableCell align="center" sx={{ color: 'white' }}>Tax</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Amount</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {preparedItems.map((item, index) => (
+                {foodItems.map((item, index) => (
                   <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell>Room #{billing.roomNo[item.roomIndex]}</TableCell>
                     <TableCell>{item.name}</TableCell>
-                    <TableCell align="center">{item.qty}</TableCell>
-                    <TableCell align="center">{item.gst}</TableCell>
-                    <TableCell align="right">₹{item.amount.toFixed(2)}</TableCell>
+                    <TableCell align="center">{item.quantity}</TableCell>
+                    <TableCell align="center">{item.tax}%</TableCell>
+                    <TableCell align="right">₹{(parseFloat(item.price) || 0).toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
 
+          {/* Total Calculation */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             <Box sx={{ width: '250px' }}>
               <Grid container spacing={1}>
                 <Grid item xs={6}>
-                  <Typography variant="body1">Subtotal:</Typography>
                   <Typography variant="body1">IGST:</Typography>
                   <Typography variant="body1">CGST:</Typography>
                   <Typography variant="body1">SGST:</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                  <Typography variant="body1">₹{subtotal.toFixed(2)}</Typography>
-                  <Typography variant="body1">{invoice.gst.toFixed(2)}%</Typography>
-                  <Typography variant="body1">{(invoice.gst / 2).toFixed(2)}%</Typography>
-                  <Typography variant="body1">{(invoice.gst / 2).toFixed(2)}%</Typography>
+                  <Typography variant="body1">{serviceTax.toFixed(2)}%</Typography>
+                  <Typography variant="body1">{(serviceTax / 2).toFixed(2)}%</Typography>
+                  <Typography variant="body1">{(serviceTax / 2).toFixed(2)}%</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>
-                    ₹{invoice.payableamt.toFixed(2)}
+                    ₹{totalServicesAmount.toFixed(2)}
                   </Typography>
                 </Grid>
               </Grid>
@@ -335,7 +381,7 @@ const PrintableFoodInvoice = ({ billId }) => {
               />
             </Box>
           )}
-          
+
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="body2" color="textSecondary" sx={{ mb: 2, textAlign: 'center' }}>
