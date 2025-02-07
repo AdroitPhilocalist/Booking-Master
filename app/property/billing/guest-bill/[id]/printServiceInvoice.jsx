@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Divider, Grid } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import axios from 'axios';
 
 // Add print-specific styles
 const printStyles = `
@@ -35,10 +36,41 @@ const PrintableServiceInvoice = ({ billId }) => {
     const [services, setServices] = useState([]);
     const [isPaid, setIsPaid] = useState(false);
     const [isCancelled, setIsCancelled] = useState(false);
+    const [foodItems, setFoodItems] = useState([]);
+    const [serviceItems, setServiceItems] = useState([]);
+    const [menuItems, setMenuItems] = useState([]);
+
+    // Fetch menu items
+    useEffect(() => {
+        const fetchMenuItems = async () => {
+            try {
+                const token = document.cookie
+                    .split("; ")
+                    .find((row) => row.startsWith("authToken="))
+                    .split("=")[1];
+                const headers = { Authorization: `Bearer ${token}` };
+                const menuResponse = await axios.get("/api/menuItem", { headers });
+                setMenuItems(menuResponse.data.data);
+            } catch (err) {
+                console.error("Error fetching menu items:", err);
+            }
+        };
+        fetchMenuItems();
+    }, []);
 
     useEffect(() => {
         const fetchInvoiceData = async () => {
             try {
+                const token = document.cookie
+                    .split("; ")
+                    .find((row) => row.startsWith("authToken="))
+                    .split("=")[1];
+                const headers = { Authorization: `Bearer ${token}` };
+                console.log('billId', billId);
+
+                // Fetch menu items for comparison
+                const menuResponse = await axios.get("/api/menuItem", { headers });
+                const menuItemsList = menuResponse.data.data;
                 // 1. First fetch billing details
                 const [billingResponse, profileResponse] = await Promise.all([
                     fetch(`/api/Billing/${billId}`),
@@ -47,63 +79,107 @@ const PrintableServiceInvoice = ({ billId }) => {
                 if (!billingResponse.ok || !profileResponse.ok) {
                     throw new Error('Failed to fetch data');
                 }
-                const [billingData, profileData] = await Promise.all([
+                const [billing, profileData] = await Promise.all([
                     billingResponse.json(),
                     profileResponse.json()
                 ]);
 
-                const billing = billingData.data;
+                const billingData = billing.data;
                 // Set payment status
-                setIsPaid(billing.Bill_Paid?.toLowerCase() === 'yes');
-                setIsCancelled(billing.Cancelled?.toLowerCase() === 'yes');
+                setIsPaid(billingData.Bill_Paid?.toLowerCase() === 'yes');
+                // Set cancellation status
+                setIsCancelled(billingData.Cancelled?.toLowerCase() === 'yes');
 
                 // 2. Fetch booking details using room number from billing
                 const bookingsResponse = await fetch('/api/NewBooking');
                 const bookingsData = await bookingsResponse.json();
                 const roomsResponse = await fetch('/api/rooms');
                 const roomsData = await roomsResponse.json();
+                console.log('roomsData', roomsData.data);
+                console.log('billingData', billingData);
+                const matchedRooms = roomsData.data.filter((room) =>
+                    billingData.roomNo.includes(String(room.number))
+                );
+                console.log('matchedRooms', matchedRooms);
 
-                // Find the room and then the booking
-                const matchedRoom = roomsData.data.find(room => room.number === billing.roomNo);
-                let booking;
+                if (!matchedRooms) {
+                    throw new Error("No matching room found");
+                }
+                // Fetch bookings
+                const newBookingsResponse = await axios.get("/api/NewBooking", {
+                    headers,
+                });
+                // Find bookings for all rooms
+                const matchedBookings = await Promise.all(matchedRooms.map(async (room) => {
+                    if (billingData.Bill_Paid === "yes" || billingData.Cancelled === "yes") {
+                        const currentBillIndex = room.billWaitlist.findIndex(
+                            (billId) => billId._id.toString() === billingData._id.toString()
+                        );
 
-                if (billing.Bill_Paid?.toLowerCase() === 'yes' || billing.Cancelled?.toLowerCase() === 'yes') {
-                    // For paid bills, find the booking using billWaitlist
-                    const billIndex = matchedRoom.billWaitlist.findIndex(
-                        billId => billId._id.toString() === billing._id.toString()
-                    );
+                        if (currentBillIndex === -1) {
+                            return null;
+                        }
 
-                    if (billIndex === -1) {
-                        throw new Error('Billing ID not found in room\'s billWaitlist');
+                        const correspondingGuestId = room.guestWaitlist[currentBillIndex];
+                        return newBookingsResponse.data.data.find(
+                            (booking) => booking._id === correspondingGuestId._id.toString()
+                        );
+                    } else {
+                        return newBookingsResponse.data.data.find(
+                            (booking) => booking._id === room.currentGuestId
+                        );
                     }
+                }));
 
-                    // Get the corresponding guest ID from guestWaitlist
-                    const guestId = matchedRoom.guestWaitlist[billIndex];
+                console.log('matchedBookings', matchedBookings);
 
-                    // Find the booking that matches this guest ID
-                    booking = bookingsData.data.find(b => b._id === guestId._id);
-                } else {
-                    // For unpaid bills, use currentGuestId
-                    booking = bookingsData.data.find(b => b._id === matchedRoom.currentGuestId);
+                if (!matchedBookings) {
+                    throw new Error("No matching booking found");
                 }
 
 
+                // Process existing items
+                const existingServices = billingData.itemList || [];
+                const existingPrices = billingData.priceList || [];
+                const existingTaxes = billingData.taxList || [];
+                const existingQuantities = billingData.quantityList || [];
 
-                // 3. Process services from billing data
-                const serviceItems = [];
-                billing.itemList.forEach((item, index) => {
-                    if (item !== 'Room Charge') {
-                        serviceItems.push({
+                // Separate food and service items
+                const foodItemsArray = [];
+                const serviceItemsArray = [];
+
+                existingServices.forEach((roomServices, roomIndex) => {
+                    const roomPrices = existingPrices[roomIndex] || [];
+                    const roomTaxes = existingTaxes[roomIndex] || [];
+                    const roomQuantities = existingQuantities[roomIndex] || [];
+
+                    roomServices.forEach((item, itemIndex) => {
+                        const menuItem = menuItemsList.find(
+                            (menuItem) => menuItem.itemName === item
+                        );
+
+                        const itemDetails = {
                             name: item,
-                            quantity: billing.quantityList[index] || 1,
-                            tax: billing.taxList[index] || 0,
-                            price: billing.priceList[index] || 0
-                        });
-                    }
+                            price: roomPrices[itemIndex] || 0,
+                            quantity: roomQuantities[itemIndex] || 1,
+                            tax: roomTaxes[itemIndex] || 0,
+                            roomIndex: roomIndex,
+                        };
+
+                        if (menuItem) {
+                            foodItemsArray.push(itemDetails);
+                        } else if (item !== "Room Charge") {
+                            serviceItemsArray.push(itemDetails);
+                        }
+                    });
                 });
 
+                setFoodItems(foodItemsArray);
+                setServiceItems(serviceItemsArray);
+                setServices([...serviceItemsArray, ...foodItemsArray]);
+
                 setServices(serviceItems);
-                setInvoiceData({ billing, booking });
+                setInvoiceData({ billing: billingData, booking: matchedBookings[0] });
                 setProfile(profileData.data[0]);
                 setLoading(false);
             } catch (err) {
@@ -145,8 +221,8 @@ const PrintableServiceInvoice = ({ billId }) => {
     const formattedTime = currentDate.toLocaleTimeString();
 
     // Calculate total services amount
-    const totalServicesAmount = services.reduce((total, service) => total + service.price, 0);
-    const serviceTax = services.reduce((tax, service) => tax + service.tax, 0);
+    const totalServicesAmount = serviceItems.reduce((total, service) => total + service.price, 0);
+    const serviceTax = serviceItems.reduce((tax, service) => tax + service.tax, 0);
 
     return (
         <>
@@ -228,12 +304,12 @@ const PrintableServiceInvoice = ({ billId }) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {services.map((service, index) => (
+                                {serviceItems.map((service, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{service.name}</TableCell>
                                         <TableCell align="center">{service.quantity}</TableCell>
                                         <TableCell align="center">{service.tax}</TableCell>
-                                        <TableCell align="right">₹{service.price.toFixed(2)}</TableCell>
+                                        <TableCell align="right">₹{(parseFloat(service.price) || 0).toFixed(2)}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -290,7 +366,7 @@ const PrintableServiceInvoice = ({ billId }) => {
                             />
                         </Box>
                     )}
-                    
+
                     <Divider sx={{ my: 3 }} />
 
                     <Typography variant="body2" color="textSecondary" sx={{ mb: 2, textAlign: 'center' }}>
