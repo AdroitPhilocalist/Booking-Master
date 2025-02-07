@@ -229,9 +229,14 @@ const RoomCard = ({ room, onDelete, onEdit, categories, setRooms, handleEdit }) 
         const billingResponse = await fetch(`/api/Billing/${room.currentBillingId}`, {headers: headers});
         const billingResponseData= await billingResponse.json();
         const billData=billingResponseData.data;
-        console.log("bill data",billData.roomNo.indexOf(room.number));
+        console.log("bill itemlist",billData);
         const removalIndex=billData.roomNo.indexOf(room.number);
-        
+        const currentItemList=billData.itemList;
+        const currentPriceList=billData.priceList;
+        const currentQuantityList=billData.quantityList;
+        const currentTaxList=billData.taxList;
+
+
         // Update Billing status to cancelled
         // await fetch(`/api/Billing/${room.currentBillingId}`, {
         //   method: 'PUT',
