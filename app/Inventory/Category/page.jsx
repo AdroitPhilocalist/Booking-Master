@@ -18,10 +18,12 @@ import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {Dialog,
-        DialogActions,
-        DialogContent,
-        DialogTitle} from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle, Typography
+} from "@mui/material";
 
 
 
@@ -29,6 +31,9 @@ export default function InventoryCategory() {
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
+  //const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
@@ -159,6 +164,20 @@ export default function InventoryCategory() {
       toast.error("Error toggling status:");
     }
   };
+  //confirm delete dialog box
+  // const handleDeleteClick = (category) => {
+  //   setSelectedCategory(category);
+  //   setIsDialogOpen(true);
+  // };
+
+  //calling the delete function:
+  // const confirmDelete = async () => {
+  //   if (selectedCategory) {
+  //     await deleteCategory(selectedCategory.id); // Call your delete function
+  //     setIsDialogOpen(false);
+  //     setSelectedCategory(null);
+  //   }
+  // };
 
   const handleDeleteProduct = async (id) => {
     try {
@@ -195,6 +214,15 @@ export default function InventoryCategory() {
       toast.error("Error deleting product:");
     }
   };
+  //calling the delete function:
+  const handleDeleteConfirm = async () => {
+    if (selectedCategory) {
+      await handleDeleteProduct(selectedCategory); // Delete the product
+      setOpenDeleteDialog(false); // Close the dialog
+      setSelectedCategory(null); // Reset the selected product ID
+    }
+  };
+
 
   return (
     <div>
@@ -258,7 +286,15 @@ export default function InventoryCategory() {
                       <IconButton color="primary" onClick={() => { setShowModal(true); setCurrentProduct(product); }} disabled={product.isActive} sx={{ opacity: product.isActive ? 0.5 : 1 }}>
                         <Edit />
                       </IconButton>
-                      <IconButton color="secondary" onClick={() => handleDeleteProduct(product._id)} disabled={product.isActive} sx={{ opacity: product.isActive ? 0.5 : 1 }}>
+                      <IconButton
+                        color="secondary"
+                        onClick={() => {
+                          setSelectedCategory(product._id); // Store the product ID
+                          setOpenDeleteDialog(true); // Open the confirmation dialog
+                        }}
+                        disabled={product.isActive}
+                        sx={{ opacity: product.isActive ? 0.5 : 1 }}
+                      >
                         <Delete />
                       </IconButton>
                     </TableCell>
@@ -268,30 +304,59 @@ export default function InventoryCategory() {
             </Table>
           </TableContainer>
 
-                {/* Delete Confirmation Dialog */}
-          {/* <Dialog
-            open={openDeleteDialog}
-            onClose={() => setOpenDeleteDialog(false)}
-          >
-            <DialogTitle>Confirm Delete</DialogTitle>
+          {/* Delete Confirmation Dialog */}
+          {/* <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+            <DialogTitle>Delete Item</DialogTitle>
             <DialogContent>
-              <Typography>
-                Are you sure you want to delete this menu item?
-              </Typography>
+              Are you sure you want to delete this item? This action cannot be undone.
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-              <Button onClick={handleDeleteProduct} color="error">
+              <Button onClick={() => openDeleteDialogForProduct(product._id)} color="error">
                 Delete
               </Button>
+
             </DialogActions>
           </Dialog> */}
 
-        </div> 
+          {/* <button onClick={() => setOpenDeleteDialog(true)}>Delete</button> */}
+
+        </div>
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+          <DialogTitle>Delete Item</DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete this item? This action cannot be undone.
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+            <Button color="error" onClick={handleDeleteConfirm}>Delete</Button>
+          </DialogActions>
+        </Dialog>
+
+
         {showModal && (
           <AddProductModal onClose={() => setShowModal(false)} onSubmit={handleAddProduct} initialValue={currentProduct?.itemName || ""} />
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {/* <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Delete Item</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this item? This action cannot be undone.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={() => openDeleteDialogForProduct(product._id)} color="error">
+            Delete
+          </Button>
+
+        </DialogActions>
+      </Dialog> */}
+
+
+
       <Footer />
     </div>
   );
