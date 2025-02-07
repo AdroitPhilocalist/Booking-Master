@@ -292,54 +292,64 @@ const RoomCard = ({
         const billingResponseData = await billingResponse.json();
         const billData = billingResponseData.data;
         console.log("bill itemlist", billData.roomNo);
-        const indexToRemove = billData.roomNo.indexOf(room.number);
-        console.log("bill itemlist", billData.roomNo.filter((_, index) => index !== indexToRemove));
-        const currentItemList = billData.itemList;
-        const currentPriceList = billData.priceList;
-        const currentQuantityList = billData.quantityList;
-        const currentTaxList = billData.taxList;
-        const currentRoomList=billData.roomNo;
-        const updatedItemList = currentItemList.filter(
-          (_, index) => index !== indexToRemove
-        );
-        const updatedPriceList = currentPriceList.filter(
-          (_, index) => index !== indexToRemove
-        );
-        const updatedQuantityList = currentQuantityList.filter(
-          (_, index) => index !== indexToRemove
-        );
-        const updatedTaxList = currentTaxList.filter(
-          (_, index) => index !== indexToRemove
-        );
-        const updatedRoomList = currentRoomList.filter(
-          (_, index) => index !== indexToRemove
-        );
-        const response = await axios.patch(
-          `/api/Billing/${room.currentBillingId}`,
-          {
-            itemList: updatedItemList,
-            priceList: updatedPriceList,
-            taxList: updatedTaxList,
-            quantityList: updatedQuantityList,
-            roomNo:updatedRoomList,
-          },
-          { headers }
-        );
+        if(billData.roomNo.length==1)
+        {
+          //Update Billing status to cancelled
+          await fetch(`/api/Billing/${room.currentBillingId}`, {
+            method: 'PUT',
+            headers: {
+              ...headers,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              Cancelled: "yes",
+              dueAmount: 0
+            })
+          });
+
+        }
+        else{
+
+          const indexToRemove = billData.roomNo.indexOf(room.number);
+          console.log("bill itemlist", billData.roomNo.filter((_, index) => index !== indexToRemove));
+          const currentItemList = billData.itemList;
+          const currentPriceList = billData.priceList;
+          const currentQuantityList = billData.quantityList;
+          const currentTaxList = billData.taxList;
+          const currentRoomList=billData.roomNo;
+          const updatedItemList = currentItemList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedPriceList = currentPriceList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedQuantityList = currentQuantityList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedTaxList = currentTaxList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const updatedRoomList = currentRoomList.filter(
+            (_, index) => index !== indexToRemove
+          );
+          const response = await axios.patch(
+            `/api/Billing/${room.currentBillingId}`,
+            {
+              itemList: updatedItemList,
+              priceList: updatedPriceList,
+              taxList: updatedTaxList,
+              quantityList: updatedQuantityList,
+              roomNo:updatedRoomList,
+            },
+            { headers }
+          );
+
+        }
+        
         
 
 
-        // Update Billing status to cancelled
-        // await fetch(`/api/Billing/${room.currentBillingId}`, {
-        //   method: 'PUT',
-        //   headers: {
-        //     ...headers,
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify({
-        //     Cancelled: "yes",
-        //     dueAmount: 0
-        //   })
-        // });
+        
 
         // Get current room data
         const roomResponse = await fetch(`/api/rooms/${room._id}`, {
