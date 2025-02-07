@@ -345,11 +345,6 @@ const RoomCard = ({
           );
 
         }
-        
-        
-
-
-        
 
         // Get current room data
         const roomResponse = await fetch(`/api/rooms/${room._id}`, {
