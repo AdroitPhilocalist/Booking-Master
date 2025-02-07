@@ -20,6 +20,7 @@ import {
   Calendar,
 } from "lucide-react";
 import Navbar from "../../_components/Navbar";
+import axios from "axios";
 import { Footer } from "../../_components/Footer";
 import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
 import { useRouter } from "next/navigation";
