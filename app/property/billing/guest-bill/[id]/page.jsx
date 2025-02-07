@@ -124,6 +124,8 @@ const BookingDashboard = () => {
           headers,
         });
         const billingData = billingResponse.data.data;
+        console.log("billingData", billingData.dueAmount);
+        setRemainingDueAmount(billingData.dueAmount);
 
         // Process existing items
         const existingServices = billingData.itemList || [];
@@ -531,7 +533,8 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-      // Update Billing API
+  
+      // Step 1: Update Billing API
       await axios.put(
         `/api/Billing/${id}`,
         {
@@ -540,64 +543,71 @@ const BookingDashboard = () => {
         },
         { headers }
       );
-      console.log("Booking ID: ", bookingData.booking._id);
+  
       // Step 2: Update NewBooking API to set CheckOut to true
       await axios.put(
-        `/api/NewBooking/${bookingData.booking._id}`, // Assuming `booking._id` is the ID of the booking
+        `/api/NewBooking/${bookingData.bookings[0]._id}`, // Use the first booking's ID
         {
-          CheckedOut: true, // Set CheckOut to true
+          CheckedOut: true,
         },
         { headers }
       );
-      // Get current room data
-      const roomNo = bookingData.room._id;
-      const currentRoomResponse = await axios.get(`/api/rooms/${roomNo}`, {
-        headers,
+  
+      // Step 3: Update multiple rooms
+      const roomUpdatePromises = bookingData.rooms.map(async (room) => {
+        // Get current room data
+        const currentRoomResponse = await axios.get(`/api/rooms/${room._id}`, {
+          headers,
+        });
+        const currentRoomData = currentRoomResponse.data.data;
+  
+        // Find position of current bill in the waitlist
+        const currentPosition = currentRoomData.billWaitlist.findIndex(
+          (billId) => billId._id.toString() === bookingData.billing._id.toString()
+        );
+  
+        // Prepare update data
+        let updateData = {
+          billWaitlist: currentRoomData.billWaitlist,
+          guestWaitlist: currentRoomData.guestWaitlist,
+          checkInDateList: currentRoomData.checkInDateList,
+          checkOutDateList: currentRoomData.checkOutDateList,
+        };
+  
+        // Check if there's a next booking
+        const hasNextBooking =
+          currentPosition < currentRoomData.billWaitlist.length - 1;
+  
+        if (hasNextBooking) {
+          updateData = {
+            ...updateData,
+            currentBillingId: currentRoomData.billWaitlist[currentPosition + 1],
+            currentGuestId: currentRoomData.guestWaitlist[currentPosition + 1],
+            occupied: "Vacant",
+            clean: true,
+            billingStarted: "No",
+          };
+        } else {
+          updateData = {
+            ...updateData,
+            currentBillingId: null,
+            currentGuestId: null,
+            occupied: "Vacant",
+            clean: true,
+            billingStarted: "No",
+          };
+        }
+  
+        // Update room with new data
+        return axios.put(`/api/rooms/${room._id}`, updateData, { headers });
       });
-      const currentRoomData = currentRoomResponse.data.data;
-
-      // Find position of current IDs
-      const currentPosition = currentRoomData.billWaitlist.findIndex(
-        (billId) => billId._id.toString() === bookingData.billing._id.toString()
-      );
-
-      // Prepare update data
-      let updateData = {
-        billWaitlist: currentRoomData.billWaitlist,
-        guestWaitlist: currentRoomData.guestWaitlist,
-        checkInDateList: currentRoomData.checkInDateList,
-        checkOutDateList: currentRoomData.checkOutDateList,
-      };
-
-      // Check if there's a next booking
-      const hasNextBooking =
-        currentPosition < currentRoomData.billWaitlist.length - 1;
-      if (hasNextBooking) {
-        updateData = {
-          ...updateData,
-          currentBillingId: currentRoomData.billWaitlist[currentPosition + 1],
-          currentGuestId: currentRoomData.guestWaitlist[currentPosition + 1],
-          occupied: "Vacant",
-          clean: true,
-          billingStarted: "No",
-        };
-      } else {
-        updateData = {
-          ...updateData,
-          currentBillingId: null,
-          currentGuestId: null,
-          occupied: "Vacant",
-          clean: true,
-          billingStarted: "No",
-        };
-      }
-
-      // Update room with new data
-      await axios.put(`/api/rooms/${roomNo}`, updateData, { headers });
-
+  
+      // Wait for all room updates to complete
+      await Promise.all(roomUpdatePromises);
+  
       // Update state
       setRemainingDueAmount(0);
-      alert("Payment completed successfully!");
+      alert("Payment completed successfully for all rooms!");
       window.location.reload();
     } catch (error) {
       console.error("Error completing payment:", error);
@@ -635,7 +645,7 @@ const BookingDashboard = () => {
   }
   const { billing, booking, room, category } = bookingData;
 
-  console.log("Booking Data: ", bookingData);
+  console.log("Booking Data: ", billing);
   return (
     <div className="min-h-screen bg-amber-50">
       <Navbar />
