@@ -216,6 +216,7 @@ const BookingDashboard = () => {
           const correspondingGuestId =
             matchedRoom.guestWaitlist[currentBillIndex];
           console.log("correspondingGuestId", correspondingGuestId);
+          console.log("Booking Data", correspondingGuestId._id);
           // Find the booking that matches this guest ID
           matchedBooking = newBookingsResponse.data.data.find(
             (booking) => booking._id === correspondingGuestId._id.toString()
@@ -542,7 +543,15 @@ const BookingDashboard = () => {
         },
         { headers }
       );
-
+      console.log("Booking ID: ", bookingData.booking._id);
+      // Step 2: Update NewBooking API to set CheckOut to true
+      await axios.put(
+        `/api/NewBooking/${bookingData.booking._id}`, // Assuming `booking._id` is the ID of the booking
+        {
+          CheckedOut: true, // Set CheckOut to true
+        },
+        { headers }
+      );
       // Get current room data
       const roomNo = bookingData.room._id;
       const currentRoomResponse = await axios.get(`/api/rooms/${roomNo}`, {
@@ -830,9 +839,18 @@ const BookingDashboard = () => {
                 <p>Due Amount:</p>
               </div>
               <div className="text-gray-800 font-semibold text-right">
-                <p>
-                  {(billing.priceList[0]?.reduce((sum, price) => sum + parseFloat(price), 0) || 0).toFixed(2)}
-                </p>
+                {billing.roomNo.map((roomNumber, index) => {
+                  // Ensure billing.priceList[index] exists and is an array
+                  const roomPrice = Array.isArray(billing.priceList[index])
+                    ? parseFloat(billing.priceList[index][0]) || 0
+                    : 0;
+
+                  return (
+                    <React.Fragment key={index}>
+                      {roomPrice.toFixed(2)}
+                    </React.Fragment>
+                  );
+                })}
 
                 <p>{parseFloat(billing.totalAmount).toFixed(2)}</p>
 
@@ -960,7 +978,7 @@ const BookingDashboard = () => {
               <tbody>
                 {serviceItems.map((service, index) => (
                   <tr key={index}>
-                    <td className="p-2 text-left">Room #{billing.roomNo[service.roomIndex]}</td> 
+                    <td className="p-2 text-left">Room #{billing.roomNo[service.roomIndex]}</td>
                     <td className="p-2 text-left">{service.name}</td>
                     <td className="p-2 text-center">{service.quantity}</td>
                     <td className="p-2 text-center">{service.tax}%</td>
@@ -1306,7 +1324,7 @@ const BookingDashboard = () => {
               <tbody>
                 {foodItems.map((food, index) => (
                   <tr key={index}>
-                    <td className="p-2 text-left">Room #{billing.roomNo[food.roomIndex]}</td> 
+                    <td className="p-2 text-left">Room #{billing.roomNo[food.roomIndex]}</td>
                     <td className="p-2 text-left">{food.name}</td>
                     <td className="p-2 text-center">{food.quantity}</td>
                     <td className="p-2 text-center">{food.tax}%</td>
