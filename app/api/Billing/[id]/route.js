@@ -89,19 +89,26 @@ export async function PATCH(req, { params }) {
     // const newDueAmount = newTotalAmount - billingData.amountAdvanced;
 
 
-    bill.totalAmount = bill.priceList.flatMap((roomPrices, i) =>
+    billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
       roomPrices.map((price, j) =>
-        price + (price * (bill.taxList[i][j] || 0) / 100)
+        price + (price * (billingData.taxList[i][j] || 0) / 100)
       )
     ).reduce((sum, price) => sum + price, 0);
 
-    bill.dueAmount = bill.totalAmount - bill.amountAdvanced;
+    billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
 
     // Update the billing data
     billingData.itemList = updatedItemList;
     billingData.priceList = updatedPriceList;
     billingData.quantityList = updatedQuantityList;
     billingData.taxList = updatedTaxList;
+    billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
+      roomPrices.map((price, j) =>
+        price + (price * (billingData.taxList[i][j] || 0) / 100)
+      )
+    ).reduce((sum, price) => sum + price, 0);
+
+    billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
 
     await billingData.save();
     return NextResponse.json({ success: true, data: billingData }, { status: 200 });
