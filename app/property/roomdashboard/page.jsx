@@ -284,7 +284,7 @@ const RoomCard = ({
           .split("=")[1];
         const headers = { Authorization: `Bearer ${token}` };
         console.log(room.currentBillingId);
-        console.log("room number", room.number);
+        console.log("room total", room.total);
         const billingResponse = await fetch(
           `/api/Billing/${room.currentBillingId}`,
           { headers: headers }
@@ -292,6 +292,9 @@ const RoomCard = ({
         const billingResponseData = await billingResponse.json();
         const billData = billingResponseData.data;
         console.log("bill itemlist", billData.roomNo);
+        const indexToRemove = billData.roomNo.indexOf(room.number);
+        const priceToRemove = billData.priceList[indexToRemove][0];
+        console.log("price to remove",priceToRemove);
         if(billData.roomNo.length==1)
         {
           //Update Billing status to cancelled
@@ -310,7 +313,7 @@ const RoomCard = ({
         }
         else{
 
-          const indexToRemove = billData.roomNo.indexOf(room.number);
+        
           console.log("bill itemlist", billData.roomNo.filter((_, index) => index !== indexToRemove));
           const currentItemList = billData.itemList;
           const currentPriceList = billData.priceList;
@@ -340,6 +343,8 @@ const RoomCard = ({
               taxList: updatedTaxList,
               quantityList: updatedQuantityList,
               roomNo:updatedRoomList,
+              totalAmount: billData.totalAmount-priceToRemove,
+              dueAmount: billData.dueAmount-priceToRemove,
             },
             { headers }
           );
@@ -384,7 +389,8 @@ const RoomCard = ({
             currentGuestId: null,
             occupied: "Vacant",
             clean: true,
-            billingStarted: "No"
+            billingStarted: "No",
+
           };
         }
 

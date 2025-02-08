@@ -104,13 +104,9 @@ export async function PATCH(req, { params }) {
     billingData.priceList = updatedPriceList;
     billingData.quantityList = updatedQuantityList;
     billingData.taxList = updatedTaxList;
-    billingData.totalAmount = billingData.priceList.flatMap((roomPrices, i) =>
-      roomPrices.map((price, j) =>
-        price 
-      )
-    ).reduce((sum, price) => sum + price, 0);
+    billingData.totalAmount = billingData.totalAmount ||data.totalAmount;
 
-    billingData.dueAmount = billingData.totalAmount - billingData.amountAdvanced;
+    billingData.dueAmount = billingData.totalAmount || data.dueAmount;
 
     await billingData.save();
     return NextResponse.json({ success: true, data: billingData }, { status: 200 });
