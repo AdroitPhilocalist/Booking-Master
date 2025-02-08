@@ -357,10 +357,16 @@ const BookingDashboard = () => {
     if (selectedItem) {
       setSelectedFoodItem(selectedItem);
       setFoodName(selectedItem.itemName || "");
-      setFoodPrice(selectedItem.price?.toString() || "0"); // Ensure string value
-      setFoodTax((selectedItem.sgst + selectedItem.cgst)?.toString() || "0"); // Ensure string value
+      setFoodPrice(selectedItem.price?.toString() || "0");
+      setFoodTax(((selectedItem.sgst + selectedItem.cgst) || 0).toString());
       setFoodQuantity(1);
     }
+  };
+
+  const calculateTotalWithTax = (price, tax, quantity) => {
+    const basePrice = parseFloat(price) * quantity;
+    const taxAmount = (basePrice * parseFloat(tax)) / 100;
+    return basePrice + taxAmount;
   };
 
   const handleQuantityChange = (e) => {
@@ -375,10 +381,17 @@ const BookingDashboard = () => {
       alert("Please select a food item");
       return;
     }
+
+    const totalPriceWithTax = calculateTotalWithTax(
+      selectedFoodItem.price,
+      selectedFoodItem.sgst + selectedFoodItem.cgst,
+      foodQuantity
+    );
+
     const newItem = {
       selectedFoodItem,
       quantity: foodQuantity,
-      totalPrice: selectedFoodItem.price * foodQuantity,
+      totalPrice: totalPriceWithTax
     };
     setSelectedFoodItems([...selectedFoodItems, newItem]);
     setSelectedFoodItem([]);
@@ -387,6 +400,7 @@ const BookingDashboard = () => {
     setFoodTax("");
     setFoodQuantity(1);
   };
+
 
   const handleRemoveItem = (index) => {
     const updatedItems = selectedFoodItems.filter((_, idx) => idx !== index);
@@ -397,16 +411,22 @@ const BookingDashboard = () => {
     if (newQuantity < 1) return;
     const updatedItems = selectedFoodItems.map((item, idx) => {
       if (idx === index) {
+        const totalPriceWithTax = calculateTotalWithTax(
+          item.selectedFoodItem.price,
+          item.selectedFoodItem.sgst + item.selectedFoodItem.cgst,
+          newQuantity
+        );
         return {
           ...item,
           quantity: newQuantity,
-          totalPrice: item.selectedFoodItem.price * newQuantity,
+          totalPrice: totalPriceWithTax
         };
       }
       return item;
     });
     setSelectedFoodItems(updatedItems);
   };
+
 
   const handleAddFood = async () => {
     if (selectedFoodItems.length === 0) {
@@ -420,10 +440,9 @@ const BookingDashboard = () => {
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
 
-      // Convert prices to numbers and handle taxes
       const foodUpdates = selectedFoodItems.map(item => ({
         name: item.selectedFoodItem.itemName,
-        price: Number(item.totalPrice),
+        price: item.totalPrice, // This is now the total price including tax
         tax: Number(item.selectedFoodItem.sgst + item.selectedFoodItem.cgst) || 0,
         quantity: Number(item.quantity)
       }));
@@ -445,7 +464,6 @@ const BookingDashboard = () => {
         updatedTaxList[selectedRoomIndex].push(item.tax);
       });
 
-      // Submit updated data
       await axios.put(`/api/Billing/${id}`, {
         itemList: updatedItemList,
         priceList: updatedPriceList,
@@ -455,7 +473,6 @@ const BookingDashboard = () => {
         FoodRemarks: [...currentBilling.FoodRemarks, foodRemarks]
       }, { headers });
 
-      // Update local state
       setServices([...services, ...foodUpdates.map(item => ({
         ...item,
         roomIndex: selectedRoomIndex
@@ -464,7 +481,7 @@ const BookingDashboard = () => {
       handleCloseFoodModal();
     } catch (error) {
       console.error("Error adding food:", error);
-      alert("Failed to add food. Check console for details.");
+      alert("Failed to add food items");
     }
   };
 
@@ -525,7 +542,7 @@ const BookingDashboard = () => {
         .find((row) => row.startsWith("authToken="))
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
-  
+
       // Step 1: Update Billing API
       await axios.put(
         `/api/Billing/${id}`,
@@ -535,7 +552,7 @@ const BookingDashboard = () => {
         },
         { headers }
       );
-  
+
       // Step 2: Update NewBooking API to set CheckOut to true
       await axios.put(
         `/api/NewBooking/${bookingData.bookings[0]._id}`, // Use the first booking's ID
@@ -544,7 +561,7 @@ const BookingDashboard = () => {
         },
         { headers }
       );
-  
+
       // Step 3: Update multiple rooms
       const roomUpdatePromises = bookingData.rooms.map(async (room) => {
         // Get current room data
@@ -552,12 +569,12 @@ const BookingDashboard = () => {
           headers,
         });
         const currentRoomData = currentRoomResponse.data.data;
-  
+
         // Find position of current bill in the waitlist
         const currentPosition = currentRoomData.billWaitlist.findIndex(
           (billId) => billId._id.toString() === bookingData.billing._id.toString()
         );
-  
+
         // Prepare update data
         let updateData = {
           billWaitlist: currentRoomData.billWaitlist,
@@ -565,11 +582,11 @@ const BookingDashboard = () => {
           checkInDateList: currentRoomData.checkInDateList,
           checkOutDateList: currentRoomData.checkOutDateList,
         };
-  
+
         // Check if there's a next booking
         const hasNextBooking =
           currentPosition < currentRoomData.billWaitlist.length - 1;
-  
+
         if (hasNextBooking) {
           updateData = {
             ...updateData,
@@ -589,14 +606,14 @@ const BookingDashboard = () => {
             billingStarted: "No",
           };
         }
-  
+
         // Update room with new data
         return axios.put(`/api/rooms/${room._id}`, updateData, { headers });
       });
-  
+
       // Wait for all room updates to complete
       await Promise.all(roomUpdatePromises);
-  
+
       // Update state
       setRemainingDueAmount(0);
       alert("Payment completed successfully for all rooms!");
