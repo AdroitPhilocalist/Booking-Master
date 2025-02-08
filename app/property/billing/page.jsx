@@ -412,7 +412,7 @@ export default function Billing() {
                       <TableCell>
                         {Array.isArray(bill.roomNo)
                           ? bill.roomNo.join(", ")
-                          : bill.roomNo || "N/A"}
+                          : bill.roomNo || "N/A"}   
                       </TableCell>
 
                       <TableCell>{bill.guestName || "N/A"}</TableCell>
