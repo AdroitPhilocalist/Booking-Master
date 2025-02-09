@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../_components/Navbar";
+import Link from "next/link";
+import { Add } from "@mui/icons-material";
 import { Footer } from "../../_components/Footer";
 import {
   Button,
@@ -310,6 +312,16 @@ export default function Billing() {
             </Button>
           </Box>
         </Box>
+        <div className="flex flex-wrap justify-between items-center mb-6">
+          <div className="flex space-x-2"> 
+            <Link
+              href="roomdashboard/newguest"
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              New Reservation <Add />
+            </Link>
+          </div>
+        </div>
         <div className="container mx-auto py-4 px-4">
           <TableContainer
             component={Paper}
@@ -318,7 +330,7 @@ export default function Billing() {
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell
+                  <TableCell
                     sx={{
                       fontWeight: "bold",
                       color: "#28bfdb",
@@ -424,7 +436,7 @@ export default function Billing() {
                         {console.log("Bill : ", bill)}
                         {Array.isArray(bill.bill.roomNo)
                           ? bill.bill.roomNo.join(", ")
-                          : bill.bill.roomNo || "N/A"}   
+                          : bill.bill.roomNo || "N/A"}
                       </TableCell>
 
                       <TableCell>{bill.guestName || "N/A"}</TableCell>
