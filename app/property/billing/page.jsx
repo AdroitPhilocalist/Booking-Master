@@ -196,17 +196,17 @@ export default function Billing() {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const checkIn = new Date(bill.checkInDate);
+    const checkIn = new Date(bill.bill.checkInDate);
     checkIn.setHours(0, 0, 0, 0);
 
     if (today < checkIn) {
       return "Booked";
-    } else if (today.toISOString() === checkIn.toISOString()) {
+    } else if (today.toLocaleDateString('en-GB') === checkIn.toLocaleDateString('en-GB')) {
       return "Checked In";
     } else if (bill.bill.Bill_Paid === "yes") {
       return "Checked Out";
     }
-    return "Unknown";
+    return "Staying";
   };
 
   // Updated Bill Status function
@@ -410,9 +410,10 @@ export default function Billing() {
                       }}
                     >
                       <TableCell>
-                        {Array.isArray(bill.roomNo)
-                          ? bill.roomNo.join(", ")
-                          : bill.roomNo || "N/A"}
+                        {console.log(bill)}
+                        {Array.isArray(bill.bill.roomNo)
+                          ? bill.bill.roomNo.join(", ")
+                          : bill.bill.roomNo || "N/A"}
                       </TableCell>
 
                       <TableCell>{bill.guestName || "N/A"}</TableCell>
