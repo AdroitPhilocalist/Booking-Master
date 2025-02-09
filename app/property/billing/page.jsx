@@ -95,6 +95,7 @@ export default function Billing() {
                 guestId: guestId._id, // Unique Guest ID
                 roomNo: room.number.toString(), // individual room number
                 guestName: guest ? guest.guestName : "N/A",
+                bookingId: guest ? guest.bookingId : "N/A",
                 checkInDate: guest ? guest.checkIn : null,
                 currentBillingId: billId._id,
                 timestamp: bill.createdAt || new Date().toISOString(),
@@ -317,6 +318,15 @@ export default function Billing() {
             <Table>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      color: "#28bfdb",
+                      textAlign: "center",
+                    }}
+                  >
+                    Booking ID
+                  </TableCell>
                   <TableCell
                     sx={{
                       fontWeight: "bold",
@@ -409,7 +419,9 @@ export default function Billing() {
                           } 5%, white 5%)`,
                       }}
                     >
+                      <TableCell>{bill.bookingId || "N/A"}</TableCell>
                       <TableCell>
+                        {console.log("Bill : ", bill)}
                         {Array.isArray(bill.bill.roomNo)
                           ? bill.bill.roomNo.join(", ")
                           : bill.bill.roomNo || "N/A"}   
