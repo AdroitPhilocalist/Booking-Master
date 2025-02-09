@@ -107,14 +107,12 @@ export default function BookingForm() {
     const newErrors = {};
     const requiredFields = [
       "guestName",
-      "gstin",
-      "bookingReference",
       "expectedArrival",
       "expectedDeparture",
       "mobileNo",
       "guestid",
       "guestidno",
-      "referenceno",
+ 
       "checkIn",
       "checkOut",
       "dateofbirth",
@@ -124,17 +122,15 @@ export default function BookingForm() {
     // Initialize all error flags at the start
     let dateErrors = false;
     let mobileError = false;
-    let emailError = false;
+  
     let gstinError = false;
-    let referenceError = false;
-    let adultsError = false;
-    let childrenError = false;
+
     let passportError = false;
     let visaError = false;
     let passportIssueError = false;
     let visaIssueError = false;
     let dobError = false;
-    let anniversaryError = false;
+
 
     // Date of Birth validation (18 years or above)
     if (formData.dateofbirth) {
@@ -199,14 +195,7 @@ export default function BookingForm() {
       mobileError = true;
     }
 
-    // Email validation
-    if (
-      formData.guestEmail &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)
-    ) {
-      newErrors.guestEmail = "Invalid email format";
-      emailError = true;
-    }
+
 
     // GSTIN validation
     if (
@@ -217,26 +206,8 @@ export default function BookingForm() {
       gstinError = true;
     }
 
-    // Reference number validation
-    if (
-      formData.referenceno &&
-      (isNaN(formData.referenceno) || formData.referenceno < 0)
-    ) {
-      newErrors.referenceno = "Reference number must be a positive number";
-      referenceError = true;
-    }
 
-    // Adults validation
-    if (formData.adults < 1) {
-      newErrors.adults = "At least 1 adult is required";
-      adultsError = true;
-    }
 
-    // Children validation
-    if (formData.children < 0) {
-      newErrors.children = "Number of children cannot be negative";
-      childrenError = true;
-    }
 
     // Passport-related validations
     if (formData.guestid === "passport") {
@@ -273,17 +244,14 @@ export default function BookingForm() {
       !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
-      !emailError &&
+      
       !gstinError &&
-      !referenceError &&
-      !adultsError &&
-      !childrenError &&
+
       !passportError &&
       !visaError &&
       !passportIssueError &&
       !visaIssueError &&
-      !dobError &&
-      !anniversaryError;
+      !dobError ;
 
     setIsFormValid(isValid);
     return isValid && Object.keys(newErrors).length === 0;
