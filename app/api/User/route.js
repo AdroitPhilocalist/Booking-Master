@@ -44,15 +44,6 @@ export async function POST(req) {
       }, { status: 404 });
     }
 
-    // Check if username already exists
-    const existingUser = await User.findOne({ username: profile.username });
-    if (existingUser) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Username already exists' 
-      }, { status: 400 });
-    }
-
     const newUser = new User({
       ...data,
       username: profile.username,

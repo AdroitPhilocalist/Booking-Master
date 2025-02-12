@@ -13,6 +13,7 @@ import {
   Home,
   Hotel,
   Coffee,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,6 +28,9 @@ import {
   Typography,
   Box,
   Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import Navbar from "../../../_components/Navbar";
 import { Footer } from "../../../_components/Footer";
@@ -112,7 +116,7 @@ export default function BookingForm() {
       "mobileNo",
       "guestid",
       "guestidno",
- 
+
       "checkIn",
       "checkOut",
       "dateofbirth",
@@ -122,7 +126,7 @@ export default function BookingForm() {
     // Initialize all error flags at the start
     let dateErrors = false;
     let mobileError = false;
-  
+
     let gstinError = false;
 
     let passportError = false;
@@ -244,14 +248,14 @@ export default function BookingForm() {
       !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
-      
+
       !gstinError &&
 
       !passportError &&
       !visaError &&
       !passportIssueError &&
       !visaIssueError &&
-      !dobError ;
+      !dobError;
 
     setIsFormValid(isValid);
     return isValid && Object.keys(newErrors).length === 0;
@@ -454,58 +458,58 @@ export default function BookingForm() {
     try {
       console.log('Selected rooms:', selectedRooms);
       const bookingData = { ...formData, roomNumbers: selectedRooms };
-  
+
       // Create booking
       const bookingResponse = await fetch('/api/NewBooking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData),
       });
-  
+
       const bookingResult = await bookingResponse.json();
       const guestId = bookingResult.data._id;
-  
+
       // Fetch necessary data
       const [roomsResponse, categoriesResponse] = await Promise.all([
         fetch('/api/rooms'),
         fetch('/api/roomCategories')
       ]);
-  
+
       const roomsData = await roomsResponse.json();
       const categoriesData = await categoriesResponse.json();
       const rooms = roomsData.data;
       const categories = categoriesData.data;
-  
+
       // Initialize arrays for consolidated billing
       let allRoomNumbers = [];
       let roomCharges = [];
       let roomTaxes = [];
       let quantities = [];
       let totalAmount = 0;
-  
+
       // Process each selected room
       for (const selectedRoomNumber of selectedRooms) {
         const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
         const matchedCategory = categories.find(category => category._id === matchedRoom.category._id);
-  
+
         // Calculate billing details
         const checkInDate = new Date(formData.checkIn);
         const checkOutDate = new Date(formData.checkOut);
         const numberOfNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
         const roomCharge = matchedCategory.total * numberOfNights;
         const roomTax = matchedCategory.gst;
-  
+
         // Collect data for consolidated billing
         allRoomNumbers.push(selectedRoomNumber);
         roomCharges.push([roomCharge]);
         roomTaxes.push([roomTax]);
         quantities.push([1]);
         totalAmount += roomCharge;
-  
+
         // Update room records...
         // (Keep existing room update logic here)
       }
-  
+
       // Create single billing record for all rooms
       const billingResponse = await fetch('/api/Billing', {
         method: 'POST',
@@ -524,12 +528,12 @@ export default function BookingForm() {
           Bill_Paid: 'no',
         })
       });
-      
-  
+
+
       const billingData = await billingResponse.json();
       console.log("billing data", billingData);
       if (!billingData.success) throw new Error('Failed to create consolidated billing');
-  
+
       // Update all rooms with the same billing ID
       for (const selectedRoomNumber of selectedRooms) {
         const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
@@ -593,18 +597,18 @@ export default function BookingForm() {
           body: JSON.stringify(roomUpdate)
         });
       }
-  
+
       alert('Booking created with consolidated billing!');
 
       setModalOpen(false);
       router.push('/property/roomdashboard');
-  
+
     } catch (error) {
       console.error('Error in booking submission:', error);
       alert(`Failed to create booking: ${error.message}`);
     }
   };
-  
+
   const modalAnimation = {
     hidden: {
       opacity: 0,
@@ -786,423 +790,408 @@ export default function BookingForm() {
                 Guest Reservation Form
               </h1>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Booking ID */}
-                  <TextField
-                    label="Booking ID"
-                    name="bookingId"
-                    value={formData.bookingId}
-                    InputProps={{ readOnly: true }}
-                    error={!!errors.bookingId}
-                    helperText={errors.bookingId}
-                    variant="outlined"
-                    fullWidth
-                    disabled
-                  />
-
-                  {/* Booking Type */}
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Booking Type"
-                      name="bookingType"
-                      value={formData.bookingType}
-                      onChange={handleChange}
-                      error={!!errors.bookingType}
-                      helperText={errors.bookingType}
-                      fullWidth
-                      select
-                    >
-                      {[
-                        "FIT",
-                        "Group",
-                        "Corporate",
-                        "Corporate Group",
-                        "Social Events",
-                        "Others",
-                      ].map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {type}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-
-                  {/* Booking Reference */}
-                  <TextField
-                    label="Booking Reference"
-                    name="bookingReference"
-                    value={formData.bookingReference}
-                    onChange={handleChange}
-                    error={!!errors.bookingReference}
-                    helperText={errors.bookingReference}
-                    fullWidth
-                    variant="outlined"
-                  />
-
-                  {/* Reference Number */}
-                  <TextField
-                    label="Reference Number"
-                    name="referenceno"
-                    value={formData.referenceno}
-                    onChange={handleChange}
-                    error={!!errors.referenceno}
-                    helperText={errors.referenceno}
-                    fullWidth
-                    variant="outlined"
-                  />
-
-                  {/* Booking Status */}
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Booking Status"
-                      name="bookingStatus"
-                      select
-                      fullWidth
-                      value={formData.bookingStatus}
-                      onChange={handleChange}
-                      error={!!errors.bookingStatus}
-                      helperText={errors.bookingStatus}
-                    >
-                      {["Confirm", "Block"].map((status) => (
-                        <MenuItem key={status} value={status}>
-                          {status}
-                        </MenuItem>
-                      ))}
-                      required
-                    </TextField>
-                  </Grid>
-
-                  {/* Guest Name */}
-                  <TextField
-                    label="Guest Name"
-                    name="guestName"
-                    value={formData.guestName}
-                    onChange={handleChange}
-                    error={!!errors.guestName}
-                    helperText={errors.guestName}
-                    fullWidth
-                    required
-                  />
-
-                  <Autocomplete
-                    freeSolo
-                    options={filteredMobileNumbers}
-                    value={formData.mobileNo}
-                    onChange={(event, newValue) =>
-                      handleMobileNumberChange(event, newValue)
-                    }
-                    onInputChange={(event, newValue) =>
-                      handleMobileNumberChange(event, newValue)
-                    }
-                    renderInput={(params) => (
+                {/* Booking Details Accordion */}
+                <Accordion defaultExpanded={false}>
+                  <AccordionSummary
+                    expandIcon={<ChevronDown />}
+                    aria-controls="booking-details-content"
+                    id="booking-details-header"
+                  >
+                    <Typography variant="h6">Booking Details</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <TextField
-                        {...params}
-                        label="Mobile Number"
-                        required
+                        label="Booking ID"
+                        name="bookingId"
+                        value={formData.bookingId}
+                        InputProps={{ readOnly: true }}
+                        variant="outlined"
                         fullWidth
-                        error={!!errors.mobileNo}
-                        helperText={errors.mobileNo}
+                        disabled
                       />
-                    )}
-                  />
-
-                  {/* Mail ID */}
-                  <TextField
-                    label="Email ID"
-                    name="guestEmail"
-                    value={formData.guestEmail}
-                    error={!!errors.guestEmail}
-                    helperText={errors.guestEmail}
-                    onChange={handleChange}
-                    fullWidth
-                  />
-
-                  {/* Date of Birth */}
-                  <TextField
-                    label="Date of Birth"
-                    type="date"
-                    name="dateofbirth"
-                    value={formData.dateofbirth}
-                    onChange={handleChange}
-                    error={!!errors.dateofbirth}
-                    helperText={errors.dateofbirth}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-
-                  {/* Date of Anniversary */}
-                  <TextField
-                    label="Date of Anniversary"
-                    type="date"
-                    name="dateofanniversary"
-                    value={formData.dateofanniversary}
-                    onChange={handleChange}
-                    error={!!errors.dateofanniversary}
-                    helperText={errors.dateofanniversary}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-
-                  {/* Company Name */}
-                  <TextField
-                    label="Company Name"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    error={!!errors.companyName}
-                    helperText={errors.companyName}
-                    fullWidth
-                  />
-
-                  {/* GSTIN */}
-                  <TextField
-                    label="GSTIN"
-                    name="gstin"
-                    value={formData.gstin}
-                    onChange={handleChange}
-                    error={!!errors.gstin}
-                    helperText={errors.gstin}
-                    fullWidth
-                  />
-
-                  {/* Guest ID dropdown */}
-                  <Grid item xs={12}>
-                    <TextField
-                      name="guestid"
-                      label="Guest ID"
-                      value={formData.guestid}
-                      onChange={handleChange}
-                      error={!!errors.guestid}
-                      helperText={errors.guestid}
-                      fullWidth
-                      select
-                    >
-                      {[
-                        "Adhaar",
-                        "Driving License",
-                        "Voter ID Card",
-                        "Passport",
-                        "Others",
-                      ].map((idType) => (
-                        <MenuItem key={idType} value={idType}>
-                          {idType}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-
-                  {/* Guest ID Number */}
-                  <TextField
-                    label="Guest ID Number"
-                    name="guestidno"
-                    value={formData.guestidno}
-                    onChange={handleChange}
-                    error={!!errors.guestidno}
-                    helperText={errors.guestidno}
-                    fullWidth
-                  />
-
-                  {/* Conditional Passport Fields */}
-                  {formData.guestid === "Passport" && (
-                    <>
                       <TextField
-                        label="Passport Issue Date"
-                        type="date"
-                        name="passportIssueDate"
-                        value={formData.passportIssueDate}
+                        label="Booking Type"
+                        name="bookingType"
+                        value={formData.bookingType}
                         onChange={handleChange}
-                        error={!!errors.passportIssueDate}
-                        helperText={errors.passportIssueDate}
+                        fullWidth
+                        select
+                      >
+                        {[
+                          "FIT",
+                          "Group",
+                          "Corporate",
+                          "Corporate Group",
+                          "Social Events",
+                          "Others",
+                        ].map((type) => (
+                          <MenuItem key={type} value={type}>
+                            {type}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        label="Booking Reference"
+                        name="bookingReference"
+                        value={formData.bookingReference}
+                        onChange={handleChange}
+                        fullWidth
+                        variant="outlined"
+                      />
+                      <TextField
+                        label="Reference Number"
+                        name="referenceno"
+                        value={formData.referenceno}
+                        onChange={handleChange}
+                        fullWidth
+                        variant="outlined"
+                      />
+                      <TextField
+                        label="Booking Status"
+                        name="bookingStatus"
+                        select
+                        fullWidth
+                        value={formData.bookingStatus}
+                        onChange={handleChange}
+                      >
+                        {["Confirm", "Block"].map((status) => (
+                          <MenuItem key={status} value={status}>
+                            {status}
+                          </MenuItem>
+                        ))}
+                        required
+                      </TextField>
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* Guest Details Accordion */}
+                <Accordion defaultExpanded={false}>
+                  <AccordionSummary
+                    expandIcon={<ChevronDown />}
+                    aria-controls="guest-details-content"
+                    id="guest-details-header"
+                  >
+                    <Typography variant="h6">Guest Details</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextField
+                        label="Guest Name"
+                        name="guestName"
+                        value={formData.guestName}
+                        onChange={handleChange}
+                        fullWidth
+                        required
+                      />
+                      <Autocomplete
+                        freeSolo
+                        options={filteredMobileNumbers}
+                        value={formData.mobileNo}
+                        onChange={(event, newValue) =>
+                          handleMobileNumberChange(event, newValue)
+                        }
+                        onInputChange={(event, newValue) =>
+                          handleMobileNumberChange(event, newValue)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Mobile Number"
+                            required
+                            fullWidth
+                          />
+                        )}
+                      />
+                      <TextField
+                        label="Email ID"
+                        name="guestEmail"
+                        value={formData.guestEmail}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                      <TextField
+                        label="Date of Birth"
+                        type="date"
+                        name="dateofbirth"
+                        value={formData.dateofbirth}
+                        onChange={handleChange}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                      />
+                      <TextField
+                        label="Date of Anniversary"
+                        type="date"
+                        name="dateofanniversary"
+                        value={formData.dateofanniversary}
+                        onChange={handleChange}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                      />
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* Identity Accordion */}
+                <Accordion defaultExpanded={false}>
+                  <AccordionSummary
+                    expandIcon={<ChevronDown />}
+                    aria-controls="identity-content"
+                    id="identity-header"
+                  >
+                    <Typography variant="h6">Identity</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextField
+                        name="guestid"
+                        label="Guest ID"
+                        value={formData.guestid}
+                        onChange={handleChange}
+                        fullWidth
+                        select
+                      >
+                        {[
+                          "Adhaar",
+                          "Driving License",
+                          "Voter ID Card",
+                          "Passport",
+                          "Others",
+                        ].map((idType) => (
+                          <MenuItem key={idType} value={idType}>
+                            {idType}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        label="Guest ID Number"
+                        name="guestidno"
+                        value={formData.guestidno}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                      {/* Conditional Passport Fields */}
+                      {formData.guestid === "Passport" && (
+                        <>
+                          <TextField
+                            label="Passport Issue Date"
+                            type="date"
+                            name="passportIssueDate"
+                            value={formData.passportIssueDate}
+                            onChange={handleChange}
+                            error={!!errors.passportIssueDate}
+                            helperText={errors.passportIssueDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+
+                          <TextField
+                            label="Passport Expiry Date"
+                            type="date"
+                            name="passportExpireDate"
+                            value={formData.passportExpireDate}
+                            onChange={handleChange}
+                            error={!!errors.passportExpireDate}
+                            helperText={errors.passportExpireDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+
+                          <TextField
+                            label="Visa Number"
+                            name="visaNumber"
+                            value={formData.visaNumber}
+                            onChange={handleChange}
+                            error={!!errors.visaNumber}
+                            helperText={errors.visaNumber}
+                            fullWidth
+                            required
+                          />
+
+                          <TextField
+                            label="Visa Issue Date"
+                            type="date"
+                            name="visaIssueDate"
+                            value={formData.visaIssueDate}
+                            onChange={handleChange}
+                            error={!!errors.visaIssueDate}
+                            helperText={errors.visaIssueDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+
+                          <TextField
+                            label="Visa Expiry Date"
+                            type="date"
+                            name="visaExpireDate"
+                            value={formData.visaExpireDate}
+                            onChange={handleChange}
+                            error={!!errors.visaExpireDate}
+                            helperText={errors.visaExpireDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+                        </>
+                      )}
+                      <TextField
+                        label="Company Name"
+                        name="companyName"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                      <TextField
+                        label="GSTIN"
+                        name="gstin"
+                        value={formData.gstin}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* Reservation Accordion */}
+                <Accordion defaultExpanded={false}>
+                  <AccordionSummary
+                    expandIcon={<ChevronDown />}
+                    aria-controls="reservation-content"
+                    id="reservation-header"
+                  >
+                    <Typography variant="h6">Reservation</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextField
+                        label="Adults"
+                        type="number"
+                        name="adults"
+                        value={formData.adults}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                      <TextField
+                        label="Children"
+                        type="number"
+                        name="children"
+                        value={formData.children}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                      <TextField
+                        label="Check-in Date"
+                        type="date"
+                        name="checkIn"
+                        value={formData.checkIn}
+                        onChange={handleChange}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                         required
                       />
-
                       <TextField
-                        label="Passport Expiry Date"
+                        label="Check-out Date"
                         type="date"
-                        name="passportExpireDate"
-                        value={formData.passportExpireDate}
+                        name="checkOut"
+                        value={formData.checkOut}
                         onChange={handleChange}
-                        error={!!errors.passportExpireDate}
-                        helperText={errors.passportExpireDate}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                         required
                       />
-
                       <TextField
-                        label="Visa Number"
-                        name="visaNumber"
-                        value={formData.visaNumber}
+                        label="Check-in Time"
+                        type="time"
+                        name="expectedArrival"
+                        value={formData.expectedArrival}
                         onChange={handleChange}
-                        error={!!errors.visaNumber}
-                        helperText={errors.visaNumber}
-                        fullWidth
-                        required
-                      />
-
-                      <TextField
-                        label="Visa Issue Date"
-                        type="date"
-                        name="visaIssueDate"
-                        value={formData.visaIssueDate}
-                        onChange={handleChange}
-                        error={!!errors.visaIssueDate}
-                        helperText={errors.visaIssueDate}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
-                        required
                       />
-
                       <TextField
-                        label="Visa Expiry Date"
-                        type="date"
-                        name="visaExpireDate"
-                        value={formData.visaExpireDate}
+                        label="Check-out Time"
+                        type="time"
+                        name="expectedDeparture"
+                        value={formData.expectedDeparture}
                         onChange={handleChange}
-                        error={!!errors.visaExpireDate}
-                        helperText={errors.visaExpireDate}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
-                        required
                       />
-                    </>
-                  )}
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
 
-                  {/* Adults */}
-                  <TextField
-                    label="Adults"
-                    type="number"
-                    name="adults"
-                    value={formData.adults}
-                    onChange={handleChange}
-                    error={!!errors.adults}
-                    helperText={errors.adults}
-                    fullWidth
-                  />
+                {/* Guest Address Accordion */}
+                <Accordion defaultExpanded={false}>
+                  <AccordionSummary
+                    expandIcon={<ChevronDown />}
+                    aria-controls="guest-address-content"
+                    id="guest-address-header"
+                  >
+                    <Typography variant="h6">Guest Address</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextField
+                        label="State"
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                      <TextField
+                        label="Address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        fullWidth
+                        multiline
+                      />
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
 
-                  {/* Children */}
-                  <TextField
-                    label="Children"
-                    type="number"
-                    name="children"
-                    value={formData.children}
-                    onChange={handleChange}
-                    error={!!errors.children}
-                    helperText={errors.children}
-                    fullWidth
-                  />
+                {/* Additional Details Accordion */}
+                <Accordion defaultExpanded={false}>
+                  <AccordionSummary
+                    expandIcon={<ChevronDown />}
+                    aria-controls="additional-details-content"
+                    id="additional-details-header"
+                  >
+                    <Typography variant="h6">Additional Details</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextField
+                        label="Meal Plan"
+                        name="mealPlan"
+                        select
+                        fullWidth
+                        value={formData.mealPlan}
+                        onChange={handleChange}
+                      >
+                        {["EP", "CP", "AP", "MAP"].map((plan) => (
+                          <MenuItem key={plan} value={plan}>
+                            {plan}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        label="Remarks"
+                        name="remarks"
+                        value={formData.remarks}
+                        onChange={handleChange}
+                        fullWidth
+                        multiline
+                      />
+                    </div>
+                  </AccordionDetails>
+                </Accordion>
 
-                  {/* Check-in */}
-                  <TextField
-                    label="Check-in Date"
-                    type="date"
-                    name="checkIn"
-                    value={formData.checkIn}
-                    onChange={handleChange}
-                    error={!!errors.checkIn}
-                    helperText={errors.checkIn}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                    required
-                  />
-
-                  {/* Check-out */}
-                  <TextField
-                    label="Check-out Date"
-                    type="date"
-                    name="checkOut"
-                    value={formData.checkOut}
-                    onChange={handleChange}
-                    error={!!errors.checkOut}
-                    helperText={errors.checkOut}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                    required
-                  />
-
-                  {/* Expected Arrival */}
-                  <TextField
-                    label="Check-in Time"
-                    type="time"
-                    name="expectedArrival"
-                    value={formData.expectedArrival}
-                    onChange={handleChange}
-                    error={!!errors.expectedArrival}
-                    helperText={errors.expectedArrival}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-
-                  {/* Expected Departure */}
-                  <TextField
-                    label="Check-out Time"
-                    type="time"
-                    name="expectedDeparture"
-                    value={formData.expectedDeparture}
-                    onChange={handleChange}
-                    error={!!errors.expectedDeparture}
-                    helperText={errors.expectedDeparture}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                  />
-
-                  {/* State */}
-                  <TextField
-                    label="State"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    error={!!errors.state}
-                    helperText={errors.state}
-                    fullWidth
-                  />
-
-                  {/* Meal Plan */}
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Meal Plan"
-                      name="mealPlan"
-                      select
-                      fullWidth
-                      value={formData.mealPlan}
-                      onChange={handleChange}
-                      error={!!errors.mealPlan}
-                      helperText={errors.mealPlan}
-                    >
-                      {["EP", "CP", "AP", "MAP"].map((plan) => (
-                        <MenuItem key={plan} value={plan}>
-                          {plan}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-
-                  {/* Address */}
-                  <TextField
-                    label="Address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    error={!!errors.address}
-                    helperText={errors.address}
-                    fullWidth
-                    multiline
-                  />
-
-                  {/* Remarks */}
-                  <TextField
-                    label="Remarks"
-                    name="remarks"
-                    value={formData.remarks}
-                    onChange={handleChange}
-                    error={!!errors.remarks}
-                    helperText={errors.remarks}
-                    fullWidth
-                    multiline
-                  />
-                </div>
                 <div className="flex items-center justify-end">
                   <Button
                     variant="contained"
@@ -1216,16 +1205,15 @@ export default function BookingForm() {
                   >
                     Check Room Availability
                   </Button>
-
                   <Button
                     variant="outlined"
                     color="secondary"
                     onClick={() => router.push("/property/roomdashboard")}
                     sx={{
                       fontWeight: "bold",
-                      ml: 4, // Margin-left for spacing
+                      ml: 4,
                       "&:hover": {
-                        backgroundColor: "#e0e0e0", // Light gray shade for hover effect
+                        backgroundColor: "#e0e0e0",
                       },
                     }}
                   >
@@ -1314,11 +1302,10 @@ export default function BookingForm() {
                         transition={{ delay: index * 0.05 }}
                         className={`
                         relative rounded-xl overflow-hidden transform-gpu
-                        ${
-                          selectedRooms.includes(room.number)
+                        ${selectedRooms.includes(room.number)
                             ? "ring-2 ring-blue-500 shadow-lg"
                             : "ring-1 ring-gray-200"
-                        }
+                          }
                       `}
                       >
                         <motion.div

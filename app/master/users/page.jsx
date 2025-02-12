@@ -98,14 +98,14 @@ export default function Page() {
       } else {
         toast.error('Failed to delete user.'
           , {   //error toaster
-            position: "top-right", 
-            autoClose: 5000, 
-            hideProgressBar: false, 
-            closeOnClick: true, 
-            pauseOnHover: true, 
-            draggable: true, 
-            progress: undefined, 
-            theme: "dark", 
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
           });
 
       }
@@ -118,7 +118,7 @@ export default function Page() {
 
   const handleAddNew = () => {
     router.push('users/addUser');
-   // toast.success('Redirecting to add new user page!');
+    // toast.success('Redirecting to add new user page!');
   };
 
   const handleOpenEdit = (user) => {
@@ -172,17 +172,17 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-amber-50">
       <Navbar />
-      <ToastContainer 
-      position="top-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      newestOnTop={false}
-      closeOnClick
-      rtl={false}
-      pauseOnFocusLoss
-      draggable
-      pauseOnHover
-      theme="dark"
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
       />
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
