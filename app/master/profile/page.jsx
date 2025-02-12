@@ -323,15 +323,14 @@ const ProfilePage = () => {
                   fullWidth
                   label="District *"
                   variant="outlined"
-                  select
+                
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                >
-                  <MenuItem value="District 1">District 1</MenuItem>
-                  <MenuItem value="District 2">District 2</MenuItem>
+                
+                  
                  
-                </TextField>
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
