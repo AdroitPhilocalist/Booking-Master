@@ -330,7 +330,7 @@ const ProfilePage = () => {
                 >
                   <MenuItem value="District 1">District 1</MenuItem>
                   <MenuItem value="District 2">District 2</MenuItem>
-                  <MenuItem value="District 3">District 3</MenuItem>
+                 
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
