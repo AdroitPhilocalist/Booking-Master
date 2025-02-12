@@ -465,7 +465,7 @@ const SalesReportPage = () => {
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Item Name</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Sales Date</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Invoice No</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Available Quantity</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Sold Quantity</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Unit</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Rate</TableCell>
                   <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>CGST</TableCell>
@@ -506,7 +506,7 @@ const SalesReportPage = () => {
                         })()}
                       </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{report.Invoiceno}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{report.quantity?.stock}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{report.quantityAmount}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{report.unit?.quantityUnit}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{report.rate}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{(report.taxpercent?.tax)/2}</TableCell>
