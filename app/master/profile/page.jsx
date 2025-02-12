@@ -36,32 +36,39 @@ const ProfilePage = () => {
   const router = useRouter();
   const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
+  // Function to check if all required fields are filled
+  const areRequiredFieldsFilled = () => {
+    const requiredFields = [
+      'hotelName',
+      'mobileNo',
+      'email',
+      'addressLine1',
+      'district',
+      'pinCode'
+    ];
+
+    return requiredFields.every(field => formData[field].trim() !== '');
+  };
+
   // Fetch existing profile data
   const fetchProfileData = async () => {
     try {
       setIsLoading(true);
       const token = getCookie('authToken');
       if (!token) {
-        router.push('/'); // Redirect to login if no token is found
+        router.push('/');
         return;
       }
-      
-      // Verify the token
+
       const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
       const userId = decoded.payload.id;
-      
-      // Fetch profile data
+
       const response = await fetch(`/api/Profile/${userId}`);
-      console.log('Response:', response);
       const result = await response.json();
-      
-      console.log('Profile data:', result.data);
-      
+
       if (result.success) {
-        // Check Profile_Complete status
         setIsProfileComplete(result.data.Profile_Complete === 'yes');
-        
-        // Populate form data
+
         const profileData = result.data;
         const sanitizedData = {
           hotelName: profileData.hotelName || "",
@@ -81,7 +88,7 @@ const ProfilePage = () => {
     } catch (error) {
       console.error("Error fetching profile data:", error);
       toast.error("Error loading profile data");
-      router.push('/'); // Redirect to login on error
+      router.push('/');
     } finally {
       setIsLoading(false);
     }
@@ -91,25 +98,20 @@ const ProfilePage = () => {
     fetchProfileData();
   }, []);
 
-  // Add a useEffect to handle navigation restriction
   useEffect(() => {
     if (!isProfileComplete) {
-      // Prevent navigation to other pages
       const preventNavigation = (e) => {
         e.preventDefault();
         toast.error("Please complete your profile first");
         router.push('/master/profile');
       };
 
-      // Block browser navigation attempts
       window.addEventListener('popstate', preventNavigation);
-      
-      // Optional: Block direct URL access
+
       if (window.location.pathname !== '/master/profile') {
         router.push('/master/profile');
       }
 
-      // Cleanup
       return () => {
         window.removeEventListener('popstate', preventNavigation);
       };
@@ -135,13 +137,12 @@ const ProfilePage = () => {
         },
         body: JSON.stringify({
           ...formData,
-          Profile_Complete: 'yes', // Set Profile_Complete to 'yes' upon submission
+          Profile_Complete: 'yes',
         }),
       });
       const result = await response.json();
 
       if (result.success) {
-        // Check if profile is now complete
         if (result.data.Profile_Complete === 'yes') {
           setIsProfileComplete(true);
           toast.success("Profile completed successfully!");
@@ -159,7 +160,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
@@ -187,196 +187,201 @@ const ProfilePage = () => {
   }
 
   return (
- <div className="min-h-screen bg-amber-50">
-     <div>
-      {isProfileComplete && <Navbar />}
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
-      <Box
-        sx={{
-          maxWidth: "800px",
-          margin: "50px auto",
-          padding: "20px",
-          border: "1px solid #e0e0e0",
-          borderRadius: "8px",
-          backgroundColor: "#fff",
-        }}
-      >
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{ marginBottom: "20px", fontWeight: "bold", textAlign: "center" }}
+    <div className="min-h-screen bg-amber-50">
+      <div>
+        {isProfileComplete && <Navbar />}
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+        <Box
+          sx={{
+            maxWidth: "800px",
+            margin: "50px auto",
+            padding: "20px",
+            border: "1px solid #e0e0e0",
+            borderRadius: "8px",
+            backgroundColor: "#fff",
+          }}
         >
-          Profile
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3} marginBottom={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Hotel Name *"
-                variant="outlined"
-                required
-                name="hotelName"
-                value={formData.hotelName}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Mobile No *"
-                variant="outlined"
-                required
-                name="mobileNo"
-                value={formData.mobileNo}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Alt Mobile"
-                variant="outlined"
-                name="altMobile"
-                value={formData.altMobile}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Email *"
-                variant="outlined"
-                required
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={3} marginBottom={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="GST No"
-                variant="outlined"
-                name="gstNo"
-                value={formData.gstNo}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Website"
-                variant="outlined"
-                name="website"
-                value={formData.website}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
-
           <Typography
-            variant="h6"
-            component="h2"
-            sx={{ marginBottom: "10px", fontWeight: "bold" }}
+            variant="h4"
+            component="h1"
+            sx={{ marginBottom: "20px", fontWeight: "bold", textAlign: "center" }}
           >
-            Address
+            Profile
           </Typography>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3} marginBottom={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Hotel Name *"
+                  variant="outlined"
+                  required
+                  name="hotelName"
+                  value={formData.hotelName}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Mobile No *"
+                  variant="outlined"
+                  required
+                  name="mobileNo"
+                  value={formData.mobileNo}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Alt Mobile"
+                  variant="outlined"
+                  name="altMobile"
+                  value={formData.altMobile}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Email *"
+                  variant="outlined"
+                  required
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </Grid>
+            </Grid>
 
-          <Grid container spacing={3} marginBottom={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Address Line 1 *"
-                variant="outlined"
-                name="addressLine1"
-                value={formData.addressLine1}
-                onChange={handleChange}
-              />
+            <Grid container spacing={3} marginBottom={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="GST No"
+                  variant="outlined"
+                  name="gstNo"
+                  value={formData.gstNo}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Website"
+                  variant="outlined"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleChange}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Address Line 2"
-                variant="outlined"
-                name="addressLine2"
-                value={formData.addressLine2}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="District *"
-                variant="outlined"
-                select
-                name="district"
-                value={formData.district}
-                onChange={handleChange}
-              >
-                <MenuItem value="District 1">District 1</MenuItem>
-                <MenuItem value="District 2">District 2</MenuItem>
-                <MenuItem value="District 3">District 3</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Country"
-                variant="outlined"
-                value="India"
-                disabled
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Pin Code *"
-                variant="outlined"
-                name="pinCode"
-                value={formData.pinCode}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
 
-          <Box textAlign="center">
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              sx={{
-                backgroundColor: "#008080",
-                color: "#fff",
-                padding: "10px 20px",
-                "&:hover": {
-                  backgroundColor: "#006666",
-                },
-              }}
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{ marginBottom: "10px", fontWeight: "bold" }}
             >
-              {profileExists ? "Update" : "Save"}
-            </Button>
-          </Box>
-        </form>
+              Address
+            </Typography>
 
-      </Box>
-      {isProfileComplete && <Footer />}
+            <Grid container spacing={3} marginBottom={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Address Line 1 *"
+                  variant="outlined"
+                  name="addressLine1"
+                  value={formData.addressLine1}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Address Line 2"
+                  variant="outlined"
+                  name="addressLine2"
+                  value={formData.addressLine2}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="District *"
+                  variant="outlined"
+                  select
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="District 1">District 1</MenuItem>
+                  <MenuItem value="District 2">District 2</MenuItem>
+                  <MenuItem value="District 3">District 3</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Country"
+                  variant="outlined"
+                  value="India"
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Pin Code *"
+                  variant="outlined"
+                  name="pinCode"
+                  value={formData.pinCode}
+                  onChange={handleChange}
+                />
+              </Grid>
+            </Grid>
+
+
+            <Box textAlign="center">
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={!isProfileComplete && !areRequiredFieldsFilled()}
+                sx={{
+                  backgroundColor: "#008080",
+                  color: "#fff",
+                  padding: "10px 20px",
+                  "&:hover": {
+                    backgroundColor: "#006666",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "#cccccc",
+                    color: "#666666"
+                  }
+                }}
+              >
+                {profileExists ? "Update" : "Save"}
+              </Button>
+            </Box>
+          </form>
+        </Box>
+        {isProfileComplete && <Footer />}
+      </div>
     </div>
- </div>
   );
 };
 
