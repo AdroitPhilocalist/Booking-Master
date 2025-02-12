@@ -118,7 +118,7 @@ const InvoicePage = () => {
                 fill="currentFill"
               />
             </svg>
-            <span className="mt-4 text-gray-700">Loading ...</span>
+            <span className="mt-4 text-gray-700">Loading Restaurant Reports ...</span>
           </div>
         </div>
       )}
