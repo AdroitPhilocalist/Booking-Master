@@ -187,6 +187,7 @@ export default function RoomCategories() {
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Category</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Description</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Tariff (INR)</TableCell>
+                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>CGST (%)</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>GST (%)</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Total (incl. GST)</TableCell>
                     <TableCell sx={{ fontWeight: "bold", color: "#28bfdb", textAlign: "center" }}>Booking Eng.</TableCell>
@@ -208,6 +209,7 @@ export default function RoomCategories() {
                       <TableCell>{room.category}</TableCell>
                       <TableCell>{room.description}</TableCell>
                       <TableCell>{room.tariff}</TableCell>
+                      <TableCell>{room.gst/2}</TableCell>
                       <TableCell>{room.gst}</TableCell>
                       <TableCell>{room.total}</TableCell>
                       <TableCell>{room.bookingEng}</TableCell>
