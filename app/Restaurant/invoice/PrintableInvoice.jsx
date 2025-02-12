@@ -160,12 +160,7 @@ const PrintableInvoice = ({ invoiceId }) => {
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                 Phone: {profile.mobileNo}
               </Typography>
-              
-              {profile.website && (
-                <Typography variant="body2" color="textSecondary">
-                  Website: {profile.website || 'N/A'}
-                </Typography>
-              )}
+
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                 Restaurant GST No: {profile.gstNo || 'N/A'}
               </Typography>
