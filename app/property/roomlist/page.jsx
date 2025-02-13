@@ -20,7 +20,8 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
@@ -129,16 +130,7 @@ export default function BookingManagement() {
       if (res.ok) {
         const data = await res.json();
         console.log("New room added:", data.data);
-        toast.success("New room added successfully!", {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+        toast.success("New room added successfully!");
 
         // Fetch updated rooms
         const roomsResponse = await fetch("/api/rooms");
@@ -159,29 +151,11 @@ export default function BookingManagement() {
       } else {
         const errorData = await res.json();
         console.error("Failed to create new room:", errorData.error);
-        toast.error("Failed to add new room!", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+        toast.error("Failed to add new room!");
       }
     } catch (error) {
       console.error("An error occurred while creating the room:", error);
-      toast.error("Failed to add new room!", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
+      toast.error("Failed to add new room!");
     }
   };
   const modalStyle = {
@@ -199,25 +173,6 @@ export default function BookingManagement() {
   return (
     <div>
       <Navbar />
-      {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md animate-pulse">
-          <p className="font-bold">Error</p>
-          <p>{error}</p>
-        </div>
-      )}
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-        transition={Slide}
-      />
       <div className="min-h-screen bg-amber-50">
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
