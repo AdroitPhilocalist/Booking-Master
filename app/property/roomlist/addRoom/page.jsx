@@ -17,6 +17,8 @@ export default function NewRoomForm() {
   const [categories, setCategories] = useState([]);
   const [floorNumber, setFloorNumber] = useState("");
   const [clean, setClean] = useState("Yes");
+  const [error, setError] = useState(null);
+
   //const [occupied, setOccupied] = useState("Vacant"); // Added occupied state
   const router = useRouter();
 
@@ -33,6 +35,7 @@ export default function NewRoomForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Reset error state
 
     // Create new room object with the correct enum values
     const newRoom = {
