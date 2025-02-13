@@ -78,8 +78,17 @@ export default function NewRoomForm() {
       // Handle response
       if (res.ok) {
         // Redirect to the room dashboard if the room creation is successful
-        toast.success('New room added successfully!')
-        //router.back();
+        toast.success('New room added successfully!', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+        router.push('/property/roomlist');
       } else {
         console.error("Failed to create new room", res.statusText);
         toast.error('Failed to add new room!');
@@ -87,7 +96,16 @@ export default function NewRoomForm() {
     } catch (error) {
       // Handle any fetch errors
       console.error("An error occurred while creating the room:", error);
-      toast.error('Failed to add new room!')
+      toast.error('Failed to add new room!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
   };
 
