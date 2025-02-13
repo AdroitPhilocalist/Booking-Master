@@ -51,11 +51,13 @@ export default function NewRoomForm() {
       const roomsResponse = await fetch("/api/rooms");
       const roomsData = await roomsResponse.json();
       const existingRooms = roomsData.data;
+      console.log("existingRooms",existingRooms)
 
       // Check if room number already exists
       const roomExists = existingRooms.some(
         (room) => room.number === roomNumber
       );
+      console.log("room exist",roomExists)
 
       if (roomExists) {
         toast.error("Room number already exists!", {

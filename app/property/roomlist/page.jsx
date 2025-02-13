@@ -32,6 +32,7 @@ export default function BookingManagement() {
   const [floorNumber, setFloorNumber] = useState("");
   const [clean, setClean] = useState("Yes");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Function to sort room numbers
   const sortRoomNumbers = (roomsArray) => {
