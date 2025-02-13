@@ -91,6 +91,31 @@ export default function BookingManagement() {
     };
 
     try {
+      // Check if room number already exists
+      const roomsResponse = await fetch("/api/rooms");
+      const roomsData = await roomsResponse.json();
+      const existingRooms = roomsData.data;
+      console.log("existingRooms",existingRooms)
+
+      // Check if room number already exists
+      const roomExists = existingRooms.some(
+        (room) => room.number === roomNumber
+      );
+      console.log("room exist",roomExists)
+
+      if (roomExists) {
+        toast.error("Room number already exists!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+        return;
+      }
       const res = await fetch("/api/rooms", {
         method: "POST",
         headers: {
