@@ -20,7 +20,8 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast, Slide } from 'react-toastify';
+
 
 
 export default function BookingManagement() {
