@@ -128,7 +128,16 @@ export default function BookingManagement() {
       if (res.ok) {
         const data = await res.json();
         console.log("New room added:", data.data);
-        toast.success("New room added successfully!");
+        toast.success("New room added successfully!", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
 
         // Fetch updated rooms
         const roomsResponse = await fetch("/api/rooms");
