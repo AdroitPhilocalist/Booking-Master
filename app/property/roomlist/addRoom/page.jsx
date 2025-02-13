@@ -48,11 +48,16 @@ export default function NewRoomForm() {
 
     try {
       // Check if room number already exists
-      const checkRes = await fetch(`/api/rooms/check/${roomNumber}`);
-      const checkData = await checkRes.json();
+      const roomsResponse = await fetch("/api/rooms");
+      const roomsData = await roomsResponse.json();
+      const existingRooms = roomsData.data;
 
-      if (checkData.exists) {
-        setError("A room with this number already exists.");
+      // Check if room number already exists
+      const roomExists = existingRooms.some(
+        (room) => room.number === roomNumber
+      );
+
+      if (roomExists) {
         toast.error("Room number already exists!", {
           position: "top-center",
           autoClose: 5000,
@@ -65,7 +70,6 @@ export default function NewRoomForm() {
         });
         return;
       }
-
       // Submit new room to backend
       const res = await fetch("/api/rooms", {
         method: "POST",
@@ -118,19 +122,19 @@ export default function NewRoomForm() {
         </div>
       )}
 
-<ToastContainer
-  position="top-center"
-  autoClose={5000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  closeOnClick
-  rtl={false}
-  pauseOnFocusLoss
-  draggable
-  pauseOnHover
-  theme="colored"
-  transition={Slide}
-/>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Slide}
+      />
 
       <h1 className="text-2xl mb-4">Add New Room</h1>
       <form onSubmit={handleSubmit}>
