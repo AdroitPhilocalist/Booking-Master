@@ -867,71 +867,56 @@ export default function BookingForm() {
                 </Accordion>
 
                 {/* Guest Details Accordion */}
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary
-                    expandIcon={<ChevronDown />}
-                    aria-controls="guest-details-content"
-                    id="guest-details-header"
-                  >
-                    <Typography variant="h6">Guest Details</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TextField
-                        label="Guest Name"
-                        name="guestName"
-                        value={formData.guestName}
-                        onChange={handleChange}
-                        fullWidth
-                        required
-                      />
-                      <Autocomplete
-                        freeSolo
-                        options={filteredMobileNumbers}
-                        value={formData.mobileNo}
-                        onChange={(event, newValue) =>
-                          handleMobileNumberChange(event, newValue)
-                        }
-                        onInputChange={(event, newValue) =>
-                          handleMobileNumberChange(event, newValue)
-                        }
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Mobile Number"
-                            required
-                            fullWidth
-                          />
-                        )}
-                      />
-                      <TextField
-                        label="Email ID"
-                        name="guestEmail"
-                        value={formData.guestEmail}
-                        onChange={handleChange}
-                        fullWidth
-                      />
-                      <TextField
-                        label="Date of Birth"
-                        type="date"
-                        name="dateofbirth"
-                        value={formData.dateofbirth}
-                        onChange={handleChange}
-                        InputLabelProps={{ shrink: true }}
-                        fullWidth
-                      />
-                      <TextField
-                        label="Date of Anniversary"
-                        type="date"
-                        name="dateofanniversary"
-                        value={formData.dateofanniversary}
-                        onChange={handleChange}
-                        InputLabelProps={{ shrink: true }}
-                        fullWidth
-                      />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
+                {/* Guest Details Section */}
+<div className="mb-6">
+  <Typography variant="h6" className="mb-2">Guest Details</Typography>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <TextField
+      label="Guest Name"
+      name="guestName"
+      value={formData.guestName}
+      onChange={handleChange}
+      fullWidth
+      required
+    />
+    <Autocomplete
+      freeSolo
+      options={filteredMobileNumbers}
+      value={formData.mobileNo}
+      onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+      onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
+      renderInput={(params) => (
+        <TextField {...params} label="Mobile Number" required fullWidth />
+      )}
+      filterOptions={(options, { inputValue }) => options.filter((option) => option.startsWith(inputValue))}
+    />
+    <TextField
+      label="Email ID"
+      name="guestEmail"
+      value={formData.guestEmail}
+      onChange={handleChange}
+      fullWidth
+    />
+    <TextField
+      label="Date of Birth"
+      type="date"
+      name="dateofbirth"
+      value={formData.dateofbirth}
+      onChange={handleChange}
+      InputLabelProps={{ shrink: true }}
+      fullWidth
+    />
+    <TextField
+      label="Date of Anniversary"
+      type="date"
+      name="dateofanniversary"
+      value={formData.dateofanniversary}
+      onChange={handleChange}
+      InputLabelProps={{ shrink: true }}
+      fullWidth
+    />
+  </div>
+</div>
 
                 {/* Identity Accordion */}
                 <Accordion defaultExpanded={false}>
@@ -1057,32 +1042,12 @@ export default function BookingForm() {
                 </Accordion>
 
                 {/* Reservation Accordion */}
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary
-                    expandIcon={<ChevronDown />}
-                    aria-controls="reservation-content"
-                    id="reservation-header"
-                  >
-                    <Typography variant="h6">Reservation</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TextField
-                        label="Adults"
-                        type="number"
-                        name="adults"
-                        value={formData.adults}
-                        onChange={handleChange}
-                        fullWidth
-                      />
-                      <TextField
-                        label="Children"
-                        type="number"
-                        name="children"
-                        value={formData.children}
-                        onChange={handleChange}
-                        fullWidth
-                      />
+                <div className="mb-6">
+                  <Typography variant="h6" className="mb-2">
+                    Reservation
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-in Date"
                         type="date"
@@ -1093,6 +1058,8 @@ export default function BookingForm() {
                         fullWidth
                         required
                       />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-out Date"
                         type="date"
@@ -1103,6 +1070,8 @@ export default function BookingForm() {
                         fullWidth
                         required
                       />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-in Time"
                         type="time"
@@ -1112,6 +1081,8 @@ export default function BookingForm() {
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                       />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-out Time"
                         type="time"
@@ -1121,21 +1092,17 @@ export default function BookingForm() {
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                       />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
+                    </Grid>
+                  </Grid>
+                </div>
 
-                {/* Guest Address Accordion */}
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary
-                    expandIcon={<ChevronDown />}
-                    aria-controls="guest-address-content"
-                    id="guest-address-header"
-                  >
-                    <Typography variant="h6">Guest Address</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               {/* Guest Address Section */}
+               <div className="mb-6">
+                  <Typography variant="h6" className="mb-2">
+                    Guest Address
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="State"
                         name="state"
@@ -1143,6 +1110,8 @@ export default function BookingForm() {
                         onChange={handleChange}
                         fullWidth
                       />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Address"
                         name="address"
@@ -1151,21 +1120,17 @@ export default function BookingForm() {
                         fullWidth
                         multiline
                       />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
+                    </Grid>
+                  </Grid>
+                </div>
 
-                {/* Additional Details Accordion */}
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary
-                    expandIcon={<ChevronDown />}
-                    aria-controls="additional-details-content"
-                    id="additional-details-header"
-                  >
-                    <Typography variant="h6">Additional Details</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Additional Details Section */}
+                <div className="mb-6">
+                  <Typography variant="h6" className="mb-2">
+                    Additional Details
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Meal Plan"
                         name="mealPlan"
@@ -1180,6 +1145,8 @@ export default function BookingForm() {
                           </MenuItem>
                         ))}
                       </TextField>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                       <TextField
                         label="Remarks"
                         name="remarks"
@@ -1188,9 +1155,9 @@ export default function BookingForm() {
                         fullWidth
                         multiline
                       />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
+                    </Grid>
+                  </Grid>
+                </div>
 
                 <div className="flex items-center justify-end">
                   <Button
