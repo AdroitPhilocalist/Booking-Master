@@ -81,6 +81,8 @@ export default function BookingManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Reset error state
+
     const newRoom = {
       number: roomNumber,
       category,
