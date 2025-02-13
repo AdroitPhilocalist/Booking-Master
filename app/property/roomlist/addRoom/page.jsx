@@ -47,6 +47,25 @@ export default function NewRoomForm() {
     };
 
     try {
+      // Check if room number already exists
+    const checkRes = await fetch(`/api/rooms/check/${roomNumber}`);
+    const checkData = await checkRes.json();
+
+    if (checkData.exists) {
+      setError("A room with this number already exists.");
+      toast.error('Room number already exists!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
+      return;
+    }
+
       // Submit new room to backend
       const res = await fetch("/api/rooms", {
         method: "POST",
