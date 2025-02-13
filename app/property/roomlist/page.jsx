@@ -130,7 +130,14 @@ export default function BookingManagement() {
       if (res.ok) {
         const data = await res.json();
         console.log("New room added:", data.data);
-        toast.success("New room added successfully!");
+        toast.success('New room added successfully!', {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
 
         // Fetch updated rooms
         const roomsResponse = await fetch("/api/rooms");
@@ -173,6 +180,18 @@ export default function BookingManagement() {
   return (
     <div>
       <Navbar />
+      <ToastContainer
+      position="top-center"
+      autoClose={5000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="colored"
+    />
       <div className="min-h-screen bg-amber-50">
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
