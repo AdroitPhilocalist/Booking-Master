@@ -790,83 +790,90 @@ export default function BookingForm() {
                 Guest Reservation Form
               </h1>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Booking Details Accordion */}
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary
-                    expandIcon={<ChevronDown />}
-                    aria-controls="booking-details-content"
-                    id="booking-details-header"
-                  >
-                    <Typography variant="h6">Booking Details</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TextField
-                        label="Booking ID"
-                        name="bookingId"
-                        value={formData.bookingId}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                        disabled
-                      />
-                      <TextField
-                        label="Booking Type"
-                        name="bookingType"
-                        value={formData.bookingType}
-                        onChange={handleChange}
-                        fullWidth
-                        select
-                      >
-                        {[
-                          "FIT",
-                          "Group",
-                          "Corporate",
-                          "Corporate Group",
-                          "Social Events",
-                          "Others",
-                        ].map((type) => (
-                          <MenuItem key={type} value={type}>
-                            {type}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                      <TextField
-                        label="Booking Reference"
-                        name="bookingReference"
-                        value={formData.bookingReference}
-                        onChange={handleChange}
-                        fullWidth
-                        variant="outlined"
-                      />
-                      <TextField
-                        label="Reference Number"
-                        name="referenceno"
-                        value={formData.referenceno}
-                        onChange={handleChange}
-                        fullWidth
-                        variant="outlined"
-                      />
-                      <TextField
-                        label="Booking Status"
-                        name="bookingStatus"
-                        select
-                        fullWidth
-                        value={formData.bookingStatus}
-                        onChange={handleChange}
-                      >
-                        {["Confirm", "Block"].map((status) => (
-                          <MenuItem key={status} value={status}>
-                            {status}
-                          </MenuItem>
-                        ))}
-                        required
-                      </TextField>
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
-
-                {/* Guest Details Accordion */}
+                {/* Booking Details Section */}
+      <div className="mb-6">
+        <Typography variant="h6" className="mb-2">
+          Booking Details
+        </Typography>
+        <Grid container spacing={2}>
+          {/* Booking ID - read-only */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Booking ID"
+              name="bookingId"
+              value={formData.bookingId}
+              InputProps={{ readOnly: true }}
+              variant="outlined"
+              fullWidth
+              disabled
+            />
+          </Grid>
+          {/* Booking Type - select field */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Booking Type"
+              name="bookingType"
+              value={formData.bookingType}
+              onChange={handleChange}
+              fullWidth
+              select
+            >
+              {[
+                "FIT",
+                "Group",
+                "Corporate",
+                "Corporate Group",
+                "Social Events",
+                "Others",
+              ].map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          {/* Booking Reference */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Booking Reference"
+              name="bookingReference"
+              value={formData.bookingReference}
+              onChange={handleChange}
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+          {/* Reference Number */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Reference Number"
+              name="referenceno"
+              value={formData.referenceno}
+              onChange={handleChange}
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+          {/* Booking Status */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Booking Status"
+              name="bookingStatus"
+              value={formData.bookingStatus}
+              onChange={handleChange}
+              fullWidth
+              select
+              required
+            >
+              {["Confirm", "Block"].map((status) => (
+                <MenuItem key={status} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+        </Grid>
+      </div>
                 {/* Guest Details Section */}
 <div className="mb-6">
   <Typography variant="h6" className="mb-2">Guest Details</Typography>
