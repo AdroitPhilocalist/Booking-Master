@@ -171,7 +171,16 @@ export default function BookingManagement() {
       }
     } catch (error) {
       console.error("An error occurred while creating the room:", error);
-      toast.error("Failed to add new room!");
+      toast.error("Failed to add new room!", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
   };
   const modalStyle = {
