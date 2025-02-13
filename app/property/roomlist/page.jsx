@@ -204,6 +204,19 @@ export default function BookingManagement() {
           <p>{error}</p>
         </div>
       )}
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Slide}
+      />
       <div className="min-h-screen bg-amber-50">
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
