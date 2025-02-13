@@ -925,129 +925,120 @@ export default function BookingForm() {
   </div>
 </div>
 
-                {/* Identity Accordion */}
-                <Accordion defaultExpanded={false}>
-                  <AccordionSummary
-                    expandIcon={<ChevronDown />}
-                    aria-controls="identity-content"
-                    id="identity-header"
-                  >
-                    <Typography variant="h6">Identity</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <TextField
-                        name="guestid"
-                        label="Guest ID"
-                        value={formData.guestid}
-                        onChange={handleChange}
-                        fullWidth
-                        select
-                      >
-                        {[
-                          "Adhaar",
-                          "Driving License",
-                          "Voter ID Card",
-                          "Passport",
-                          "Others",
-                        ].map((idType) => (
-                          <MenuItem key={idType} value={idType}>
-                            {idType}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                      <TextField
-                        label="Guest ID Number"
-                        name="guestidno"
-                        value={formData.guestidno}
-                        onChange={handleChange}
-                        fullWidth
-                      />
-                      {/* Conditional Passport Fields */}
-                      {formData.guestid === "Passport" && (
-                        <>
-                          <TextField
-                            label="Passport Issue Date"
-                            type="date"
-                            name="passportIssueDate"
-                            value={formData.passportIssueDate}
-                            onChange={handleChange}
-                            error={!!errors.passportIssueDate}
-                            helperText={errors.passportIssueDate}
-                            InputLabelProps={{ shrink: true }}
-                            fullWidth
-                            required
-                          />
-
-                          <TextField
-                            label="Passport Expiry Date"
-                            type="date"
-                            name="passportExpireDate"
-                            value={formData.passportExpireDate}
-                            onChange={handleChange}
-                            error={!!errors.passportExpireDate}
-                            helperText={errors.passportExpireDate}
-                            InputLabelProps={{ shrink: true }}
-                            fullWidth
-                            required
-                          />
-
-                          <TextField
-                            label="Visa Number"
-                            name="visaNumber"
-                            value={formData.visaNumber}
-                            onChange={handleChange}
-                            error={!!errors.visaNumber}
-                            helperText={errors.visaNumber}
-                            fullWidth
-                            required
-                          />
-
-                          <TextField
-                            label="Visa Issue Date"
-                            type="date"
-                            name="visaIssueDate"
-                            value={formData.visaIssueDate}
-                            onChange={handleChange}
-                            error={!!errors.visaIssueDate}
-                            helperText={errors.visaIssueDate}
-                            InputLabelProps={{ shrink: true }}
-                            fullWidth
-                            required
-                          />
-
-                          <TextField
-                            label="Visa Expiry Date"
-                            type="date"
-                            name="visaExpireDate"
-                            value={formData.visaExpireDate}
-                            onChange={handleChange}
-                            error={!!errors.visaExpireDate}
-                            helperText={errors.visaExpireDate}
-                            InputLabelProps={{ shrink: true }}
-                            fullWidth
-                            required
-                          />
-                        </>
-                      )}
-                      <TextField
-                        label="Company Name"
-                        name="companyName"
-                        value={formData.companyName}
-                        onChange={handleChange}
-                        fullWidth
-                      />
-                      <TextField
-                        label="GSTIN"
-                        name="gstin"
-                        value={formData.gstin}
-                        onChange={handleChange}
-                        fullWidth
-                      />
-                    </div>
-                  </AccordionDetails>
-                </Accordion>
-
+                {/* Identity Section */}
+      <div className="mb-6">
+        <Typography variant="h6" className="mb-2">
+          Identity
+        </Typography>
+        <Grid container spacing={2}>
+          {/* Guest ID - select the type */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              name="guestid"
+              label="Guest ID"
+              value={formData.guestid}
+              onChange={handleChange}
+              fullWidth
+              select
+            >
+              {[
+                "Adhaar",
+                "Driving License",
+                "Voter ID Card",
+                "Passport",
+                "Others",
+              ].map((idType) => (
+                <MenuItem key={idType} value={idType}>
+                  {idType}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          {/* Guest ID Number */}
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Guest ID Number"
+              name="guestidno"
+              value={formData.guestidno}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Grid>
+          {/* Conditional Passport fields if "Passport" is selected */}
+          {formData.guestid === "Passport" && (
+            <>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Passport Issue Date"
+                  type="date"
+                  name="passportIssueDate"
+                  value={formData.passportIssueDate}
+                  onChange={handleChange}
+                  error={!!errors.passportIssueDate}
+                  helperText={errors.passportIssueDate}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Passport Expiry Date"
+                  type="date"
+                  name="passportExpireDate"
+                  value={formData.passportExpireDate}
+                  onChange={handleChange}
+                  error={!!errors.passportExpireDate}
+                  helperText={errors.passportExpireDate}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Visa Number"
+                  name="visaNumber"
+                  value={formData.visaNumber}
+                  onChange={handleChange}
+                  error={!!errors.visaNumber}
+                  helperText={errors.visaNumber}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Visa Issue Date"
+                  type="date"
+                  name="visaIssueDate"
+                  value={formData.visaIssueDate}
+                  onChange={handleChange}
+                  error={!!errors.visaIssueDate}
+                  helperText={errors.visaIssueDate}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Visa Expiry Date"
+                  type="date"
+                  name="visaExpireDate"
+                  value={formData.visaExpireDate}
+                  onChange={handleChange}
+                  error={!!errors.visaExpireDate}
+                  helperText={errors.visaExpireDate}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  required
+                />
+              </Grid>
+            </>
+          )}
+        </Grid>
+      </div>
                 {/* Reservation Accordion */}
                 <div className="mb-6">
                   <Typography variant="h6" className="mb-2">
