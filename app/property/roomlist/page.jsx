@@ -198,6 +198,12 @@ export default function BookingManagement() {
   return (
     <div>
       <Navbar />
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md animate-pulse">
+          <p className="font-bold">Error</p>
+          <p>{error}</p>
+        </div>
+      )}
       <div className="min-h-screen bg-amber-50">
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
