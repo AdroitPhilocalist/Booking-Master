@@ -118,18 +118,20 @@ export default function NewRoomForm() {
         </div>
       )}
 
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+<ToastContainer
+  position="top-center"
+  autoClose={5000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  theme="colored"
+  transition={Slide}
+/>
+
       <h1 className="text-2xl mb-4">Add New Room</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
