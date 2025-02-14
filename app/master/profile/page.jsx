@@ -130,7 +130,15 @@ const ProfilePage = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      const response = await fetch("/api/Profile", {
+      const token = getCookie('authToken');
+      if (!token) {
+        router.push('/');
+        return;
+      }
+
+      const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+      const userId = decoded.payload.id;
+      const response = await fetch(`/api/Profile/${userId}`, {
         method: profileExists ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -143,6 +151,7 @@ const ProfilePage = () => {
       const result = await response.json();
 
       if (result.success) {
+        console.log(result.data)
         if (result.data.Profile_Complete === 'yes') {
           setIsProfileComplete(true);
           toast.success("Profile completed successfully!");
