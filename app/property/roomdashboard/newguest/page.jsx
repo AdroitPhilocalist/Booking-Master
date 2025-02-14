@@ -833,6 +833,8 @@ export default function BookingForm() {
               name="bookingType"
               value={formData.bookingType}
               onChange={handleChange}
+              error={!!errors.bookingType}
+              helperText={errors.bookingType}
               fullWidth
               select
             >
