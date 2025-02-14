@@ -936,6 +936,8 @@ export default function BookingForm() {
       name="dateofbirth"
       value={formData.dateofbirth}
       onChange={handleChange}
+      error={(errors.dateofbirth)}
+      helperText={errors.dateofbirth}
       InputLabelProps={{ shrink: true }}
       fullWidth
     />
@@ -945,6 +947,7 @@ export default function BookingForm() {
       name="dateofanniversary"
       value={formData.dateofanniversary}
       onChange={handleChange}
+      
       InputLabelProps={{ shrink: true }}
       fullWidth
     />
