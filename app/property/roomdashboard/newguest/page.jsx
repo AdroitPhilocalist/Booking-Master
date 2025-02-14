@@ -1086,7 +1086,7 @@ export default function BookingForm() {
             >
               Reservation
             </Typography>
-                  <Grid container spacing={2}>
+                  <Grid container spacing={2} mt={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-in Date"
@@ -1174,9 +1174,17 @@ export default function BookingForm() {
 
                 {/* Additional Details Section */}
                 <div className="mb-6">
-                  <Typography variant="h6" className="mb-2">
-                    Additional Details
-                  </Typography>
+                <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: "#0277bd",
+                fontWeight: "bold",
+                textTransform: "uppercase"
+              }}
+            >
+              Additional Details
+            </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
