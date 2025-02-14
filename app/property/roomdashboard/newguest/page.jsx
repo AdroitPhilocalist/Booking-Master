@@ -1213,6 +1213,19 @@ export default function BookingForm() {
                     Reservation
                   </Typography>
                   <Grid container spacing={2} mt={1}>
+                  <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Adults"
+                    type="number"
+                    name="adults"
+                    value={formData.adults}
+                    onChange={handleChange}
+                    error={!!errors.adults}
+                    helperText={errors.adults}
+                    fullWidth
+                  />
+
+                    </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-in Date"
