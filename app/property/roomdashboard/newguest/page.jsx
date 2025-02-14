@@ -1371,6 +1371,8 @@ export default function BookingForm() {
                         name="remarks"
                         value={formData.remarks}
                         onChange={handleChange}
+                        error={!!errors.remarks}
+                    helperText={errors.remarks}
                         fullWidth
                         multiline
                       />
