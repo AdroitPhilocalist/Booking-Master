@@ -1324,6 +1324,8 @@ export default function BookingForm() {
                         name="address"
                         value={formData.address}
                         onChange={handleChange}
+                        error={!!errors.address}
+                    helperText={errors.address}
                         fullWidth
                         multiline
                       />
