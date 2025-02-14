@@ -135,7 +135,6 @@ export default function BookingForm() {
     let visaIssueError = false;
     let dobError = false;
 
-
     // Date of Birth validation (18 years or above)
     if (formData.dateofbirth) {
       const dobDate = new Date(formData.dateofbirth);
@@ -199,8 +198,6 @@ export default function BookingForm() {
       mobileError = true;
     }
 
-
-
     // GSTIN validation
     if (
       formData.gstin &&
@@ -209,9 +206,6 @@ export default function BookingForm() {
       newErrors.gstin = "Invalid GSTIN format";
       gstinError = true;
     }
-
-
-
 
     // Passport-related validations
     if (formData.guestid === "passport") {
@@ -248,9 +242,7 @@ export default function BookingForm() {
       !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
-
       !gstinError &&
-
       !passportError &&
       !visaError &&
       !passportIssueError &&
@@ -451,18 +443,18 @@ export default function BookingForm() {
       const indices = dates.map((_, index) => index);
       indices.sort((a, b) => new Date(dates[a]) - new Date(dates[b]));
       return [
-        indices.map(i => dates[i]),
-        ...arrays.map(arr => indices.map(i => arr[i]))
+        indices.map((i) => dates[i]),
+        ...arrays.map((arr) => indices.map((i) => arr[i])),
       ];
     };
     try {
-      console.log('Selected rooms:', selectedRooms);
+      console.log("Selected rooms:", selectedRooms);
       const bookingData = { ...formData, roomNumbers: selectedRooms };
 
       // Create booking
-      const bookingResponse = await fetch('/api/NewBooking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const bookingResponse = await fetch("/api/NewBooking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
 
@@ -471,8 +463,8 @@ export default function BookingForm() {
 
       // Fetch necessary data
       const [roomsResponse, categoriesResponse] = await Promise.all([
-        fetch('/api/rooms'),
-        fetch('/api/roomCategories')
+        fetch("/api/rooms"),
+        fetch("/api/roomCategories"),
       ]);
 
       const roomsData = await roomsResponse.json();
@@ -489,13 +481,19 @@ export default function BookingForm() {
 
       // Process each selected room
       for (const selectedRoomNumber of selectedRooms) {
-        const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
-        const matchedCategory = categories.find(category => category._id === matchedRoom.category._id);
+        const matchedRoom = rooms.find(
+          (room) => room.number === selectedRoomNumber
+        );
+        const matchedCategory = categories.find(
+          (category) => category._id === matchedRoom.category._id
+        );
 
         // Calculate billing details
         const checkInDate = new Date(formData.checkIn);
         const checkOutDate = new Date(formData.checkOut);
-        const numberOfNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+        const numberOfNights = Math.ceil(
+          (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+        );
         const roomCharge = matchedCategory.total * numberOfNights;
         const roomTax = matchedCategory.gst;
 
@@ -511,12 +509,14 @@ export default function BookingForm() {
       }
 
       // Create single billing record for all rooms
-      const billingResponse = await fetch('/api/Billing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const billingResponse = await fetch("/api/Billing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomNo: allRoomNumbers,
-          itemList: Array.from({ length: allRoomNumbers.length }, () => ['Room Charge']),
+          itemList: Array.from({ length: allRoomNumbers.length }, () => [
+            "Room Charge",
+          ]),
           priceList: roomCharges,
           taxList: roomTaxes,
           quantityList: quantities,
@@ -525,65 +525,95 @@ export default function BookingForm() {
           totalAmount: totalAmount,
           amountAdvanced: 0,
           dueAmount: totalAmount,
-          Bill_Paid: 'no',
-        })
+          Bill_Paid: "no",
+        }),
       });
-
 
       const billingData = await billingResponse.json();
       console.log("billing data", billingData);
-      if (!billingData.success) throw new Error('Failed to create consolidated billing');
+      if (!billingData.success)
+        throw new Error("Failed to create consolidated billing");
 
       // Update all rooms with the same billing ID
       for (const selectedRoomNumber of selectedRooms) {
-        const matchedRoom = rooms.find(room => room.number === selectedRoomNumber);
+        const matchedRoom = rooms.find(
+          (room) => room.number === selectedRoomNumber
+        );
         // Prepare new dates and lists
-        const newCheckInDateList = [...(matchedRoom.checkInDateList || []), formData.checkIn];
-        const newCheckOutDateList = [...(matchedRoom.checkOutDateList || []), formData.checkOut];
-        const newBillWaitlist = [...(matchedRoom.billWaitlist || []), billingData.data._id];
-        const newGuestWaitlist = [...(matchedRoom.guestWaitlist || []), guestId];
+        const newCheckInDateList = [
+          ...(matchedRoom.checkInDateList || []),
+          formData.checkIn,
+        ];
+        const newCheckOutDateList = [
+          ...(matchedRoom.checkOutDateList || []),
+          formData.checkOut,
+        ];
+        const newBillWaitlist = [
+          ...(matchedRoom.billWaitlist || []),
+          billingData.data._id,
+        ];
+        const newGuestWaitlist = [
+          ...(matchedRoom.guestWaitlist || []),
+          guestId,
+        ];
 
         // Sort all arrays based on proximity to current date
         const currentDate = new Date();
-        const [sortedCheckInDates, sortedCheckOutDates, sortedBillWaitlist, sortedGuestWaitlist] =
-          sortDatesWithCorrespondingArrays(
-            newCheckInDateList,
-            newCheckOutDateList,
-            newBillWaitlist,
-            newGuestWaitlist
-          );
+        const [
+          sortedCheckInDates,
+          sortedCheckOutDates,
+          sortedBillWaitlist,
+          sortedGuestWaitlist,
+        ] = sortDatesWithCorrespondingArrays(
+          newCheckInDateList,
+          newCheckOutDateList,
+          newBillWaitlist,
+          newGuestWaitlist
+        );
 
         // Initialize room update object
         const roomUpdate = {
           checkInDateList: sortedCheckInDates,
           checkOutDateList: sortedCheckOutDates,
           billWaitlist: sortedBillWaitlist,
-          guestWaitlist: sortedGuestWaitlist
+          guestWaitlist: sortedGuestWaitlist,
         };
 
-        if (matchedRoom.billingStarted === 'No') {
+        if (matchedRoom.billingStarted === "No") {
           // If room is not currently booked, simply assign new booking as current
           roomUpdate.currentBillingId = billingData.data._id;
           roomUpdate.currentGuestId = guestId;
-          roomUpdate.billingStarted = 'Yes';
+          roomUpdate.billingStarted = "Yes";
         } else {
           // Fetch current guest's booking details
-          console.log('matchedRoom:', matchedRoom);
-          console.log('matchedRoom.currentGuestId:', matchedRoom.currentGuestId);
-          const currentGuestResponse = await fetch(`/api/NewBooking/${matchedRoom.currentGuestId}`);
+          console.log("matchedRoom:", matchedRoom);
+          console.log(
+            "matchedRoom.currentGuestId:",
+            matchedRoom.currentGuestId
+          );
+          const currentGuestResponse = await fetch(
+            `/api/NewBooking/${matchedRoom.currentGuestId}`
+          );
           const currentGuestData = await currentGuestResponse.json();
-          console.log('currentGuestData:', currentGuestData);
+          console.log("currentGuestData:", currentGuestData);
           const currentGuestCheckIn = new Date(currentGuestData.checkIn);
-          console.log('currentGuestCheckIn:', currentGuestCheckIn);
-          console.log('sortedGuestWaitlist:', sortedGuestWaitlist);
+          console.log("currentGuestCheckIn:", currentGuestCheckIn);
+          console.log("sortedGuestWaitlist:", sortedGuestWaitlist);
           // Fetch first waitlisted guest's booking details
-          const firstWaitlistedGuestResponse = await fetch(`/api/NewBooking/${sortedGuestWaitlist[0]._id}`);
-          const firstWaitlistedGuestData = await firstWaitlistedGuestResponse.json();
-          const firstWaitlistedCheckIn = new Date(firstWaitlistedGuestData.data.checkIn);
+          const firstWaitlistedGuestResponse = await fetch(
+            `/api/NewBooking/${sortedGuestWaitlist[0]._id}`
+          );
+          const firstWaitlistedGuestData =
+            await firstWaitlistedGuestResponse.json();
+          const firstWaitlistedCheckIn = new Date(
+            firstWaitlistedGuestData.data.checkIn
+          );
 
           // Compare dates to determine which should be current
           const currentDateDiff = Math.abs(currentDate - currentGuestCheckIn);
-          const waitlistedDateDiff = Math.abs(currentDate - firstWaitlistedCheckIn);
+          const waitlistedDateDiff = Math.abs(
+            currentDate - firstWaitlistedCheckIn
+          );
 
           if (waitlistedDateDiff < currentDateDiff) {
             // If waitlisted guest's check-in is closer to current date
@@ -591,20 +621,22 @@ export default function BookingForm() {
             roomUpdate.currentBillingId = sortedBillWaitlist[0];
           }
         }
-        const roomUpdateResponse = await fetch(`/api/rooms/${matchedRoom._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(roomUpdate)
-        });
+        const roomUpdateResponse = await fetch(
+          `/api/rooms/${matchedRoom._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(roomUpdate),
+          }
+        );
       }
 
-      alert('Booking created with consolidated billing!');
+      alert("Booking created with consolidated billing!");
 
       setModalOpen(false);
-      router.push('/property/roomdashboard');
-
+      router.push("/property/roomdashboard");
     } catch (error) {
-      console.error('Error in booking submission:', error);
+      console.error("Error in booking submission:", error);
       alert(`Failed to create booking: ${error.message}`);
     }
   };
@@ -786,321 +818,333 @@ export default function BookingForm() {
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="bg-white shadow rounded-lg p-6">
-            <Typography
-              variant="h5"
-              sx={{
-                mb: 2,
-                color: "black",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Guest Reservation Form
-            </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  mb: 2,
+                  color: "black",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                }}
+              >
+                Guest Reservation Form
+              </Typography>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Booking Details Section */}
-      <div className="mb-6">
-      <Typography
-              variant="h6"
-              sx={{
-                mb: 2,
-                color: "#0277bd",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Booking Details
-            </Typography>
-        <Grid container spacing={2} mt={1}>
-          {/* Booking ID - read-only */}
-          <Grid item xs={12} md={6} >
-            <TextField
-              label="Booking ID"
-              name="bookingId"
-              value={formData.bookingId}
-              InputProps={{ readOnly: true }}
-              error={!!errors.bookingId}
-              helperText={errors.bookingId}
-              variant="outlined"
-              fullWidth
-              disabled
-            />
-          </Grid>
-          {/* Booking Type - select field */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Booking Type"
-              name="bookingType"
-              value={formData.bookingType}
-              onChange={handleChange}
-              error={!!errors.bookingType}
-              helperText={errors.bookingType}
-              fullWidth
-              select
-            >
-              {[
-                "FIT",
-                "Group",
-                "Corporate",
-                "Corporate Group",
-                "Social Events",
-                "Others",
-              ].map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          {/* Booking Reference */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Booking Reference"
-              name="bookingReference"
-              value={formData.bookingReference}
-              onChange={handleChange}
-              error={!!errors.bookingReference}
-              helperText={errors.bookingReference}
-              fullWidth
-              variant="outlined"
-            />
-          </Grid>
-          {/* Reference Number */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Reference Number"
-              name="referenceno"
-              value={formData.referenceno}
-              onChange={handleChange}
-              error={!!errors.referenceno}
-              helperText={errors.referenceno}
-              fullWidth
-              variant="outlined"
-            />
-          </Grid>
-          {/* Booking Status */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Booking Status"
-              name="bookingStatus"
-              value={formData.bookingStatus}
-              onChange={handleChange}
-              error={!!errors.bookingStatus}
-              helperText={errors.bookingStatus}
-              fullWidth
-              select
-              required
-            >
-              {["Confirm", "Block"].map((status) => (
-                <MenuItem key={status} value={status}>
-                  {status}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-        </Grid>
-      </div>
+                <div className="mb-6">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: "#0277bd",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Booking Details
+                  </Typography>
+                  <Grid container spacing={2} mt={1}>
+                    {/* Booking ID - read-only */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Booking ID"
+                        name="bookingId"
+                        value={formData.bookingId}
+                        InputProps={{ readOnly: true }}
+                        error={!!errors.bookingId}
+                        helperText={errors.bookingId}
+                        variant="outlined"
+                        fullWidth
+                        disabled
+                      />
+                    </Grid>
+                    {/* Booking Type - select field */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Booking Type"
+                        name="bookingType"
+                        value={formData.bookingType}
+                        onChange={handleChange}
+                        error={!!errors.bookingType}
+                        helperText={errors.bookingType}
+                        fullWidth
+                        select
+                      >
+                        {[
+                          "FIT",
+                          "Group",
+                          "Corporate",
+                          "Corporate Group",
+                          "Social Events",
+                          "Others",
+                        ].map((type) => (
+                          <MenuItem key={type} value={type}>
+                            {type}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    {/* Booking Reference */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Booking Reference"
+                        name="bookingReference"
+                        value={formData.bookingReference}
+                        onChange={handleChange}
+                        error={!!errors.bookingReference}
+                        helperText={errors.bookingReference}
+                        fullWidth
+                        variant="outlined"
+                      />
+                    </Grid>
+                    {/* Reference Number */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Reference Number"
+                        name="referenceno"
+                        value={formData.referenceno}
+                        onChange={handleChange}
+                        error={!!errors.referenceno}
+                        helperText={errors.referenceno}
+                        fullWidth
+                        variant="outlined"
+                      />
+                    </Grid>
+                    {/* Booking Status */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Booking Status"
+                        name="bookingStatus"
+                        value={formData.bookingStatus}
+                        onChange={handleChange}
+                        error={!!errors.bookingStatus}
+                        helperText={errors.bookingStatus}
+                        fullWidth
+                        select
+                        required
+                      >
+                        {["Confirm", "Block"].map((status) => (
+                          <MenuItem key={status} value={status}>
+                            {status}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                  </Grid>
+                </div>
                 {/* Guest Details Section */}
-<div className="mb-6">
-<Typography
-              variant="h6"
-              sx={{
-                mb: 2,
-                color: "#0277bd",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Guest Details
-            </Typography>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <TextField
-      label="Guest Name"
-      name="guestName"
-      value={formData.guestName}
-      onChange={handleChange}
-      error={!!errors.guestName}
-      helperText={errors.guestName}
-      fullWidth
-      required
-    />
-    <Autocomplete
-      freeSolo
-      options={filteredMobileNumbers}
-      value={formData.mobileNo}
-      onChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
-      onInputChange={(event, newValue) => handleMobileNumberChange(event, newValue)}
-      renderInput={(params) => (
-        <TextField {...params} label="Mobile Number" required fullWidth />
-      )}
-      filterOptions={(options, { inputValue }) => options.filter((option) => option.startsWith(inputValue))}
-    />
-    <TextField
-      label="Email ID"
-      name="guestEmail"
-      value={formData.guestEmail}
-      onChange={handleChange}
-      fullWidth
-    />
-    <TextField
-      label="Date of Birth"
-      type="date"
-      name="dateofbirth"
-      value={formData.dateofbirth}
-      onChange={handleChange}
-      error={(errors.dateofbirth)}
-      helperText={errors.dateofbirth}
-      InputLabelProps={{ shrink: true }}
-      fullWidth
-    />
-    <TextField
-      label="Date of Anniversary"
-      type="date"
-      name="dateofanniversary"
-      value={formData.dateofanniversary}
-      onChange={handleChange}
-      
-      InputLabelProps={{ shrink: true }}
-      fullWidth
-    />
-  </div>
-</div>
+                <div className="mb-6">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: "#0277bd",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Guest Details
+                  </Typography>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <TextField
+                      label="Guest Name"
+                      name="guestName"
+                      value={formData.guestName}
+                      onChange={handleChange}
+                      error={!!errors.guestName}
+                      helperText={errors.guestName}
+                      fullWidth
+                      required
+                    />
+                    <Autocomplete
+                      freeSolo
+                      options={filteredMobileNumbers}
+                      value={formData.mobileNo}
+                      onChange={(event, newValue) =>
+                        handleMobileNumberChange(event, newValue)
+                      }
+                      onInputChange={(event, newValue) =>
+                        handleMobileNumberChange(event, newValue)
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Mobile Number"
+                          required
+                          fullWidth
+                        />
+                      )}
+                      filterOptions={(options, { inputValue }) =>
+                        options.filter((option) =>
+                          option.startsWith(inputValue)
+                        )
+                      }
+                    />
+                    <TextField
+                      label="Email ID"
+                      name="guestEmail"
+                      value={formData.guestEmail}
+                      onChange={handleChange}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Date of Birth"
+                      type="date"
+                      name="dateofbirth"
+                      value={formData.dateofbirth}
+                      onChange={handleChange}
+                      error={errors.dateofbirth}
+                      helperText={errors.dateofbirth}
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Date of Anniversary"
+                      type="date"
+                      name="dateofanniversary"
+                      value={formData.dateofanniversary}
+                      onChange={handleChange}
+                      InputLabelProps={{ shrink: true }}
+                      fullWidth
+                    />
+                  </div>
+                </div>
 
                 {/* Identity Section */}
-      <div className="mb-6">
-      <Typography
-              variant="h6"
-              sx={{
-                mb: 2,
-                color: "#0277bd",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Identity
-            </Typography>
-        <Grid container spacing={2}>
-          {/* Guest ID - select the type */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              name="guestid"
-              label="Guest ID"
-              value={formData.guestid}
-              onChange={handleChange}
-              fullWidth
-              select
-            >
-              {[
-                "Adhaar",
-                "Driving License",
-                "Voter ID Card",
-                "Passport",
-                "Others",
-              ].map((idType) => (
-                <MenuItem key={idType} value={idType}>
-                  {idType}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          {/* Guest ID Number */}
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Guest ID Number"
-              name="guestidno"
-              value={formData.guestidno}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-          {/* Conditional Passport fields if "Passport" is selected */}
-          {formData.guestid === "Passport" && (
-            <>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Passport Issue Date"
-                  type="date"
-                  name="passportIssueDate"
-                  value={formData.passportIssueDate}
-                  onChange={handleChange}
-                  error={!!errors.passportIssueDate}
-                  helperText={errors.passportIssueDate}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Passport Expiry Date"
-                  type="date"
-                  name="passportExpireDate"
-                  value={formData.passportExpireDate}
-                  onChange={handleChange}
-                  error={!!errors.passportExpireDate}
-                  helperText={errors.passportExpireDate}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Visa Number"
-                  name="visaNumber"
-                  value={formData.visaNumber}
-                  onChange={handleChange}
-                  error={!!errors.visaNumber}
-                  helperText={errors.visaNumber}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Visa Issue Date"
-                  type="date"
-                  name="visaIssueDate"
-                  value={formData.visaIssueDate}
-                  onChange={handleChange}
-                  error={!!errors.visaIssueDate}
-                  helperText={errors.visaIssueDate}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Visa Expiry Date"
-                  type="date"
-                  name="visaExpireDate"
-                  value={formData.visaExpireDate}
-                  onChange={handleChange}
-                  error={!!errors.visaExpireDate}
-                  helperText={errors.visaExpireDate}
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  required
-                />
-              </Grid>
-            </>
-          )}
-        </Grid>
-      </div>
+                <div className="mb-6">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: "#0277bd",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Identity
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {/* Guest ID - select the type */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        name="guestid"
+                        label="Guest ID"
+                        value={formData.guestid}
+                        onChange={handleChange}
+                        fullWidth
+                        select
+                      >
+                        {[
+                          "Adhaar",
+                          "Driving License",
+                          "Voter ID Card",
+                          "Passport",
+                          "Others",
+                        ].map((idType) => (
+                          <MenuItem key={idType} value={idType}>
+                            {idType}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    {/* Guest ID Number */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Guest ID Number"
+                        name="guestidno"
+                        value={formData.guestidno}
+                        onChange={handleChange}
+                        fullWidth
+                      />
+                    </Grid>
+                    {/* Conditional Passport fields if "Passport" is selected */}
+                    {formData.guestid === "Passport" && (
+                      <>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            label="Passport Issue Date"
+                            type="date"
+                            name="passportIssueDate"
+                            value={formData.passportIssueDate}
+                            onChange={handleChange}
+                            error={!!errors.passportIssueDate}
+                            helperText={errors.passportIssueDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            label="Passport Expiry Date"
+                            type="date"
+                            name="passportExpireDate"
+                            value={formData.passportExpireDate}
+                            onChange={handleChange}
+                            error={!!errors.passportExpireDate}
+                            helperText={errors.passportExpireDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            label="Visa Number"
+                            name="visaNumber"
+                            value={formData.visaNumber}
+                            onChange={handleChange}
+                            error={!!errors.visaNumber}
+                            helperText={errors.visaNumber}
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            label="Visa Issue Date"
+                            type="date"
+                            name="visaIssueDate"
+                            value={formData.visaIssueDate}
+                            onChange={handleChange}
+                            error={!!errors.visaIssueDate}
+                            helperText={errors.visaIssueDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            label="Visa Expiry Date"
+                            type="date"
+                            name="visaExpireDate"
+                            value={formData.visaExpireDate}
+                            onChange={handleChange}
+                            error={!!errors.visaExpireDate}
+                            helperText={errors.visaExpireDate}
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                      </>
+                    )}
+                  </Grid>
+                </div>
                 {/* Reservation Accordion */}
                 <div className="mb-6">
-                <Typography
-              variant="h6"
-              sx={{
-                mb: 2,
-                color: "#0277bd",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Reservation
-            </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: "#0277bd",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Reservation
+                  </Typography>
                   <Grid container spacing={2} mt={1}>
                     <Grid item xs={12} md={6}>
                       <TextField
@@ -1151,19 +1195,19 @@ export default function BookingForm() {
                   </Grid>
                 </div>
 
-               {/* Guest Address Section */}
-               <div className="mb-6">
-               <Typography
-              variant="h6"
-              sx={{
-                mb: 2,
-                color: "#0277bd",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Guest Address
-            </Typography>
+                {/* Guest Address Section */}
+                <div className="mb-6">
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: "#0277bd",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Guest Address
+                  </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
@@ -1189,17 +1233,17 @@ export default function BookingForm() {
 
                 {/* Additional Details Section */}
                 <div className="mb-6">
-                <Typography
-              variant="h6"
-              sx={{
-                mb: 2,
-                color: "#0277bd",
-                fontWeight: "bold",
-                textTransform: "uppercase"
-              }}
-            >
-              Additional Details
-            </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: "#0277bd",
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Additional Details
+                  </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
@@ -1340,10 +1384,11 @@ export default function BookingForm() {
                         transition={{ delay: index * 0.05 }}
                         className={`
                         relative rounded-xl overflow-hidden transform-gpu
-                        ${selectedRooms.includes(room.number)
+                        ${
+                          selectedRooms.includes(room.number)
                             ? "ring-2 ring-blue-500 shadow-lg"
                             : "ring-1 ring-gray-200"
-                          }
+                        }
                       `}
                       >
                         <motion.div
