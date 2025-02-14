@@ -1094,6 +1094,8 @@ export default function BookingForm() {
                         label="Guest ID"
                         value={formData.guestid}
                         onChange={handleChange}
+                        error={!!errors.guestid}
+                      helperText={errors.guestid}
                         fullWidth
                         select
                       >
