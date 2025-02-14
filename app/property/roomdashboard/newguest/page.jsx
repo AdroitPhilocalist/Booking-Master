@@ -996,26 +996,26 @@ export default function BookingForm() {
                       required
                     />
                     <Autocomplete
-                    freeSolo
-                    options={filteredMobileNumbers}
-                    value={formData.mobileNo}
-                    onChange={(event, newValue) =>
-                      handleMobileNumberChange(event, newValue)
-                    }
-                    onInputChange={(event, newValue) =>
-                      handleMobileNumberChange(event, newValue)
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Mobile Number"
-                        required
-                        fullWidth
-                        error={!!errors.mobileNo}
-                        helperText={errors.mobileNo}
-                      />
-                    )}
-                  />
+                      freeSolo
+                      options={filteredMobileNumbers}
+                      value={formData.mobileNo}
+                      onChange={(event, newValue) =>
+                        handleMobileNumberChange(event, newValue)
+                      }
+                      onInputChange={(event, newValue) =>
+                        handleMobileNumberChange(event, newValue)
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Mobile Number"
+                          required
+                          fullWidth
+                          error={!!errors.mobileNo}
+                          helperText={errors.mobileNo}
+                        />
+                      )}
+                    />
                     <TextField
                       label="Email ID"
                       name="guestEmail"
@@ -1066,36 +1066,35 @@ export default function BookingForm() {
                   <Grid container spacing={2}>
                     {/* Guest ID - select the type */}
                     <Grid item xs={12} md={6}>
-                    <TextField
-                    label="Company Name"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    error={!!errors.companyName}
-                    helperText={errors.companyName}
-                    fullWidth
-                  />
+                      <TextField
+                        label="Company Name"
+                        name="companyName"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                        error={!!errors.companyName}
+                        helperText={errors.companyName}
+                        fullWidth
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                    <TextField
-                    label="GSTIN"
-                    name="gstin"
-                    value={formData.gstin}
-                    onChange={handleChange}
-                    error={!!errors.gstin}
-                    helperText={errors.gstin}
-                    fullWidth
-                  />
+                      <TextField
+                        label="GSTIN"
+                        name="gstin"
+                        value={formData.gstin}
+                        onChange={handleChange}
+                        error={!!errors.gstin}
+                        helperText={errors.gstin}
+                        fullWidth
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      
                       <TextField
                         name="guestid"
                         label="Guest ID"
                         value={formData.guestid}
                         onChange={handleChange}
                         error={!!errors.guestid}
-                      helperText={errors.guestid}
+                        helperText={errors.guestid}
                         fullWidth
                         select
                       >
@@ -1120,7 +1119,7 @@ export default function BookingForm() {
                         value={formData.guestidno}
                         onChange={handleChange}
                         error={!!errors.guestidno}
-                    helperText={errors.guestidno}
+                        helperText={errors.guestidno}
                         fullWidth
                       />
                     </Grid>
@@ -1213,18 +1212,29 @@ export default function BookingForm() {
                     Reservation
                   </Typography>
                   <Grid container spacing={2} mt={1}>
-                  <Grid item xs={12} md={6}>
-                  <TextField
-                    label="Adults"
-                    type="number"
-                    name="adults"
-                    value={formData.adults}
-                    onChange={handleChange}
-                    error={!!errors.adults}
-                    helperText={errors.adults}
-                    fullWidth
-                  />
-
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Adults"
+                        type="number"
+                        name="adults"
+                        value={formData.adults}
+                        onChange={handleChange}
+                        error={!!errors.adults}
+                        helperText={errors.adults}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Children"
+                        type="number"
+                        name="children"
+                        value={formData.children}
+                        onChange={handleChange}
+                        error={!!errors.children}
+                        helperText={errors.children}
+                        fullWidth
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField
