@@ -1138,9 +1138,17 @@ export default function BookingForm() {
 
                {/* Guest Address Section */}
                <div className="mb-6">
-                  <Typography variant="h6" className="mb-2">
-                    Guest Address
-                  </Typography>
+               <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: "#0277bd",
+                fontWeight: "bold",
+                textTransform: "uppercase"
+              }}
+            >
+              Guest Address
+            </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
