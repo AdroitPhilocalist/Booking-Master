@@ -872,6 +872,8 @@ export default function BookingForm() {
               name="referenceno"
               value={formData.referenceno}
               onChange={handleChange}
+              error={!!errors.referenceno}
+              helperText={errors.referenceno}
               fullWidth
               variant="outlined"
             />
