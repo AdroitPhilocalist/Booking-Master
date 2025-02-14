@@ -819,6 +819,8 @@ export default function BookingForm() {
               name="bookingId"
               value={formData.bookingId}
               InputProps={{ readOnly: true }}
+              error={!!errors.bookingId}
+              helperText={errors.bookingId}
               variant="outlined"
               fullWidth
               disabled
