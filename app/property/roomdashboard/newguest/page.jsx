@@ -111,12 +111,14 @@ export default function BookingForm() {
     const newErrors = {};
     const requiredFields = [
       "guestName",
+      "gstin",
+      "bookingReference",
       "expectedArrival",
       "expectedDeparture",
       "mobileNo",
       "guestid",
       "guestidno",
-
+      "referenceno",
       "checkIn",
       "checkOut",
       "dateofbirth",
@@ -126,14 +128,17 @@ export default function BookingForm() {
     // Initialize all error flags at the start
     let dateErrors = false;
     let mobileError = false;
-
+    let emailError = false;
     let gstinError = false;
-
+    let referenceError = false;
+    let adultsError = false;
+    let childrenError = false;
     let passportError = false;
     let visaError = false;
     let passportIssueError = false;
     let visaIssueError = false;
     let dobError = false;
+    let anniversaryError = false;
 
     // Date of Birth validation (18 years or above)
     if (formData.dateofbirth) {
@@ -198,6 +203,15 @@ export default function BookingForm() {
       mobileError = true;
     }
 
+    // Email validation
+    if (
+      formData.guestEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guestEmail)
+    ) {
+      newErrors.guestEmail = "Invalid email format";
+      emailError = true;
+    }
+
     // GSTIN validation
     if (
       formData.gstin &&
@@ -205,6 +219,27 @@ export default function BookingForm() {
     ) {
       newErrors.gstin = "Invalid GSTIN format";
       gstinError = true;
+    }
+
+    // Reference number validation
+    if (
+      formData.referenceno &&
+      (isNaN(formData.referenceno) || formData.referenceno < 0)
+    ) {
+      newErrors.referenceno = "Reference number must be a positive number";
+      referenceError = true;
+    }
+
+    // Adults validation
+    if (formData.adults < 1) {
+      newErrors.adults = "At least 1 adult is required";
+      adultsError = true;
+    }
+
+    // Children validation
+    if (formData.children < 0) {
+      newErrors.children = "Number of children cannot be negative";
+      childrenError = true;
     }
 
     // Passport-related validations
@@ -242,12 +277,17 @@ export default function BookingForm() {
       !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
+      !emailError &&
       !gstinError &&
+      !referenceError &&
+      !adultsError &&
+      !childrenError &&
       !passportError &&
       !visaError &&
       !passportIssueError &&
       !visaIssueError &&
-      !dobError;
+      !dobError &&
+      !anniversaryError;
 
     setIsFormValid(isValid);
     return isValid && Object.keys(newErrors).length === 0;
@@ -729,7 +769,6 @@ export default function BookingForm() {
     setModalOpen(false); // Close the modal
   };
 
-  // Update handleMobileNumberChange to include validation
   const handleMobileNumberChange = async (event, newValue) => {
     const inputValue = newValue || event.target.value;
 
@@ -957,29 +996,26 @@ export default function BookingForm() {
                       required
                     />
                     <Autocomplete
-                      freeSolo
-                      options={filteredMobileNumbers}
-                      value={formData.mobileNo}
-                      onChange={(event, newValue) =>
-                        handleMobileNumberChange(event, newValue)
-                      }
-                      onInputChange={(event, newValue) =>
-                        handleMobileNumberChange(event, newValue)
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Mobile Number"
-                          required
-                          fullWidth
-                        />
-                      )}
-                      filterOptions={(options, { inputValue }) =>
-                        options.filter((option) =>
-                          option.startsWith(inputValue)
-                        )
-                      }
-                    />
+                    freeSolo
+                    options={filteredMobileNumbers}
+                    value={formData.mobileNo}
+                    onChange={(event, newValue) =>
+                      handleMobileNumberChange(event, newValue)
+                    }
+                    onInputChange={(event, newValue) =>
+                      handleMobileNumberChange(event, newValue)
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Mobile Number"
+                        required
+                        fullWidth
+                        error={!!errors.mobileNo}
+                        helperText={errors.mobileNo}
+                      />
+                    )}
+                  />
                     <TextField
                       label="Email ID"
                       name="guestEmail"
