@@ -859,6 +859,8 @@ export default function BookingForm() {
               name="bookingReference"
               value={formData.bookingReference}
               onChange={handleChange}
+              error={!!errors.bookingReference}
+              helperText={errors.bookingReference}
               fullWidth
               variant="outlined"
             />
