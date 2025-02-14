@@ -1021,6 +1021,8 @@ export default function BookingForm() {
                       name="guestEmail"
                       value={formData.guestEmail}
                       onChange={handleChange}
+                      error={!!errors.guestEmail}
+                      helperText={errors.guestEmail}
                       fullWidth
                     />
                     <TextField
