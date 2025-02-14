@@ -1066,6 +1066,29 @@ export default function BookingForm() {
                   <Grid container spacing={2}>
                     {/* Guest ID - select the type */}
                     <Grid item xs={12} md={6}>
+                    <TextField
+                    label="Company Name"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleChange}
+                    error={!!errors.companyName}
+                    helperText={errors.companyName}
+                    fullWidth
+                  />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                    <TextField
+                    label="GSTIN"
+                    name="gstin"
+                    value={formData.gstin}
+                    onChange={handleChange}
+                    error={!!errors.gstin}
+                    helperText={errors.gstin}
+                    fullWidth
+                  />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      
                       <TextField
                         name="guestid"
                         label="Guest ID"
