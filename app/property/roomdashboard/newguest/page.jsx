@@ -1313,6 +1313,8 @@ export default function BookingForm() {
                         name="state"
                         value={formData.state}
                         onChange={handleChange}
+                        error={!!errors.state}
+                    helperText={errors.state}
                         fullWidth
                       />
                     </Grid>
