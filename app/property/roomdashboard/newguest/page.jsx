@@ -811,7 +811,7 @@ export default function BookingForm() {
             >
               Booking Details
             </Typography>
-        <Grid container spacing={2} mt={2}>
+        <Grid container spacing={2} mt={1}>
           {/* Booking ID - read-only */}
           <Grid item xs={12} md={6} >
             <TextField
@@ -1086,7 +1086,7 @@ export default function BookingForm() {
             >
               Reservation
             </Typography>
-                  <Grid container spacing={2} mt={2}>
+                  <Grid container spacing={2} mt={1}>
                     <Grid item xs={12} md={6}>
                       <TextField
                         label="Check-in Date"
