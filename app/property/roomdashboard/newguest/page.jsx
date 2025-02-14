@@ -919,6 +919,8 @@ export default function BookingForm() {
       name="guestName"
       value={formData.guestName}
       onChange={handleChange}
+      error={!!errors.guestName}
+      helperText={errors.guestName}
       fullWidth
       required
     />
