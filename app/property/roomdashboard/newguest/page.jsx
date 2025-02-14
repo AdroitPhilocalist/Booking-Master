@@ -1284,6 +1284,8 @@ export default function BookingForm() {
                         name="expectedDeparture"
                         value={formData.expectedDeparture}
                         onChange={handleChange}
+                        error={!!errors.expectedDeparture}
+                    helperText={errors.expectedDeparture}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                       />
