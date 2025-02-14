@@ -1119,6 +1119,8 @@ export default function BookingForm() {
                         name="guestidno"
                         value={formData.guestidno}
                         onChange={handleChange}
+                        error={!!errors.guestidno}
+                    helperText={errors.guestidno}
                         fullWidth
                       />
                     </Grid>
