@@ -1257,6 +1257,8 @@ export default function BookingForm() {
                         name="checkOut"
                         value={formData.checkOut}
                         onChange={handleChange}
+                        error={!!errors.checkOut}
+                    helperText={errors.checkOut}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                         required
