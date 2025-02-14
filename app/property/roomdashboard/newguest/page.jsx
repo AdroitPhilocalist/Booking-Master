@@ -786,9 +786,17 @@ export default function BookingForm() {
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="bg-white shadow rounded-lg p-6">
-              <h1 className="text-2xl font-semibold text-cyan-800 mb-4">
-                Guest Reservation Form
-              </h1>
+            <Typography
+              variant="h5"
+              sx={{
+                mb: 2,
+                color: "black",
+                fontWeight: "bold",
+                textTransform: "uppercase"
+              }}
+            >
+              Guest Reservation Form
+            </Typography>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Booking Details Section */}
       <div className="mb-6">
@@ -803,9 +811,9 @@ export default function BookingForm() {
             >
               Booking Details
             </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} mt={2}>
           {/* Booking ID - read-only */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} >
             <TextField
               label="Booking ID"
               name="bookingId"
@@ -884,7 +892,17 @@ export default function BookingForm() {
       </div>
                 {/* Guest Details Section */}
 <div className="mb-6">
-  <Typography variant="h6" className="mb-2">Guest Details</Typography>
+<Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: "#0277bd",
+                fontWeight: "bold",
+                textTransform: "uppercase"
+              }}
+            >
+              Guest Details
+            </Typography>
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     <TextField
       label="Guest Name"
@@ -935,9 +953,17 @@ export default function BookingForm() {
 
                 {/* Identity Section */}
       <div className="mb-6">
-        <Typography variant="h6" className="mb-2">
-          Identity
-        </Typography>
+      <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: "#0277bd",
+                fontWeight: "bold",
+                textTransform: "uppercase"
+              }}
+            >
+              Identity
+            </Typography>
         <Grid container spacing={2}>
           {/* Guest ID - select the type */}
           <Grid item xs={12} md={6}>
@@ -1049,9 +1075,17 @@ export default function BookingForm() {
       </div>
                 {/* Reservation Accordion */}
                 <div className="mb-6">
-                  <Typography variant="h6" className="mb-2">
-                    Reservation
-                  </Typography>
+                <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                color: "#0277bd",
+                fontWeight: "bold",
+                textTransform: "uppercase"
+              }}
+            >
+              Reservation
+            </Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                       <TextField
