@@ -1042,6 +1042,8 @@ export default function BookingForm() {
                       name="dateofanniversary"
                       value={formData.dateofanniversary}
                       onChange={handleChange}
+                      error={!!errors.dateofanniversary}
+                      helperText={errors.dateofanniversary}
                       InputLabelProps={{ shrink: true }}
                       fullWidth
                     />
