@@ -1355,6 +1355,8 @@ export default function BookingForm() {
                         fullWidth
                         value={formData.mealPlan}
                         onChange={handleChange}
+                        error={!!errors.mealPlan}
+                      helperText={errors.mealPlan}
                       >
                         {["EP", "CP", "AP", "MAP"].map((plan) => (
                           <MenuItem key={plan} value={plan}>
