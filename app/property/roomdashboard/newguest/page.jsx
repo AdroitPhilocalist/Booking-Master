@@ -870,6 +870,16 @@ export default function BookingForm() {
               </Typography>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Booking Details Section */}
+                <Box
+                  sx={{
+                    mb: 6,
+                    p: 3,
+                    background: "linear-gradient(135deg, #f0f9ff, #cce7ff)",
+                    borderRadius: 2,
+                    borderLeft: "8px solid #0277bd",
+                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                  }}
+                >
                 <div className="mb-6">
                   <Typography
                     variant="h6"
@@ -971,7 +981,18 @@ export default function BookingForm() {
                     </Grid>
                   </Grid>
                 </div>
+                </Box>
                 {/* Guest Details Section */}
+                <Box
+  sx={{
+    mb: 6,
+    p: 3,
+    background: "linear-gradient(135deg, #ffebf0, #ffb3c6)", // Pink Gradient
+    borderRadius: 2,
+    borderLeft: "8px solid #d81b60", // Deep Pink Accent
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+  }}
+>
                 <div className="mb-6">
                   <Typography
                     variant="h6"
@@ -1049,8 +1070,21 @@ export default function BookingForm() {
                     />
                   </div>
                 </div>
+                </Box>
 
                 {/* Identity Section */}
+                <Box
+  sx={{
+    mb: 6,
+    p: 3,
+    background: "linear-gradient(135deg, #e3f9e5, #b3e6c8)", // Green Gradient
+    borderRadius: 2,
+    borderLeft: "8px solid #2e7d32", // Deep Green Accent
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+  }}
+>
+  {/* Content here */}
+
                 <div className="mb-6">
                   <Typography
                     variant="h6"
@@ -1198,7 +1232,20 @@ export default function BookingForm() {
                     )}
                   </Grid>
                 </div>
+                </Box>
                 {/* Reservation Accordion */}
+                <Box
+  sx={{
+    mb: 6,
+    p: 3,
+    background: "linear-gradient(135deg, #fff5cc, #ffd966)", // Yellow-Orange Gradient
+    borderRadius: 2,
+    borderLeft: "8px solid #ff9800", // Orange Accent
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+  }}
+>
+  {/* Content here */}
+
                 <div className="mb-6">
                   <Typography
                     variant="h6"
@@ -1292,8 +1339,21 @@ export default function BookingForm() {
                     </Grid>
                   </Grid>
                 </div>
+                </Box>
 
                 {/* Guest Address Section */}
+                <Box
+  sx={{
+    mb: 6,
+    p: 3,
+    background: "linear-gradient(135deg, #e0ccff, #b380ff)", // Purple Gradient
+    borderRadius: 2,
+    borderLeft: "8px solid #7b1fa2", // Deep Purple Accent
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+  }}
+>
+  {/* Content here */}
+
                 <div className="mb-6">
                   <Typography
                     variant="h6"
@@ -1332,8 +1392,21 @@ export default function BookingForm() {
                     </Grid>
                   </Grid>
                 </div>
+                </Box>
 
                 {/* Additional Details Section */}
+                <Box
+  sx={{
+    mb: 6,
+    p: 3,
+    background: "linear-gradient(135deg, #dcedc8, #aed581)", // Soft Lime Green Gradient
+    borderRadius: 2,
+    borderLeft: "8px solid #689f38", // Olive Green Accent
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+  }}
+>
+  {/* Content here */}
+
                 <div className="mb-6">
                   <Typography
                     variant="h6"
@@ -1379,6 +1452,7 @@ export default function BookingForm() {
                     </Grid>
                   </Grid>
                 </div>
+                </Box>
 
                 <div className="flex items-center justify-end">
                   <Button
