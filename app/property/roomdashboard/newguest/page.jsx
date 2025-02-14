@@ -1330,25 +1330,6 @@ export default function BookingForm() {
                         multiline
                       />
                     </Grid>
-                    {/* Meal Plan */}
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Meal Plan"
-                      name="mealPlan"
-                      select
-                      fullWidth
-                      value={formData.mealPlan}
-                      onChange={handleChange}
-                      error={!!errors.mealPlan}
-                      helperText={errors.mealPlan}
-                    >
-                      {["EP", "CP", "AP", "MAP"].map((plan) => (
-                        <MenuItem key={plan} value={plan}>
-                          {plan}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
                   </Grid>
                 </div>
 
