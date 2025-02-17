@@ -80,7 +80,7 @@ export default function BookingForm() {
     address: "",
     remarks: "",
     state: "",
-    mealPlan: "",
+    mealPlan: 'EP',
     bookingReference: "",
     stopPosting: false,
     guestType: "",
