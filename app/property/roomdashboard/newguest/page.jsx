@@ -111,14 +111,11 @@ export default function BookingForm() {
     const newErrors = {};
     const requiredFields = [
       "guestName",
-      "gstin",
-      "bookingReference",
       "expectedArrival",
       "expectedDeparture",
       "mobileNo",
       "guestid",
       "guestidno",
-      "referenceno",
       "checkIn",
       "checkOut",
       "dateofbirth",
@@ -277,11 +274,6 @@ export default function BookingForm() {
       !hasEmptyFields &&
       !dateErrors &&
       !mobileError &&
-      !emailError &&
-      !gstinError &&
-      !referenceError &&
-      !adultsError &&
-      !childrenError &&
       !passportError &&
       !visaError &&
       !passportIssueError &&
@@ -290,6 +282,7 @@ export default function BookingForm() {
       !anniversaryError;
 
     setIsFormValid(isValid);
+    console.log(isFormValid)
     return isValid && Object.keys(newErrors).length === 0;
   };
 
