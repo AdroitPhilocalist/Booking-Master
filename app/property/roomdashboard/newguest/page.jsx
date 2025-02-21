@@ -999,17 +999,7 @@ export default function BookingForm() {
                     Guest Details
                   </Typography>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <TextField
-                      label="Guest Name"
-                      name="guestName"
-                      value={formData.guestName}
-                      onChange={handleChange}
-                      error={!!errors.guestName}
-                      helperText={errors.guestName}
-                      fullWidth
-                      required
-                    />
-                    <Autocomplete
+                  <Autocomplete
                       freeSolo
                       options={filteredMobileNumbers}
                       value={formData.mobileNo}
@@ -1030,6 +1020,17 @@ export default function BookingForm() {
                         />
                       )}
                     />
+                    <TextField
+                      label="Guest Name"
+                      name="guestName"
+                      value={formData.guestName}
+                      onChange={handleChange}
+                      error={!!errors.guestName}
+                      helperText={errors.guestName}
+                      fullWidth
+                      required
+                    />
+                    
                     <TextField
                       label="Email ID"
                       name="guestEmail"
