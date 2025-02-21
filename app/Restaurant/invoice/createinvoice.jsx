@@ -449,7 +449,7 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
                   value={formData[name]}
                   onChange={handleChange}
                   variant="outlined"
-                  required
+                  
                 />
               </Grid>
             ))}
