@@ -142,7 +142,7 @@ export default function Home() {
           />
         </div>
         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-3xl font-semibold text-center mb-6 text-cyan-900">Login</h2>
+          <h2 className="text-3xl font-semibold text-center mb-6 text-cyan-900">Hotel Login</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <TextField 
