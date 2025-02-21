@@ -6,6 +6,8 @@ import {
 import PrintIcon from '@mui/icons-material/Print';
 import HotelIcon from '@mui/icons-material/Hotel';
 import axios from 'axios';
+import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
+import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
 
 // Add print-specific styles
 const printStyles = `
@@ -53,9 +55,20 @@ const PrintableRoomInvoice = ({ billId }) => {
         const headers = { Authorization: `Bearer ${token}` };
         console.log('billId', billId);
         // 1. First fetch billing details
+        const authtoken = getCookie("authToken"); // Get the token from cookies
+        if (!authtoken) {
+          router.push("/"); // Redirect to login if no token is found
+          return;
+        }
+        // Verify the token
+        const decoded = await jwtVerify(
+          authtoken,
+          new TextEncoder().encode(SECRET_KEY)
+        );
+        const userId = decoded.payload.id;
         const [billingResponse, profileResponse] = await Promise.all([
           fetch(`/api/Billing/${billId}`),
-          fetch('/api/Profile')
+          fetch(`/api/Profile/${userId}`)
         ]);
         console.log('billingResponse', billingResponse);
         if (!billingResponse.ok || !profileResponse.ok) {
@@ -177,7 +190,7 @@ const PrintableRoomInvoice = ({ billId }) => {
           room: matchedRooms,
           category: matchedCategories,
         });
-        setProfile(profileData.data[0]);
+        setProfile(profileData.data);
         setLoading(false);
       } catch (err) {
         setError(err.message);

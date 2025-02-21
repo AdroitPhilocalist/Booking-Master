@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
+import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
 
 // Add print-specific styles
 const printStyles = `
@@ -48,13 +50,25 @@ const PrintableInvoice = ({ invoiceId }) => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
+  const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const authtoken = getCookie("authToken"); // Get the token from cookies
+        if (!authtoken) {
+          router.push("/"); // Redirect to login if no token is found
+          return;
+        }
+        // Verify the token
+        const decoded = await jwtVerify(
+          authtoken,
+          new TextEncoder().encode(SECRET_KEY)
+        );
+        const userId = decoded.payload.id;
         const [invoiceResponse, profileResponse] = await Promise.all([
           fetch(`/api/restaurantinvoice/${invoiceId}`),
-          fetch('/api/Profile')
+          fetch(`/api/Profile/${userId}`)
         ]);
         if (!invoiceResponse.ok || !profileResponse.ok) {
           throw new Error('Failed to fetch data');
@@ -66,7 +80,7 @@ const PrintableInvoice = ({ invoiceId }) => {
         ]);
         console.log(profileData.data);
         setInvoice(invoiceData);
-        setProfile(profileData.data[0]);
+        setProfile(profileData.data);
         setLoading(false);
       } catch (err) {
         setError(err.message);

@@ -1,5 +1,18 @@
 import mongoose from "mongoose";
 
+// List of Indian states and union territories (28 states + 8 UTs = 36 entities)
+const indianStatesAndUTs = [
+  // States (28)
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa',
+  'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala',
+  'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland',
+  'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  // Union Territories (8)
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+];
+
 const restaurantInvoiceSchema = new mongoose.Schema(
   {
     invoiceno: {
@@ -55,23 +68,23 @@ const restaurantInvoiceSchema = new mongoose.Schema(
       required: true,
     },
     cgstArray: {
-      type: [Number], // Array of GST percentages for individual items
+      type: [Number], // Array of CGST percentages for individual items
       required: true,
       validate: {
         validator: function (v) {
           return v.length === this.menuitem.length; // Ensure it matches the number of menu items
         },
-        message: "GST array length must match menu items length.",
+        message: "CGST array length must match menu items length.",
       },
     },
     sgstArray: {
-      type: [Number], // Array of GST percentages for individual items
+      type: [Number], // Array of SGST percentages for individual items
       required: true,
       validate: {
         validator: function (v) {
           return v.length === this.menuitem.length; // Ensure it matches the number of menu items
         },
-        message: "GST array length must match menu items length.",
+        message: "SGST array length must match menu items length.",
       },
     },
     amountWithGstArray: {
@@ -84,9 +97,14 @@ const restaurantInvoiceSchema = new mongoose.Schema(
         message: "Amount with GST array length must match menu items length.",
       },
     },
-    username: {  // New field
+    username: {
       type: String,
       required: true,
+    },
+    state: {
+      type: String,
+      enum: indianStatesAndUTs, // Enum with all 36 states and union territories
+      required: false, // Optional field, change to true if mandatory
     },
   },
   {
