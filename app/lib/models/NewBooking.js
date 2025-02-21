@@ -71,7 +71,7 @@ const newBookingSchema = new mongoose.Schema({
   },
   referenceno: { 
     type: String, 
-    required: true 
+     
   },
   companyName: { 
     type: String 
