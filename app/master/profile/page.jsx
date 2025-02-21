@@ -336,9 +336,6 @@ const ProfilePage = () => {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                
-                  
-                 
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

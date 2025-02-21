@@ -61,6 +61,7 @@ export async function POST(req) {
       addressLine1: data.addressLine1,
       addressLine2: data.addressLine2,
       district: data.district,
+      state: data.state,
       country: data.country,
       pinCode: data.pinCode,
       username: data.username,
