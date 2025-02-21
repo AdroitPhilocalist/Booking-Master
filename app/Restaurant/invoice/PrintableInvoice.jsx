@@ -15,8 +15,8 @@ import {
 } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
-import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
-import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
+import { getCookie } from "cookies-next";
+import { jwtVerify } from "jose";
 
 // Add print-specific styles
 const printStyles = `
@@ -55,16 +55,12 @@ const PrintableInvoice = ({ invoiceId }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const authtoken = getCookie("authToken"); // Get the token from cookies
+        const authtoken = getCookie("authToken");
         if (!authtoken) {
-          router.push("/"); // Redirect to login if no token is found
+          router.push("/");
           return;
         }
-        // Verify the token
-        const decoded = await jwtVerify(
-          authtoken,
-          new TextEncoder().encode(SECRET_KEY)
-        );
+        const decoded = await jwtVerify(authtoken, new TextEncoder().encode(SECRET_KEY));
         const userId = decoded.payload.id;
         const [invoiceResponse, profileResponse] = await Promise.all([
           fetch(`/api/restaurantinvoice/${invoiceId}`),
@@ -92,6 +88,7 @@ const PrintableInvoice = ({ invoiceId }) => {
       fetchData();
     }
   }, [invoiceId]);
+
   const handlePrint = () => {
     window.print();
   };
@@ -99,23 +96,23 @@ const PrintableInvoice = ({ invoiceId }) => {
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-        <svg 
-          aria-hidden="true" 
-          className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" 
-          viewBox="0 0 100 101" 
-          fill="none" 
+        <svg
+          aria-hidden="true"
+          className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
+          viewBox="0 0 100 101"
+          fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path 
-            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" 
+          <path
+            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
             fill="currentColor"
           />
-          <path 
-            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" 
+          <path
+            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
             fill="currentFill"
           />
         </svg>
-        <span className="mt-4 text-gray-700">Loading Invoices...</span>
+        <span className="mt-4 text-gray-700">Loading Invoice...</span>
       </div>
     );
   }
@@ -128,22 +125,26 @@ const PrintableInvoice = ({ invoiceId }) => {
     );
   }
 
-  if (!invoice) {
+  if (!invoice || !profile) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <Typography variant="h6">No invoice found</Typography>
+        <Typography variant="h6">No invoice or profile data found</Typography>
       </Box>
     );
   }
+
+  // Determine if invoice state matches profile state
+  const isSameState = invoice.state && profile.state && invoice.state === profile.state;
 
   // Prepare items with correct attributes for display
   const preparedItems = invoice.menuitem.map((item, index) => ({
     name: item,
     qty: invoice.quantity[index],
     rate: invoice.price[index],
-    sgst:invoice.sgstArray[index],
-    cgst:invoice.cgstArray[index],
-    amount: invoice.quantity[index] * invoice.price[index]
+    sgst: invoice.sgstArray[index],
+    cgst: invoice.cgstArray[index],
+    amount: invoice.quantity[index] * invoice.price[index],
+    igst: invoice.amountWithGstArray[index] - (invoice.quantity[index] * invoice.price[index]), // IGST as total GST
   }));
 
   // Calculate subtotal from items
@@ -163,18 +164,17 @@ const PrintableInvoice = ({ invoiceId }) => {
                 </Typography>
               </Box>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                {profile.addressLine1 || 'N/A'}
+                {profile.addressLine1 || 'N/A'}, {profile.addressLine2 || 'N/A'}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                {profile.addressLine2 || 'N/A'}
+                {profile.district || 'N/A'} - {profile.pinCode || 'N/A'},
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                {profile.district || 'N/A'}, {profile.country} - {profile.pincode || 'N/A'}
+                {profile.state || 'N/A'}, {profile.country || 'India'}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                 Phone: {profile.mobileNo}
               </Typography>
-
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                 Restaurant GST No: {profile.gstNo || 'N/A'}
               </Typography>
@@ -199,7 +199,10 @@ const PrintableInvoice = ({ invoiceId }) => {
                 Phone: {invoice.custphone}
               </Typography>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
-                Customer GST No: {invoice.custgst}
+                Customer GST No: {invoice.custgst || 'N/A'}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                State: {invoice.state || 'N/A'}
               </Typography>
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
@@ -216,9 +219,14 @@ const PrintableInvoice = ({ invoiceId }) => {
                   <TableCell sx={{ color: 'white' }}>Item</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Quantity</TableCell>
                   <TableCell align="right" sx={{ color: 'white' }}>Rate</TableCell>
-                  <TableCell align="right" sx={{ color: 'white' }}>SGST</TableCell>
-                  <TableCell align="right" sx={{ color: 'white' }}>CGST</TableCell>
-                  <TableCell align="right" sx={{ color: 'white' }}>IGST</TableCell>
+                  {isSameState ? (
+                    <>
+                      <TableCell align="right" sx={{ color: 'white' }}>SGST</TableCell>
+                      <TableCell align="right" sx={{ color: 'white' }}>CGST</TableCell>
+                    </>
+                  ) : (
+                    <TableCell align="right" sx={{ color: 'white' }}>IGST</TableCell>
+                  )}
                   <TableCell align="right" sx={{ color: 'white' }}>Amount</TableCell>
                 </TableRow>
               </TableHead>
@@ -228,9 +236,14 @@ const PrintableInvoice = ({ invoiceId }) => {
                     <TableCell>{item.name}</TableCell>
                     <TableCell align="right">{item.qty}</TableCell>
                     <TableCell align="right">₹{item.rate.toFixed(2)}</TableCell>
-                    <TableCell align="right">₹{item.sgst.toFixed(2)}</TableCell>
-                    <TableCell align="right">₹{item.cgst.toFixed(2)}</TableCell>
-                    <TableCell align="right">₹{(parseFloat(item.cgst)+parseFloat(item.sgst)).toFixed(2)}</TableCell>
+                    {isSameState ? (
+                      <>
+                        <TableCell align="right">₹{item.sgst.toFixed(2)}</TableCell>
+                        <TableCell align="right">₹{item.cgst.toFixed(2)}</TableCell>
+                      </>
+                    ) : (
+                      <TableCell align="right">₹{item.igst.toFixed(2)}</TableCell>
+                    )}
                     <TableCell align="right">₹{item.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
@@ -243,16 +256,26 @@ const PrintableInvoice = ({ invoiceId }) => {
               <Grid container spacing={1}>
                 <Grid item xs={6}>
                   <Typography variant="body1">Subtotal:</Typography>
-                  <Typography variant="body1">SGST:</Typography>
-                  <Typography variant="body1">CGST:</Typography>
-                  <Typography variant="body1">IGST:</Typography>
+                  {isSameState ? (
+                    <>
+                      <Typography variant="body1">SGST:</Typography>
+                      <Typography variant="body1">CGST:</Typography>
+                    </>
+                  ) : (
+                    <Typography variant="body1">IGST:</Typography>
+                  )}
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>Total:</Typography>
                 </Grid>
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>
                   <Typography variant="body1">₹{subtotal.toFixed(2)}</Typography>
-                  <Typography variant="body1">₹{invoice.sgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)}</Typography>
-                  <Typography variant="body1">₹{invoice.cgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)}</Typography>
-                  <Typography variant="body1">₹{((invoice.gst)).toFixed(2)}</Typography>
+                  {isSameState ? (
+                    <>
+                      <Typography variant="body1">₹{invoice.sgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)}</Typography>
+                      <Typography variant="body1">₹{invoice.cgstArray?.reduce((sum, value) => sum + value, 0).toFixed(2)}</Typography>
+                    </>
+                  ) : (
+                    <Typography variant="body1">₹{invoice.gst.toFixed(2)}</Typography>
+                  )}
                   <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>₹{invoice.payableamt.toFixed(2)}</Typography>
                 </Grid>
               </Grid>
