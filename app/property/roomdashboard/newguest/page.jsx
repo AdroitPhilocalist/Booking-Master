@@ -218,14 +218,7 @@ export default function BookingForm() {
       gstinError = true;
     }
 
-    // Reference number validation
-    if (
-      formData.referenceno &&
-      (isNaN(formData.referenceno) || formData.referenceno < 0)
-    ) {
-      newErrors.referenceno = "Reference number must be a positive number";
-      referenceError = true;
-    }
+
 
     // Adults validation
     if (formData.adults < 1) {
@@ -965,7 +958,7 @@ export default function BookingForm() {
                         select
                         required
                       >
-                        {["Confirm", "Block"].map((status) => (
+                        {["Confirm", "Block","Pencil"].map((status) => (
                           <MenuItem key={status} value={status}>
                             {status}
                           </MenuItem>
@@ -999,17 +992,7 @@ export default function BookingForm() {
                     Guest Details
                   </Typography>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <TextField
-                      label="Guest Name"
-                      name="guestName"
-                      value={formData.guestName}
-                      onChange={handleChange}
-                      error={!!errors.guestName}
-                      helperText={errors.guestName}
-                      fullWidth
-                      required
-                    />
-                    <Autocomplete
+                  <Autocomplete
                       freeSolo
                       options={filteredMobileNumbers}
                       value={formData.mobileNo}
@@ -1030,6 +1013,17 @@ export default function BookingForm() {
                         />
                       )}
                     />
+                    <TextField
+                      label="Guest Name"
+                      name="guestName"
+                      value={formData.guestName}
+                      onChange={handleChange}
+                      error={!!errors.guestName}
+                      helperText={errors.guestName}
+                      fullWidth
+                      required
+                    />
+                    
                     <TextField
                       label="Email ID"
                       name="guestEmail"
