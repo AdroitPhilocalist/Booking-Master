@@ -33,7 +33,7 @@ const restaurantInvoiceSchema = new mongoose.Schema(
     },
     custphone: {
       type: String,
-      required: true,
+      required: false,
     },
     custaddress: {
       type: String, // Optional customer address
