@@ -965,7 +965,7 @@ export default function BookingForm() {
                         select
                         required
                       >
-                        {["Confirm", "Block"].map((status) => (
+                        {["Confirm", "Block","Pencil"].map((status) => (
                           <MenuItem key={status} value={status}>
                             {status}
                           </MenuItem>

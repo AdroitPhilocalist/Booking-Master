@@ -106,7 +106,7 @@ const newBookingSchema = new mongoose.Schema({
   },
   bookingStatus: { 
     type: String, 
-    enum: ['Confirm', 'Block'], 
+    enum: ['Confirm', 'Block','Pencil'], 
     required: true 
   },
   address: { 
