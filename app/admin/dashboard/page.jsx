@@ -26,12 +26,15 @@ import {
   DialogContentText,
   Stack,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import {
   Edit,
   Delete,
   Visibility,
-  Add,CheckCircle, Cancel,
+  Add,
+  CheckCircle,
+  Cancel,
   ErrorOutline,
   CheckCircleOutline,
 } from "@mui/icons-material";
@@ -41,9 +44,223 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Navbar from "../../_components/admin-navbar";
-import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
+import { getCookie } from 'cookies-next';
 import { Footer } from "../../_components/Footer";
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+
+// Define states and districts (same as in Profile.js and ProfilePage.jsx)
+const indianStatesAndUTs = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa',
+  'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala',
+  'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland',
+  'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+];
+
+const stateDistricts = {
+  "Andhra Pradesh": [
+    "Anakapalli", "Anantapur", "Annamayya", "Alluri Sitharama Raju", "Bapatla",
+    "Chittoor", "East Godavari", "Eluru", "Guntur", "Kakinada", "Krishna",
+    "Kurnool", "Nandyal", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam",
+    "Vizianagaram", "West Godavari"
+  ],
+  "Arunachal Pradesh": [
+    "Tawang", "West Kameng", "East Kameng", "Papum Pare", "Kurung Kumey",
+    "Kra Daadi", "Lower Subansiri", "Upper Subansiri", "West Siang", "East Siang",
+    "Siang", "Upper Siang", "Lower Siang", "Lower Dibang Valley", "Dibang Valley",
+    "Anjaw", "Lohit", "Namsai", "Changlang", "Tirap", "Longding"
+  ],
+  "Assam": [
+    "Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo",
+    "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara",
+    "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup Metropolitan",
+    "Kamrup", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur",
+    "Majuli", "Morigaon", "Nagaon", "Nalbari", "Dima Hasao", "Sivasagar",
+    "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"
+  ],
+  "Bihar": [
+    "Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur",
+    "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj",
+    "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj",
+    "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda",
+    "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran",
+    "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali",
+    "West Champaran"
+  ],
+  "Chhattisgarh": [
+    "Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur",
+    "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Gaurela-Pendra-Marwahi",
+    "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba",
+    "Koriya", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur",
+    "Rajnandgaon", "Sukma", "Surajpur", "Surguja"
+  ],
+  "Goa": ["North Goa", "South Goa"],
+  "Gujarat": [
+    "Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch",
+    "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka",
+    "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch",
+    "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal",
+    "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar",
+    "Tapi", "Vadodara", "Valsad"
+  ],
+  "Haryana": [
+    "Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram",
+    "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh",
+    "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa",
+    "Sonipat", "Yamunanagar"
+  ],
+  "Himachal Pradesh": [
+    "Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti",
+    "Mandi", "Shimla", "Sirmaur", "Solan", "Una"
+  ],
+  "Jharkhand": [
+    "Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum",
+    "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti",
+    "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi",
+    "Sahebganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"
+  ],
+  "Karnataka": [
+    "Bagalkot", "Ballari", "Belagavi", "Bengaluru Urban", "Bengaluru Rural",
+    "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga",
+    "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri",
+    "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur",
+    "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura",
+    "Yadgir"
+  ],
+  "Kerala": [
+    "Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam",
+    "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta",
+    "Thiruvananthapuram", "Thrissur", "Wayanad"
+  ],
+  "Madhya Pradesh": [
+    "Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani",
+    "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara",
+    "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda",
+    "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone",
+    "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Niwari", "Panna",
+    "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni",
+    "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli",
+    "Tikamgarh", "Ujjain", "Umaria", "Vidisha"
+  ],
+  "Maharashtra": [
+    "Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara",
+    "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli",
+    "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban",
+    "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani",
+    "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur",
+    "Thane", "Wardha", "Washim", "Yavatmal"
+  ],
+  "Manipur": [
+    "Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West",
+    "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl",
+    "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"
+  ],
+  "Meghalaya": [
+    "East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills",
+    "Ri-Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills",
+    "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"
+  ],
+  "Mizoram": [
+    "Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai",
+    "Lunglei", "Mamit", "Saitual", "Siaha", "Serchhip"
+  ],
+  "Nagaland": [
+    "Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Noklak",
+    "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"
+  ],
+  "Odisha": [
+    "Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack",
+    "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur",
+    "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha",
+    "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada",
+    "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundargarh"
+  ],
+  "Punjab": [
+    "Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka",
+    "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana",
+    "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sangrur",
+    "Shahid Bhagat Singh Nagar", "Sri Muktsar Sahib", "Tarn Taran"
+  ],
+  "Rajasthan": [
+    "Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara",
+    "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur",
+    "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu",
+    "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand",
+    "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"
+  ],
+  "Sikkim": ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+  "Tamil Nadu": [
+    "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore",
+    "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari",
+    "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal",
+    "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet",
+    "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi",
+    "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur",
+    "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"
+  ],
+  "Telangana": [
+    "Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon",
+    "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar",
+    "Khammam", "Komaram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial",
+    "Medak", "Medchal-Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda",
+    "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla",
+    "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad",
+    "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"
+  ],
+  "Tripura": [
+    "Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura",
+    "Unakoti", "West Tripura"
+  ],
+  "Uttar Pradesh": [
+    "Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha",
+    "Auraiya", "Ayodhya", "Azamgarh", "Baghpat", "Bahraich", "Ballia",
+    "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi",
+    "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria",
+    "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar",
+    "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi",
+    "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat",
+    "Kanpur Nagar", "Kasganj", "Kaushambi", "Kushinagar", "Lakhimpur Kheri",
+    "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura",
+    "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit",
+    "Pratapgarh", "Prayagraj", "Rae Bareli", "Rampur", "Saharanpur", "Sambhal",
+    "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar",
+    "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"
+  ],
+  "Uttarakhand": [
+    "Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar",
+    "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal",
+    "Udham Singh Nagar", "Uttarkashi"
+  ],
+  "West Bengal": [
+    "Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur",
+    "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong",
+    "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas",
+    "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur",
+    "Purulia", "South 24 Parganas", "Uttar Dinajpur"
+  ],
+  "Andaman and Nicobar Islands": [
+    "Nicobar", "North and Middle Andaman", "South Andaman"
+  ],
+  "Chandigarh": ["Chandigarh"],
+  "Dadra and Nagar Haveli and Daman and Diu": [
+    "Dadra and Nagar Haveli", "Daman", "Diu"
+  ],
+  "Delhi": [
+    "Central Delhi", "East Delhi", "New Delhi", "North Delhi", "North East Delhi",
+    "North West Delhi", "Shahdara", "South Delhi", "South East Delhi",
+    "South West Delhi", "West Delhi"
+  ],
+  "Jammu and Kashmir": [
+    "Anantnag", "Bandipora", "Baramulla", "Budgam", "Doda", "Ganderbal",
+    "Jammu", "Kathua", "Kishtwar", "Kulgam", "Kupwara", "Poonch", "Pulwama",
+    "Rajouri", "Ramban", "Reasi", "Samba", "Shopian", "Srinagar", "Udhampur"
+  ],
+  "Ladakh": ["Kargil", "Leh"],
+  "Lakshadweep": ["Lakshadweep"],
+  "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"]
+};
 
 const StyledCard = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -79,6 +296,7 @@ const SuperAdminDashboard = () => {
     addressLine1: "",
     addressLine2: "",
     altMobile: "",
+    state: "",
     district: "",
     gstNo: "",
     pinCode: "",
@@ -88,14 +306,15 @@ const SuperAdminDashboard = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
   const router = useRouter();
+
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
         setIsLoading(true);
-        const token = getCookie('adminauthToken'); // Get the token from cookies
+        const token = getCookie('adminauthToken');
         console.log(token);
         if (!token) {
-          router.push('/admin/login'); // Redirect to login if no token is found
+          router.push('/admin/login');
           return;
         }
         const response = await fetch("/api/Profile");
@@ -157,6 +376,7 @@ const SuperAdminDashboard = () => {
       addressLine1: "",
       addressLine2: "",
       altMobile: "",
+      state: "",
       district: "",
       gstNo: "",
       pinCode: "",
@@ -166,6 +386,7 @@ const SuperAdminDashboard = () => {
     setErrors({});
     setOpenAddProfileDialog(true);
   };
+
   const toggleActiveStatus = async (id) => {
     try {
       setIsLoading(true);
@@ -179,7 +400,7 @@ const SuperAdminDashboard = () => {
         );
         toast.success("Active status toggled successfully!");
       } else {
-        toast.error("Failed to toggle active status: " + data.error);
+        toast.error("Failed to toggle active status: " + response.data.error);
       }
     } catch (error) {
       toast.error("Error toggling active status: " + error.message);
@@ -187,6 +408,7 @@ const SuperAdminDashboard = () => {
       setIsLoading(false);
     }
   };
+
   const handleCloseAddProfileDialog = () => {
     setOpenAddProfileDialog(false);
     setFormData({
@@ -198,6 +420,7 @@ const SuperAdminDashboard = () => {
       addressLine1: "",
       addressLine2: "",
       altMobile: "",
+      state: "",
       district: "",
       gstNo: "",
       pinCode: "",
@@ -212,16 +435,11 @@ const SuperAdminDashboard = () => {
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
-      addressLine1: "",
-      addressLine2: "",
-      altMobile: "",
-      district: "",
-      gstNo: "",
-      pinCode: "",
-      website: "",
-      Profile_Complete: "no",
+      // Reset district if state changes and the current district isn't valid for the new state
+      ...(name === 'state' && prevData.district && !stateDistricts[value]?.includes(prevData.district) ? { district: "" } : {})
     }));
     console.log(formData);
+
     // Validate fields on change
     let newErrors = { ...errors };
     if (name === "username") {
@@ -243,6 +461,7 @@ const SuperAdminDashboard = () => {
     }
     setErrors(newErrors);
   };
+
   const validatePassword = (password) => {
     const errors = {};
     if (password.length < 8) {
@@ -251,21 +470,9 @@ const SuperAdminDashboard = () => {
     if (password.length > 13) {
       errors.maxLength = "Password must be no more than 13 characters long.";
     }
-    // if (!/[A-Z]/.test(password)) {
-    //   errors.uppercase = "Password must contain at least one uppercase letter.";
-    // }
-    // if (!/[a-z]/.test(password)) {
-    //   errors.lowercase = "Password must contain at least one lowercase letter.";
-    // }
-    // if (!/[0-9]/.test(password)) {
-    //   errors.digit = "Password must contain at least one digit.";
-    // }
-    // if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    //   errors.specialChar =
-    //     'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
-    // }
     return errors;
   };
+
   const handleAddProfile = async () => {
     // Validate form before submission
     let newErrors = {};
@@ -319,10 +526,12 @@ const SuperAdminDashboard = () => {
           addressLine1: "",
           addressLine2: "",
           altMobile: "",
+          state: "",
           district: "",
           gstNo: "",
           pinCode: "",
           website: "",
+          Profile_Complete: "no",
         });
         setErrors({});
         toast.success("Profile added successfully!");
@@ -344,14 +553,24 @@ const SuperAdminDashboard = () => {
       email: profile.email,
       username: profile.username,
       password: "",
+      addressLine1: profile.addressLine1 || "",
+      addressLine2: profile.addressLine2 || "",
+      altMobile: profile.altMobile || "",
+      state: profile.state || "",
+      district: profile.district || "",
+      gstNo: profile.gstNo || "",
+      pinCode: profile.pinCode || "",
+      website: profile.website || "",
+      Profile_Complete: profile.Profile_Complete || "no",
     });
     setErrors({});
     setOpenAddProfileDialog(true);
     setSelectedProfileId(profile._id);
   };
+
   const modalStyle = {
-    width: 350, // Increased width
-    height: 400, // Increased height
+    width: 500, // Adjusted width
+    height: 600, // Adjusted height
   };
 
   const handleOpenIssueDialog = (profile) => {
@@ -440,43 +659,40 @@ const SuperAdminDashboard = () => {
     }
   };
 
-
   const deleteSpecificCookies = () => {
-    // Delete authtoken
     document.cookie =
       "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-    // Delete clienttoken
     document.cookie =
       "adminclientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
   };
 
   const handleLogout = () => {
     setIsLoggingOut(true);
-
-    // Delete specific cookies
     deleteSpecificCookies();
-
-    // Add a small delay before redirecting
     setTimeout(() => {
       setIsLoggingOut(false);
       router.push("/admin/login");
     }, 800);
   };
 
+  const getDistrictOptions = () => {
+    return formData.state ? stateDistricts[formData.state] || [] : [];
+  };
+
   return (
-   <div>
+    <div>
       <Navbar />
       {isLoading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
-            <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-              <svg aria-hidden="true" className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-              </svg>
-              <span className="mt-4 text-gray-700">Loading Hotel List...</span>
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
+            <svg aria-hidden="true" className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+            </svg>
+            <span className="mt-4 text-gray-700">Loading Hotel List...</span>
           </div>
-        )}
+        </div>
+      )}
       <div className="bg-amber-50 min-h-screen mt-6">
         <Container maxWidth="lg" style={{ marginTop: "0rem" }}>
           <Grid container spacing={3}>
@@ -497,75 +713,77 @@ const SuperAdminDashboard = () => {
                   }
                 />
                 <CardContent>
-                    <TableContainer
-                      component={Paper}
-                      elevation={6}
-                      style={{ borderRadius: "16px" }}
-                    >
-                      <Table aria-label="profiles table">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Hotel Name</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell>Mobile No</TableCell>
-                            <TableCell>Username</TableCell>
-                            <TableCell>User Issue</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Actions</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {profiles.map((profile) => (
-                            <TableRow key={profile._id}
+                  <TableContainer
+                    component={Paper}
+                    elevation={6}
+                    style={{ borderRadius: "16px" }}
+                  >
+                    <Table aria-label="profiles table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Hotel Name</TableCell>
+                          <TableCell>Email</TableCell>
+                          <TableCell>Mobile No</TableCell>
+                          <TableCell>Username</TableCell>
+                          <TableCell>User Issue</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {profiles.map((profile) => (
+                          <TableRow
+                            key={profile._id}
                             style={{
-                              backgroundColor: profile.active === 'no' ? '#ffdddd' : '#f8f9fa',
+                              backgroundColor: profile.Active === 'no' ? '#ffdddd' : '#f8f9fa',
                               transition: 'background-color 0.3s',
-                            }}>
-                              <TableCell>{profile.hotelName}</TableCell>
-                              <TableCell>{profile.email}</TableCell>
-                              <TableCell>{profile.mobileNo}</TableCell>
-                              <TableCell>{profile.username || "N/A"}</TableCell>
-                              <TableCell>
-                                <IconButton
-                                  onClick={() => handleOpenIssueDialog(profile)}
-                                >
-                                  {getIssueIcon(profile)}
-                                </IconButton>
-                              </TableCell>
-                              <TableCell>
-                          {profile.Active === 'yes' ? (
-                            <CheckCircle color="success" />
-                          ) : (
-                            <Cancel color="error" />
-                          )}
-                        </TableCell>
-                              <TableCell>
-                                <IconButton
-                                  color="primary"
-                                  onClick={() =>
-                                    handleOpenEditProfileDialog(profile)
-                                  }
-                                >
-                                  <Edit />
-                                </IconButton>
-                                <IconButton
-                                  color="secondary"
-                                  onClick={() => handleDeleteClick(profile._id)}
-                                >
-                                  <Delete />
-                                </IconButton>
-                                <IconButton
-                            color="default"
-                            onClick={() => toggleActiveStatus(profile._id)}
+                            }}
                           >
-                            <Visibility />
-                          </IconButton>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
+                            <TableCell>{profile.hotelName}</TableCell>
+                            <TableCell>{profile.email}</TableCell>
+                            <TableCell>{profile.mobileNo}</TableCell>
+                            <TableCell>{profile.username || "N/A"}</TableCell>
+                            <TableCell>
+                              <IconButton
+                                onClick={() => handleOpenIssueDialog(profile)}
+                              >
+                                {getIssueIcon(profile)}
+                              </IconButton>
+                            </TableCell>
+                            <TableCell>
+                              {profile.Active === 'yes' ? (
+                                <CheckCircle color="success" />
+                              ) : (
+                                <Cancel color="error" />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <IconButton
+                                color="primary"
+                                onClick={() =>
+                                  handleOpenEditProfileDialog(profile)
+                                }
+                              >
+                                <Edit />
+                              </IconButton>
+                              <IconButton
+                                color="secondary"
+                                onClick={() => handleDeleteClick(profile._id)}
+                              >
+                                <Delete />
+                              </IconButton>
+                              <IconButton
+                                color="default"
+                                onClick={() => toggleActiveStatus(profile._id)}
+                              >
+                                <Visibility />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </CardContent>
               </StyledCard>
             </Grid>
@@ -603,7 +821,7 @@ const SuperAdminDashboard = () => {
           </DialogActions>
         </StyledDialog>
 
-        {/* Add Profile Dialog */}
+        {/* Add/Edit Profile Dialog */}
         <StyledDialog
           open={openAddProfileDialog}
           onClose={handleCloseAddProfileDialog}
@@ -630,6 +848,14 @@ const SuperAdminDashboard = () => {
                 value={formData.mobileNo}
                 onChange={handleChange}
                 required
+              />
+              <TextField
+                label="Alt Mobile"
+                variant="outlined"
+                fullWidth
+                name="altMobile"
+                value={formData.altMobile}
+                onChange={handleChange}
               />
               <TextField
                 label="Email"
@@ -663,6 +889,79 @@ const SuperAdminDashboard = () => {
                 error={Boolean(errors.password)}
                 helperText={errors.password}
               />
+              <TextField
+                label="Address Line 1"
+                variant="outlined"
+                fullWidth
+                name="addressLine1"
+                value={formData.addressLine1}
+                onChange={handleChange}
+              />
+              <TextField
+                label="Address Line 2"
+                variant="outlined"
+                fullWidth
+                name="addressLine2"
+                value={formData.addressLine2}
+                onChange={handleChange}
+              />
+              <TextField
+                select
+                label="State"
+                variant="outlined"
+                fullWidth
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+              >
+                <MenuItem value="">Select State</MenuItem>
+                {indianStatesAndUTs.map((state) => (
+                  <MenuItem key={state} value={state}>
+                    {state}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="District"
+                variant="outlined"
+                fullWidth
+                name="district"
+                value={formData.district}
+                onChange={handleChange}
+                disabled={!formData.state}
+              >
+                <MenuItem value="">Select District</MenuItem>
+                {getDistrictOptions().map((district) => (
+                  <MenuItem key={district} value={district}>
+                    {district}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="GST No"
+                variant="outlined"
+                fullWidth
+                name="gstNo"
+                value={formData.gstNo}
+                onChange={handleChange}
+              />
+              <TextField
+                label="Pin Code"
+                variant="outlined"
+                fullWidth
+                name="pinCode"
+                value={formData.pinCode}
+                onChange={handleChange}
+              />
+              <TextField
+                label="Website"
+                variant="outlined"
+                fullWidth
+                name="website"
+                value={formData.website}
+                onChange={handleChange}
+              />
             </Stack>
           </DialogContent>
           <DialogActions>
@@ -674,65 +973,60 @@ const SuperAdminDashboard = () => {
             </Button>
           </DialogActions>
         </StyledDialog>
-      </div>
-      {/* Issue Dialog */}
-      <StyledDialog
-        open={openIssueDialog}
-        onClose={handleCloseIssueDialog}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          style: {
-            backgroundColor: "#f9f9f9",
-            borderRadius: "16px",
-            padding: "2rem",
-            boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
-          },
-        }}
-      >
-        <DialogTitle>
-          {issueProfile?.forgotUsername && issueProfile?.forgotPassword
-            ? "Forgot Username & Password"
-            : issueProfile?.forgotUsername
-            ? "Forgot Username"
-            : issueProfile?.forgotPassword
-            ? "Forgot Password"
-            : "No Issues"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
+
+        {/* Issue Dialog */}
+        <StyledDialog
+          open={openIssueDialog}
+          onClose={handleCloseIssueDialog}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            style: {
+              backgroundColor: "#f9f9f9",
+              borderRadius: "16px",
+              padding: "2rem",
+              boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
+            },
+          }}
+        >
+          <DialogTitle>
             {issueProfile?.forgotUsername && issueProfile?.forgotPassword
-              ? "This user has requested help with both their username and password."
+              ? "Forgot Username & Password"
               : issueProfile?.forgotUsername
-              ? "This user has requested help with their username."
+              ? "Forgot Username"
               : issueProfile?.forgotPassword
-              ? "This user has requested help with their password."
-              : "This user has no issues."}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseIssueDialog} color="primary">
-            Close
-          </Button>
-          {(issueProfile?.forgotUsername || issueProfile?.forgotPassword) && (
-            <Button onClick={handleResolveIssue} color="secondary">
-              Resolve
+              ? "Forgot Password"
+              : "No Issues"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {issueProfile?.forgotUsername && issueProfile?.forgotPassword
+                ? "This user has requested help with both their username and password."
+                : issueProfile?.forgotUsername
+                ? "This user has requested help with their username."
+                : issueProfile?.forgotPassword
+                ? "This user has requested help with their password."
+                : "This user has no issues."}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseIssueDialog} color="primary">
+              Close
             </Button>
-          )}
-        </DialogActions>
-      </StyledDialog>
+            {(issueProfile?.forgotUsername || issueProfile?.forgotPassword) && (
+              <Button onClick={handleResolveIssue} color="secondary">
+                Resolve
+              </Button>
+            )}
+          </DialogActions>
+        </StyledDialog>
+      </div>
       <Footer />
       <style jsx global>{`
         @keyframes pop {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          100% {
-            transform: scale(1);
-          }
+          0% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); }
         }
       `}</style>
     </div>
