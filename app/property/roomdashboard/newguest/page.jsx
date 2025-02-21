@@ -218,14 +218,7 @@ export default function BookingForm() {
       gstinError = true;
     }
 
-    // Reference number validation
-    if (
-      formData.referenceno &&
-      (isNaN(formData.referenceno) || formData.referenceno < 0)
-    ) {
-      newErrors.referenceno = "Reference number must be a positive number";
-      referenceError = true;
-    }
+
 
     // Adults validation
     if (formData.adults < 1) {
