@@ -53,7 +53,6 @@ export async function POST(req) {
       );
     }
 
-    const token = jwt.sign({ id: user._id,roles: user.roles }, SECRET_KEY, { expiresIn: '24h' });
     // Find the profile by hotelName
     const profile = await Profile.findOne({ hotelName: data.hotelName });
     if (!profile) {
