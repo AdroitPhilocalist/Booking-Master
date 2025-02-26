@@ -103,6 +103,14 @@ export default function LoginPage() {
               Hotel Login
             </Typography>
             <form onSubmit={handleSubmit}>
+            <TextField
+                label="Hotel Name"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={hotelName}
+                onChange={(e) => setHotelName(e.target.value)}
+              />
               <TextField
                 label="Email"
                 variant="outlined"
@@ -111,14 +119,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <TextField
-                label="Hotel Name"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={hotelName}
-                onChange={(e) => setHotelName(e.target.value)}
-              />
+              
               <TextField
                 label="Password"
                 variant="outlined"
