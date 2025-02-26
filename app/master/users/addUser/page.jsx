@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, TextField, Grid, Typography, Paper, Box, Container } from '@mui/material';
@@ -99,7 +98,7 @@ export default function AddUser() {
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="Property"
+                    label="Hotel Name"
                     fullWidth
                     required
                     variant="outlined"
@@ -135,6 +134,22 @@ export default function AddUser() {
                     error={!!errors.phone}
                     helperText={errors.phone?.message}
                   />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Roles"
+                    fullWidth
+                    required
+                    select
+                    variant="outlined"
+                    {...register('Role', { required: 'Role is required' })}
+                    error={!!errors.role}
+                    helperText={errors.role?.message}
+                  >
+                    <MenuItem value="Online">Property & Frontdesk</MenuItem>
+                    <MenuItem value="Offline">Restaurant</MenuItem>
+                    <MenuItem value="Offline">Inventory</MenuItem>
+                  </TextField>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
