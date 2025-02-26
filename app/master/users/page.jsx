@@ -7,6 +7,7 @@ import {
   Table,
   TableBody,
   Grid,
+  Typography,
   TableCell,
   TableContainer,
   TableHead,
