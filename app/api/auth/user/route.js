@@ -50,16 +50,8 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-    const profileActive=await profile.Active;
-    if(profileActive==="no")
-    {
-      return NextResponse.json(
-        { success: false, error: 'Profile Inactive!! Please contact admin.' },
-        { status: 400 }
-      );
-    }
 
-    const token = jwt.sign({ id: profile._id }, SECRET_KEY, { expiresIn: '24h' });
+    const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '24h' });
 
     // Create the response
     const response = NextResponse.json(
@@ -70,16 +62,16 @@ export async function POST(req) {
     
 
     // Set both HTTP-only and client-accessible cookies
-    response.cookies.set('authToken', token, {
+    response.cookies.set('userAuthToken', token, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
-      maxAge: 3600,
+      maxAge: 86400,
       path: '/',
     });
 
     // Set a non-HTTP-only cookie for client-side access
-    response.cookies.set('clientToken', token, {
+    response.cookies.set('userClientToken', token, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
