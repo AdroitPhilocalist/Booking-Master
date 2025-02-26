@@ -21,31 +21,32 @@ export async function GET(req, { params }) {
     await connectToDatabase();
     const { id } = params;
 
-    // Extract the token from cookies
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication token missing' 
-      }, { status: 401 });
-    }
+    // // Extract the token from cookies
+    // const token = req.cookies.get('authToken')?.value;
+    // const usertoken = req.cookies.get('userAuthToken')?.value;
+    // if (!token && !usertoken) {
+    //   return NextResponse.json({ 
+    //     success: false, 
+    //     error: 'Authentication token missing' 
+    //   }, { status: 401 });
+    // }
 
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+    // // Verify the token
+    // const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+    // const userId = decoded.payload.id;
 
-    // Find the profile by userId to get the username
-    const profile = await Profile.findById(userId);
-    if (!profile) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Profile not found' 
-      }, { status: 404 });
-    }
+    // // Find the profile by userId to get the username
+    // const profile = await Profile.findById(userId);
+    // if (!profile) {
+    //   return NextResponse.json({ 
+    //     success: false, 
+    //     error: 'Profile not found' 
+    //   }, { status: 404 });
+    // }
 
     // Fetch the user by ID and ensure it belongs to the current user
     const user = await User.findById(id);
-    if (!user || user.username !== profile.username) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'User not found or unauthorized' },
         { status: 404 }

@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
+import { getCookie } from "cookies-next";
+import { jwtVerify } from "jose";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
@@ -45,8 +47,52 @@ export default function LoginPage() {
           autoClose: 3000,
           theme: "colored",
         });
-        // Redirect to the dashboard (or desired route)
-        router.push("/dashboard");
+
+        const token = getCookie("userAuthToken");
+        if (!token) {
+          router.push("/user/login");
+          return;
+        }
+
+        const decoded = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET || "your_secret_key"));
+        console.log("Decoded token:", decoded);
+        const userId = decoded.payload.userId;
+        const profileId = decoded.payload.profileId;
+
+        const response = await fetch(`/api/User/${userId}`);
+        const result = await response.json();
+        console.log("Profile data:", result.data._id);
+        // Fetch user data to get roles
+        const userRes = await fetch(`/api/User/${result.data._id}`);
+        const userData = await userRes.json();
+        console.log("User data:", userData);
+        if (userData.success && userData.data && userData.data.roles) {
+          const roles = userData.data.roles;
+          console.log("User roles:", roles);
+          // Determine the first role and its first route
+          if (roles.length > 0) {
+            const firstRole = roles[0]; // Get the first role from the array
+            let redirectPath = "/dashboard"; // Default redirect if no role match
+            switch (firstRole) {
+              case "Property & Frontdesk":
+                redirectPath = "/property/roomdashboard"; // First link for Property & Frontdesk
+                break;
+              case "Restaurant":
+                redirectPath = "/Restaurant/dashboard"; // First link for Restaurant
+                break;
+              case "Inventory":
+                redirectPath = "/Inventory/Category"; // First link for Inventory
+                break;
+              default:
+                redirectPath = "/dashboard"; // Fallback redirect
+            }
+            router.push(redirectPath);
+          } else {
+            router.push("/dashboard"); // Redirect to dashboard if no roles
+          }
+        } else {
+          router.push("/dashboard"); // Fallback redirect if user data fetch fails
+        }
       } else {
         toast.error(data.error || "Login failed", {
           position: "top-center",
@@ -103,7 +149,7 @@ export default function LoginPage() {
               User Login
             </Typography>
             <form onSubmit={handleSubmit}>
-            <TextField
+              <TextField
                 label="Hotel Name"
                 variant="outlined"
                 fullWidth
@@ -119,7 +165,6 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              
               <TextField
                 label="Password"
                 variant="outlined"
@@ -148,13 +193,11 @@ export default function LoginPage() {
               </Button>
             </form>
           </CardContent>
-          
         </Card>
         <div className="mt-8 text-center text-white text-sm">
           © 2025, Hotel Booking. All Rights Reserved.
         </div>
       </motion.div>
-      
     </Box>
   );
 }

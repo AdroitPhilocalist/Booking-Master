@@ -887,7 +887,8 @@ export default function RoomDashboard() {
       try {
         setIsLoading(true);
         const token = getCookie("authToken"); // Get the token from cookies
-        if (!token) {
+        const usertoken = getCookie("userAuthToken");
+        if (!token && !usertoken) {
           router.push("/"); // Redirect to login if no token is found
           return;
         }
