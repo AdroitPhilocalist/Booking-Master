@@ -3,17 +3,16 @@ import Room from '../../lib/models/Rooms';
 import RoomCategory from '../../lib/models/RoomCategory';
 import Profile from '../../lib/models/Profile';
 import NewBooking from '../../lib/models/NewBooking';
-import Billing from '../../lib/models/Billing' // Import Profile model
+import Billing from '../../lib/models/Billing'; // Import Profile model
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
-
 // Connect to the database
 const connectToDatabase = async () => {
-  if (mongoose.connections[0].readyState) return;
+  if (mongoose.connections[0]?.readyState === 1) return;
   await mongoose.connect(connectSTR, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -53,18 +52,27 @@ export async function POST(req) {
       }, { status: 400 });
     }
 
-    // Extract the token from cookies
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
+    // Extract both tokens from cookies (check authToken first, then userAuthToken)
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+
+    if (!authToken && !userAuthToken) {
       return NextResponse.json({ 
         success: false, 
         error: 'Authentication token missing' 
       }, { status: 401 });
     }
 
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.userId; // Use userId from the new token structure
+    }
 
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
@@ -109,27 +117,42 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     if (!mongoose.models.RoomCategory) {
-        mongoose.model('RoomCategory', RoomCategory.schema);
-      }
-      if (!mongoose.models.NewBooking) {
-        mongoose.model('NewBooking', NewBooking.schema);
-      }
-      if (!mongoose.models.Billing) {
-        mongoose.model('Billing', Billing.schema);
-      }
+      mongoose.model('RoomCategory', RoomCategory.schema);
+    }
+    if (!mongoose.models.NewBooking) {
+      mongoose.model('NewBooking', NewBooking.schema);
+    }
+    if (!mongoose.models.Billing) {
+      mongoose.model('Billing', Billing.schema);
+    }
 
-    // Extract the token from cookies
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
+    // Extract both tokens from cookies (check authToken first, then userAuthToken)
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+
+    if (!authToken && !userAuthToken) {
       return NextResponse.json({ 
         success: false, 
         error: 'Authentication token missing' 
       }, { status: 401 });
     }
 
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else if (userAuthToken) {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.profileId; // Use userId from the new token structure
+    } else {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid token structure' 
+      }, { status: 400 });
+    }
+
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
     if (!profile) {
@@ -138,14 +161,12 @@ export async function GET(req) {
         error: 'Profile not found' 
       }, { status: 404 });
     }
-    
 
     // Fetch all rooms from the database filtered by username
     const rooms = await Room.find({ username: profile.username })
       .populate('category')
       .populate('guestWaitlist')
       .populate('billWaitlist');
-
 
     return NextResponse.json({ success: true, data: rooms }, { status: 200 });
   } catch (error) {
