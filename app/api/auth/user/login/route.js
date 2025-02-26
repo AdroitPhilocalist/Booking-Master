@@ -51,7 +51,7 @@ export async function POST(req) {
       );
     }
 
-    const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '24h' });
+    const token = jwt.sign({ id: user._id,roles: user.roles }, SECRET_KEY, { expiresIn: '24h' });
 
     // Create the response
     const response = NextResponse.json(
