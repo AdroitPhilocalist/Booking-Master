@@ -148,8 +148,13 @@ export default function LoginPage() {
               </Button>
             </form>
           </CardContent>
+          
         </Card>
+        <div className="mt-8 text-center text-white text-sm">
+          © 2025, Hotel Booking. All Rights Reserved.
+        </div>
       </motion.div>
+      
     </Box>
   );
 }
