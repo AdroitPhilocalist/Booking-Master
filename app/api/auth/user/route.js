@@ -37,13 +37,13 @@ export async function POST(req) {
     const user = await User.findOne({ email: data.email });
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Invalid username' },
+        { success: false, error: 'Invalid email' },
         { status: 400 }
       );
     }
     
 
-    const isMatch = await bcrypt.compare(data.password, profile.password);
+    const isMatch = await bcrypt.compare(data.password, user.password);
     if (!isMatch) {
       return NextResponse.json(
         { success: false, error: 'Invalid password' },
