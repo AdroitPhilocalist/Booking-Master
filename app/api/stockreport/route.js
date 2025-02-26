@@ -25,25 +25,31 @@ const connectToDatabase = async () => {
 export async function GET(req) {
   try {
     await connectToDatabase();
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication token missing' 
-      }, { status: 401 });
-    }
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
-    // Fetch the profile by userId to get the username
-    // const profileResponse = await fetch(`/api/Profile/${userId}`);
-    // const profileData = await profileResponse.json();
-    // if (!profileData.success || !profileData.data) {
-    //   return NextResponse.json({ 
-    //     success: false, 
-    //     error: 'Profile not found' 
-    //   }, { status: 404 });
-    // }
+    // Extract the token from cookies
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+     if (!authToken && !userAuthToken) {
+          return NextResponse.json({ 
+            success: false, 
+            error: 'Authentication token missing' 
+          }, { status: 401 });
+        }
+    
+        let decoded, userId;
+        if (authToken) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        } else if (userAuthToken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        } else {
+          return NextResponse.json({ 
+            success: false, 
+            error: 'Invalid token structure' 
+          }, { status: 400 });
+        }
     const profile = await Profile.findById(userId);
     // const username = profileData.data.username;
     // Ensure all models are registered before querying
@@ -126,26 +132,31 @@ export async function POST(request) {
       }
     }
     await connectToDatabase();
-    const token = request.cookies.get('authToken')?.value;
-    if (!token) {
+// Extract the token from cookies
+const authToken = req.cookies.get('authToken')?.value;
+const userAuthToken = req.cookies.get('userAuthToken')?.value;
+ if (!authToken && !userAuthToken) {
       return NextResponse.json({ 
         success: false, 
         error: 'Authentication token missing' 
       }, { status: 401 });
     }
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
-    // Fetch the profile by userId to get the username
-    // const profileResponse = await fetch(`/api/Profile/${userId}`);
-    // const profileData = await profileResponse.json();
-    // if (!profileData.success || !profileData.data) {
-    //   return NextResponse.json({ 
-    //     success: false, 
-    //     error: 'Profile not found' 
-    //   }, { status: 404 });
-    // }
-    // const username = profileData.data.username;
+
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else if (userAuthToken) {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.profileId; // Use userId from the new token structure
+    } else {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid token structure' 
+      }, { status: 400 });
+    }
     const profile = await Profile.findById(userId);
     if (!profile) {
       return NextResponse.json({ 
