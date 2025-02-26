@@ -1,5 +1,5 @@
-import connectSTR from '../../../lib/dbConnect';
-import User from '../../../lib/models/User';
+import connectSTR from '../../../../lib/dbConnect';
+import User from '../../../../lib/models/User';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
