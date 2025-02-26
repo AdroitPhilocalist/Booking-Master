@@ -18,8 +18,8 @@ import {
   Box,
 } from "@mui/material";
 import axios from "axios";
-import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
-import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
+import { getCookie } from "cookies-next";
+import { jwtVerify } from "jose";
 
 export default function Billing() {
   const router = useRouter();
@@ -35,23 +35,20 @@ export default function Billing() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const authtoken = getCookie("authToken"); // Get the token from cookies
+        const authtoken = getCookie("authToken");
         if (!authtoken) {
-          router.push("/"); // Redirect to login if no token is found
+          router.push("/");
           return;
         }
-        // Verify the token
         const decoded = await jwtVerify(
           authtoken,
           new TextEncoder().encode(SECRET_KEY)
         );
         const userId = decoded.payload.id;
-        // Fetch the profile by userId to get the username
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
-        // console.log(profileData);
         if (!profileData.success || !profileData.data) {
-          router.push("/"); // Redirect to login if profile not found
+          router.push("/");
           return;
         }
         const username = profileData.data.username;
@@ -82,8 +79,7 @@ export default function Billing() {
         );
         console.log("Billings Map : ", billingsMap);
         console.log("Bookings Map : ", bookingsMap);
-        // Process and sort bills
-        // Keep your existing enrichedBills code up to here…
+
         const enrichedBills = roomsResult
           .flatMap((room) => {
             if (!room.billWaitlist || room.billWaitlist.length === 0) return [];
@@ -93,9 +89,9 @@ export default function Billing() {
               const guestId = room.guestWaitlist[index];
               const guest = bookingsMap.get(guestId._id);
               return {
-                bill, // the billing document
-                guestId: guestId._id, // Unique Guest ID
-                roomNo: room.number.toString(), // individual room number
+                bill,
+                guestId: guestId._id,
+                roomNo: room.number.toString(),
                 guestName: guest ? guest.guestName : "N/A",
                 bookingId: guest ? guest.bookingId : "N/A",
                 checkInDate: guest ? guest.checkIn : null,
@@ -107,7 +103,7 @@ export default function Billing() {
           .filter(Boolean)
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         const groupedBills = enrichedBills.reduce((acc, cur) => {
-          const key = cur.guestId; // Use Guest ID as the grouping key
+          const key = cur.guestId;
           if (!acc[key]) {
             acc[key] = { ...cur, roomNo: [cur.roomNo] };
           } else {
@@ -118,7 +114,6 @@ export default function Billing() {
 
         const mergedBillings = Object.values(groupedBills);
 
-        // Update state with consolidated billing records
         setBillingData(mergedBillings);
         setOriginalBillingData(mergedBillings);
       } catch (error) {
@@ -139,7 +134,6 @@ export default function Billing() {
           filterStatus
         )
       ) {
-        // Existing date-based filtering logic
         result = result.filter((bill) => {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
@@ -162,16 +156,14 @@ export default function Billing() {
           return false;
         });
       } else {
-        // Modified payment status filtering to exclude cancelled bills
         result = result.filter(
           (bill) =>
             bill.bill.Bill_Paid.toLowerCase() === filterStatus &&
-            bill.bill.Cancelled !== "yes" // Add this condition
+            bill.bill.Cancelled !== "yes"
         );
       }
     }
 
-    // Existing search filters
     if (searchRoom) {
       result = result.filter((bill) =>
         bill.roomNo.toString().toLowerCase().includes(searchRoom.toLowerCase())
@@ -181,7 +173,7 @@ export default function Billing() {
       result = result.filter(
         (bill) =>
           bill.guestName.toLowerCase().includes(searchGuest.toLowerCase()) ||
-          bill.guestId.includes(searchGuest) // Search by Guest ID
+          bill.guestId.includes(searchGuest)
       );
     }
     return result;
@@ -191,7 +183,6 @@ export default function Billing() {
     router.push(`/property/billing/guest-bill/${bill.currentBillingId}`);
   };
 
-  // Updated Guest Status function to include Cancelled status
   const getGuestStatus = (bill) => {
     if (bill.bill.Cancelled === "yes") {
       return "Cancelled";
@@ -212,7 +203,6 @@ export default function Billing() {
     return "Staying";
   };
 
-  // Updated Bill Status function
   const getBillStatus = (bill) => {
     if (bill.bill.Cancelled === "yes") {
       return "Cancelled";
@@ -312,17 +302,37 @@ export default function Billing() {
             </Button>
           </Box>
         </Box>
-        <div className="flex flex-wrap justify-between items-center mb-6">
-          <div className="flex space-x-2"> 
-            <Link
-              href="roomdashboard/newguest"
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              New Reservation <Add />
-            </Link>
-          </div>
-        </div>
+
+        {/* Main Content */}
         <div className="container mx-auto py-4 px-4">
+          {/* New Reservation Button */}
+          <Box
+            sx={{
+              maxWidth: "80%",
+              margin: "0 auto",
+              display: "flex",
+              justifyContent: "flex-end",
+              mb: 2,
+              paddingRight: 2, // Added padding to ensure alignment within the container
+            }}
+          >
+            <Link href="roomdashboard/newguest">
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Add />}
+                sx={{
+                  backgroundColor: "#006bb3",
+                  "&:hover": { backgroundColor: "#004d9e" }, // Darkened blue for hover
+                  minWidth: 160, // Fixed width for consistency
+                }}
+              >
+                New Reservation
+              </Button>
+            </Link>
+          </Box>
+
+          {/* Billing Table */}
           <TableContainer
             component={Paper}
             sx={{ maxWidth: "80%", margin: "0 auto" }}
@@ -423,22 +433,21 @@ export default function Billing() {
                           backgroundColor: "white",
                           textAlign: "center",
                         },
-                        background: `linear-gradient(to right, ${bill.bill.Cancelled === "yes"
-                          ? "#808080"
-                          : bill.bill.Bill_Paid === "yes"
+                        background: `linear-gradient(to right, ${
+                          bill.bill.Cancelled === "yes"
+                            ? "#808080"
+                            : bill.bill.Bill_Paid === "yes"
                             ? "#1ebc1e"
                             : "#f24a23"
-                          } 5%, white 5%)`,
+                        } 5%, white 5%)`,
                       }}
                     >
                       <TableCell>{bill.bookingId || "N/A"}</TableCell>
                       <TableCell>
-                        {console.log("Bill : ", bill)}
                         {Array.isArray(bill.bill.roomNo)
                           ? bill.bill.roomNo.join(", ")
                           : bill.bill.roomNo || "N/A"}
                       </TableCell>
-
                       <TableCell>{bill.guestName || "N/A"}</TableCell>
                       <TableCell>₹{bill.bill.totalAmount || 0}</TableCell>
                       <TableCell>₹{bill.bill.amountAdvanced || 0}</TableCell>
@@ -461,7 +470,7 @@ export default function Billing() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} align="center">
+                    <TableCell colSpan={9} align="center">
                       No billing records available.
                     </TableCell>
                   </TableRow>

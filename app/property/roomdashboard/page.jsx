@@ -26,6 +26,7 @@ import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import { Switch, FormControlLabel, Typography } from "@mui/material"; // Added Switch and FormControlLabel from MUI
 
 // Component for summary items at the top of the page
 const SummaryItem = ({ icon: Icon, title, count }) => (
@@ -57,11 +58,10 @@ const RoomCard = ({
   const handleEditChange = (e) => {
     const { name, value } = e.target;
 
-    // Special handling for 'clean' to convert string to boolean
     if (name === "clean") {
       setUpdatedRoom({
         ...updatedRoom,
-        [name]: value === "true", // This will convert 'true' to true, and 'false' to false
+        [name]: value === "true",
       });
     } else {
       setUpdatedRoom({
@@ -70,11 +70,11 @@ const RoomCard = ({
       });
     }
 
-    // Fetch guests when status changes to "Occupied"
     if (e.target.name === "occupied" && e.target.value === "Occupied") {
       fetchGuests();
     }
   };
+
   const fetchGuests = async () => {
     try {
       const response = await fetch("/api/NewBooking");
@@ -84,7 +84,7 @@ const RoomCard = ({
       console.error("Error fetching guests:", error);
     }
   };
-  // Modified fetchGuestDetails to always try to fetch guest info
+
   const fetchGuestDetails = async () => {
     if (room.currentGuestId) {
       try {
@@ -99,14 +99,41 @@ const RoomCard = ({
       setCurrentGuest(null);
     }
   };
+
   useEffect(() => {
     fetchGuestDetails();
     console.log("Guest ID:", room.currentGuestId);
     console.log("Billing ID:", room.currentBillingId);
   }, [room.occupied, room.currentGuestId]);
 
+  // New function to handle toggle switch changes
+  const handleToggleChange = async (field, value) => {
+    if (!currentGuest) return;
+
+    try {
+      const updatedGuest = { ...currentGuest, [field]: value };
+      const response = await fetch(`/api/NewBooking/${currentGuest._id}`, {
+        method: 'PUT',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedGuest),
+      });
+
+      if (response.ok) {
+        setCurrentGuest(updatedGuest);
+        // alert(`${field} status updated successfully!`);
+      } else {
+        console.error(`Failed to update ${field} status`);
+        alert(`Failed to update ${field} status`);
+      }
+    } catch (error) {
+      console.error(`Error updating ${field} status:`, error);
+      alert(`Error updating ${field} status`);
+    }
+  };
+
   const handleEditSubmit = async () => {
-    // Validation: Ensure a guest is selected when the room is set to "Occupied"
     if (updatedRoom.occupied === "Occupied" && !selectedGuest) {
       alert("Please select a guest before saving an occupied room.");
       return;
@@ -114,39 +141,30 @@ const RoomCard = ({
 
     if (updatedRoom.occupied === "Occupied" && selectedGuest) {
       try {
-        // Retrieve checkIn and checkOut from selected guest
         const { checkIn, checkOut } = selectedGuest;
-
-        // Find the matching room category
         const matchingCategory = categories.find(
           (cat) => cat._id === updatedRoom.category._id
         );
-
-        // Calculate the number of nights (days between checkIn and checkOut)
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
         const numberOfNights = Math.ceil(
           (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
         );
-
-        // Calculate total room charge
         const roomCharge = matchingCategory
           ? matchingCategory.total * numberOfNights
           : 0;
 
-        // Create billing entry when room status changes to "Occupied"
         const newBilling = {
           roomNo: updatedRoom.number,
-          itemList: ["Room Charge"], // Add more items as necessary
-          priceList: [roomCharge], // Assuming the room has a price field
-          billStartDate: checkIn, // Use the checkIn value from the selected guest
-          billEndDate: checkOut, // Use the checkOut value from the selected guest
+          itemList: ["Room Charge"],
+          priceList: [roomCharge],
+          billStartDate: checkIn,
+          billEndDate: checkOut,
           totalAmount: roomCharge,
           amountAdvanced: 0,
           dueAmount: roomCharge,
         };
 
-        // Create Billing Record in the database
         const billingResponse = await fetch("/api/Billing", {
           method: "POST",
           headers: {
@@ -157,18 +175,14 @@ const RoomCard = ({
 
         const billingData = await billingResponse.json();
         if (billingData.success) {
-          // Get the generated billing record's ID
           const billingId = billingData.data._id;
-
-          // Update the updatedRoom object with the new billing details and guest ID
           const updatedRoomWithBilling = {
             ...updatedRoom,
             billingStarted: "Yes",
             currentBillingId: billingId,
-            currentGuestId: selectedGuest._id, // Add the current guest's ID
+            currentGuestId: selectedGuest._id,
           };
 
-          // Update the room in the database directly
           const roomUpdateResponse = await fetch(
             `/api/rooms/${updatedRoomWithBilling._id}`,
             {
@@ -205,7 +219,6 @@ const RoomCard = ({
         );
       }
     } else {
-      // Update the room in the database directly if no billing creation is needed
       try {
         const roomUpdateResponse = await fetch(
           `/api/rooms/${updatedRoom._id}`,
@@ -236,43 +249,8 @@ const RoomCard = ({
       }
     }
 
-    window.location.reload(); // Finalize editing
+    window.location.reload();
     setIsEditing(false);
-  };
-
-  // Find category name and icon based on room's category ID
-  const categoryInfo = categories.find(
-    (cat) => cat._id === room.category._id
-  ) || {
-    category: "No Category",
-    icon: Tags, // Default icon if no category found
-  };
-
-  // Color and icon mapping for room status
-  const statusConfig = {
-    Vacant: {
-      bgColor: "bg-green-50",
-      textColor: "text-green-600",
-      icon: CheckCircle2,
-    },
-    Occupied: {
-      bgColor: "bg-red-100",
-      textColor: "text-red-600",
-      icon: XCircle,
-    },
-  };
-
-  const cleanStatusConfig = {
-    true: {
-      bgColor: "bg-emerald-100",
-      textColor: "text-emerald-700",
-      label: "Clean",
-    },
-    false: {
-      bgColor: "bg-yellow-100",
-      textColor: "text-yellow-700",
-      label: "Needs Cleaning",
-    },
   };
 
   const handleCancelBooking = async () => {
@@ -294,10 +272,8 @@ const RoomCard = ({
         console.log("bill itemlist", billData.roomNo);
         const indexToRemove = billData.roomNo.indexOf(room.number);
         const priceToRemove = billData.priceList[indexToRemove][0];
-        console.log("price to remove",priceToRemove);
-        if(billData.roomNo.length==1)
-        {
-          //Update Billing status to cancelled
+        console.log("price to remove", priceToRemove);
+        if (billData.roomNo.length === 1) {
           await fetch(`/api/Billing/${room.currentBillingId}`, {
             method: 'PUT',
             headers: {
@@ -309,17 +285,13 @@ const RoomCard = ({
               dueAmount: 0
             })
           });
-
-        }
-        else{
-
-        
+        } else {
           console.log("bill itemlist", billData.roomNo.filter((_, index) => index !== indexToRemove));
           const currentItemList = billData.itemList;
           const currentPriceList = billData.priceList;
           const currentQuantityList = billData.quantityList;
           const currentTaxList = billData.taxList;
-          const currentRoomList=billData.roomNo;
+          const currentRoomList = billData.roomNo;
           const updatedItemList = currentItemList.filter(
             (_, index) => index !== indexToRemove
           );
@@ -342,28 +314,24 @@ const RoomCard = ({
               priceList: updatedPriceList,
               taxList: updatedTaxList,
               quantityList: updatedQuantityList,
-              roomNo:updatedRoomList,
-              totalAmount: billData.totalAmount-priceToRemove,
-              dueAmount: billData.dueAmount-priceToRemove,
+              roomNo: updatedRoomList,
+              totalAmount: billData.totalAmount - priceToRemove,
+              dueAmount: billData.dueAmount - priceToRemove,
             },
             { headers }
           );
-
         }
 
-        // Get current room data
         const roomResponse = await fetch(`/api/rooms/${room._id}`, {
           headers: headers
         });
         const roomData = await roomResponse.json();
         const currentRoomData = roomData.data;
 
-        // Find position of current IDs
         const currentPosition = currentRoomData.billWaitlist.findIndex(
           billId => billId._id.toString() === room.currentBillingId.toString()
         );
 
-        // Prepare update data
         let updateData = {
           billWaitlist: currentRoomData.billWaitlist,
           guestWaitlist: currentRoomData.guestWaitlist,
@@ -371,7 +339,6 @@ const RoomCard = ({
           checkOutDateList: currentRoomData.checkOutDateList,
         };
 
-        // Check if there's a next booking
         const hasNextBooking = currentPosition < currentRoomData.billWaitlist.length - 1;
         if (hasNextBooking) {
           updateData = {
@@ -390,11 +357,9 @@ const RoomCard = ({
             occupied: "Vacant",
             clean: true,
             billingStarted: "No",
-
           };
         }
 
-        // Update room with new data
         const updateResponse = await fetch(`/api/rooms/${room._id}`, {
           method: 'PUT',
           headers: {
@@ -409,7 +374,6 @@ const RoomCard = ({
         if (updateResult.success) {
           setShowGuestModal(false);
           setCurrentGuest(null);
-          // Update rooms state
           setRooms(prevRooms => prevRooms.map(r =>
             r._id === room._id ? { ...r, ...updateData } : r
           ));
@@ -424,14 +388,33 @@ const RoomCard = ({
       }
     }
   };
-  
+
+  const categoryInfo = categories.find(
+    (cat) => cat._id === room.category._id
+  ) || {
+    category: "No Category",
+    icon: Tags,
+  };
+
+  const statusConfig = {
+    Vacant: {
+      bgColor: "bg-green-50",
+      textColor: "text-green-600",
+      icon: CheckCircle2,
+    },
+    Occupied: {
+      bgColor: "bg-red-100",
+      textColor: "text-red-600",
+      icon: XCircle,
+    },
+  };
+
   return (
     <div
       className="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Room Card Container with Enhanced Hover Effect */}
       <div
         className={`
           relative overflow-hidden transition-all duration-400 ease-in-out 
@@ -442,7 +425,6 @@ const RoomCard = ({
           ${statusConfig[room.occupied].bgColor}
         `}
       >
-        {/* Room Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <Building
@@ -459,7 +441,6 @@ const RoomCard = ({
               `}
             >
               Room {room.number}
-              {/* Guest Info Icon (only shows when occupied) */}
               {currentGuest && (
                 <button
                   onClick={() => setShowGuestModal(true)}
@@ -491,7 +472,6 @@ const RoomCard = ({
             </h3>
           </div>
 
-          {/* Action Buttons with Advanced Hover Effects */}
           <div
             className={`
               flex space-x-2 transition-all duration-300 ease-in-out
@@ -529,14 +509,12 @@ const RoomCard = ({
           </div>
         </div>
 
-        {/* Room Details with Hover Animations */}
         <div className="p-4 space-y-3">
           <div className="flex justify-between items-center">
             <div className="p-4 space-y-3">
               <div
                 className={`flex flex-col items-start space-y-1 transition-all duration-300`}
               >
-                {/* Floor Information */}
                 <div className="flex items-center space-x-2">
                   <Key
                     className={`text-gray-500 transition-transform duration-300 ${
@@ -548,8 +526,6 @@ const RoomCard = ({
                     Floor: {room.floor}
                   </span>
                 </div>
-
-                {/* Category Information */}
                 <div className="flex items-center space-x-2">
                   {React.createElement(categoryInfo.icon || Tags, {
                     className: `text-gray-500 transition-transform duration-300 ${
@@ -563,7 +539,6 @@ const RoomCard = ({
                 </div>
               </div>
             </div>
-            {/* Status Indicator */}
             <div
               className={`
                 flex items-center space-x-2 
@@ -584,7 +559,6 @@ const RoomCard = ({
             </div>
           </div>
 
-          {/* Modified Booked On section to use createdAt */}
           <div
             className={`
             text-center py-1 rounded transition-all duration-300
@@ -609,7 +583,8 @@ const RoomCard = ({
           </div>
         </div>
       </div>
-      {/* Guest Modal (similar to Edit Modal) */}
+
+      {/* Guest Modal with Toggle Switches */}
       {showGuestModal && currentGuest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up border-4 border-amber-500">
@@ -618,9 +593,7 @@ const RoomCard = ({
                 Guest Details
               </h2>
               <button
-                onClick={() => {
-                  setShowGuestModal(false);
-                }}
+                onClick={() => setShowGuestModal(false)}
                 className="text-gray-500 hover:text-red-500 transition-colors"
               >
                 <XCircle size={28} />
@@ -679,6 +652,34 @@ const RoomCard = ({
                   </p>
                 </div>
               </div>
+              {/* Added Toggle Switches */}
+              <div className="bg-amber-50 p-3 rounded-lg space-y-2">
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={currentGuest.CheckedIn || false}
+                      onChange={(e) =>
+                        handleToggleChange("CheckedIn", e.target.checked)
+                      }
+                      color="primary"
+                    />
+                  }
+                  label="Checked In"
+                />
+                <br />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={currentGuest.CheckedOut || false}
+                      onChange={(e) =>
+                        handleToggleChange("CheckedOut", e.target.checked)
+                      }
+                      color="primary"
+                    />
+                  }
+                  label="Checked Out"
+                />
+              </div>
               {currentGuest.remarks && (
                 <div className="bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">
                   <p className="text-xs text-gray-500">Remarks</p>
@@ -686,7 +687,6 @@ const RoomCard = ({
                 </div>
               )}
             </div>
-            {/* New Cancel Booking Button */}
             <button
               onClick={handleCancelBooking}
               className="w-full mt-4 flex items-center justify-center space-x-2 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
@@ -697,7 +697,8 @@ const RoomCard = ({
           </div>
         </div>
       )}
-      {/* Edit Modal (Centered and Animated) */}
+
+      {/* Edit Modal */}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
           <div className="bg-white w-96 rounded-lg shadow-2xl p-6 animate-slide-up">
@@ -738,18 +739,6 @@ const RoomCard = ({
                   ))}
                 </select>
               </label>
-              {/* <label className="block mt-2">
-                Clean:
-                <select
-                  name="clean"
-                  value={updatedRoom.clean ? "true" : "false"}
-                  onChange={handleEditChange}
-                  className="border rounded w-full p-1"
-                >
-                  <option value="true">Clean</option>
-                  <option value="false">Dirty</option>
-                </select>
-              </label> */}
               <div className="flex justify-end mt-4">
                 <button
                   className="bg-blue-500 text-white px-2 py-1 rounded"
@@ -898,7 +887,8 @@ export default function RoomDashboard() {
       try {
         setIsLoading(true);
         const token = getCookie("authToken"); // Get the token from cookies
-        if (!token) {
+        const usertoken = getCookie("userAuthToken");
+        if (!token && !usertoken) {
           router.push("/"); // Redirect to login if no token is found
           return;
         }

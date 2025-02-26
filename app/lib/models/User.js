@@ -1,12 +1,22 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
   },
-  property: {
+  password: { 
     type: String,
+    required: true
+  },
+  hotelName: {
+    type: String,
+    required: true
+  },
+  roles: {
+    type: [String],
+    enum: ['Property & Frontdesk', 'Restaurant', 'Inventory'],
     required: true
   },
   email: {
@@ -29,6 +39,13 @@ const userSchema = new mongoose.Schema({
   },
 }, {
   timestamps: true
+});
+
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
