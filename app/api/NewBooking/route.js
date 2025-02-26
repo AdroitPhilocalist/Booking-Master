@@ -10,16 +10,31 @@ export async function POST(req) {
   try {
     await mongoose.connect(connectSTR);
     const data = await req.json();
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
+    // Extract the token from cookies
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+    if (!authToken && !userAuthToken) {
       return NextResponse.json({
         success: false,
         error: 'Authentication token missing'
       }, { status: 401 });
     }
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else if (userAuthToken) {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.profileId; // Use userId from the new token structure
+    } else {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid token structure'
+      }, { status: 400 });
+    }
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
     if (!profile) {
@@ -82,26 +97,41 @@ export async function POST(req) {
 export async function GET(req) {
   try {
     await mongoose.connect(connectSTR);
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication token missing' 
+    // Extract the token from cookies
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+    if (!authToken && !userAuthToken) {
+      return NextResponse.json({
+        success: false,
+        error: 'Authentication token missing'
       }, { status: 401 });
     }
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else if (userAuthToken) {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.profileId; // Use userId from the new token structure
+    } else {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid token structure'
+      }, { status: 400 });
+    }
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
     if (!profile) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Profile not found' 
+      return NextResponse.json({
+        success: false,
+        error: 'Profile not found'
       }, { status: 404 });
     }
     const bookings = await NewBooking.find({ username: profile.username });
-    return NextResponse.json({ success: true, data: bookings}, { status: 200 });
+    return NextResponse.json({ success: true, data: bookings }, { status: 200 });
   } catch (error) {
     console.error('Error fetching bookings:', error);
     return NextResponse.json(
