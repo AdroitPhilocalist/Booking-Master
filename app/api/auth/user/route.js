@@ -34,8 +34,8 @@ export async function POST(req) {
     }
     
 
-    const user = await User.findOne({ username: data.username });
-    if (!profile) {
+    const user = await User.findOne({ email: data.email });
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid username' },
         { status: 400 }
