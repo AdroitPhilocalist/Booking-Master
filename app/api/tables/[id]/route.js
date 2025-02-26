@@ -22,17 +22,31 @@ export async function GET(req, { params }) {
     const { id } = params;
 
     // Extract the token from cookies
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Authentication token missing' 
-      }, { status: 401 });
-    }
-
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+    // Extract the token from cookies
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+     if (!authToken && !userAuthToken) {
+          return NextResponse.json({ 
+            success: false, 
+            error: 'Authentication token missing' 
+          }, { status: 401 });
+        }
+    
+        let decoded, userId;
+        if (authToken) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        } else if (userAuthToken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        } else {
+          return NextResponse.json({ 
+            success: false, 
+            error: 'Invalid token structure' 
+          }, { status: 400 });
+        }
 
     // Find the profile by userId to get the username
     const profile = await Profile.findById(userId);
