@@ -100,9 +100,17 @@ export default function LoginPage() {
                 color: "#1c313a",
               }}
             >
-              Hotel Login
+              User Login
             </Typography>
             <form onSubmit={handleSubmit}>
+            <TextField
+                label="Hotel Name"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={hotelName}
+                onChange={(e) => setHotelName(e.target.value)}
+              />
               <TextField
                 label="Email"
                 variant="outlined"
@@ -111,14 +119,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <TextField
-                label="Hotel Name"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={hotelName}
-                onChange={(e) => setHotelName(e.target.value)}
-              />
+              
               <TextField
                 label="Password"
                 variant="outlined"
@@ -147,8 +148,13 @@ export default function LoginPage() {
               </Button>
             </form>
           </CardContent>
+          
         </Card>
+        <div className="mt-8 text-center text-white text-sm">
+          © 2025, Hotel Booking. All Rights Reserved.
+        </div>
       </motion.div>
+      
     </Box>
   );
 }
