@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Navbar from '../../_components/Navbar';
-import { Footer } from '../../_components/Footer';
+import React, { useState, useEffect } from "react";
+import Navbar from "../../_components/Navbar";
+import { Footer } from "../../_components/Footer";
 import {
   Table,
   TableBody,
+  Grid,
   TableCell,
   TableContainer,
   TableHead,
@@ -21,16 +22,94 @@ import {
   DialogTitle,
   IconButton,
   InputLabel,
-} from '@mui/material';
-import { Delete, Edit } from '@mui/icons-material';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+  CircularProgress,
+  Box,
+} from "@mui/material";
+import { Delete, Edit, Add as AddIcon } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { useForm, Controller } from "react-hook-form";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { styled } from "@mui/system";
+
+// Custom styling for the main container
+const StyledContainer = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: "12px",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+  background: "#ffffff",
+  transition: "box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.15)",
+  },
+}));
+
+// Custom styling for the table header
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#f5f5f5",
+  "& .MuiTableCell-root": {
+    fontWeight: "bold",
+    color: "#28bfdb",
+    textAlign: "center",
+    padding: theme.spacing(1.5),
+  },
+}));
+
+// Custom styling for table rows with fallback for theme
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:hover": {
+    backgroundColor: (theme && theme.palette && theme.palette.grey && theme.palette.grey[100]) || "#f5f5f5", // Fallback to a default grey color
+  },
+  "& .MuiTableCell-root": {
+    textAlign: "center",
+    padding: theme.spacing(1.5),
+  },
+}));
+
+// Custom styling for the TextField (ensure TextField is imported and used correctly)
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiInputBase-root": {
+    borderRadius: "8px",
+  },
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: (theme && theme.palette && theme.palette.grey && theme.palette.grey[300]) || "#d9d9d9",
+    },
+    "&:hover fieldset": {
+      borderColor: (theme && theme.palette && theme.palette.primary && theme.palette.primary.main) || "#1976d2",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: (theme && theme.palette && theme.palette.primary && theme.palette.primary.main) || "#1976d2",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    fontSize: "0.875rem",
+    color: (theme && theme.palette && theme.palette.grey && theme.palette.grey[700]) || "#666",
+  },
+}));
+
+// Custom styling for the Select (ensure Select is imported and used correctly)
+const StyledSelect = styled(Select)(({ theme }) => ({
+  "& .MuiSelect-select": {
+    borderRadius: "8px",
+  },
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: (theme && theme.palette && theme.palette.grey && theme.palette.grey[300]) || "#d9d9d9",
+    },
+    "&:hover fieldset": {
+      borderColor: (theme && theme.palette && theme.palette.primary && theme.palette.primary.main) || "#1976d2",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: (theme && theme.palette && theme.palette.primary && theme.palette.primary.main) || "#1976d2",
+    },
+  },
+}));
 
 export default function Page() {
   const [openDialog, setOpenDialog] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -42,15 +121,33 @@ export default function Page() {
     const fetchUsers = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/User');
+        const response = await fetch("/api/User");
         const data = await response.json();
         if (data.success) {
           setUsers(data.data);
         } else {
-          toast.error('Failed to fetch users.');
+          toast.error("Failed to fetch users.", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
         }
       } catch (error) {
-        toast.error('Error fetching users.');
+        toast.error("Error fetching users.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -61,7 +158,7 @@ export default function Page() {
 
   const filteredUsers = users.filter((user) =>
     Object.values(user).some((value) =>
-      value.toLowerCase().includes(searchTerm.toLowerCase())
+      typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -82,88 +179,122 @@ export default function Page() {
       if (response.data.success) {
         setUsers((prevUsers) => prevUsers.filter((user) => user._id !== selectedUser));
         setOpenDialog(false);
-        toast.success('User deleted successfully!',
-          {  //success toaster
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-
-          });
-
+        toast.success("User deleted successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       } else {
-        toast.error('Failed to delete user.'
-          , {   //error toaster
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-          });
-
+        toast.error("Failed to delete user.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       }
     } catch (error) {
-      toast.error('Error deleting user.');
+      toast.error("Error deleting user.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleAddNew = () => {
-    router.push('users/addUser');
-    // toast.success('Redirecting to add new user page!');
+    router.push("/master/users/addUser");
   };
+
+  // Initialize react-hook-form for edit form
+  const { handleSubmit: handleEditSubmit, control: editControl, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      name: "",
+      hotelName: "",
+      email: "",
+      phone: "",
+      userType: "Online",
+      roles: [],
+    },
+  });
 
   const handleOpenEdit = (user) => {
     setSelectedUser(user);
+    reset(user); // Reset form with user data
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedUser(null);
+    reset(); // Reset form on close
   };
 
-  const handleChange = (e) => {
-    setSelectedUser({
-      ...selectedUser,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onEditSubmit = async (data) => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/User/${selectedUser._id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(selectedUser),
+        body: JSON.stringify(data),
       });
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.success) {
+      if (result.success) {
         setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user._id === selectedUser._id ? selectedUser : user
-          )
+          prevUsers.map((user) => (user._id === selectedUser._id ? { ...user, ...data } : user))
         );
         handleClose();
-        toast.success('User updated successfully!');
+        toast.success("User updated successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       } else {
-        toast.error('Failed to update user.');
+        toast.error("Failed to update user.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       }
     } catch (error) {
-      toast.error('Error updating user.');
+      toast.error("Error updating user.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -187,216 +318,272 @@ export default function Page() {
       {isLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
-            <svg
-              aria-hidden="true"
-              className="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
-              viewBox="0 0 100 101"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                fill="currentColor"
-              />
-              <path
-                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                fill="currentFill"
-              />
-            </svg>
+            <CircularProgress size={48} color="primary" />
             <span className="mt-4 text-gray-700">Loading Users...</span>
           </div>
         </div>
       )}
       <main className="flex-grow p-8">
-        <h1 className="text-3xl font-semibold mb-4 text-cyan-900 ml-4">Booking Master Control Panel</h1>
-        <div className="rounded-lg">
-          <div className="p-4 rounded-t-lg text-2xl">
-            <h2 className="text-2xl font-semibold text-cyan-900">Users</h2>
+        <h1 className="text-3xl font-semibold mb-6 text-cyan-900 ml-4">Booking Master Control Panel</h1>
+        <StyledContainer>
+          <div className="p-4 rounded-t-lg">
+            <h2 className="text-2xl font-semibold text-cyan-900 mb-4">Users</h2>
           </div>
           <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <Button variant="contained" color="success" onClick={handleAddNew}>
-                Add New +
+            <div className="flex justify-between items-center mb-6">
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleAddNew}
+                startIcon={<AddIcon />}
+                sx={{
+                  backgroundColor: "#4caf50",
+                  "&:hover": { backgroundColor: "#45a049" },
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                }}
+              >
+                Add New
               </Button>
-              <div className="flex items-center space-x-4">
-                <span>Display</span>
-                <Select defaultValue="All" size="small" variant="outlined">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <span className="text-sm text-gray-600">Display</span>
+                <Select
+                  defaultValue="All"
+                  size="small"
+                  variant="outlined"
+                  sx={{ minWidth: 100 }}
+                >
                   <MenuItem value="All">All</MenuItem>
                 </Select>
-                <span>records</span>
+                <span className="text-sm text-gray-600">records</span>
                 <TextField
                   variant="outlined"
                   size="small"
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  sx={{ width: 200 }}
                 />
-              </div>
+              </Box>
             </div>
             <TableContainer component={Paper}>
               <Table>
-                <TableHead>
+                <StyledTableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Name</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Property</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Phone</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>User Type</TableCell>
-                    <TableCell sx={{ fontWeight: "bold", color: "#28bfdb" }}>Action</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Hotel Name</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Phone</TableCell>
+                    <TableCell>User Type</TableCell>
+                    <TableCell>Roles</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
-                </TableHead>
+                </StyledTableHead>
                 <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user._id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.property}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.phone}</TableCell>
-                      <TableCell>{user.userType}</TableCell>
-                      <TableCell>
-                        {/* <Button
-                          variant="contained"
-                          color="success"
-                          size="small"
-                          sx={{ marginRight: 1 }}
-                        >
-                          Active
-                        </Button> */}
-                        {/* <Button
-  variant="contained"
-  color="primary"
-  size="small"
-  onClick={() => handleOpenEdit(user)}
-  sx={{ marginRight: 2 }} // Adds right margin to space it from the next button
->
-  Edit
-</Button> */}
-                        <IconButton
-                          color="primary"
-                          onClick={() => handleOpenEdit(user)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        {/* <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => handleOpenDialog(user._id)}
-                          sx={{ marginLeft: 1 }} // Adds left margin to space it from the previous button
-                        >
-                          Delete
-                        </Button> */}
-                        <IconButton
-                          color="secondary"
-                          onClick={() => handleOpenDialog(user._id)}
-                        >
-                          <Delete />
-                        </IconButton>
-
-
-                        {/* Confirmation Dialog */}
-                        <Dialog open={openDialog} onClose={handleCloseDialog}>
-                          <DialogTitle>Confirm Deletion</DialogTitle>
-                          <DialogContent>
-                            <p>Are you sure you want to delete this user?</p>
-                          </DialogContent>
-                          <DialogActions>
-                            <Button onClick={handleCloseDialog} color="primary">
-                              Cancel
-                            </Button>
-                            <Button onClick={handleDeleteUser} color="secondary">
-                              Confirm
-                            </Button>
-                          </DialogActions>
-                        </Dialog>
+                  {filteredUsers.length > 0 ? (
+                    filteredUsers.map((user) => (
+                      <StyledTableRow key={user._id}>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.hotelName}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.phone}</TableCell>
+                        <TableCell>{user.userType}</TableCell>
+                        <TableCell>{user.roles?.join(", ") || "N/A"}</TableCell>
+                        <TableCell>
+                          <IconButton
+                            color="primary"
+                            onClick={() => handleOpenEdit(user)}
+                            sx={{ mr: 1 }}
+                          >
+                            <Edit />
+                          </IconButton>
+                          <IconButton
+                            color="secondary"
+                            onClick={() => handleOpenDialog(user._id)}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </TableCell>
+                      </StyledTableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        No users found.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
           </div>
-        </div>
+        </StyledContainer>
       </main>
 
-      {/* Edit User Modal */}
-      {/* Edit User Modal */}
-      <Dialog open={open} onClose={handleClose} maxWidth="md" // Increased width to 'md' for a wider layout
-        fullWidth>
-        <DialogTitle>Edit User</DialogTitle>
-        <DialogContent>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <TextField
-                label="Name"
-                name="name"
-                value={selectedUser?.name || ''}
-                onChange={handleChange}
-                fullWidth
-                required
-                margin="dense"
-                variant="outlined"
-              />
-            </div>
-            <div className="mb-4">
-              <TextField
-                label="Property"
-                name="property"
-                value={selectedUser?.property || ''}
-                onChange={handleChange}
-                fullWidth
-                required
-                margin="dense"
-                variant="outlined"
-              />
-            </div>
-            <div className="mb-4">
-              <TextField
-                label="Email"
-                name="email"
-                value={selectedUser?.email || ''}
-                onChange={handleChange}
-                fullWidth
-                required
-                margin="dense"
-                variant="outlined"
-              />
-            </div>
-            <div className="mb-4">
-              <TextField
-                label="Phone"
-                name="phone"
-                value={selectedUser?.phone || ''}
-                onChange={handleChange}
-                fullWidth
-                required
-                margin="dense"
-                variant="outlined"
-              />
-            </div>
-            <div className="mb-4">
-              <InputLabel id="UserTypeLabel" className="mb-2">
-                User Type
-              </InputLabel>
-              <Select
-                label="User Type"
-                name="userType"
-                id="UserType"
-                value={selectedUser?.userType || ''}
-                onChange={handleChange}
-                fullWidth
-                required
-                variant="outlined"
-              >
-                <MenuItem value="Online">Online</MenuItem>
-                <MenuItem value="Offline">Offline</MenuItem>
-              </Select>
-            </div>
-            <DialogActions className="mt-4">
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle sx={{ fontWeight: 600, color: "#1976d2" }}>
+          Confirm Deletion
+        </DialogTitle>
+        <DialogContent sx={{ padding: 3 }}>
+          <p>Are you sure you want to delete this user?</p>
+        </DialogContent>
+        <DialogActions sx={{ padding: 2 }}>
+          <Button
+            onClick={handleCloseDialog}
+            color="primary"
+            variant="outlined"
+            sx={{ mr: 2 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteUser}
+            color="secondary"
+            variant="contained"
+            sx={{
+              backgroundColor: "#f44336",
+              "&:hover": { backgroundColor: "#d32f2f" },
+            }}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ fontWeight: 600, color: "#1976d2" }}>
+          Edit User
+        </DialogTitle>
+        <DialogContent sx={{ padding: 3 }}>
+          <form onSubmit={handleEditSubmit(onEditSubmit)}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sx={{ mt: 2 }}>
+                <StyledTextField
+                  label="Name"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  {...editControl.register("name", { required: "Name is required" })}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <StyledTextField
+                  label="Hotel Name"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  {...editControl.register("hotelName", { required: "Hotel Name is required" })}
+                  error={!!errors.hotelName}
+                  helperText={errors.hotelName?.message}
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <StyledTextField
+                  label="Email"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  {...editControl.register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/,
+                      message: "Invalid email address",
+                    },
+                  })}
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <StyledTextField
+                  label="Phone"
+                  fullWidth
+                  required
+                  variant="outlined"
+                  {...editControl.register("phone", { required: "Phone number is required" })}
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message}
+                  sx={{ mb: 2 }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ mb: 2 }}>
+                  <InputLabel id="userType-label" sx={{ fontSize: "0.875rem", color: "#666", mb: 1 }}>
+                    User Type
+                  </InputLabel>
+                  <Controller
+                    name="userType"
+                    control={editControl}
+                    rules={{ required: "User type is required" }}
+                    render={({ field }) => (
+                      <StyledSelect
+                        {...field}
+                        labelId="userType-label"
+                        fullWidth
+                        variant="outlined"
+                        value={field.value || "Online"}
+                        error={!!errors.userType}
+                        sx={{ mb: errors.userType ? 0 : 2 }}
+                      >
+                        <MenuItem value="Online">Online</MenuItem>
+                        <MenuItem value="Offline">Offline</MenuItem>
+                      </StyledSelect>
+                    )}
+                  />
+                  {errors.userType && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                      {errors.userType.message}
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ mb: 2 }}>
+                  <InputLabel id="roles-label" sx={{ fontSize: "0.875rem", color: "#666", mb: 1 }}>
+                    Roles
+                  </InputLabel>
+                  <Controller
+                    name="roles"
+                    control={editControl}
+                    rules={{ required: "At least one role is required" }}
+                    render={({ field }) => (
+                      <StyledSelect
+                        {...field}
+                        labelId="roles-label"
+                        multiple
+                        fullWidth
+                        variant="outlined"
+                        renderValue={(selected) => selected.join(", ")}
+                        error={!!errors.roles}
+                        sx={{ mb: errors.roles ? 0 : 2 }}
+                      >
+                        <MenuItem value="Property & Frontdesk">Property & Frontdesk</MenuItem>
+                        <MenuItem value="Restaurant">Restaurant</MenuItem>
+                        <MenuItem value="Inventory">Inventory</MenuItem>
+                      </StyledSelect>
+                    )}
+                  />
+                  {errors.roles && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                      {errors.roles.message}
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+            <DialogActions sx={{ padding: 2 }}>
               <Button
                 onClick={handleClose}
                 color="error"
-                variant="contained"
-                size="large"
+                variant="outlined"
+                sx={{ mr: 2 }}
               >
                 Cancel
               </Button>
@@ -404,7 +591,10 @@ export default function Page() {
                 type="submit"
                 color="success"
                 variant="contained"
-                size="large"
+                sx={{
+                  backgroundColor: "#4caf50",
+                  "&:hover": { backgroundColor: "#45a049" },
+                }}
               >
                 Save
               </Button>
@@ -412,7 +602,6 @@ export default function Page() {
           </form>
         </DialogContent>
       </Dialog>
-
 
       <Footer />
     </div>
