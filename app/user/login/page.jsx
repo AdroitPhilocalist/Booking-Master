@@ -100,7 +100,7 @@ export default function LoginPage() {
                 color: "#1c313a",
               }}
             >
-              Hotel Login
+              User Login
             </Typography>
             <form onSubmit={handleSubmit}>
             <TextField
