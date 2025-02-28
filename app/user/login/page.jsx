@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -22,6 +22,25 @@ export default function LoginPage() {
   const [hotelName, setHotelName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timestamp, setTimestamp] = useState(null);
+
+  // Function to delete specific cookies
+  const deleteSpecificCookies = () => {
+    // Delete adminauthToken if it exists
+    if (document.cookie.split("; ").find((row) => row.startsWith("authToken="))) {
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
+    // Delete userAuthToken if it exists
+    if (document.cookie.split("; ").find((row) => row.startsWith("adminauthToken="))) {
+      document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
+  };
+
+  useEffect(() => {
+    setTimestamp(new Date().getFullYear());
+    // Delete adminauthToken and userAuthToken if they exist
+    deleteSpecificCookies();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
