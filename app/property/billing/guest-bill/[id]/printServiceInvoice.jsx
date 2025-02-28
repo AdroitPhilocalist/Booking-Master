@@ -4,6 +4,9 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import axios from 'axios';
+import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
+import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
+
 
 // Add print-specific styles
 const printStyles = `
@@ -39,6 +42,7 @@ const PrintableServiceInvoice = ({ billId }) => {
     const [foodItems, setFoodItems] = useState([]);
     const [serviceItems, setServiceItems] = useState([]);
     const [menuItems, setMenuItems] = useState([]);
+    const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
     // Fetch menu items
     useEffect(() => {
@@ -67,6 +71,24 @@ const PrintableServiceInvoice = ({ billId }) => {
                     .split("=")[1];
                 const headers = { Authorization: `Bearer ${token}` };
                 console.log('billId', billId);
+                const authtoken = getCookie('authToken');
+                const usertoken = getCookie("userAuthToken");
+                if (!authtoken && !usertoken) {
+                    router.push("/"); // Redirect to login if no token is found
+                    return;
+                }
+
+                let decoded, userId;
+                if (authtoken) {
+                    // Verify the authToken (legacy check)
+                    decoded = await jwtVerify(authtoken, new TextEncoder().encode(SECRET_KEY));
+                    userId = decoded.payload.id;
+                }
+                if (usertoken) {
+                    // Verify the userAuthToken
+                    decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+                    userId = decoded.payload.profileId; // Use userId from the new token structure
+                }
 
                 // Fetch menu items for comparison
                 const menuResponse = await axios.get("/api/menuItem", { headers });
@@ -74,7 +96,7 @@ const PrintableServiceInvoice = ({ billId }) => {
                 // 1. First fetch billing details
                 const [billingResponse, profileResponse] = await Promise.all([
                     fetch(`/api/Billing/${billId}`),
-                    fetch('/api/Profile')
+                    fetch(`/api/Profile/${userId}`)
                 ]);
                 if (!billingResponse.ok || !profileResponse.ok) {
                     throw new Error('Failed to fetch data');
@@ -83,7 +105,7 @@ const PrintableServiceInvoice = ({ billId }) => {
                     billingResponse.json(),
                     profileResponse.json()
                 ]);
-
+                console.log('Profile Data', profileData);
                 const billingData = billing.data;
                 // Set payment status
                 setIsPaid(billingData.Bill_Paid?.toLowerCase() === 'yes');
@@ -180,7 +202,7 @@ const PrintableServiceInvoice = ({ billId }) => {
 
                 setServices(serviceItems);
                 setInvoiceData({ billing: billingData, booking: matchedBookings[0] });
-                setProfile(profileData.data[0]);
+                setProfile(profileData.data);
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -297,7 +319,7 @@ const PrintableServiceInvoice = ({ billId }) => {
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ bgcolor: '#00bcd4' }}>
-                                <TableCell sx={{ color: 'white' }}>Room No.</TableCell>
+                                    <TableCell sx={{ color: 'white' }}>Room No.</TableCell>
                                     <TableCell sx={{ color: 'white' }}>Service</TableCell>
                                     <TableCell align="center" sx={{ color: 'white' }}>Quantity</TableCell>
                                     <TableCell align="center" sx={{ color: 'white' }}>Tax</TableCell>
