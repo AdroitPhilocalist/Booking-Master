@@ -35,17 +35,24 @@ export default function Billing() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const authtoken = getCookie("authToken");
+        const authtoken = getCookie('authToken');
         const usertoken = getCookie("userAuthToken");
-        if (!token && !usertoken) {
-          router.push("/"); // Redirect to login if no token is found
-          return;
+        if (!authtoken && !usertoken) {
+            router.push("/"); // Redirect to login if no token is found
+            return;
         }
-        const decoded = await jwtVerify(
-          authtoken,
-          new TextEncoder().encode(SECRET_KEY)
-        );
-        const userId = decoded.payload.id;
+
+        let decoded, userId;
+        if (authtoken) {
+            // Verify the authToken (legacy check)
+            decoded = await jwtVerify(authtoken, new TextEncoder().encode(SECRET_KEY));
+            userId = decoded.payload.id;
+        }
+        if (usertoken) {
+            // Verify the userAuthToken
+            decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+            userId = decoded.payload.profileId; // Use userId from the new token structure
+        }
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
         if (!profileData.success || !profileData.data) {
@@ -55,7 +62,7 @@ export default function Billing() {
         const username = profileData.data.username;
         const token = document.cookie
           .split("; ")
-          .find((row) => row.startsWith("authToken="))
+          .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
           .split("=")[1];
         const headers = { Authorization: `Bearer ${token}` };
 
