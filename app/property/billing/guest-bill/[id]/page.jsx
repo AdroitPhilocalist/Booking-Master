@@ -98,7 +98,8 @@ const BookingDashboard = () => {
         .split("=")[1];
       const headers = { Authorization: `Bearer ${token}` };
         const menuResponse = await fetch("/api/menuItem");
-        setMenuItems(menuResponse.data.data);
+        const menuData = await menuResponse.json();
+        setMenuItems(menuData.data);
       } catch (err) {
         console.error("Error fetching menu items:", err);
       }
