@@ -36,8 +36,8 @@ export default function Billing() {
       try {
         setIsLoading(true);
         const authtoken = getCookie("authToken");
-        if (!authtoken) {
-          router.push("/");
+        if (!token && !usertoken) {
+          router.push("/"); // Redirect to login if no token is found
           return;
         }
         const decoded = await jwtVerify(
