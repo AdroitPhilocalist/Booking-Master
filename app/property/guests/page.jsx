@@ -58,8 +58,17 @@ export default function GuestList() {
                     return;
                 }
 
-                const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-                const userId = decoded.payload.id;
+                let decoded, userId;
+                if (token) {
+                    // Verify the authToken (legacy check)
+                    decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+                    userId = decoded.payload.id;
+                }
+                if (usertoken) {
+                    // Verify the userAuthToken
+                    decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+                    userId = decoded.payload.profileId; // Use userId from the new token structure
+                }
 
                 const profileResponse = await fetch(`/api/Profile/${userId}`);
                 const profileData = await profileResponse.json();
