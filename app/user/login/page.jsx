@@ -26,7 +26,7 @@ export default function LoginPage() {
 
   // Function to delete specific cookies
   const deleteSpecificCookies = () => {
-    // Delete adminauthToken if it exists
+    // Delete authToken if it exists
     if (document.cookie.split("; ").find((row) => row.startsWith("authToken="))) {
       document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
     }
