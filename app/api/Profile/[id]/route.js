@@ -24,16 +24,31 @@ const connectToDatabase = async () => {
 export async function GET(req, { params }) {
   try {
     await connectToDatabase();
-    const token = req.cookies.get('authToken')?.value;
-    if (!token) {
+    // Extract the token from cookies
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+    if (!authToken && !userAuthToken) {
       return NextResponse.json({
         success: false,
         error: 'Authentication token missing'
       }, { status: 401 });
     }
-    // Verify the token
-    const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-    const userId = decoded.payload.id;
+
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else if (userAuthToken) {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.profileId; // Use userId from the new token structure
+    } else {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid token structure'
+      }, { status: 400 });
+    }
     const profile = await Profile.findById(userId);
     if (!profile) {
       return NextResponse.json({
@@ -57,18 +72,30 @@ export async function PUT(req, { params }) {
     await connectToDatabase();
     const { id } = params;
     const data = await req.json();
-    const token = req.cookies.get('authToken')?.value;
-    const authtoken = req.cookies.get('adminauthToken')?.value;
-    if (!token && !authtoken) {
+    // Extract the token from cookies
+    const authToken = req.cookies.get('authToken')?.value;
+    const userAuthToken = req.cookies.get('userAuthToken')?.value;
+    if (!authToken && !userAuthToken) {
       return NextResponse.json({
         success: false,
         error: 'Authentication token missing'
       }, { status: 401 });
     }
-    // Verify the token
-    if (token) {
-      const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-      const userId = decoded.payload.id;
+
+    let decoded, userId;
+    if (authToken) {
+      // Verify the authToken (legacy check)
+      decoded = await jwtVerify(authToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.id;
+    } else if (userAuthToken) {
+      // Verify the userAuthToken
+      decoded = await jwtVerify(userAuthToken, new TextEncoder().encode(SECRET_KEY));
+      userId = decoded.payload.profileId; // Use userId from the new token structure
+    } else {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid token structure'
+      }, { status: 400 });
     }
     // Find the profile by userId to get the username
     const profile = await Profile.findById(id);
@@ -146,9 +173,9 @@ export async function PATCH(req, { params }) {
     // Find the profile by userId to get the username
     const profile = await Profile.findById(id);
     if (!profile) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Profile not found' 
+      return NextResponse.json({
+        success: false,
+        error: 'Profile not found'
       }, { status: 404 });
     }
 
