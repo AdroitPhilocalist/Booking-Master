@@ -6,6 +6,7 @@ const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
+  const cookie = request.cookies.get('authToken')?.value;
   const userToken = request.cookies.get("userAuthToken")?.value; // Use userAuthToken for normal users
   const adminToken = request.cookies.get("adminauthToken")?.value;
 
@@ -15,8 +16,11 @@ export async function middleware(request) {
   }
 
   // Allow access to the normal user login page without any restrictions
-  if (pathname === "/") {
+  if (pathname === '/') {
     return NextResponse.next();
+  }
+  else if (pathname === '/' && cookie) {
+    return NextResponse.redirect(new URL('/property/roomdashboard', request.url));
   }
 
   // Redirect logged-in users from root (/) to their first role's route
@@ -87,13 +91,14 @@ export async function middleware(request) {
     pathname.startsWith("/Restaurant") ||
     pathname.startsWith("/Inventory")
   ) {
-    if (!userToken) {
+    if (!userToken && !cookie) {
       console.log("No user token found, redirecting to login");
       return NextResponse.redirect(new URL("/", request.url));
     }
     try {
       // Verify the user token using jose
-      await jwtVerify(userToken, new TextEncoder().encode(SECRET_KEY));
+      if(userToken) await jwtVerify(userToken, new TextEncoder().encode(SECRET_KEY));
+      if(cookie) await jwtVerify(cookie, new TextEncoder().encode(SECRET_KEY));
       // Token is valid, continue to the protected route
       return NextResponse.next();
     } catch (error) {
