@@ -50,14 +50,24 @@ const PurchaseReportPage = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const token = getCookie('authToken'); // Get the token from cookies
-        if (!token) {
-          router.push('/'); // Redirect to login if no token is found
+        const token = getCookie('authToken');
+        const usertoken = getCookie("userAuthToken");
+        if (!token && !usertoken) {
+          router.push("/"); // Redirect to login if no token is found
           return;
         }
-        // Verify the token
-        const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-        const userId = decoded.payload.id;
+
+        let decoded, userId;
+        if (token) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        }
+        if (usertoken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        }
         // Fetch the profile by userId to get the username
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
@@ -124,8 +134,8 @@ const PurchaseReportPage = () => {
     }
   }, [quantityAmount, rate, selectedItem, purchaseorderno, purchasedate, Invoiceno, duplicateError]);
 
-   // Update the handlers for purchaseorderno and invoiceno
-   const handlePurchaseOrderChange = (e) => {
+  // Update the handlers for purchaseorderno and invoiceno
+  const handlePurchaseOrderChange = (e) => {
     const value = e.target.value;
     setPurchaseorderno(value);
     const isDuplicate = checkForDuplicates('purchaseorderno', value);
