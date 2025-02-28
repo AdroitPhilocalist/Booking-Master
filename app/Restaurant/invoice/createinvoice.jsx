@@ -73,12 +73,26 @@ const CreateInvoicePage = ({ onInvoiceCreate, existingInvoice, onCancel }) => {
         const menuResponse = await fetch("/api/menuItem");
         const menuData = await menuResponse.json();
         setMenu(menuData.data);
-
         // Fetch profile data
         const token = getCookie('authToken');
+        const usertoken = getCookie("userAuthToken");
         if (token) {
           const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
           const userId = decoded.payload.id;
+          const profileResponse = await fetch(`/api/Profile/${userId}`);
+          const profileData = await profileResponse.json();
+          if (profileData.success) {
+            setProfileState(profileData.data.state || null);
+            setFormData(prev => ({
+              ...prev,
+              username: profileData.data.username || "",
+            }));
+          } else {
+            toast.error("Failed to fetch profile data");
+          }
+        } else if (usertoken) {
+          const decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+          const userId = decoded.payload.profileId; // Use userId from the new token structure
           const profileResponse = await fetch(`/api/Profile/${userId}`);
           const profileData = await profileResponse.json();
           if (profileData.success) {
