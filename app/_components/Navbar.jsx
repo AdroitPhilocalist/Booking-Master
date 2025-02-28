@@ -51,7 +51,8 @@ export default function Navbar() {
           );
           setRoles(decoded.payload.roles || []); // Extract roles from userAuthToken payload
           setUserAuthToken(userToken); // Store userAuthToken in state
-        } else if (legacyToken) {
+        }
+        if (legacyToken) {
           const decoded = await jwtVerify(
             legacyToken,
             new TextEncoder().encode(SECRET_KEY)
@@ -71,7 +72,9 @@ export default function Navbar() {
         setAuthToken(null); // Clear authToken on error
         // Clear both tokens from cookies
         document.cookie = "userAuthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        // document.cookie = "userClientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
         document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        // document.cookie = "clientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
       }
     };
 
@@ -121,11 +124,11 @@ export default function Navbar() {
     }, 800);
   };
 
-  // Determine which dropdowns to show based on roles and token presence
-  const showMaster = !userAuthToken && !authToken && (roles.includes("Property & Frontdesk") || roles.includes("Restaurant") || roles.includes("Inventory")); // Only show Master if no tokens
-  const showProperty = (userAuthToken || authToken) && roles.includes("Property & Frontdesk"); // Show if logged in and has this role
-  const showRestaurant = (userAuthToken || authToken) && roles.includes("Restaurant"); // Show if logged in and has this role
-  const showInventory = (userAuthToken || authToken) && roles.includes("Inventory"); // Show if logged in and has this role
+  // Determine which dropdowns to show based on token presence and roles
+  const showMaster = authToken || (!userAuthToken && !authToken && (roles.includes("Property & Frontdesk") || roles.includes("Restaurant") || roles.includes("Inventory")));
+  const showProperty = authToken || ((userAuthToken || authToken) && roles.includes("Property & Frontdesk"));
+  const showRestaurant = authToken || ((userAuthToken || authToken) && roles.includes("Restaurant"));
+  const showInventory = authToken || ((userAuthToken || authToken) && roles.includes("Inventory"));
 
   return (
     <nav className="bg-gradient-to-r from-cyan-600 to-cyan-700 p-4 shadow-lg">
@@ -137,7 +140,7 @@ export default function Navbar() {
         </Link>
 
         <ul className="flex space-x-6 text-white">
-          {/* Master Dropdown (shown only if no userAuthToken or authToken and any role exists) */}
+          {/* Master Dropdown (shown if authToken exists or no tokens and any role exists) */}
           {showMaster && (
             <li className="relative group" 
                 onMouseEnter={() => handleMouseEnter(1)} 
@@ -161,7 +164,7 @@ export default function Navbar() {
             </li>
           )}
 
-          {/* Property & Frontdesk Dropdown (shown if logged in with either token and has "Property & Frontdesk" role) */}
+          {/* Property & Frontdesk Dropdown (shown if authToken exists or logged in with userAuthToken and has role) */}
           {showProperty && (
             <li className="relative group"
                 onMouseEnter={() => handleMouseEnter(2)}
@@ -201,7 +204,7 @@ export default function Navbar() {
             </li>
           )}
 
-          {/* Restaurant Dropdown (shown if logged in with either token and has "Restaurant" role) */}
+          {/* Restaurant Dropdown (shown if authToken exists or logged in with userAuthToken and has role) */}
           {showRestaurant && (
             <li className="relative group"
                 onMouseEnter={() => handleMouseEnter(7)}
@@ -241,7 +244,7 @@ export default function Navbar() {
             </li>
           )}
 
-          {/* Inventory Dropdown (shown if logged in with either token and has "Inventory" role) */}
+          {/* Inventory Dropdown (shown if authToken exists or logged in with userAuthToken and has role) */}
           {showInventory && (
             <li className="relative group"
                 onMouseEnter={() => handleMouseEnter(8)}

@@ -78,14 +78,14 @@ export async function POST(req) {
       path: '/',
     });
 
-    // Set a non-HTTP-only cookie for client-side access
-    response.cookies.set('clientToken', token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 86400,
-      path: '/',
-    });
+    // // Set a non-HTTP-only cookie for client-side access
+    // response.cookies.set('clientToken', token, {
+    //   httpOnly: false,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'lax',
+    //   maxAge: 86400,
+    //   path: '/',
+    // });
 
     return response;
   } catch (error) {

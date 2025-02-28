@@ -57,17 +57,17 @@ export async function POST(req) {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
-      maxAge: 3600,
+      maxAge: 86400,
       path: '/',
     });
-    // Set a non-HTTP-only cookie for client-side access
-    response.cookies.set('adminclientToken', token, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 3600,
-      path: '/',
-    });
+    // // Set a non-HTTP-only cookie for client-side access
+    // response.cookies.set('adminclientToken', token, {
+    //   httpOnly: false,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'lax',
+    //   maxAge: 3600,
+    //   path: '/',
+    // });
     return response;
   } catch (error) {
     console.error('Error logging in:', error);

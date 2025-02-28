@@ -27,7 +27,7 @@ export default function Navbar() {
         // Delete authtoken
         document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
         // Delete clienttoken
-        document.cookie = "adminclientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        // document.cookie = "adminclientToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
     };
 
     const handleLogout = () => {
