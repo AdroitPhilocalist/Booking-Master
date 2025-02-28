@@ -52,8 +52,9 @@ export default function GuestList() {
             try {
                 setIsLoading(true);
                 const token = getCookie('authToken');
-                if (!token) {
-                    router.push('/');
+                const usertoken = getCookie("userAuthToken");
+                if (!token && !usertoken) {
+                    router.push("/"); // Redirect to login if no token is found
                     return;
                 }
 
@@ -156,8 +157,9 @@ export default function GuestList() {
         try {
             setIsLoading(true);
             const token = getCookie('authToken');
-            if (!token) {
-                router.push('/');
+            const usertoken = getCookie("userAuthToken");
+            if (!token && !usertoken) {
+                router.push("/"); // Redirect to login if no token is found
                 return;
             }
 

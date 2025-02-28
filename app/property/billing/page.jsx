@@ -36,6 +36,7 @@ export default function Billing() {
       try {
         setIsLoading(true);
         const authtoken = getCookie("authToken");
+        const usertoken = getCookie("userAuthToken");
         if (!token && !usertoken) {
           router.push("/"); // Redirect to login if no token is found
           return;
@@ -433,13 +434,12 @@ export default function Billing() {
                           backgroundColor: "white",
                           textAlign: "center",
                         },
-                        background: `linear-gradient(to right, ${
-                          bill.bill.Cancelled === "yes"
+                        background: `linear-gradient(to right, ${bill.bill.Cancelled === "yes"
                             ? "#808080"
                             : bill.bill.Bill_Paid === "yes"
-                            ? "#1ebc1e"
-                            : "#f24a23"
-                        } 5%, white 5%)`,
+                              ? "#1ebc1e"
+                              : "#f24a23"
+                          } 5%, white 5%)`,
                       }}
                     >
                       <TableCell>{bill.bookingId || "N/A"}</TableCell>
