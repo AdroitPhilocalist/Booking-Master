@@ -42,18 +42,24 @@ export default function InventoryCategory() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const token = getCookie('authToken'); // Get the token from cookies
-        console.log(token);
-        if (!token) {
-          router.push('/'); // Redirect to login if no token is found
+        const token = getCookie('authToken');
+        const usertoken = getCookie("userAuthToken");
+        if (!token && !usertoken) {
+          router.push("/"); // Redirect to login if no token is found
           return;
         }
-        console.log('Hello');
-        console.log("SECRET KEY :", SECRET_KEY);
-        // Verify the token
-        const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-        console.log(decoded);
-        const userId = decoded.payload.id;
+
+        let decoded, userId;
+        if (token) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        }
+        if (usertoken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        }
         // Fetch the profile by userId to get the username
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
@@ -81,14 +87,24 @@ export default function InventoryCategory() {
     try {
       const method = currentProduct ? "PUT" : "POST";
       const url = currentProduct ? `/api/InventoryCategory/${currentProduct._id}` : "/api/InventoryCategory";
-      const token = getCookie('authToken'); // Get the token from cookies
-      if (!token) {
-        router.push('/'); // Redirect to login if no token is found
+      const token = getCookie('authToken');
+      const usertoken = getCookie("userAuthToken");
+      if (!token && !usertoken) {
+        router.push("/"); // Redirect to login if no token is found
         return;
       }
-      // Verify the token
-      const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-      const userId = decoded.payload.id;
+
+      let decoded, userId;
+      if (token) {
+        // Verify the authToken (legacy check)
+        decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+        userId = decoded.payload.id;
+      }
+      if (usertoken) {
+        // Verify the userAuthToken
+        decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+        userId = decoded.payload.profileId; // Use userId from the new token structure
+      }
       // Fetch the profile by userId to get the username
       const profileResponse = await fetch(`/api/Profile/${userId}`);
       const profileData = await profileResponse.json();
@@ -127,14 +143,24 @@ export default function InventoryCategory() {
     try {
       const product = products.find((p) => p._id === id);
       if (!product) return;
-      const token = getCookie('authToken'); // Get the token from cookies
-      if (!token) {
-        router.push('/'); // Redirect to login if no token is found
+      const token = getCookie('authToken');
+      const usertoken = getCookie("userAuthToken");
+      if (!token && !usertoken) {
+        router.push("/"); // Redirect to login if no token is found
         return;
       }
-      // Verify the token
-      const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-      const userId = decoded.payload.id;
+
+      let decoded, userId;
+      if (token) {
+        // Verify the authToken (legacy check)
+        decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+        userId = decoded.payload.id;
+      }
+      if (usertoken) {
+        // Verify the userAuthToken
+        decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+        userId = decoded.payload.profileId; // Use userId from the new token structure
+      }
       // Fetch the profile by userId to get the username
       const profileResponse = await fetch(`/api/Profile/${userId}`);
       const profileData = await profileResponse.json();
@@ -237,11 +263,7 @@ export default function InventoryCategory() {
   return (
     <div>
       <Navbar />
-
-
-
       <div className="bg-amber-50 min-h-screen">
-
         <ToastContainer
           position="top-right"
           autoClose={5000}
@@ -254,8 +276,6 @@ export default function InventoryCategory() {
           pauseOnHover
           theme="dark"
         />
-
-
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
@@ -364,9 +384,6 @@ export default function InventoryCategory() {
 
         </DialogActions>
       </Dialog> */}
-
-
-
       <Footer />
     </div>
   );
