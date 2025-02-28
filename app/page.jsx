@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import * as React from 'react';
 import Link from "next/link";
@@ -15,6 +16,7 @@ import { getCookie } from 'cookies-next'; // Import getCookie from cookies-next
 import { jwtVerify } from 'jose'; // Import jwtVerify for decoding JWT
 import { useEffect, useState } from 'react';
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
   const [username, setUsername] = React.useState('');
@@ -25,8 +27,24 @@ export default function Home() {
   const [timestamp, setTimestamp] = useState(null);
   const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
+  // Function to delete specific cookies
+  const deleteSpecificCookies = () => {
+    // Delete adminauthToken if it exists
+    if (document.cookie.split("; ").find((row) => row.startsWith("adminauthToken="))) {
+      document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
+    // Delete userAuthToken if it exists
+    if (document.cookie.split("; ").find((row) => row.startsWith("userAuthToken="))) {
+      document.cookie = "userAuthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
+  };
+
   useEffect(() => {
     setTimestamp(new Date().getFullYear());
+    
+    // Delete adminauthToken and userAuthToken if they exist
+    deleteSpecificCookies();
+
     const checkAuthStatus = async () => {
       const token = getCookie('authToken');
       if (token) {
@@ -36,14 +54,12 @@ export default function Home() {
           const profileResponse = await fetch(`/api/Profile/${userId}`);
           const profileData = await profileResponse.json();
           if (profileData.success && profileData.data) {
-            
             const profileComplete = profileData.data.Profile_Complete;
             if (profileComplete === 'no') {
-                router.push("/master/profile");
-              } else {
-                router.push("/property/roomdashboard");
-              }
-            
+              router.push("/master/profile");
+            } else {
+              router.push("/property/roomdashboard");
+            }
           }
         } catch (error) {
           console.error("Error verifying token or fetching profile:", error);
@@ -77,7 +93,6 @@ export default function Home() {
       const data = await response.json();
       
       if (data.success) {
-        
         const token = getCookie('authToken');
         if (token) {
           const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
@@ -87,12 +102,11 @@ export default function Home() {
           
           if (profileData.success && profileData.data) {
             const profileComplete = profileData.data.Profile_Complete;
-
-              if (profileComplete === 'no') {
-                router.push("/master/profile");
-              } else {
-                router.push("/property/roomdashboard");
-              }      
+            if (profileComplete === 'no') {
+              router.push("/master/profile");
+            } else {
+              router.push("/property/roomdashboard");
+            }      
           }
         }
       } else {
@@ -109,7 +123,7 @@ export default function Home() {
   return (
     <main>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-700 to-cyan-600">
-      {isLoading && (
+        {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center">
               <svg
