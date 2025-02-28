@@ -34,6 +34,11 @@ export default function LoginPage() {
     if (document.cookie.split("; ").find((row) => row.startsWith("adminauthToken="))) {
       document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
     }
+
+    // Delete userAuthToken if it exists
+    if (document.cookie.split("; ").find((row) => row.startsWith("userAuthToken="))) {
+      document.cookie = "userAuthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
   };
 
   useEffect(() => {
