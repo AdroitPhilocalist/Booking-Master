@@ -38,14 +38,24 @@ export default function InventoryList() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const token = getCookie('authToken'); // Get the token from cookies
-        if (!token) {
-          router.push('/'); // Redirect to login if no token is found
+        const token = getCookie('authToken');
+        const usertoken = getCookie("userAuthToken");
+        if (!token && !usertoken) {
+          router.push("/"); // Redirect to login if no token is found
           return;
         }
-        // Verify the token
-        const decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
-        const userId = decoded.payload.id;
+
+        let decoded, userId;
+        if (token) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        }
+        if (usertoken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        }
         // Fetch the profile by userId to get the username
         const profileResponse = await fetch(`/api/Profile/${userId}`);
         const profileData = await profileResponse.json();
@@ -113,7 +123,7 @@ export default function InventoryList() {
             ? { ...category, isActive: true }
             : category
         )
-        
+
       );
       //toast.success("Item updated successfully");
     } catch (error) {
@@ -201,7 +211,7 @@ export default function InventoryList() {
 
       const data = await response.json();
       console.log(data.message);
-      
+
       // Remove the deleted product from the state
       setItems((prev) => prev.filter((item) => item._id !== id));
       toast.success("Item deleted successfully");
@@ -220,7 +230,7 @@ export default function InventoryList() {
     <div>
       <Navbar />
       <div className="bg-amber-50 min-h-screen">
-      <ToastContainer
+        <ToastContainer
           position="top-right"
           autoClose={5000}
           hideProgressBar={false}
