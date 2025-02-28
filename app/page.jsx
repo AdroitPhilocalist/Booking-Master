@@ -29,6 +29,10 @@ export default function Home() {
 
   // Function to delete specific cookies
   const deleteSpecificCookies = () => {
+    // Delete authToken if it exists
+    if (document.cookie.split("; ").find((row) => row.startsWith("authToken="))) {
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    }
     // Delete adminauthToken if it exists
     if (document.cookie.split("; ").find((row) => row.startsWith("adminauthToken="))) {
       document.cookie = "adminauthToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
@@ -41,7 +45,7 @@ export default function Home() {
 
   useEffect(() => {
     setTimestamp(new Date().getFullYear());
-    
+
     // Delete adminauthToken and userAuthToken if they exist
     deleteSpecificCookies();
 
@@ -69,7 +73,7 @@ export default function Home() {
     };
     checkAuthStatus();
   }, [router]);
-  
+
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -91,7 +95,7 @@ export default function Home() {
         credentials: 'include', // Important: This ensures cookies are sent with the request
       });
       const data = await response.json();
-      
+
       if (data.success) {
         const token = getCookie('authToken');
         if (token) {
@@ -99,14 +103,14 @@ export default function Home() {
           const userId = decoded.payload.id;
           const profileResponse = await fetch(`/api/Profile/${userId}`);
           const profileData = await profileResponse.json();
-          
+
           if (profileData.success && profileData.data) {
             const profileComplete = profileData.data.Profile_Complete;
             if (profileComplete === 'no') {
               router.push("/master/profile");
             } else {
               router.push("/property/roomdashboard");
-            }      
+            }
           }
         }
       } else {
@@ -159,13 +163,13 @@ export default function Home() {
           <h2 className="text-3xl font-semibold text-center mb-6 text-cyan-900">Hotel Login</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <TextField 
+              <TextField
                 id="username"
-                label="Username" 
+                label="Username"
                 variant="outlined"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                fullWidth 
+                fullWidth
               />
             </div>
             <div>
@@ -190,7 +194,7 @@ export default function Home() {
                     </InputAdornment>
                   }
                   label="Password"
-                /> 
+                />
               </FormControl>
             </div>
             <div>
