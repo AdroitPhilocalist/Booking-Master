@@ -44,6 +44,7 @@ const PrintableRoomInvoice = ({ billId }) => {
   const [profile, setProfile] = useState(null);
   const [isPaid, setIsPaid] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
   useEffect(() => {
     const fetchInvoiceData = async () => {
@@ -55,17 +56,25 @@ const PrintableRoomInvoice = ({ billId }) => {
         const headers = { Authorization: `Bearer ${token}` };
         console.log('billId', billId);
         // 1. First fetch billing details
-        const authtoken = getCookie("authToken"); // Get the token from cookies
-        if (!authtoken) {
+        const authtoken = getCookie('authToken');
+        const usertoken = getCookie("userAuthToken");
+        if (!authtoken && !usertoken) {
           router.push("/"); // Redirect to login if no token is found
           return;
         }
-        // Verify the token
-        const decoded = await jwtVerify(
-          authtoken,
-          new TextEncoder().encode(SECRET_KEY)
-        );
-        const userId = decoded.payload.id;
+
+        let decoded, userId;
+        if (authtoken) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(authtoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        }
+        if (usertoken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        }
+
         const [billingResponse, profileResponse] = await Promise.all([
           fetch(`/api/Billing/${billId}`),
           fetch(`/api/Profile/${userId}`)
