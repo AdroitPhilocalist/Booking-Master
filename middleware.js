@@ -43,6 +43,7 @@ export async function middleware(request) {
         const roles = userData.data.roles;
         if (roles.length > 0) {
           const firstRole = roles[0]; // Get the first role from the array
+          console.log("First role:", firstRole);
           let redirectPath = "/dashboard"; // Default redirect if no role match
           switch (firstRole) {
             case "Property & Frontdesk":
