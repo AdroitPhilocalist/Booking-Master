@@ -46,7 +46,7 @@ const PrintableServiceInvoice = ({ billId }) => {
             try {
                 const token = document.cookie
                     .split("; ")
-                    .find((row) => row.startsWith("authToken="))
+                    .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
                     .split("=")[1];
                 const headers = { Authorization: `Bearer ${token}` };
                 const menuResponse = await axios.get("/api/menuItem", { headers });
@@ -63,7 +63,7 @@ const PrintableServiceInvoice = ({ billId }) => {
             try {
                 const token = document.cookie
                     .split("; ")
-                    .find((row) => row.startsWith("authToken="))
+                    .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
                     .split("=")[1];
                 const headers = { Authorization: `Bearer ${token}` };
                 console.log('billId', billId);
