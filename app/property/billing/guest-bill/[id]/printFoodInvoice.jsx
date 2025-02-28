@@ -16,6 +16,9 @@ import {
 import PrintIcon from '@mui/icons-material/Print';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import axios from 'axios';
+import { getCookie } from "cookies-next"; // Import getCookie from cookies-next
+import { jwtVerify } from "jose"; // Import jwtVerify for decoding JWT
+
 
 const printStyles = `
   @media print {
@@ -51,6 +54,7 @@ const PrintableFoodInvoice = ({ billId }) => {
   const [foodItems, setFoodItems] = useState([]);
   const [serviceItems, setServiceItems] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+  const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
   // Fetch menu items
   useEffect(() => {
@@ -58,7 +62,7 @@ const PrintableFoodInvoice = ({ billId }) => {
       try {
         const token = document.cookie
           .split("; ")
-          .find((row) => row.startsWith("authToken="))
+          .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
           .split("=")[1];
         const headers = { Authorization: `Bearer ${token}` };
         const menuResponse = await axios.get("/api/menuItem", { headers });
@@ -75,18 +79,35 @@ const PrintableFoodInvoice = ({ billId }) => {
       try {
         const token = document.cookie
           .split("; ")
-          .find((row) => row.startsWith("authToken="))
+          .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
           .split("=")[1];
         const headers = { Authorization: `Bearer ${token}` };
         console.log('billId', billId);
+        const authtoken = getCookie('authToken');
+        const usertoken = getCookie("userAuthToken");
+        if (!authtoken && !usertoken) {
+          router.push("/"); // Redirect to login if no token is found
+          return;
+        }
 
+        let decoded, userId;
+        if (authtoken) {
+          // Verify the authToken (legacy check)
+          decoded = await jwtVerify(authtoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.id;
+        }
+        if (usertoken) {
+          // Verify the userAuthToken
+          decoded = await jwtVerify(usertoken, new TextEncoder().encode(SECRET_KEY));
+          userId = decoded.payload.profileId; // Use userId from the new token structure
+        }
         // Fetch menu items for comparison
         const menuResponse = await axios.get("/api/menuItem", { headers });
         const menuItemsList = menuResponse.data.data;
         // 1. First fetch billing details
         const [billingResponse, profileResponse] = await Promise.all([
           fetch(`/api/Billing/${billId}`),
-          fetch('/api/Profile')
+          fetch(`/api/Profile/${userId}`)
         ]);
         if (!billingResponse.ok || !profileResponse.ok) {
           throw new Error('Failed to fetch data');
@@ -192,7 +213,7 @@ const PrintableFoodInvoice = ({ billId }) => {
 
         setServices(serviceItems);
         setInvoiceData({ billing: billingData, booking: matchedBookings[0] });
-        setProfile(profileData.data[0]);
+        setProfile(profileData.data);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -276,7 +297,7 @@ const PrintableFoodInvoice = ({ billId }) => {
             </Grid>
             <Grid item xs={6} sx={{ textAlign: 'right' }}>
               <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#00bcd4' }}>
-                Service Invoice
+                Food Invoice
               </Typography>
               <Typography variant="body1" color="textSecondary">
                 #{booking.bookingId}
