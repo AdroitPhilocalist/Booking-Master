@@ -93,11 +93,11 @@ const BookingDashboard = () => {
     const fetchMenuItems = async () => {
       try {
         const token = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("authToken="))
-          .split("=")[1];
-        const headers = { Authorization: `Bearer ${token}` };
-        const menuResponse = await axios.get("/api/menuItem", { headers });
+        .split("; ")
+        .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
+        .split("=")[1];
+      const headers = { Authorization: `Bearer ${token}` };
+        const menuResponse = await fetch("/api/menuItem");
         setMenuItems(menuResponse.data.data);
       } catch (err) {
         console.error("Error fetching menu items:", err);
@@ -111,7 +111,7 @@ const BookingDashboard = () => {
       try {
         const token = document.cookie
           .split("; ")
-          .find((row) => row.startsWith("authToken="))
+          .find((row) => row.startsWith("authToken=") || row.startsWith("userAuthToken="))
           .split("=")[1];
         const headers = { Authorization: `Bearer ${token}` };
 
