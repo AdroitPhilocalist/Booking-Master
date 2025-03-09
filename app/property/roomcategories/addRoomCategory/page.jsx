@@ -292,7 +292,7 @@ const RoomCategoryForm = () => {
                     type="number"
                     name="gst"
                     id="gst"
-                    value={formData.cgst+formData.sgst}
+                    value={parseFloat(formData.sgst||0)+parseFloat(formData.cgst||0)}
                     onChange={handleChange}
                     readOnly
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
