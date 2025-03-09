@@ -45,7 +45,7 @@ const RoomCategoryForm = () => {
         [name]: value,
       };
 
-      const gst = parseInt(updatedData.gst) || 0;
+      const gst = (parseFloat(updatedData.sgst || 0)+parseFloat(updatedData.cgst || 0));
 
       if (name === "gst" || name === "tariff") {
         // Calculate total when gst or tariff changes
