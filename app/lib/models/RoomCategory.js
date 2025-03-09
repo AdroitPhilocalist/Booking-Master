@@ -6,6 +6,8 @@ const RoomCategorySchema = new mongoose.Schema({
   description: String,
   bedType: String,
   tariff: { type: Number, required: true },
+  sgst: { type: Number, required: true },
+  cgst: { type: Number, required: true },
   gst: { type: Number, required: true },
   total: { type: Number, required: true },
   baseAdult: Number,
