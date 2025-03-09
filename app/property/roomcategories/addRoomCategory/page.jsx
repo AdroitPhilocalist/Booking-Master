@@ -251,6 +251,38 @@ const RoomCategoryForm = () => {
                 </div>
                 <div>
                   <label
+                    htmlFor="sgst"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    SGST
+                  </label>
+                  <input
+                    type="number"
+                    name="sgst"
+                    id="sgst"
+                    value={formData.sgst}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="cgst"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    CGST
+                  </label>
+                  <input
+                    type="number"
+                    name="cgst"
+                    id="cgst"
+                    value={formData.cgst}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label
                     htmlFor="gst"
                     className="block text-sm font-medium text-gray-700"
                   >
