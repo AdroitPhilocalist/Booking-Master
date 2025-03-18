@@ -14,6 +14,8 @@ const RoomCategoryForm = () => {
     description: "",
     bedType: "",
     tariff: 0,
+    sgst: 0,
+    cgst: 0,
     gst: 0,
     total: 0,
     baseAdult: "",
@@ -43,9 +45,9 @@ const RoomCategoryForm = () => {
         [name]: value,
       };
 
-      const gst = parseInt(updatedData.gst) || 0;
+      const gst = (parseFloat(updatedData.sgst || 0)+parseFloat(updatedData.cgst || 0));
 
-      if (name === "gst" || name === "tariff") {
+      if (name === "gst" || name === "sgst" || name === "cgst" || name === "tariff") {
         // Calculate total when gst or tariff changes
         const tariff = parseInt(updatedData.tariff) || 0;
         updatedData.total = Math.ceil(((100 + gst) / 100) * tariff);
@@ -98,6 +100,8 @@ const RoomCategoryForm = () => {
       description,
       bedType,
       tariff,
+      sgst,
+      cgst,
       gst,
       total,
       baseAdult,
@@ -120,6 +124,8 @@ const RoomCategoryForm = () => {
       description,
       bedType,
       tariff,
+      sgst,
+      cgst,
       gst,
       total,
       baseAdult,
@@ -245,6 +251,38 @@ const RoomCategoryForm = () => {
                 </div>
                 <div>
                   <label
+                    htmlFor="sgst"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    SGST
+                  </label>
+                  <input
+                    type="number"
+                    name="sgst"
+                    id="sgst"
+                    value={formData.sgst}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="cgst"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    CGST
+                  </label>
+                  <input
+                    type="number"
+                    name="cgst"
+                    id="cgst"
+                    value={formData.cgst}
+                    onChange={handleChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label
                     htmlFor="gst"
                     className="block text-sm font-medium text-gray-700"
                   >
@@ -254,8 +292,9 @@ const RoomCategoryForm = () => {
                     type="number"
                     name="gst"
                     id="gst"
-                    value={formData.gst}
+                    value={parseFloat(formData.sgst||0)+parseFloat(formData.cgst||0)}
                     onChange={handleChange}
+                    readOnly
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
                 </div>
