@@ -43,5 +43,3 @@ next-env.d.ts
 .env.test.local
 .env.production.local
 
-# Database connection
-app/lib/dbConnect.js
